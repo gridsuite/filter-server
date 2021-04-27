@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(FilterListController.class)
-@ContextConfiguration(classes = {FiltersApplication.class})
+@ContextConfiguration(classes = {FilterApplication.class})
 public class FilterEntityControllerTest extends AbstractEmbeddedCassandraSetup {
 
     public static final String URL_TEMPLATE = "/" + VERSION + "/filters/";
@@ -54,7 +54,7 @@ public class FilterEntityControllerTest extends AbstractEmbeddedCassandraSetup {
     private MockMvc mvc;
 
     @Autowired
-    private FiltersService filtersService;
+    private FilterService filterService;
 
     @Before
     public void setUp() {

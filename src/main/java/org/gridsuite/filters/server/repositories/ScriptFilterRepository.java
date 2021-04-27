@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
  * @author Jacuqes Borsenberger <geoffroy.jamgotchian at rte-france.com>
  */
 @Repository
-public interface ScriptFilterRepository extends FiltersRepository<ScriptFilterEntity> {
+public interface ScriptFilterRepository extends FilterRepository<ScriptFilterEntity> {
 }

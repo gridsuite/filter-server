@@ -4,5 +4,5 @@ import org.gridsuite.filters.server.entities.LineFilterEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LineFiltersRepository extends FiltersRepository<LineFilterEntity> {
+public interface LineFilterRepository extends FilterRepository<LineFilterEntity> {
 }

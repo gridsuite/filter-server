@@ -17,8 +17,8 @@ import org.gridsuite.filters.server.entities.AbstractFilterEntity;
 import org.gridsuite.filters.server.entities.LineFilterEntity;
 import org.gridsuite.filters.server.entities.NumericFilterEntity;
 import org.gridsuite.filters.server.entities.ScriptFilterEntity;
-import org.gridsuite.filters.server.repositories.FiltersRepository;
-import org.gridsuite.filters.server.repositories.LineFiltersRepository;
+import org.gridsuite.filters.server.repositories.FilterRepository;
+import org.gridsuite.filters.server.repositories.LineFilterRepository;
 import org.gridsuite.filters.server.repositories.ScriptFilterRepository;
 import org.gridsuite.filters.server.utils.FilterType;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 
-interface Repository<Entity extends AbstractFilterEntity, Repository extends FiltersRepository<Entity>> {
+interface Repository<Entity extends AbstractFilterEntity, Repository extends FilterRepository<Entity>> {
     Repository getRepository();
 
     AbstractFilter toDto(Entity entity);
@@ -63,11 +63,11 @@ interface Repository<Entity extends AbstractFilterEntity, Repository extends Fil
 
 @ComponentScan(basePackageClasses = {NetworkStoreService.class})
 @Service
-public class FiltersService {
+public class FilterService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FiltersService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilterService.class);
 
-    private final EnumMap<FilterType, Repository<?, ?>> filtersRepositories = new EnumMap<>(FilterType.class);
+    private final EnumMap<FilterType, Repository<?, ?>> filterRepositories = new EnumMap<>(FilterType.class);
 
     private AbstractFilter.AbstractFilterBuilder<?, ?> passBase(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
         return builder.name(entity.getName());
@@ -94,11 +94,11 @@ public class FiltersService {
             : null;
     }
 
-    public FiltersService(final ScriptFilterRepository scriptFiltersRepository, final LineFiltersRepository lineFiltersRepository) {
-        filtersRepositories.put(FilterType.LINE, new Repository<LineFilterEntity, LineFiltersRepository>() {
+    public FilterService(final ScriptFilterRepository scriptFiltersRepository, final LineFilterRepository lineFilterRepository) {
+        filterRepositories.put(FilterType.LINE, new Repository<LineFilterEntity, LineFilterRepository>() {
             @Override
-            public LineFiltersRepository getRepository() {
-                return lineFiltersRepository;
+            public LineFilterRepository getRepository() {
+                return lineFilterRepository;
             }
 
             @Override
@@ -132,7 +132,7 @@ public class FiltersService {
             }
         });
 
-        filtersRepositories.put(FilterType.SCRIPT, new Repository<ScriptFilterEntity, ScriptFilterRepository>() {
+        filterRepositories.put(FilterType.SCRIPT, new Repository<ScriptFilterEntity, ScriptFilterRepository>() {
             @Override
             public ScriptFilterRepository getRepository() {
                 return scriptFiltersRepository;
@@ -164,14 +164,14 @@ public class FiltersService {
     }
 
     List<FilterAttributes> getFilters() {
-        return filtersRepositories.entrySet().stream()
+        return filterRepositories.entrySet().stream()
             .flatMap(entry -> entry.getValue().getFiltersNames().map(name -> new FilterAttributes(name, entry.getKey())))
             .collect(Collectors.toList());
     }
 
     Optional<AbstractFilter> getFilter(String name) {
         Objects.requireNonNull(name);
-        for (Repository<?, ?> repository : filtersRepositories.values()) {
+        for (Repository<?, ?> repository : filterRepositories.values()) {
             Optional<AbstractFilter> res = repository.getFilter(name);
             if (res.isPresent()) {
                 return res;
@@ -185,16 +185,16 @@ public class FiltersService {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create script contingency list '{}'", sanitizeParam(name));
         }
-        filtersRepositories.values().forEach(r -> r.getRepository().delete(name));
-        if (filtersRepositories.values().stream().noneMatch(repository -> repository.getRepository().existsByName(name))) {
+        filterRepositories.values().forEach(r -> r.getRepository().delete(name));
+        if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().existsByName(name))) {
             filter.setName(name);
-            filtersRepositories.get(filter.getType()).insert(filter);
+            filterRepositories.get(filter.getType()).insert(filter);
         }
     }
 
     void deleteFilter(String name) {
         Objects.requireNonNull(name);
-        if (filtersRepositories.values().stream().noneMatch(repository -> repository.getRepository().delete(name))) {
+        if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().delete(name))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + name + " not found");
         }
     }
@@ -205,7 +205,7 @@ public class FiltersService {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("rename filter contingency list '{}' to '{}'", sanitizeParam(name), sanitizeParam(newName));
         }
-        if (filtersRepositories.values().stream().noneMatch(repository -> repository.getRepository().renameFilter(name, newName))) {
+        if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().renameFilter(name, newName))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + name + " not found");
         }
     }

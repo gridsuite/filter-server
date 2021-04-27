@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * @author Borsenebrger Jacques <jacques.borsenberger at rte-france.com>
  */
-public interface FiltersRepository<T extends AbstractFilterEntity> extends CassandraRepository<T, String> {
+public interface FilterRepository<T extends AbstractFilterEntity> extends CassandraRepository<T, String> {
 
     Optional<T> findByName(String name);
 

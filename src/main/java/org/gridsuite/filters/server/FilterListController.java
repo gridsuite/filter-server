@@ -24,14 +24,14 @@ import java.util.List;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @RestController
-@RequestMapping(value = "/" + FiltersApi.API_VERSION)
+@RequestMapping(value = "/" + FilterApi.API_VERSION)
 @Api(value = "Filters server")
-@ComponentScan(basePackageClasses = FiltersService.class)
+@ComponentScan(basePackageClasses = FilterService.class)
 public class FilterListController {
 
-    private final FiltersService service;
+    private final FilterService service;
 
-    public FilterListController(FiltersService service) {
+    public FilterListController(FilterService service) {
         this.service = service;
     }
 

@@ -9,9 +9,9 @@ package org.gridsuite.filters.server;
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
  */
-public final class FiltersApi {
+public final class FilterApi {
 
-    private FiltersApi() {
+    private FilterApi() {
     }
 
     public static final String API_VERSION = "v1";

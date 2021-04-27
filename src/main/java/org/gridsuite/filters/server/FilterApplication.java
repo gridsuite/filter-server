@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Bean;
  */
 @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
 @SpringBootApplication
-public class FiltersApplication {
+public class FilterApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FiltersApplication.class, args);
+        SpringApplication.run(FilterApplication.class, args);
     }
 
     @Bean
