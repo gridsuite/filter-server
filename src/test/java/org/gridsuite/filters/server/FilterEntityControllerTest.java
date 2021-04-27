@@ -7,9 +7,7 @@
 package org.gridsuite.filters.server;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NumericNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -31,7 +29,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -45,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
+ * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(FilterListController.class)
@@ -89,56 +87,39 @@ public class FilterEntityControllerTest extends AbstractEmbeddedCassandraSetup {
         });
     }
 
-    public static class NumericNodeComparator implements Comparator<JsonNode> {
-        @Override
-        public int compare(JsonNode o1, JsonNode o2) {
-            if (o1.equals(o2)) {
-                return 0;
-            }
-            if ((o1 instanceof NumericNode) && (o2 instanceof NumericNode)) {
-                Double d1 = o1.asDouble();
-                Double d2 = o2.asDouble();
-                if (d1.compareTo(d2) == 0) {
-                    return 0;
-                }
-            }
-            System.err.println(o1.asText() + " <> " + o2.asText());
-            return 1;
-        }
+    public String joinWithComma(Object... array) {
+        return join(array, ",");
     }
-
-    final NumericNodeComparator jSonNumericComparator = new NumericNodeComparator();
 
     @Test
     public void test() throws Exception {
 
         // test all fields
-        String lineFilter = "{" +
-            jsonVal("name", "testLine") +
-            jsonVal("type", FilterType.LINE.name()) +
-            jsonVal("substationName1", "ragala") +
-            jsonVal("substationName2", "miamMiam") +
-            jsonVal("equipmentID", "vazy") +
-            jsonVal("equipmentName", "tata") +
-            numericalRange("nominalVoltage1", RangeType.RANGE, 5., 8.) +
-            numericalRange("nominalVoltage2", RangeType.EQUALITY, 6., null) +
-            jsonSet("countries1", Set.of("yoyo")) +
-            jsonSet("countries2", Set.of("smurf", "schtroumph"), false) +
-            "}";
+        String lineFilter = "{" + joinWithComma(
+            jsonVal("name", "testLine"),
+            jsonVal("type", FilterType.LINE.name()),
+            jsonVal("substationName1", "ragala"),
+            jsonVal("substationName2", "miamMiam"),
+            jsonVal("equipmentID", "vazy"),
+            jsonVal("equipmentName", "tata"),
+            numericalRange("nominalVoltage1", RangeType.RANGE, 5., 8.),
+            numericalRange("nominalVoltage2", RangeType.EQUALITY, 6., null),
+            jsonSet("countries1", Set.of("yoyo")),
+            jsonSet("countries2", Set.of("smurf", "schtroumph"))) + "}";
 
         insertFilter("testLine", lineFilter);
 
-        String minimalLineFilter = "{" +
-            jsonVal("name", "testLine") +
-            jsonVal("type", FilterType.LINE.name(), false)
+        String minimalLineFilter = "{" + joinWithComma(
+            jsonVal("name", "testLine"),
+            jsonVal("type", FilterType.LINE.name()))
             + "}";
         // test replace and null value (country set & numerical range)
         insertFilter("testLine", minimalLineFilter);
 
-        String scriptFilter = "{" +
-            jsonVal("name", "testScript") +
-            jsonVal("type", FilterType.SCRIPT.name()) +
-            jsonVal("script", "test", false) +
+        String scriptFilter = "{" + joinWithComma(
+            jsonVal("name", "testScript"),
+            jsonVal("type", FilterType.SCRIPT.name()),
+            jsonVal("script", "test")) +
             "}";
 
         insertFilter("testScript", scriptFilter);
@@ -179,35 +160,26 @@ public class FilterEntityControllerTest extends AbstractEmbeddedCassandraSetup {
         JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
     }
 
-    private StringBuilder jsonVal(String id, String val) {
-        return jsonVal(id, val, true);
-    }
-
-    public StringBuilder jsonVal(String id, String val, boolean trailingComma) {
-        return new StringBuilder("\"").append(id).append("\": \"").append(val).append("\"").append(trailingComma ? ", " : "");
+    public StringBuilder jsonVal(String id, String val) {
+        return new StringBuilder("\"").append(id).append("\": \"").append(val).append("\"");
     }
 
     public StringBuilder jsonDouble(String id, Double val) {
-        return new StringBuilder("\"").append(id).append("\": ").append(val).append(",");
+        return new StringBuilder("\"").append(id).append("\": ").append(val);
     }
 
     public StringBuilder jsonSet(String id, Set<String> set) {
-        return jsonSet(id, set, true);
-    }
-
-    public StringBuilder jsonSet(String id, Set<String> set, boolean trailingComma) {
-        return new StringBuilder("\"").append(id).append("\": ")
-            .append("[" + (!set.isEmpty() ? "\"" + join(set, "\",\"") + "\"" : "") + "]")
-            .append(trailingComma ? ", " : "");
+        return new StringBuilder("\"").append(id).append("\": ").append("[")
+            .append(!set.isEmpty() ? "\"" + join(set, "\",\"") + "\"" : "").append("]");
     }
 
     private StringBuilder numericalRange(String id, RangeType range, Double value1, Double value2) {
         return new StringBuilder("\"").append(id).append("\": ")
-            .append("{")
-            .append(jsonDouble("value1", value1))
-            .append(jsonDouble("value2", value2))
-            .append(jsonVal("type", range.name(), false))
-            .append("},");
+            .append("{").append(joinWithComma(
+                jsonDouble("value1", value1),
+                jsonDouble("value2", value2),
+                jsonVal("type", range.name()))
+            ).append("}");
     }
 
 }

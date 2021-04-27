@@ -32,6 +32,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
+ */
+
 interface Repository<Entity extends AbstractFilterEntity, Repository extends FiltersRepository<Entity>> {
     Repository getRepository();
 
@@ -57,16 +61,13 @@ interface Repository<Entity extends AbstractFilterEntity, Repository extends Fil
 
 }
 
-/**
- * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
- */
 @ComponentScan(basePackageClasses = {NetworkStoreService.class})
 @Service
 public class FiltersService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FiltersService.class);
 
-    private EnumMap<FilterType, Repository<?, ?>> filtersRepositories = new EnumMap<>(FilterType.class);
+    private final EnumMap<FilterType, Repository<?, ?>> filtersRepositories = new EnumMap<>(FilterType.class);
 
     private AbstractFilter.AbstractFilterBuilder<?, ?> passBase(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
         return builder.name(entity.getName());
@@ -78,7 +79,7 @@ public class FiltersService {
 
     <T> Set<T> cloneIfNotNull(Set<T> set) {
         if (set != null) {
-            return new HashSet<T>(set);
+            return new HashSet<>(set);
         }
         return null;
     }
@@ -159,7 +160,7 @@ public class FiltersService {
     }
 
     private static String sanitizeParam(String param) {
-        return param != null ? param.replaceAll("[\n|\r|\t]", "_") : null;
+        return param != null ? param.replaceAll("[\n|\r\t]", "_") : null;
     }
 
     List<FilterAttributes> getFilters() {
