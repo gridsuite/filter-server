@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.EnumSet;
 import java.util.Set;
 
-import static com.powsybl.network.store.model.NetworkStoreApi.VERSION;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -49,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {FilterApplication.class})
 public class FilterEntityControllerTest extends AbstractEmbeddedCassandraSetup {
 
-    public static final String URL_TEMPLATE = "/" + VERSION + "/filters/";
+    public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters/";
     @Autowired
     private MockMvc mvc;
 

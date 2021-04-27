@@ -6,7 +6,6 @@
  */
 package org.gridsuite.filters.server;
 
-import com.powsybl.network.store.client.NetworkStoreService;
 import org.gridsuite.filters.server.dto.AbstractFilter;
 import org.gridsuite.filters.server.dto.FilterAttributes;
 import org.gridsuite.filters.server.dto.AbstractGenericFilter;
@@ -23,7 +22,6 @@ import org.gridsuite.filters.server.repositories.ScriptFilterRepository;
 import org.gridsuite.filters.server.utils.FilterType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -61,7 +59,6 @@ interface Repository<Entity extends AbstractFilterEntity, Repository extends Fil
 
 }
 
-@ComponentScan(basePackageClasses = {NetworkStoreService.class})
 @Service
 public class FilterService {
 
