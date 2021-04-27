@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(FilterListController.class)
+@WebMvcTest(FilterController.class)
 @ContextConfiguration(classes = {FilterApplication.class})
 public class FilterEntityControllerTest extends AbstractEmbeddedCassandraSetup {
 

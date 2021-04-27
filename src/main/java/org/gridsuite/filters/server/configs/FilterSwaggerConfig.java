@@ -8,7 +8,7 @@ package org.gridsuite.filters.server.configs;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import org.gridsuite.filters.server.FilterListController;
+import org.gridsuite.filters.server.FilterController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -30,7 +30,7 @@ public class FilterSwaggerConfig {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage(FilterListController.class.getPackage().getName()))
+                .apis(RequestHandlerSelectors.basePackage(FilterController.class.getPackage().getName()))
                 .paths(paths())
                 .build();
     }

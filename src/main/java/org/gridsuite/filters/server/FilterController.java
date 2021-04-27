@@ -22,16 +22,17 @@ import java.util.List;
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
+ * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 @RestController
 @RequestMapping(value = "/" + FilterApi.API_VERSION)
 @Api(value = "Filters server")
 @ComponentScan(basePackageClasses = FilterService.class)
-public class FilterListController {
+public class FilterController {
 
     private final FilterService service;
 
-    public FilterListController(FilterService service) {
+    public FilterController(FilterService service) {
         this.service = service;
     }
 
