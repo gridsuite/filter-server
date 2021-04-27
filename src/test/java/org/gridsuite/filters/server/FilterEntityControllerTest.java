@@ -149,7 +149,7 @@ public class FilterEntityControllerTest extends AbstractEmbeddedCassandraSetup {
     }
 
     private void insertFilter(String filtersName, String content) throws Exception {
-        mvc.perform(put(URL_TEMPLATE + filtersName)
+        mvc.perform(put(URL_TEMPLATE)
             .content(content)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk());

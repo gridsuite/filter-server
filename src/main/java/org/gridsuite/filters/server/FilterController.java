@@ -54,11 +54,11 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping(value = "filters/{name}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "filters/", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Create a filter", response = AbstractFilter.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The filters contingency list have been created successfully")})
-    public void createFilter(@PathVariable("name") String name, @RequestBody(required = true) AbstractFilter filter) {
-        service.createFilterList(name, filter);
+    public void createFilter(@RequestBody(required = true) AbstractFilter filter) {
+        service.createFilterList(filter);
     }
 
     @DeleteMapping(value = "filters/{name}")

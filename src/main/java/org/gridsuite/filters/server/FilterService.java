@@ -180,14 +180,13 @@ public class FilterService {
         return Optional.empty();
     }
 
-    public <F extends AbstractFilter> void createFilterList(String name, F filter) {
-        Objects.requireNonNull(name);
+    public <F extends AbstractFilter> void createFilterList(F filter) {
+        final String name = filter.getName();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create script contingency list '{}'", sanitizeParam(name));
         }
         filterRepositories.values().forEach(r -> r.getRepository().delete(name));
         if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().existsByName(name))) {
-            filter.setName(name);
             filterRepositories.get(filter.getType()).insert(filter);
         }
     }
