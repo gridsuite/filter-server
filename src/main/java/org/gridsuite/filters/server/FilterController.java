@@ -44,7 +44,7 @@ public class FilterController {
     }
 
     @GetMapping(value = "filters/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get script contingency list by name", response = AbstractFilter.class)
+    @ApiOperation(value = "Get filter by name", response = AbstractFilter.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The script contingency list"),
         @ApiResponse(code = 404, message = "The script contingency list does not exists")})
     public ResponseEntity<AbstractFilter> getFilter(@PathVariable("name") String name) {
@@ -71,7 +71,7 @@ public class FilterController {
 
     @PostMapping(value = "filters/{name}/rename")
     @ApiOperation(value = "Rename filter by name")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The contingency list has been renamed"),
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been renamed"),
         @ApiResponse(code = 404, message = "The contingency list does not exists")})
     public void renameContingencyList(@PathVariable("name") String name,
                                       @RequestBody String newName) {
