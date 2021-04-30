@@ -113,19 +113,21 @@ public class FilterService {
 
             @Override
             public LineFilterEntity fromDto(AbstractFilter dto) {
-                assert dto instanceof LineFilter;
-                LineFilter lineFilter = (LineFilter) dto;
-                return LineFilterEntity.builder()
-                    .name(lineFilter.getName())
-                    .equipmentName(lineFilter.getEquipmentName())
-                    .equipmentId(lineFilter.getEquipmentID())
-                    .substationName1(lineFilter.getSubstationName1())
-                    .substationName2(lineFilter.getSubstationName2())
-                    .countries1(cloneIfNotNull(lineFilter.getCountries1()))
-                    .countries2(cloneIfNotNull(lineFilter.getCountries2()))
-                    .nominalVoltage1(convert(lineFilter.getNominalVoltage1()))
-                    .nominalVoltage2(convert(lineFilter.getNominalVoltage2()))
-                    .build();
+                if (dto instanceof LineFilter) {
+                    LineFilter lineFilter = (LineFilter) dto;
+                    return LineFilterEntity.builder()
+                        .name(lineFilter.getName())
+                        .equipmentName(lineFilter.getEquipmentName())
+                        .equipmentId(lineFilter.getEquipmentID())
+                        .substationName1(lineFilter.getSubstationName1())
+                        .substationName2(lineFilter.getSubstationName2())
+                        .countries1(cloneIfNotNull(lineFilter.getCountries1()))
+                        .countries2(cloneIfNotNull(lineFilter.getCountries2()))
+                        .nominalVoltage1(convert(lineFilter.getNominalVoltage1()))
+                        .nominalVoltage2(convert(lineFilter.getNominalVoltage2()))
+                        .build();
+                }
+                throw new RuntimeException("Wrong filter type, should never happen");
             }
         });
 
@@ -145,12 +147,14 @@ public class FilterService {
 
             @Override
             public ScriptFilterEntity fromDto(AbstractFilter dto) {
-                assert dto instanceof ScriptFilter;
-                ScriptFilter filter = (ScriptFilter) dto;
-                return ScriptFilterEntity.builder()
-                    .name(filter.getName())
-                    .script(filter.getScript())
-                    .build();
+                if (dto instanceof ScriptFilter) {
+                    ScriptFilter filter = (ScriptFilter) dto;
+                    return ScriptFilterEntity.builder()
+                        .name(filter.getName())
+                        .script(filter.getScript())
+                        .build();
+                }
+                throw new RuntimeException("Wrong filter type, should never happen");
             }
         });
 
@@ -180,7 +184,7 @@ public class FilterService {
     public <F extends AbstractFilter> void createFilterList(F filter) {
         final String name = filter.getName();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Create script contingency list '{}'", sanitizeParam(name));
+            LOGGER.debug("Create script filter '{}'", sanitizeParam(name));
         }
         filterRepositories.values().forEach(r -> r.getRepository().delete(name));
         if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().existsByName(name))) {
@@ -199,7 +203,7 @@ public class FilterService {
         Objects.requireNonNull(name);
         Objects.requireNonNull(newName);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("rename filter contingency list '{}' to '{}'", sanitizeParam(name), sanitizeParam(newName));
+            LOGGER.debug("rename filter filter '{}' to '{}'", sanitizeParam(name), sanitizeParam(newName));
         }
         if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().renameFilter(name, newName))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + name + " not found");
