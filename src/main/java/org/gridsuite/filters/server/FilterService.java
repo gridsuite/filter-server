@@ -34,15 +34,15 @@ import java.util.stream.Stream;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 
-interface Repository<Entity extends AbstractFilterEntity, Repository extends FilterRepository<Entity>> {
-    Repository getRepository();
+interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository extends FilterRepository<FilterEntity>> {
+    EntityRepository getRepository();
 
-    AbstractFilter toDto(Entity entity);
+    AbstractFilter toDto(FilterEntity filterEntity);
 
-    Entity fromDto(AbstractFilter dto);
+    FilterEntity fromDto(AbstractFilter dto);
 
     default Optional<AbstractFilter> getFilter(String name) {
-        Optional<Entity> element = getRepository().findByName(name);
+        Optional<FilterEntity> element = getRepository().findByName(name);
         if (element.isPresent()) {
             return element.map(this::toDto);
         }
@@ -53,7 +53,7 @@ interface Repository<Entity extends AbstractFilterEntity, Repository extends Fil
         return getRepository().findAll().stream().map(AbstractFilterEntity::getName);
     }
 
-    default Entity insert(AbstractFilter f) {
+    default FilterEntity insert(AbstractFilter f) {
         return getRepository().insert(fromDto(f));
     }
 
@@ -114,7 +114,7 @@ public class FilterService {
             @Override
             public LineFilterEntity fromDto(AbstractFilter dto) {
                 if (dto instanceof LineFilter) {
-                    LineFilter lineFilter = (LineFilter) dto;
+                    var lineFilter = (LineFilter) dto;
                     return LineFilterEntity.builder()
                         .name(lineFilter.getName())
                         .equipmentName(lineFilter.getEquipmentName())
@@ -148,7 +148,7 @@ public class FilterService {
             @Override
             public ScriptFilterEntity fromDto(AbstractFilter dto) {
                 if (dto instanceof ScriptFilter) {
-                    ScriptFilter filter = (ScriptFilter) dto;
+                    var filter = (ScriptFilter) dto;
                     return ScriptFilterEntity.builder()
                         .name(filter.getName())
                         .script(filter.getScript())
