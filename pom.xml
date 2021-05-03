@@ -20,18 +20,18 @@
     </parent>
 
     <groupId>org.gridsuite</groupId>
-    <artifactId>gridsuite-filters-server</artifactId>
+    <artifactId>gridsuite-filter-server</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
-    <name>Filters server</name>
-    <description>Filters service</description>
+    <name>Filter server</name>
+    <description>Filter service</description>
     <url>http://www.gridsuite.org/</url>
 
     <scm>
-        <connection>scm:git:https://github.com/gridsuite/filters-server.git</connection>
-        <developerConnection>scm:git:https://github.com/gridsuite/filters-server.git</developerConnection>
-        <url>https://github.com/gridsuite/filters-server</url>
+        <connection>scm:git:https://github.com/gridsuite/filter-server.git</connection>
+        <developerConnection>scm:git:https://github.com/gridsuite/filter-server.git</developerConnection>
+        <url>https://github.com/gridsuite/filter-server</url>
     </scm>
 
     <developers>
@@ -116,11 +116,13 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-cassandra</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+        <!-- jpa, crud repository -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
         <!-- Runtime dependencies -->
@@ -139,11 +141,16 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
-            <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra-spring-test</artifactId>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -171,36 +178,10 @@
             <artifactId>lombok</artifactId>
             <version>1.18.12</version>
         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
     </dependencies>
 
-    <profiles>
-        <!-- needed for embedded-cassandra to download cassandra (only once) through authentified proxies -->
-        <profile>
-            <id>proxy</id>
-            <activation>
-              <property>
-                <name>proxyHost</name>
-              </property>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-surefire-plugin</artifactId>
-                            <configuration>
-                                <systemPropertyVariables>
-                                    <proxyHost>${proxyHost}</proxyHost>
-                                    <proxyPort>${proxyPort}</proxyPort>
-                                    <proxyUser>${proxyUser}</proxyUser>
-                                    <proxyPassword>${proxyPassword}</proxyPassword>
-                                    <jdk.http.auth.tunneling.disabledSchemes></jdk.http.auth.tunneling.disabledSchemes>
-                                </systemPropertyVariables>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-    </profiles>
 </project>
