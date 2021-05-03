@@ -15,12 +15,12 @@ import java.util.Set;
 public class LineFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "countries1")
     @ElementCollection
-    @CollectionTable(foreignKey = @ForeignKey(name = "lineFilterEntity_countries_fk"), indexes = {@Index(name = "lineFilterEntity_countries_idx", columnList = "FiltersContingencyListEntity_name")})
+    @CollectionTable(foreignKey = @ForeignKey(name = "lineFilterEntity_countries_fk1"), indexes = {@Index(name = "lineFilterEntity_countries_idx1", columnList = "lineFilterEntity_name")})
     Set<String> countries1;
 
     @Column(name = "countries2")
     @ElementCollection
-    @CollectionTable(foreignKey = @ForeignKey(name = "lineFilterEntity_countries_fk"), indexes = {@Index(name = "lineFilterEntity_countries_idx", columnList = "FiltersContingencyListEntity_name")})
+    @CollectionTable(foreignKey = @ForeignKey(name = "lineFilterEntity_countries_fk2"), indexes = {@Index(name = "lineFilterEntity_countries_idx2", columnList = "lineFilterEntity_name")})
     Set<String> countries2;
 
     @Column(name = "substationName1")
@@ -29,18 +29,18 @@ public class LineFilterEntity extends AbstractGenericFilterEntity {
     String substationName2;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name  =  "numericFilterId_id",
+    @JoinColumn(name  =  "numericFilterId1_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk"
+            name = "numericFilterId_id_fk1"
         ), nullable = true)
     NumericFilterEntity nominalVoltage1;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name  =  "numericFilterId_id",
+    @JoinColumn(name  =  "numericFilterId2_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk"
+            name = "numericFilterId_id_fk2"
         ), nullable = true)
     NumericFilterEntity nominalVoltage2;
 

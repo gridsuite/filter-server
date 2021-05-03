@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server.repositories;
 
 import org.gridsuite.filter.server.entities.ScriptFilterEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 
@@ -14,5 +15,5 @@ import org.springframework.stereotype.Repository;
  * @author Jacuqes Borsenberger <jacques.borsenberger at rte-france.com>
  */
 @Repository
-public interface ScriptFilterRepository extends FilterRepository<ScriptFilterEntity> {
+public interface ScriptFilterRepository extends JpaRepository<ScriptFilterEntity, String> {
 }

@@ -17,13 +17,13 @@ import org.gridsuite.filter.server.entities.AbstractGenericFilterEntity;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
 import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.entities.ScriptFilterEntity;
-import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 
-interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository extends FilterRepository<FilterEntity>> {
+interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository extends JpaRepository<FilterEntity, String>> {
     EntityRepository getRepository();
 
     AbstractFilter toDto(FilterEntity filterEntity);
@@ -45,7 +45,7 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
     FilterEntity fromDto(AbstractFilter dto);
 
     default Optional<AbstractFilter> getFilter(String name) {
-        Optional<FilterEntity> element = getRepository().findByName(name);
+        Optional<FilterEntity> element = getRepository().findById(name);
         if (element.isPresent()) {
             return element.map(this::toDto);
         }
@@ -57,11 +57,30 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
     }
 
     default FilterEntity insert(AbstractFilter f) {
-        return getRepository().insert(fromDto(f));
+        return getRepository().saveAndFlush(fromDto(f));
     }
 
     default void deleteAll() {
         getRepository().deleteAll();
+    }
+
+    default boolean renameFilter(String name, String newName) {
+        if (getRepository().existsById(name)) {
+            FilterEntity filter = getRepository().getOne(name);
+            getRepository().deleteById(name);
+            filter.setName(newName);
+            getRepository().saveAndFlush(filter);
+            return true;
+        }
+        return false;
+    }
+
+    default boolean deleteById(String name) {
+        if (getRepository().existsById(name)) {
+            getRepository().deleteById(name);
+            return true;
+        }
+        return false;
     }
 }
 
@@ -196,15 +215,13 @@ public class FilterService {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create script filter '{}'", sanitizeParam(name));
         }
-        filterRepositories.values().forEach(r -> r.getRepository().delete(name));
-        if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().existsByName(name))) {
-            filterRepositories.get(filter.getType()).insert(filter);
-        }
+        filterRepositories.values().forEach(r -> r.deleteById(name));
+        filterRepositories.get(filter.getType()).insert(filter);
     }
 
     void deleteFilter(String name) {
         Objects.requireNonNull(name);
-        if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().delete(name))) {
+        if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(name))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + name + " not found");
         }
     }
@@ -215,7 +232,7 @@ public class FilterService {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("rename filter '{}' to '{}'", sanitizeParam(name), sanitizeParam(newName));
         }
-        if (filterRepositories.values().stream().noneMatch(repository -> repository.getRepository().renameFilter(name, newName))) {
+        if (filterRepositories.values().stream().noneMatch(repository -> repository.renameFilter(name, newName))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + name + " not found");
         }
     }
