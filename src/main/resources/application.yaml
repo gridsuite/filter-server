@@ -30,5 +30,5 @@ spring:
               create-target: src/main/resources/filters.sql
               create-source: metadata
 
-dbName: filter
+dbName: filters
 dbApi: jdbc
