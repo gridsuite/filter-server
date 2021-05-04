@@ -58,7 +58,7 @@ public class FilterController {
     @ApiOperation(value = "Create a filter", response = AbstractFilter.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The filters have been successfully created")})
     public void createFilter(@RequestBody(required = true) AbstractFilter filter) {
-        service.createFilterList(filter);
+        service.createFilter(filter);
     }
 
     @DeleteMapping(value = "filters/{name}")

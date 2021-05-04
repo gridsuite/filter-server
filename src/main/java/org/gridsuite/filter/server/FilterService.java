@@ -65,10 +65,7 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
 
     default boolean renameFilter(String name, String newName) {
         if (getRepository().existsById(name)) {
-            FilterEntity filter = getRepository().getOne(name);
-            getRepository().deleteById(name);
-            filter.setName(newName);
-            getRepository().saveAndFlush(filter);
+            getRepository().rename(name, newName);
             return true;
         }
         return false;
@@ -209,7 +206,7 @@ public class FilterService {
     }
 
     @Transactional
-    public <F extends AbstractFilter> void createFilterList(F filter) {
+    public <F extends AbstractFilter> void createFilter(F filter) {
         final String name = filter.getName();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create script filter '{}'", sanitizeParam(name));

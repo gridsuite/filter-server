@@ -9,6 +9,7 @@ package org.gridsuite.filter.server.repositories;
 
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -23,4 +24,7 @@ public interface FilterRepository<T extends AbstractFilterEntity> extends JpaRep
     @Query(value = "SELECT t.name from #{#entityName} as t")
     List<String> getFiltersNames();
 
+    @Modifying
+    @Query(value = "UPDATE #{#entityName} filter set filter.name = :newName where filter.name = :oldName")
+    void rename(String oldName, String newName);
 }
