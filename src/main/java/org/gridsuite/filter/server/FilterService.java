@@ -226,7 +226,7 @@ public class FilterService {
     }
 
     @Transactional
-    void renameFilter(String name, String newName) {
+    public void renameFilter(String name, String newName) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(newName);
         if (LOGGER.isDebugEnabled()) {
