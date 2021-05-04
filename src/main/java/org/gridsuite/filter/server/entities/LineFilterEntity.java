@@ -1,3 +1,10 @@
+/**
+ *  Copyright (c) 2021, RTE (http://www.rte-france.com)
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 package org.gridsuite.filter.server.entities;
 
 import lombok.Getter;
@@ -7,6 +14,9 @@ import javax.persistence.*;
 
 import java.util.Set;
 
+/**
+ * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
+ */
 @Getter
 @NoArgsConstructor
 @SuperBuilder
@@ -28,7 +38,7 @@ public class LineFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "substationName2")
     String substationName2;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name  =  "numericFilterId1_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
@@ -36,7 +46,7 @@ public class LineFilterEntity extends AbstractGenericFilterEntity {
         ), nullable = true)
     NumericFilterEntity nominalVoltage1;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name  =  "numericFilterId2_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020, RTE (http://www.rte-france.com)
+ * Copyright (c) 2021, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -17,13 +17,13 @@ import org.gridsuite.filter.server.entities.AbstractGenericFilterEntity;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
 import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.entities.ScriptFilterEntity;
+import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +31,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 
-interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository extends JpaRepository<FilterEntity, String>> {
+interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository extends FilterRepository<FilterEntity>> {
     EntityRepository getRepository();
 
     AbstractFilter toDto(FilterEntity filterEntity);
@@ -52,8 +51,8 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
         return Optional.empty();
     }
 
-    default Stream<String> getFiltersNames() {
-        return getRepository().findAll().stream().map(AbstractFilterEntity::getName);
+    default List<String> getFiltersNames() {
+        return getRepository().getFiltersNames();
     }
 
     default FilterEntity insert(AbstractFilter f) {
@@ -194,7 +193,7 @@ public class FilterService {
 
     List<FilterAttributes> getFilters() {
         return filterRepositories.entrySet().stream()
-            .flatMap(entry -> entry.getValue().getFiltersNames().map(name -> new FilterAttributes(name, entry.getKey())))
+            .flatMap(entry -> entry.getValue().getFiltersNames().stream().map(name -> new FilterAttributes(name, entry.getKey())))
             .collect(Collectors.toList());
     }
 
@@ -226,6 +225,7 @@ public class FilterService {
         }
     }
 
+    @Transactional
     void renameFilter(String name, String newName) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(newName);
