@@ -46,7 +46,7 @@ public class FilterController {
     @GetMapping(value = "filters/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get filter by name", response = AbstractFilter.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter"),
-        @ApiResponse(code = 404, message = "The script contingency list does not exists")})
+        @ApiResponse(code = 404, message = "The filter does not exists")})
     public ResponseEntity<AbstractFilter> getFilter(@PathVariable("name") String name) {
         return service.getFilter(name).map(filter -> ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
