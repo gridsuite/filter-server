@@ -8,6 +8,7 @@ package org.gridsuite.filter.server;
 
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
+ * @author Jacques Borsenberger <jacques.borsenbeger at rte-france.com>
  */
 public final class FilterApi {
 
