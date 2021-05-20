@@ -98,8 +98,8 @@ public class FilterService {
         return passBase(builder.equipmentID(entity.getEquipmentId()).equipmentName(entity.getEquipmentName()), entity);
     }
 
-    <T> Set<T> cloneIfNotNull(Set<T> set) {
-        if (set != null) {
+    <T> Set<T> cloneIfNotEmptyOrNull(Set<T> set) {
+        if (set != null && !set.isEmpty()) {
             return new HashSet<>(set);
         }
         return null;
@@ -126,8 +126,8 @@ public class FilterService {
             public AbstractFilter toDto(LineFilterEntity entity) {
                 return passGenerics(
                     LineFilter.builder()
-                        .countries1(cloneIfNotNull(entity.getCountries1()))
-                        .countries2(cloneIfNotNull(entity.getCountries2()))
+                        .countries1(cloneIfNotEmptyOrNull(entity.getCountries1()))
+                        .countries2(cloneIfNotEmptyOrNull(entity.getCountries2()))
                         .substationName1(entity.getSubstationName1())
                         .substationName2(entity.getSubstationName2())
                         .nominalVoltage1(convert(entity.getNominalVoltage1()))
@@ -145,8 +145,8 @@ public class FilterService {
                         .equipmentId(lineFilter.getEquipmentID())
                         .substationName1(lineFilter.getSubstationName1())
                         .substationName2(lineFilter.getSubstationName2())
-                        .countries1(cloneIfNotNull(lineFilter.getCountries1()))
-                        .countries2(cloneIfNotNull(lineFilter.getCountries2()))
+                        .countries1(cloneIfNotEmptyOrNull(lineFilter.getCountries1()))
+                        .countries2(cloneIfNotEmptyOrNull(lineFilter.getCountries2()))
                         .nominalVoltage1(convert(lineFilter.getNominalVoltage1()))
                         .nominalVoltage2(convert(lineFilter.getNominalVoltage2()))
                         .build();
