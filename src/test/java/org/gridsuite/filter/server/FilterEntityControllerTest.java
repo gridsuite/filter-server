@@ -89,10 +89,6 @@ public class FilterEntityControllerTest  {
 
     }
 
-    private void cleanDB() {
-        filterService.deleteAll();
-    }
-
     public String joinWithComma(Object... array) {
         return join(array, ",");
     }

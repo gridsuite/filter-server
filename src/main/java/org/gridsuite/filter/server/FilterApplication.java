@@ -6,11 +6,8 @@
  */
 package org.gridsuite.filter.server;
 
-import com.fasterxml.jackson.databind.Module;
-import com.powsybl.contingency.json.ContingencyJsonModule;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
@@ -24,8 +21,4 @@ public class FilterApplication {
         SpringApplication.run(FilterApplication.class, args);
     }
 
-    @Bean
-    public Module module() {
-        return new ContingencyJsonModule();
-    }
 }

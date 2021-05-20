@@ -26,7 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/" + FilterApi.API_VERSION)
-@Api(value = "Filters server")
+@Api(value = "Filter server")
 @ComponentScan(basePackageClasses = FilterService.class)
 public class FilterController {
 
@@ -56,7 +56,7 @@ public class FilterController {
 
     @PutMapping(value = "filters/", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Create a filter", response = AbstractFilter.class)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filters have been successfully created")})
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been successfully created")})
     public void createFilter(@RequestBody(required = true) AbstractFilter filter) {
         service.createFilter(filter);
     }
