@@ -83,9 +83,6 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
 @Service
 public class FilterService {
 
-    @Autowired
-    FilterService self;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterService.class);
 
     private final EnumMap<FilterType, Repository<?, ?>> filterRepositories = new EnumMap<>(FilterType.class);
