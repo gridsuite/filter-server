@@ -1,0 +1,23 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!--
+        suppress unreadable huge logs..
+    -->
+    <logger name="org.springframework.test" level="warn"/>
+    <logger name="org.springframework.boot.test" level="warn"/>
+
+    <!--
+        our logs
+    -->
+    <logger name="org.gridsuite.filter.server" level="debug"/>
+
+</configuration>
