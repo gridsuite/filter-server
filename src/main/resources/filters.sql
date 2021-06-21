@@ -1,22 +1,23 @@
 
     create table line_filter (
-       name varchar(255) not null,
+       id uuid not null,
+        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName1 varchar(255),
         substationName2 varchar(255),
         numericFilterId1_id uuid,
         numericFilterId2_id uuid,
-        primary key (name)
+        primary key (id)
     );
 
     create table LineFilterEntity_countries1 (
-       LineFilterEntity_name varchar(255) not null,
+       LineFilterEntity_id uuid not null,
         countries1 varchar(255)
     );
 
     create table LineFilterEntity_countries2 (
-       LineFilterEntity_name varchar(255) not null,
+       LineFilterEntity_id uuid not null,
         countries2 varchar(255)
     );
 
@@ -29,12 +30,13 @@
     );
 
     create table script_filter (
-       name varchar(255) not null,
+       id uuid not null,
+        name varchar(255),
         script varchar(255),
-        primary key (name)
+        primary key (id)
     );
-create index lineFilterEntity_countries_idx1 on LineFilterEntity_countries1 (LineFilterEntity_name);
-create index lineFilterEntity_countries_idx2 on LineFilterEntity_countries2 (LineFilterEntity_name);
+create index lineFilterEntity_countries_idx1 on LineFilterEntity_countries1 (LineFilterEntity_id);
+create index lineFilterEntity_countries_idx2 on LineFilterEntity_countries2 (LineFilterEntity_id);
 
     alter table if exists line_filter 
        add constraint numericFilterId_id_fk1 
@@ -48,10 +50,10 @@ create index lineFilterEntity_countries_idx2 on LineFilterEntity_countries2 (Lin
 
     alter table if exists LineFilterEntity_countries1 
        add constraint lineFilterEntity_countries_fk1 
-       foreign key (LineFilterEntity_name) 
+       foreign key (LineFilterEntity_id) 
        references line_filter;
 
     alter table if exists LineFilterEntity_countries2 
        add constraint lineFilterEntity_countries_fk2 
-       foreign key (LineFilterEntity_name) 
+       foreign key (LineFilterEntity_id) 
        references line_filter;

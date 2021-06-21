@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.gridsuite.filter.server.utils.FilterType;
 
+import java.util.UUID;
+
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
@@ -19,5 +21,6 @@ import org.gridsuite.filter.server.utils.FilterType;
 @AllArgsConstructor
 public class FilterAttributes {
     String name;
+    UUID id;
     FilterType type;
 }

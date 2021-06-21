@@ -17,6 +17,7 @@ import org.gridsuite.filter.server.entities.AbstractGenericFilterEntity;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
 import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.entities.ScriptFilterEntity;
+import org.gridsuite.filter.server.repositories.FilterNameId;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
@@ -42,15 +43,15 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
 
     FilterEntity fromDto(AbstractFilter dto);
 
-    default Optional<AbstractFilter> getFilter(String name) {
-        Optional<FilterEntity> element = getRepository().findById(name);
+    default Optional<AbstractFilter> getFilter(UUID id) {
+        Optional<FilterEntity> element = getRepository().findById(id);
         if (element.isPresent()) {
             return element.map(this::toDto);
         }
         return Optional.empty();
     }
 
-    default List<String> getFiltersNames() {
+    default List<FilterNameId> getFiltersNames() {
         return getRepository().getFiltersNames();
     }
 
@@ -62,17 +63,13 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
         getRepository().deleteAll();
     }
 
-    default boolean renameFilter(String name, String newName) {
-        if (getRepository().existsById(name)) {
-            getRepository().rename(name, newName);
-            return true;
-        }
-        return false;
+    default boolean renameFilter(UUID id, String newName) {
+        return getRepository().rename(id, newName) != 0;
     }
 
-    default boolean deleteById(String name) {
-        if (getRepository().existsById(name)) {
-            getRepository().deleteById(name);
+    default boolean deleteById(UUID id) {
+        if (getRepository().existsById(id)) {
+            getRepository().deleteById(id);
             return true;
         }
         return false;
@@ -87,7 +84,7 @@ public class FilterService {
     private final EnumMap<FilterType, Repository<?, ?>> filterRepositories = new EnumMap<>(FilterType.class);
 
     private AbstractFilter.AbstractFilterBuilder<?, ?> passBase(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
-        return builder.name(entity.getName());
+        return builder.name(entity.getName()).id(entity.getId());
     }
 
     private AbstractFilter.AbstractFilterBuilder<?, ?> passGenerics(AbstractGenericFilter.AbstractGenericFilterBuilder<?, ?> builder, AbstractGenericFilterEntity entity) {
@@ -136,6 +133,7 @@ public class FilterService {
                 if (dto instanceof LineFilter) {
                     var lineFilter = (LineFilter) dto;
                     return LineFilterEntity.builder()
+                        .id(getIdOrCreate(lineFilter.getId()))
                         .name(lineFilter.getName())
                         .equipmentName(lineFilter.getEquipmentName())
                         .equipmentId(lineFilter.getEquipmentID())
@@ -171,6 +169,7 @@ public class FilterService {
                     var filter = (ScriptFilter) dto;
                     return ScriptFilterEntity.builder()
                         .name(filter.getName())
+                        .id(getIdOrCreate(filter.getId()))
                         .script(filter.getScript())
                         .build();
                 }
@@ -180,20 +179,24 @@ public class FilterService {
 
     }
 
+    private UUID getIdOrCreate(UUID id) {
+        return id == null ? UUID.randomUUID() : id;
+    }
+
     private static String sanitizeParam(String param) {
         return param != null ? param.replaceAll("[\n|\r\t]", "_") : null;
     }
 
     List<FilterAttributes> getFilters() {
         return filterRepositories.entrySet().stream()
-            .flatMap(entry -> entry.getValue().getFiltersNames().stream().map(name -> new FilterAttributes(name, entry.getKey())))
+            .flatMap(entry -> entry.getValue().getFiltersNames().stream().map(filterNameId -> new FilterAttributes(filterNameId.getName(), filterNameId.getId(), entry.getKey())))
             .collect(Collectors.toList());
     }
 
-    Optional<AbstractFilter> getFilter(String name) {
-        Objects.requireNonNull(name);
+    Optional<AbstractFilter> getFilter(UUID id) {
+        Objects.requireNonNull(id);
         for (Repository<?, ?> repository : filterRepositories.values()) {
-            Optional<AbstractFilter> res = repository.getFilter(name);
+            Optional<AbstractFilter> res = repository.getFilter(id);
             if (res.isPresent()) {
                 return res;
             }
@@ -203,30 +206,25 @@ public class FilterService {
 
     @Transactional
     public <F extends AbstractFilter> void createFilter(F filter) {
-        final String name = filter.getName();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Create script filter '{}'", sanitizeParam(name));
-        }
-        filterRepositories.values().forEach(r -> r.deleteById(name));
         filterRepositories.get(filter.getType()).insert(filter);
     }
 
-    void deleteFilter(String name) {
-        Objects.requireNonNull(name);
-        if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(name))) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + name + " not found");
+    void deleteFilter(UUID id) {
+        Objects.requireNonNull(id);
+        if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + id + " not found");
         }
     }
 
     @Transactional
-    public void renameFilter(String name, String newName) {
-        Objects.requireNonNull(name);
+    public void renameFilter(UUID id, String newName) {
+        Objects.requireNonNull(id);
         Objects.requireNonNull(newName);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("rename filter '{}' to '{}'", sanitizeParam(name), sanitizeParam(newName));
+            LOGGER.debug("rename filter of id '{}' to '{}'", id, sanitizeParam(newName));
         }
-        if (filterRepositories.values().stream().noneMatch(repository -> repository.renameFilter(name, newName))) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + name + " not found");
+        if (filterRepositories.values().stream().noneMatch(repository -> repository.renameFilter(id, newName))) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + id + " not found");
         }
     }
 

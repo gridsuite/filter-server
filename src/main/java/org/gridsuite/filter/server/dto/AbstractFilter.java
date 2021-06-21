@@ -15,6 +15,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.FilterType;
 
+import java.util.UUID;
+
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
@@ -34,6 +36,8 @@ import org.gridsuite.filter.server.utils.FilterType;
 @NoArgsConstructor
 @SuperBuilder
 public abstract class AbstractFilter {
+
+    UUID id;
 
     String name;
 
