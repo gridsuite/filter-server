@@ -10,9 +10,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.UUID;
+
+import static javax.persistence.TemporalType.TIMESTAMP;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
@@ -22,6 +28,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @SuperBuilder
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractFilterEntity {
 
     @Id
@@ -31,4 +38,16 @@ public abstract class AbstractFilterEntity {
     @Column(name = "name")
     private String name;
 
+    @CreatedDate
+    @Temporal(TIMESTAMP)
+    @Column(name = "creationDate", updatable = false)
+    private Date creationDate;
+
+    @LastModifiedDate
+    @Temporal(TIMESTAMP)
+    @Column(name = "modificationDate")
+    private Date modificationDate;
+
+    @Column()
+    private String description;
 }

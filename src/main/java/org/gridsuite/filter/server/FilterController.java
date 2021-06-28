@@ -40,7 +40,7 @@ public class FilterController {
     @GetMapping(value = "filters", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all filters", response = List.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "All filters")})
-    public ResponseEntity<List<FilterAttributes>> getFilters() {
+    public ResponseEntity<List<IFilterAttributes>> getFilters() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
     }
 
@@ -77,6 +77,14 @@ public class FilterController {
     public void renameFilter(@PathVariable("id") UUID id,
                              @RequestBody String newName) {
         service.renameFilter(id, newName);
+    }
+
+    @GetMapping(value = "filters/metadata/")
+    @ApiOperation(value = "get filter metadata")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "filters metadata"),
+        @ApiResponse(code = 404, message = "The filter does not exists")})
+    public ResponseEntity<List<IFilterAttributes>> getFilterMetadata(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
     }
 
 }

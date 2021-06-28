@@ -15,6 +15,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.FilterType;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -35,11 +36,17 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public abstract class AbstractFilter {
+public abstract class AbstractFilter implements IFilterAttributes {
 
     UUID id;
 
     String name;
+
+    Date creationDate;
+
+    Date modificationDate;
+
+    String description;
 
     public abstract FilterType getType();
 }

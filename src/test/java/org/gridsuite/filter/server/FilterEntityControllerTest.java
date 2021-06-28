@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
@@ -14,8 +15,10 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
-import org.gridsuite.filter.server.utils.RangeType;
+import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.server.dto.IFilterAttributes;
 import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,16 +28,22 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.join;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -48,8 +57,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@EnableJpaAuditing
 @ContextConfiguration(classes = {FilterApplication.class})
-public class FilterEntityControllerTest  {
+public class FilterEntityControllerTest {
 
     public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters/";
     @Autowired
@@ -90,6 +100,8 @@ public class FilterEntityControllerTest  {
 
     }
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
     public String joinWithComma(Object... array) {
         return join(array, ",");
     }
@@ -99,6 +111,8 @@ public class FilterEntityControllerTest  {
         UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
 
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
         // test all fields
         String lineFilter = "{" + joinWithComma(
             jsonVal("name", "testLine"),
@@ -127,14 +141,23 @@ public class FilterEntityControllerTest  {
             jsonVal("name", "testScript"),
             jsonVal("id", filterId2.toString()),
             jsonVal("type", FilterType.SCRIPT.name()),
-            jsonVal("script", "test")) +
+            jsonVal("script", "test"),
+            jsonVal("description", "oups")) +
             "}";
 
         insertFilter(filterId2, scriptFilter);
 
-        mvc.perform(get(URL_TEMPLATE))
+        var res = mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"name\":\"testLineBis\",\"type\":\"LINE\"}, {\"name\":\"testScript\",\"type\":\"SCRIPT\"}]"));
+            .andReturn().getResponse().getContentAsString();
+        List<FilterAttributes> filterAttributes = objectMapper.readValue(res, new TypeReference<>() {
+        });
+        assertEquals(filterAttributes.size(), 2);
+        if (!filterAttributes.get(0).getId().equals(filterId1)) {
+            Collections.reverse(filterAttributes);
+        }
+        matchFilterDescription(filterAttributes.get(0), filterId1, "testLineBis", FilterType.LINE, creationDate, modificationDate, null);
+        matchFilterDescription(filterAttributes.get(1), filterId2, "testScript", FilterType.SCRIPT, creationDate, modificationDate, "oups");
 
         mvc.perform(post(URL_TEMPLATE + filterId1 + "/rename").content("grandLine")).andExpect(status().isOk());
 
@@ -156,13 +179,22 @@ public class FilterEntityControllerTest  {
 
     }
 
+    private void matchFilterDescription(IFilterAttributes filterAttribute, UUID id, String name, FilterType type, Date creationDate, Date modificationDate, String description) throws Exception {
+        assertEquals(filterAttribute.getName(), name);
+        assertEquals(filterAttribute.getId(), id);
+        assertEquals(filterAttribute.getType(), type);
+        assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 1000);
+        assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 1000);
+        assertEquals(description, filterAttribute.getDescription());
+    }
+
     private void insertFilter(UUID filterId, String content) throws Exception {
         mvc.perform(put(URL_TEMPLATE)
             .content(content)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        var ok = mvc.perform(get(URL_TEMPLATE))
+        mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
         MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();

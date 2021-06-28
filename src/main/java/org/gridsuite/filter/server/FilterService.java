@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
+import org.gridsuite.filter.server.dto.IFilterAttributes;
 import org.gridsuite.filter.server.dto.LineFilter;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.FilterAttributes;
@@ -17,7 +18,7 @@ import org.gridsuite.filter.server.entities.AbstractGenericFilterEntity;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
 import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.entities.ScriptFilterEntity;
-import org.gridsuite.filter.server.repositories.FilterNameId;
+import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
@@ -31,6 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
@@ -43,6 +45,8 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
 
     FilterEntity fromDto(AbstractFilter dto);
 
+    FilterType getRepositoryType();
+
     default Optional<AbstractFilter> getFilter(UUID id) {
         Optional<FilterEntity> element = getRepository().findById(id);
         if (element.isPresent()) {
@@ -51,8 +55,16 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
         return Optional.empty();
     }
 
-    default List<FilterNameId> getFiltersNames() {
-        return getRepository().getFiltersNames();
+    default Stream<FilterAttributes> getFiltersAttributes() {
+        return getRepository().getFiltersAttributes().stream().map(this::metadataToAttribute);
+    }
+
+    default Stream<FilterAttributes> getFiltersAttributes(List<UUID> ids) {
+        return getRepository().findFiltersAttributeById(ids).stream().map(this::metadataToAttribute);
+    }
+
+    default FilterAttributes metadataToAttribute(FilterMetadata f) {
+        return new FilterAttributes(f, getRepositoryType());
     }
 
     default FilterEntity insert(AbstractFilter f) {
@@ -74,6 +86,11 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
         }
         return false;
     }
+
+    default FilterAttributes toAttribute(AbstractFilterEntity entity) {
+        return new FilterAttributes(entity.getName(), entity.getId(), entity.getCreationDate(), entity.getModificationDate(), entity.getDescription(), getRepositoryType());
+    }
+
 }
 
 @Service
@@ -84,11 +101,27 @@ public class FilterService {
     private final EnumMap<FilterType, Repository<?, ?>> filterRepositories = new EnumMap<>(FilterType.class);
 
     private AbstractFilter.AbstractFilterBuilder<?, ?> passBase(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
-        return builder.name(entity.getName()).id(entity.getId());
+        return builder.name(entity.getName()).id(entity.getId())
+            .creationDate(entity.getCreationDate()).modificationDate(entity.getModificationDate())
+            .description(entity.getDescription());
     }
 
     private AbstractFilter.AbstractFilterBuilder<?, ?> passGenerics(AbstractGenericFilter.AbstractGenericFilterBuilder<?, ?> builder, AbstractGenericFilterEntity entity) {
         return passBase(builder.equipmentID(entity.getEquipmentId()).equipmentName(entity.getEquipmentName()), entity);
+    }
+
+    private void passGeneric(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, AbstractGenericFilter dto) {
+        passBase(builder, dto);
+        builder.equipmentId(dto.getEquipmentID())
+            .equipmentName(dto.getEquipmentName());
+    }
+
+    private void passBase(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
+        builder.name(dto.getName())
+            .id(getIdOrCreate(dto.getId()))
+            .creationDate(dto.getCreationDate())
+            .modificationDate(dto.getModificationDate())
+            .description(dto.getDescription());
     }
 
     <T> Set<T> cloneIfNotEmptyOrNull(Set<T> set) {
@@ -110,6 +143,12 @@ public class FilterService {
 
     public FilterService(final ScriptFilterRepository scriptFiltersRepository, final LineFilterRepository lineFilterRepository) {
         filterRepositories.put(FilterType.LINE, new Repository<LineFilterEntity, LineFilterRepository>() {
+
+            @Override
+            public FilterType getRepositoryType() {
+                return FilterType.LINE;
+            }
+
             @Override
             public LineFilterRepository getRepository() {
                 return lineFilterRepository;
@@ -132,9 +171,7 @@ public class FilterService {
             public LineFilterEntity fromDto(AbstractFilter dto) {
                 if (dto instanceof LineFilter) {
                     var lineFilter = (LineFilter) dto;
-                    return LineFilterEntity.builder()
-                        .id(getIdOrCreate(lineFilter.getId()))
-                        .name(lineFilter.getName())
+                    var lineFilterEntityBuilder = LineFilterEntity.builder()
                         .equipmentName(lineFilter.getEquipmentName())
                         .equipmentId(lineFilter.getEquipmentID())
                         .substationName1(lineFilter.getSubstationName1())
@@ -142,14 +179,20 @@ public class FilterService {
                         .countries1(cloneIfNotEmptyOrNull(lineFilter.getCountries1()))
                         .countries2(cloneIfNotEmptyOrNull(lineFilter.getCountries2()))
                         .nominalVoltage1(convert(lineFilter.getNominalVoltage1()))
-                        .nominalVoltage2(convert(lineFilter.getNominalVoltage2()))
-                        .build();
+                        .nominalVoltage2(convert(lineFilter.getNominalVoltage2()));
+                    passGeneric(lineFilterEntityBuilder, lineFilter);
+                    return lineFilterEntityBuilder.build();
                 }
                 throw new RuntimeException("Wrong filter type, should never happen");
             }
         });
 
         filterRepositories.put(FilterType.SCRIPT, new Repository<ScriptFilterEntity, ScriptFilterRepository>() {
+            @Override
+            public FilterType getRepositoryType() {
+                return FilterType.SCRIPT;
+            }
+
             @Override
             public ScriptFilterRepository getRepository() {
                 return scriptFiltersRepository;
@@ -167,11 +210,10 @@ public class FilterService {
             public ScriptFilterEntity fromDto(AbstractFilter dto) {
                 if (dto instanceof ScriptFilter) {
                     var filter = (ScriptFilter) dto;
-                    return ScriptFilterEntity.builder()
-                        .name(filter.getName())
-                        .id(getIdOrCreate(filter.getId()))
-                        .script(filter.getScript())
-                        .build();
+                    var scriptBuilderEntity = ScriptFilterEntity.builder()
+                        .script(filter.getScript());
+                    passBase(scriptBuilderEntity, filter);
+                    return scriptBuilderEntity.build();
                 }
                 throw new RuntimeException("Wrong filter type, should never happen");
             }
@@ -187,9 +229,15 @@ public class FilterService {
         return param != null ? param.replaceAll("[\n|\r\t]", "_") : null;
     }
 
-    List<FilterAttributes> getFilters() {
+    List<IFilterAttributes> getFilters() {
         return filterRepositories.entrySet().stream()
-            .flatMap(entry -> entry.getValue().getFiltersNames().stream().map(filterNameId -> new FilterAttributes(filterNameId.getName(), filterNameId.getId(), entry.getKey())))
+            .flatMap(entry -> entry.getValue().getFiltersAttributes())
+            .collect(Collectors.toList());
+    }
+
+    List<IFilterAttributes> getFilters(List<UUID> ids) {
+        return filterRepositories.entrySet().stream()
+            .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
             .collect(Collectors.toList());
     }
 
