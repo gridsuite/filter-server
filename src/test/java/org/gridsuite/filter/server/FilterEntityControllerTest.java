@@ -28,7 +28,6 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -57,7 +56,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@EnableJpaAuditing
 @ContextConfiguration(classes = {FilterApplication.class})
 public class FilterEntityControllerTest {
 
@@ -110,6 +108,7 @@ public class FilterEntityControllerTest {
     public void test() throws Exception {
         UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
+        UUID notFound = UUID.fromString("44444444-4444-4444-8e3e-78e9027d300f");
 
         Date creationDate = new Date();
         Date modificationDate = new Date();
@@ -128,6 +127,15 @@ public class FilterEntityControllerTest {
             jsonSet("countries2", Set.of("smurf", "schtroumph"))) + "}";
 
         insertFilter(filterId1, lineFilter);
+        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + filterId1 + "\"]"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(),
+            new TypeReference<>() {
+            });
+
+        Date dateCreation = filterAttributes.get(0).getCreationDate();
+        Date dateModification = filterAttributes.get(0).getModificationDate();
 
         String minimalLineFilter = "{" + joinWithComma(
             jsonVal("name", "testLineBis"),
@@ -150,20 +158,34 @@ public class FilterEntityControllerTest {
         var res = mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(res, new TypeReference<>() {
+        filterAttributes = objectMapper.readValue(res, new TypeReference<>() {
         });
         assertEquals(filterAttributes.size(), 2);
         if (!filterAttributes.get(0).getId().equals(filterId1)) {
             Collections.reverse(filterAttributes);
         }
+
         matchFilterDescription(filterAttributes.get(0), filterId1, "testLineBis", FilterType.LINE, creationDate, modificationDate, null);
         matchFilterDescription(filterAttributes.get(1), filterId2, "testScript", FilterType.SCRIPT, creationDate, modificationDate, "oups");
+
+        filterAttributes = objectMapper.readValue(
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + filterId1 + "\"]"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(),
+            new TypeReference<>() {
+            });
+        assertEquals(1, filterAttributes.size());
+        assertEquals(dateCreation, filterAttributes.get(0).getCreationDate());
+        assertEquals("testLineBis", filterAttributes.get(0).getName());
+        assertTrue(dateModification.getTime() < filterAttributes.get(0).getModificationDate().getTime());
 
         mvc.perform(post(URL_TEMPLATE + filterId1 + "/rename").content("grandLine")).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andExpect(content().json("[{\"name\":\"grandLine\",\"type\":\"LINE\"}, {\"name\":\"testScript\",\"type\":\"SCRIPT\"}]"));
+
+        mvc.perform(post(URL_TEMPLATE + notFound + "/rename").content("grandLine")).andExpect(status().isNotFound());
 
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
 

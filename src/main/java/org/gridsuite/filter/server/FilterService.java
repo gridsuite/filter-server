@@ -71,10 +71,6 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
         return getRepository().saveAndFlush(fromDto(f));
     }
 
-    default void deleteAll() {
-        getRepository().deleteAll();
-    }
-
     default boolean renameFilter(UUID id, String newName) {
         return getRepository().rename(id, newName) != 0;
     }
@@ -85,10 +81,6 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
             return true;
         }
         return false;
-    }
-
-    default FilterAttributes toAttribute(AbstractFilterEntity entity) {
-        return new FilterAttributes(entity.getName(), entity.getId(), entity.getCreationDate(), entity.getModificationDate(), entity.getDescription(), getRepositoryType());
     }
 
 }
@@ -275,7 +267,4 @@ public class FilterService {
         }
     }
 
-    public void deleteAll() {
-        filterRepositories.values().forEach(Repository::deleteAll);
-    }
 }

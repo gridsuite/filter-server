@@ -8,7 +8,6 @@ package org.gridsuite.filter.server.entities;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -24,7 +23,6 @@ import static javax.persistence.TemporalType.TIMESTAMP;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 @Getter
-@Setter
 @NoArgsConstructor
 @SuperBuilder
 @MappedSuperclass

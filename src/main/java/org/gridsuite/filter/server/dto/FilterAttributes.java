@@ -7,7 +7,6 @@
 
 package org.gridsuite.filter.server.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
@@ -21,7 +20,6 @@ import java.util.UUID;
  */
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class FilterAttributes implements IFilterAttributes {
     String name;

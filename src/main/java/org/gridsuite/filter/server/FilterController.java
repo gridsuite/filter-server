@@ -79,7 +79,7 @@ public class FilterController {
         service.renameFilter(id, newName);
     }
 
-    @GetMapping(value = "filters/metadata/")
+    @GetMapping(value = "metadata")
     @ApiOperation(value = "get filter metadata")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "filters metadata"),
         @ApiResponse(code = 404, message = "The filter does not exists")})
