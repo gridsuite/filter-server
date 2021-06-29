@@ -117,10 +117,9 @@ public class FilterService {
     }
 
     private void passBase(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
+        /* dates a managed by jpa, so we don't process them */
         builder.name(dto.getName())
             .id(getIdOrCreate(dto.getId()))
-            .creationDate(dto.getCreationDate())
-            .modificationDate(dto.getModificationDate())
             .description(dto.getDescription());
     }
 
