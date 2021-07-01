@@ -52,7 +52,7 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
     }
 
     default List<FilterNameId> getFiltersNames() {
-        return getRepository().getFiltersNames();
+        return getRepository().getFiltersNameIds();
     }
 
     default FilterEntity insert(AbstractFilter f) {
@@ -68,11 +68,7 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
     }
 
     default boolean deleteById(UUID id) {
-        if (getRepository().existsById(id)) {
-            getRepository().deleteById(id);
-            return true;
-        }
-        return false;
+        return getRepository().removeById(id) != 0;
     }
 }
 
