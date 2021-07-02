@@ -55,11 +55,13 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping(value = "filters/", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "filters/", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Create a filter", response = AbstractFilter.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been successfully created")})
-    public void createFilter(@RequestBody(required = true) AbstractFilter filter) {
-        service.createFilter(filter);
+    public ResponseEntity<AbstractFilter> createFilter(@RequestBody(required = true) AbstractFilter filter) {
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(service.createFilter(filter));
     }
 
     @DeleteMapping(value = "filters/{id}")

@@ -55,8 +55,8 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
         return getRepository().getFiltersNameIds();
     }
 
-    default FilterEntity insert(AbstractFilter f) {
-        return getRepository().saveAndFlush(fromDto(f));
+    default AbstractFilter insert(AbstractFilter f) {
+        return toDto(getRepository().save(fromDto(f)));
     }
 
     default void deleteAll() {
@@ -201,8 +201,8 @@ public class FilterService {
     }
 
     @Transactional
-    public <F extends AbstractFilter> void createFilter(F filter) {
-        filterRepositories.get(filter.getType()).insert(filter);
+    public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
+        return filterRepositories.get(filter.getType()).insert(filter);
     }
 
     void deleteFilter(UUID id) {
