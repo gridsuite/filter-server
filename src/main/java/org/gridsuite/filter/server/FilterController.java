@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
@@ -43,38 +44,41 @@ public class FilterController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
     }
 
-    @GetMapping(value = "filters/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get filter by name", response = AbstractFilter.class)
+    @GetMapping(value = "filters/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get filter by id", response = AbstractFilter.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter"),
         @ApiResponse(code = 404, message = "The filter does not exists")})
-    public ResponseEntity<AbstractFilter> getFilter(@PathVariable("name") String name) {
-        return service.getFilter(name).map(filter -> ResponseEntity.ok()
+    public ResponseEntity<AbstractFilter> getFilter(@PathVariable("id") UUID id) {
+        return service.getFilter(id).map(filter -> ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
             .body(filter))
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping(value = "filters/", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "filters/", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Create a filter", response = AbstractFilter.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been successfully created")})
-    public void createFilter(@RequestBody(required = true) AbstractFilter filter) {
-        service.createFilter(filter);
+    public ResponseEntity<AbstractFilter> createFilter(@RequestBody(required = true) AbstractFilter filter) {
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(service.createFilter(filter));
     }
 
-    @DeleteMapping(value = "filters/{name}")
+    @DeleteMapping(value = "filters/{id}")
     @ApiOperation(value = "delete the filter")
     @ApiResponse(code = 200, message = "The filter has been deleted")
-    public ResponseEntity<Void> deleteFilter(@PathVariable("name") String name) {
-        service.deleteFilter(name);
+    public ResponseEntity<Void> deleteFilter(@PathVariable("id") UUID id) {
+        service.deleteFilter(id);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = "filters/{name}/rename")
+    @PostMapping(value = "filters/{id}/rename")
     @ApiOperation(value = "Rename filter by name")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been renamed"),
         @ApiResponse(code = 404, message = "The filter does not exists")})
-    public void renameFilter(@PathVariable("name") String name,
+    public void renameFilter(@PathVariable("id") UUID id,
                              @RequestBody String newName) {
-        service.renameFilter(name, newName);
+        service.renameFilter(id, newName);
     }
+
 }

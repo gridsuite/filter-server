@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
@@ -24,6 +25,9 @@ import javax.persistence.*;
 public abstract class AbstractFilterEntity {
 
     @Id
+    @Column(name = "id")
+    private UUID id;
+
     @Column(name = "name")
     private String name;
 

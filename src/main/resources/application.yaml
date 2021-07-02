@@ -27,7 +27,7 @@ spring:
           schema-generation:
             scripts:
               #action: create
-              create-target: src/main/resources/filters.sql
+              create-target: src/main/resources/filter.sql
               create-source: metadata
 
 dbName: filters

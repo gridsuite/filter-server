@@ -8,6 +8,6 @@
  To automatically generate the sql schema file you can use the following command: 
 
 ```bash
-mvn package -DskipTests && rm -f src/main/resources/filters.sql && java -jar target/gridsuite-filter-server-1.0.0-SNAPSHOT-exec.jar --spring.jpa.properties.javax.persistence.schema-generation.scripts.action=create
+mvn package -DskipTests && rm -f src/main/resources/filter.sql && java -jar target/gridsuite-filter-server-1.0.0-SNAPSHOT-exec.jar --spring.jpa.properties.javax.persistence.schema-generation.scripts.action=create
 ```
 

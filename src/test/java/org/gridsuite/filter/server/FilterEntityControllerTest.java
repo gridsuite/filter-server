@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -95,10 +96,13 @@ public class FilterEntityControllerTest  {
 
     @Test
     public void test() throws Exception {
+        UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
 
         // test all fields
         String lineFilter = "{" + joinWithComma(
             jsonVal("name", "testLine"),
+            jsonVal("id", filterId1.toString()),
             jsonVal("type", FilterType.LINE.name()),
             jsonVal("substationName1", "ragala"),
             jsonVal("substationName2", "miamMiam"),
@@ -109,55 +113,62 @@ public class FilterEntityControllerTest  {
             jsonSet("countries1", Set.of("yoyo")),
             jsonSet("countries2", Set.of("smurf", "schtroumph"))) + "}";
 
-        insertFilter("testLine", lineFilter);
+        insertFilter(filterId1, lineFilter);
 
         String minimalLineFilter = "{" + joinWithComma(
-            jsonVal("name", "testLine"),
+            jsonVal("name", "testLineBis"),
+            jsonVal("id", filterId1.toString()),
             jsonVal("type", FilterType.LINE.name()))
             + "}";
         // test replace and null value (country set & numerical range)
-        insertFilter("testLine", minimalLineFilter);
+        insertFilter(filterId1, minimalLineFilter);
 
         String scriptFilter = "{" + joinWithComma(
             jsonVal("name", "testScript"),
+            jsonVal("id", filterId2.toString()),
             jsonVal("type", FilterType.SCRIPT.name()),
             jsonVal("script", "test")) +
             "}";
 
-        insertFilter("testScript", scriptFilter);
+        insertFilter(filterId2, scriptFilter);
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"LINE\"}, {\"name\":\"testScript\",\"type\":\"SCRIPT\"}]"));
+            .andExpect(content().json("[{\"name\":\"testLineBis\",\"type\":\"LINE\"}, {\"name\":\"testScript\",\"type\":\"SCRIPT\"}]"));
 
-        mvc.perform(post(URL_TEMPLATE + "testLine/rename").content("grandLine")).andExpect(status().isOk());
+        mvc.perform(post(URL_TEMPLATE + filterId1 + "/rename").content("grandLine")).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andExpect(content().json("[{\"name\":\"grandLine\",\"type\":\"LINE\"}, {\"name\":\"testScript\",\"type\":\"SCRIPT\"}]"));
 
-        mvc.perform(delete(URL_TEMPLATE + "testScript")).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andExpect(content().json("[{\"name\":\"grandLine\",\"type\":\"LINE\"}]"));
 
-        mvc.perform(delete(URL_TEMPLATE + "testScript")).andExpect(status().isNotFound());
+        mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isNotFound());
 
-        mvc.perform(get(URL_TEMPLATE + "testScript")).andExpect(status().isNotFound());
+        mvc.perform(get(URL_TEMPLATE + filterId2)).andExpect(status().isNotFound());
 
-        mvc.perform(post(URL_TEMPLATE + "testLine/rename").content("grandLine")).andExpect(status().isNotFound());
+        mvc.perform(post(URL_TEMPLATE + filterId2 + "/rename").content("grandLine")).andExpect(status().isNotFound());
 
     }
 
-    private void insertFilter(String filtersName, String content) throws Exception {
-        mvc.perform(put(URL_TEMPLATE)
+    private void insertFilter(UUID filterId, String content) throws Exception {
+        String strRes = mvc.perform(post(URL_TEMPLATE)
             .content(content)
             .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-        MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filtersName)).andExpect(status().isOk()).andReturn();
-        String strRes = mockResponse.getResponse().getContentAsString();
+        JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
+
+        var ok = mvc.perform(get(URL_TEMPLATE))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
+        mockResponse.getResponse().getContentAsString();
         // Check we didn't miss anything
         JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
     }
