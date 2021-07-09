@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -78,6 +79,8 @@ public class FilterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterService.class);
 
     private final EnumMap<FilterType, Repository<?, ?>> filterRepositories = new EnumMap<>(FilterType.class);
+
+    private final FiltersToGroovyScript filtersToScript = new FiltersToGroovyScript();
 
     private AbstractFilter.AbstractFilterBuilder<?, ?> passBase(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
         return builder.name(entity.getName()).id(entity.getId());
@@ -226,5 +229,48 @@ public class FilterService {
 
     public void deleteAll() {
         filterRepositories.values().forEach(Repository::deleteAll);
+    }
+
+    private String generateGroovyScriptFromFilter(AbstractFilter filter) {
+        return filtersToScript.generateGroovyScriptFromFilters(filter);
+    }
+
+    @Transactional
+    public AbstractFilter replaceFilterWithScript(UUID id) {
+        Objects.requireNonNull(id);
+
+        Optional<AbstractFilter> filter = getFilter(id);
+        AtomicReference<AbstractFilter> newFilter = new AtomicReference<>();
+        filter.ifPresentOrElse(entity -> {
+            if (entity.getType() == FilterType.SCRIPT) {
+                throw new RuntimeException("Wrong filter type, should never happen");
+            } else {
+                String script = generateGroovyScriptFromFilter(entity);
+                newFilter.set(filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(entity.getId()).name(entity.getName()).script(script).build()));
+                filterRepositories.get(FilterType.LINE).deleteById(entity.getId());
+            }
+        }, () -> {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + id + " not found");
+            });
+        return newFilter.get();
+    }
+
+    @Transactional
+    public AbstractFilter newScriptFromFilter(UUID id, String scriptName) {
+        Objects.requireNonNull(id);
+
+        Optional<AbstractFilter> filter = getFilter(id);
+        AtomicReference<AbstractFilter> newFilter = new AtomicReference<>();
+        filter.ifPresentOrElse(entity -> {
+            if (entity.getType() == FilterType.SCRIPT) {
+                throw new RuntimeException("Wrong filter type, should never happen");
+            } else {
+                String script = generateGroovyScriptFromFilter(entity);
+                newFilter.set(filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().name(scriptName).script(script).build()));
+            }
+        }, () -> {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Filter list " + id + " not found");
+            });
+        return newFilter.get();
     }
 }

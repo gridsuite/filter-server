@@ -87,7 +87,6 @@ public class FilterEntityControllerTest  {
                 return EnumSet.noneOf(Option.class);
             }
         });
-
     }
 
     public String joinWithComma(Object... array) {
@@ -154,6 +153,47 @@ public class FilterEntityControllerTest  {
 
         mvc.perform(post(URL_TEMPLATE + filterId2 + "/rename").content("grandLine")).andExpect(status().isNotFound());
 
+        filterService.deleteAll();
+    }
+
+    @Test
+    public void testFilterToScript() throws Exception {
+        UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        String lineFilter = "{" + joinWithComma(
+            jsonVal("name", "testLine"),
+            jsonVal("id", filterId1.toString()),
+            jsonVal("type", FilterType.LINE.name()),
+            jsonVal("substationName1", "ragala"),
+            jsonVal("substationName2", "miamMiam"),
+            jsonVal("equipmentID", "vazy"),
+            jsonVal("equipmentName", "tata"),
+            numericalRange("nominalVoltage1", RangeType.RANGE, 5., 8.),
+            numericalRange("nominalVoltage2", RangeType.EQUALITY, 6., null),
+            jsonSet("countries1", Set.of("yoyo")),
+            jsonSet("countries2", Set.of("smurf", "schtroumph"))) + "}";
+
+        insertFilter(filterId1, lineFilter);
+
+        mvc.perform(get(URL_TEMPLATE))
+            .andExpect(status().isOk())
+            .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"LINE\"}]"));
+
+        // new script from filter
+        mvc.perform(put(URL_TEMPLATE + filterId1 + "/new-script/" + "testLineScript")).andExpect(status().isOk());
+
+        mvc.perform(get(URL_TEMPLATE))
+            .andExpect(status().isOk())
+            .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"LINE\"}, {\"name\":\"testLineScript\",\"type\":\"SCRIPT\"}]"));
+
+        // replace filter with script
+        mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
+
+        mvc.perform(get(URL_TEMPLATE))
+            .andExpect(status().isOk())
+            .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"SCRIPT\"}, {\"name\":\"testLineScript\",\"type\":\"SCRIPT\"}]"));
+
+        filterService.deleteAll();
     }
 
     private void insertFilter(UUID filterId, String content) throws Exception {
@@ -194,5 +234,4 @@ public class FilterEntityControllerTest  {
                 jsonVal("type", range.name()))
             ).append("}");
     }
-
 }
