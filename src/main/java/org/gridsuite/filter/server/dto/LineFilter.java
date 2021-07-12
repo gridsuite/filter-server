@@ -47,6 +47,7 @@ public class LineFilter extends AbstractGenericFilter {
     @ApiModelProperty("Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
 
+    @Override
     public boolean isEmpty() {
         return super.isEmpty()
             && substationName1 == null

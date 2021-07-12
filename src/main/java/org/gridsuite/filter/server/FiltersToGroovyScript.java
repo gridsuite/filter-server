@@ -27,6 +27,7 @@ import static java.util.stream.Collectors.joining;
  */
 public class FiltersToGroovyScript {
     private final String branchTemplate;
+    private static final String NOMINAL_V = "nominalV";
 
     public FiltersToGroovyScript() {
         try {
@@ -37,17 +38,17 @@ public class FiltersToGroovyScript {
     }
 
     private void addLineFilterNominalVoltage(ST template, NumericalFilter filter, String index) {
-        template.add("nominalV" + index + "Type", filter.getType().name());
+        template.add(NOMINAL_V + index + "Type", filter.getType().name());
         if (filter.getType() == RangeType.EQUALITY) {
-            template.add("nominalV" + index + "Equality", "true");
-            template.add("nominalV" + index, filter.getValue1() != null ? filter.getValue1() : "null");
+            template.add(NOMINAL_V + index + "Equality", "true");
+            template.add(NOMINAL_V + index, filter.getValue1() != null ? filter.getValue1() : "null");
         } else if (filter.getType() == RangeType.RANGE) {
-            template.add("nominalV" + index + "Range", "true");
+            template.add(NOMINAL_V + index + "Range", "true");
             template.add("minNominalV" + index, filter.getValue1() != null ? filter.getValue1() : "null");
             template.add("maxNominalV" + index, filter.getValue2() != null ? filter.getValue2() : "null");
         } else if (filter.getType() == RangeType.APPROX) {
-            template.add("nominalV" + index + "Approx", "true");
-            template.add("nominalV" + index, filter.getValue1() != null ? filter.getValue1() : "null");
+            template.add(NOMINAL_V + index + "Approx", "true");
+            template.add(NOMINAL_V + index, filter.getValue1() != null ? filter.getValue1() : "null");
             template.add("percentNominalV" + index, filter.getValue2() != null ? filter.getValue2() : "null");
         }
     }
@@ -61,6 +62,7 @@ public class FiltersToGroovyScript {
                 equipmentsCollection = "lines";
                 script += branchTemplate;
                 break;
+            // other types (generators, loads ...) later
             default:
                 throw new PowsyblException("Filter type not allowed");
         }
@@ -99,6 +101,7 @@ public class FiltersToGroovyScript {
                     template.add("substationName2", lineFilter.getSubstationName2());
                 }
                 break;
+            // other types (generators, loads ...) later
             default:
                 throw new PowsyblException("Filter type not allowed");
         }
