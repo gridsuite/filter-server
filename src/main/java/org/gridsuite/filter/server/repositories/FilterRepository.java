@@ -24,10 +24,10 @@ import java.util.UUID;
 public interface FilterRepository<T extends AbstractFilterEntity> extends JpaRepository<T, UUID> {
 
     @Query(value = "SELECT t.name AS name, t.id as id, t.creationDate as creationDate, t.modificationDate as modificationDate, t.description as description from #{#entityName} as t")
-    List<FilterMetadata> getFiltersAttributes();
+    List<FilterMetadata> getFiltersMetadata();
 
     @Query(value = "SELECT t.name AS name, t.id as id, t.creationDate as creationDate, t.modificationDate as modificationDate, t.description as description from #{#entityName} as t WHERE t.id in (:ids)")
-    List<FilterMetadata> findFiltersAttributeById(List<UUID> ids);
+    List<FilterMetadata> findFiltersMetaDataById(List<UUID> ids);
 
     @Modifying
     @Query(value = "UPDATE #{#entityName} filter set filter.name = :newName where filter.id = :id")

@@ -56,11 +56,11 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
     }
 
     default Stream<FilterAttributes> getFiltersAttributes() {
-        return getRepository().getFiltersAttributes().stream().map(this::metadataToAttribute);
+        return getRepository().getFiltersMetadata().stream().map(this::metadataToAttribute);
     }
 
     default Stream<FilterAttributes> getFiltersAttributes(List<UUID> ids) {
-        return getRepository().findFiltersAttributeById(ids).stream().map(this::metadataToAttribute);
+        return getRepository().findFiltersMetaDataById(ids).stream().map(this::metadataToAttribute);
     }
 
     default FilterAttributes metadataToAttribute(FilterMetadata f) {
