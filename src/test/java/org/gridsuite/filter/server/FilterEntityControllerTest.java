@@ -211,16 +211,18 @@ public class FilterEntityControllerTest {
     }
 
     private void insertFilter(UUID filterId, String content) throws Exception {
-        mvc.perform(put(URL_TEMPLATE)
+        String strRes = mvc.perform(post(URL_TEMPLATE)
             .content(content)
             .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
         MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
-        String strRes = mockResponse.getResponse().getContentAsString();
+        mockResponse.getResponse().getContentAsString();
         // Check we didn't miss anything
         JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
     }

@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,4 +32,7 @@ public interface FilterRepository<T extends AbstractFilterEntity> extends JpaRep
     @Modifying
     @Query(value = "UPDATE #{#entityName} filter set filter.name = :newName where filter.id = :id")
     Integer rename(UUID id, String newName);
+
+    @Transactional
+    Integer removeById(UUID id);
 }
