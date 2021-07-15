@@ -160,7 +160,7 @@ public class FilterEntityControllerTest {
             .andReturn().getResponse().getContentAsString();
         filterAttributes = objectMapper.readValue(res, new TypeReference<>() {
         });
-        assertEquals(filterAttributes.size(), 2);
+        assertEquals(2, filterAttributes.size());
         if (!filterAttributes.get(0).getId().equals(filterId1)) {
             Collections.reverse(filterAttributes);
         }

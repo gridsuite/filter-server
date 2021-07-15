@@ -48,5 +48,4 @@ public abstract class AbstractFilter implements IFilterAttributes {
 
     String description;
 
-    public abstract FilterType getType();
 }
