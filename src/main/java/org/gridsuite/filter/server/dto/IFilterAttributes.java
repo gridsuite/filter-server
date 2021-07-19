@@ -9,6 +9,9 @@ package org.gridsuite.filter.server.dto;
 
 import org.gridsuite.filter.server.utils.FilterType;
 
+/**
+ * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
+ */
 public interface IFilterAttributes {
     String getName();
 

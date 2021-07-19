@@ -45,7 +45,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -143,7 +142,7 @@ public class FilterEntityControllerTest {
             jsonVal("type", FilterType.LINE.name()))
             + "}";
         // test replace and null value (country set & numerical range)
-        insertFilter(filterId1, minimalLineFilter);
+        modifyFilter(filterId1, minimalLineFilter);
 
         String scriptFilter = "{" + joinWithComma(
             jsonVal("name", "testScript"),
@@ -179,25 +178,13 @@ public class FilterEntityControllerTest {
         assertEquals("testLineBis", filterAttributes.get(0).getName());
         assertTrue(dateModification.getTime() < filterAttributes.get(0).getModificationDate().getTime());
 
-        mvc.perform(post(URL_TEMPLATE + filterId1 + "/rename").content("grandLine")).andExpect(status().isOk());
-
-        mvc.perform(get(URL_TEMPLATE))
-            .andExpect(status().isOk())
-            .andExpect(content().json("[{\"name\":\"grandLine\",\"type\":\"LINE\"}, {\"name\":\"testScript\",\"type\":\"SCRIPT\"}]"));
-
-        mvc.perform(post(URL_TEMPLATE + notFound + "/rename").content("grandLine")).andExpect(status().isNotFound());
-
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
-
-        mvc.perform(get(URL_TEMPLATE))
-            .andExpect(status().isOk())
-            .andExpect(content().json("[{\"name\":\"grandLine\",\"type\":\"LINE\"}]"));
 
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isNotFound());
 
         mvc.perform(get(URL_TEMPLATE + filterId2)).andExpect(status().isNotFound());
 
-        mvc.perform(post(URL_TEMPLATE + filterId2 + "/rename").content("grandLine")).andExpect(status().isNotFound());
+        mvc.perform(put(URL_TEMPLATE + filterId2).contentType(APPLICATION_JSON).content(scriptFilter)).andExpect(status().isNotFound());
 
     }
 
@@ -216,6 +203,24 @@ public class FilterEntityControllerTest {
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
+        JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
+
+        mvc.perform(get(URL_TEMPLATE))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
+        mockResponse.getResponse().getContentAsString();
+        // Check we didn't miss anything
+        JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
+    }
+
+    private void modifyFilter(UUID filterId, String content) throws Exception {
+        mvc.perform(put(URL_TEMPLATE + filterId)
+            .content(content)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        String strRes = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
         JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
 
         mvc.perform(get(URL_TEMPLATE))

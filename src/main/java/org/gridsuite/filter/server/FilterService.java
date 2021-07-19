@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,6 +70,14 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
 
     default AbstractFilter insert(AbstractFilter f) {
         return toDto(getRepository().save(fromDto(f)));
+    }
+
+    default void modify(UUID id, AbstractFilter f) {
+        if (!getRepository().existsById(id)) {
+            throw new EntityNotFoundException(id.toString());
+        }
+        f.setId(id);
+        toDto(getRepository().save(fromDto(f)));
     }
 
     default boolean renameFilter(UUID id, String newName) {
@@ -242,6 +251,11 @@ public class FilterService {
     @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
         return filterRepositories.get(filter.getType()).insert(filter);
+    }
+
+    @Transactional
+    public <F extends AbstractFilter> void changeFilter(UUID id, F filter) {
+        filterRepositories.get(filter.getType()).modify(id, filter);
     }
 
     void deleteFilter(UUID id) {

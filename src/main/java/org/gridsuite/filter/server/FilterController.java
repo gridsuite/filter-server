@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,21 +65,24 @@ public class FilterController {
             .body(service.createFilter(filter));
     }
 
+    @PutMapping(value = "filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Create a filter", response = Void.class)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been successfully created")})
+    public ResponseEntity<AbstractFilter> changeFilter(@PathVariable UUID id, @RequestBody(required = true) AbstractFilter filter) {
+        try {
+            service.changeFilter(id, filter);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException ignored) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @DeleteMapping(value = "filters/{id}")
     @ApiOperation(value = "delete the filter")
     @ApiResponse(code = 200, message = "The filter has been deleted")
     public ResponseEntity<Void> deleteFilter(@PathVariable("id") UUID id) {
         service.deleteFilter(id);
         return ResponseEntity.ok().build();
-    }
-
-    @PostMapping(value = "filters/{id}/rename")
-    @ApiOperation(value = "Rename filter by name")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been renamed"),
-        @ApiResponse(code = 404, message = "The filter does not exists")})
-    public void renameFilter(@PathVariable("id") UUID id,
-                             @RequestBody String newName) {
-        service.renameFilter(id, newName);
     }
 
     @GetMapping(value = "metadata")
