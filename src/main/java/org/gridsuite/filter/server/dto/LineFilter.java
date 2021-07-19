@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.FilterType;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
 
@@ -46,4 +47,14 @@ public class LineFilter extends AbstractGenericFilter {
     @ApiModelProperty("Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
 
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty()
+            && substationName1 == null
+            && substationName2 == null
+            && CollectionUtils.isEmpty(countries1)
+            && CollectionUtils.isEmpty(countries2)
+            && nominalVoltage1 == null
+            && nominalVoltage2 == null;
+    }
 }

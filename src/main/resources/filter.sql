@@ -38,7 +38,7 @@
         description varchar(255),
         modificationDate timestamp,
         name varchar(255),
-        script varchar(255),
+        script TEXT,
         primary key (id)
     );
 create index lineFilterEntity_countries_idx1 on LineFilterEntity_countries1 (LineFilterEntity_id);

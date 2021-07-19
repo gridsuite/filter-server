@@ -45,8 +45,9 @@
 
     <properties>
         <java.version>11</java.version>
-
         <gridsuite-dependencies.version>8</gridsuite-dependencies.version>
+        <string-template.version>4.3.1</string-template.version>
+
     </properties>
 
     <build>
@@ -121,6 +122,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+            <version>${string-template.version}</version>
         </dependency>
 
         <!-- jpa, crud repository -->

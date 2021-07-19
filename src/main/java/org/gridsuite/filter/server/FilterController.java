@@ -93,4 +93,22 @@ public class FilterController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
     }
 
+    @PutMapping(value = "filters/{id}/replace-with-script")
+    @ApiOperation(value = "Replace a filter with a script filter", response = AbstractFilter.class)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter have been replaced successfully")})
+    public ResponseEntity<AbstractFilter> replaceFilterWithScript(@PathVariable("id") UUID id) {
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(service.replaceFilterWithScript(id));
+    }
+
+    @PutMapping(value = "filters/{id}/new-script/{scriptName}")
+    @ApiOperation(value = "Create a new script filter from a filter", response = AbstractFilter.class)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "The script filter have been created successfully")})
+    public ResponseEntity<AbstractFilter> newScriptFromFilter(@PathVariable("id") UUID id,
+                                                              @PathVariable("scriptName") String scriptName) {
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(service.newScriptFromFilter(id, scriptName));
+    }
 }
