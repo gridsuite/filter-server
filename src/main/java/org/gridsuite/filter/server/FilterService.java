@@ -89,6 +89,9 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
         return getRepository().removeById(id) != 0;
     }
 
+    default void deleteAll() {
+        getRepository().deleteAll();
+    }
 }
 
 @Service

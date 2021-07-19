@@ -19,6 +19,7 @@ import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IFilterAttributes;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.RangeType;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -95,6 +97,11 @@ public class FilterEntityControllerTest {
                 return EnumSet.noneOf(Option.class);
             }
         });
+    }
+
+    @After
+    public void cleanUp() {
+        filterService.deleteAll();
     }
 
     ObjectMapper objectMapper = new ObjectMapper();
@@ -241,7 +248,6 @@ public class FilterEntityControllerTest {
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/new-script/" + "testScript3")).andExpect(status().isNotFound());
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
 
-        filterService.deleteAll();
     }
 
     private void matchFilterDescription(IFilterAttributes filterAttribute, UUID id, String name, FilterType type, Date creationDate, Date modificationDate, String description) throws Exception {
