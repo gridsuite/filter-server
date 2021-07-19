@@ -10,8 +10,20 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.IFilterAttributes;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ScriptFilter;
+import org.gridsuite.filter.server.repositories.BatteryFilterRepository;
+import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
+import org.gridsuite.filter.server.repositories.DanglingLineFilterRepository;
+import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
+import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
+import org.gridsuite.filter.server.repositories.LccConverterStationFilterRepository;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
+import org.gridsuite.filter.server.repositories.LoadFilterRepository;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
+import org.gridsuite.filter.server.repositories.ShuntCompensatorFilterRepository;
+import org.gridsuite.filter.server.repositories.StaticVarCompensatorFilterRepository;
+import org.gridsuite.filter.server.repositories.ThreeWindingsTransformerFilterRepository;
+import org.gridsuite.filter.server.repositories.TwoWindingsTransformerFilterRepository;
+import org.gridsuite.filter.server.repositories.VscConverterStationFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +35,10 @@ import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 
+/**
+ * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
+ * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
+ */
 @Service
 public class FilterService {
 
@@ -35,10 +51,37 @@ public class FilterService {
 
     public FilterService(FiltersToGroovyScript filtersToScript,
                          final ScriptFilterRepository scriptFiltersRepository,
-                         final LineFilterRepository lineFilterRepository) {
+                         final LineFilterRepository lineFilterRepository,
+                         final GeneratorFilterRepository generatorFilterRepository,
+                         final LoadFilterRepository loadFilterRepository,
+                         final ShuntCompensatorFilterRepository shuntCompensatorFilterRepository,
+                         final StaticVarCompensatorFilterRepository staticVarCompensatorFilterRepository,
+                         final BatteryFilterRepository batteryFilterRepository,
+                         final BusBarSectionFilterRepository busBarSectionFilterRepository,
+                         final DanglingLineFilterRepository danglingLineFilterRepository,
+                         final LccConverterStationFilterRepository lccConverterStationFilterRepository,
+                         final VscConverterStationFilterRepository vscConverterStationFilterRepository,
+                         final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository,
+                         final ThreeWindingsTransformerFilterRepository threeWindingsTransformerFilterRepository,
+                         final HvdcLineFilterRepository hvdcLineFilterRepository) {
         this.filtersToScript = filtersToScript;
+
         filterRepositories.put(FilterType.LINE, new LineFilterRepositoryProxy(lineFilterRepository));
+        filterRepositories.put(FilterType.GENERATOR, new GeneratorFilterRepositoryProxy(generatorFilterRepository));
+        filterRepositories.put(FilterType.LOAD, new LoadFilterRepositoryProxy(loadFilterRepository));
+        filterRepositories.put(FilterType.SHUNT_COMPENSATOR, new ShuntCompensatorFilterRepositoryProxy(shuntCompensatorFilterRepository));
+        filterRepositories.put(FilterType.STATIC_VAR_COMPENSATOR, new StaticVarCompensatorFilterRepositoryProxy(staticVarCompensatorFilterRepository));
+        filterRepositories.put(FilterType.BATTERY, new BatteryFilterRepositoryProxy(batteryFilterRepository));
+        filterRepositories.put(FilterType.BUSBAR_SECTION, new BusBarSectionFilterRepositoryProxy(busBarSectionFilterRepository));
+        filterRepositories.put(FilterType.DANGLING_LINE, new DanglingLineFilterRepositoryProxy(danglingLineFilterRepository));
+        filterRepositories.put(FilterType.LCC_CONVERTER_STATION, new LccConverterStationFilterRepositoryProxy(lccConverterStationFilterRepository));
+        filterRepositories.put(FilterType.VSC_CONVERTER_STATION, new VscConverterStationFilterRepositoryProxy(vscConverterStationFilterRepository));
+        filterRepositories.put(FilterType.TWO_WINDINGS_TRANSFORMER, new TwoWindingsTransformerFilterRepositoryProxy(twoWindingsTransformerFilterRepository));
+        filterRepositories.put(FilterType.THREE_WINDINGS_TRANSFORMER, new ThreeWindingsTransformerFilterRepositoryProxy(threeWindingsTransformerFilterRepository));
+        filterRepositories.put(FilterType.HVDC_LINE, new HvdcLineFilterRepositoryProxy(hvdcLineFilterRepository));
+
         filterRepositories.put(FilterType.SCRIPT, new ScriptFilterRepositoryProxy(scriptFiltersRepository));
+
     }
 
     List<IFilterAttributes> getFilters() {
@@ -71,7 +114,25 @@ public class FilterService {
 
     @Transactional
     public <F extends AbstractFilter> void changeFilter(UUID id, F filter) {
-        filterRepositories.get(filter.getType()).modify(id, filter);
+        Optional<AbstractFilter> f = getFilter(id);
+        if (f.isPresent()) {
+            if (f.get().getType() == filter.getType()) {  // filter type has not changed
+                filter.setCreationDate(f.get().getCreationDate());
+                filterRepositories.get(filter.getType()).modify(id, filter);
+            } else {  // filter type has changed
+                if ((f.get().getType() == FilterType.SCRIPT && filter.getType() != FilterType.SCRIPT) ||
+                    (f.get().getType() != FilterType.SCRIPT && filter.getType() == FilterType.SCRIPT)) {
+                    throw new PowsyblException(WRONG_FILTER_TYPE);
+                } else {
+                    filterRepositories.get(f.get().getType()).deleteById(id);
+                    filter.setId(id);
+                    filter.setCreationDate(f.get().getCreationDate());
+                    createFilter(filter);
+                }
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
+        }
     }
 
     void deleteFilter(UUID id) {
