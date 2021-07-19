@@ -106,23 +106,23 @@ public class FilterService {
 
     private FiltersToGroovyScript filtersToScript;
 
-    private AbstractFilter.AbstractFilterBuilder<?, ?> passBase(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
+    private AbstractFilter.AbstractFilterBuilder<?, ?> buildAbstractFilter(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
         return builder.name(entity.getName()).id(entity.getId())
             .creationDate(entity.getCreationDate()).modificationDate(entity.getModificationDate())
             .description(entity.getDescription());
     }
 
-    private AbstractFilter.AbstractFilterBuilder<?, ?> passGenerics(AbstractGenericFilter.AbstractGenericFilterBuilder<?, ?> builder, AbstractGenericFilterEntity entity) {
-        return passBase(builder.equipmentID(entity.getEquipmentId()).equipmentName(entity.getEquipmentName()), entity);
+    private AbstractFilter.AbstractFilterBuilder<?, ?> buildGenericFilter(AbstractGenericFilter.AbstractGenericFilterBuilder<?, ?> builder, AbstractGenericFilterEntity entity) {
+        return buildAbstractFilter(builder.equipmentID(entity.getEquipmentId()).equipmentName(entity.getEquipmentName()), entity);
     }
 
-    private void passGeneric(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, AbstractGenericFilter dto) {
-        passBase(builder, dto);
+    private void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, AbstractGenericFilter dto) {
+        buildAbstractFilter(builder, dto);
         builder.equipmentId(dto.getEquipmentID())
             .equipmentName(dto.getEquipmentName());
     }
 
-    private void passBase(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
+    private void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* dates a managed by jpa, so we don't process them */
         builder.name(dto.getName())
             .id(getIdOrCreate(dto.getId()))
@@ -164,7 +164,7 @@ public class FilterService {
 
             @Override
             public AbstractFilter toDto(LineFilterEntity entity) {
-                return passGenerics(
+                return buildGenericFilter(
                     LineFilter.builder()
                         .countries1(cloneIfNotEmptyOrNull(entity.getCountries1()))
                         .countries2(cloneIfNotEmptyOrNull(entity.getCountries2()))
@@ -188,7 +188,7 @@ public class FilterService {
                         .countries2(cloneIfNotEmptyOrNull(lineFilter.getCountries2()))
                         .nominalVoltage1(convert(lineFilter.getNominalVoltage1()))
                         .nominalVoltage2(convert(lineFilter.getNominalVoltage2()));
-                    passGeneric(lineFilterEntityBuilder, lineFilter);
+                    buildGenericFilter(lineFilterEntityBuilder, lineFilter);
                     return lineFilterEntityBuilder.build();
                 }
                 throw new PowsyblException(WRONG_FILTER_TYPE);
@@ -208,7 +208,7 @@ public class FilterService {
 
             @Override
             public AbstractFilter toDto(ScriptFilterEntity entity) {
-                return passBase(
+                return buildAbstractFilter(
                     ScriptFilter.builder()
                         .script(entity.getScript()),
                     entity).build();
@@ -220,7 +220,7 @@ public class FilterService {
                     var filter = (ScriptFilter) dto;
                     var scriptBuilderEntity = ScriptFilterEntity.builder()
                         .script(filter.getScript());
-                    passBase(scriptBuilderEntity, filter);
+                    buildAbstractFilter(scriptBuilderEntity, filter);
                     return scriptBuilderEntity.build();
                 }
                 throw new PowsyblException(WRONG_FILTER_TYPE);
