@@ -251,7 +251,7 @@ public class FilterService {
             } else {
                 String script = generateGroovyScriptFromFilter(entity);
                 newFilter.set(filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(entity.getId()).name(entity.getName()).script(script).build()));
-                filterRepositories.get(FilterType.LINE).deleteById(entity.getId());
+                filterRepositories.get(entity.getType()).deleteById(entity.getId());
             }
         }, () -> {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
