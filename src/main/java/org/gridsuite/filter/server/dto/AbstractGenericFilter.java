@@ -30,4 +30,7 @@ public abstract class AbstractGenericFilter extends AbstractFilter {
     @ApiModelProperty("Equipment name")
     private String equipmentName;
 
+    protected boolean isEmpty() {
+        return equipmentID == null && equipmentName == null;
+    }
 }

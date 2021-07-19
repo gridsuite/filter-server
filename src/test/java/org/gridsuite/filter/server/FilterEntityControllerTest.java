@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.join;
+import static org.junit.Assert.assertThrows;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -87,7 +88,6 @@ public class FilterEntityControllerTest  {
                 return EnumSet.noneOf(Option.class);
             }
         });
-
     }
 
     public String joinWithComma(Object... array) {
@@ -154,6 +154,62 @@ public class FilterEntityControllerTest  {
 
         mvc.perform(post(URL_TEMPLATE + filterId2 + "/rename").content("grandLine")).andExpect(status().isNotFound());
 
+        filterService.deleteAll();
+    }
+
+    @Test
+    public void testFilterToScript() throws Exception {
+        UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
+        UUID filterId3 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
+
+        String lineFilter = "{" + joinWithComma(
+            jsonVal("name", "testLine"),
+            jsonVal("id", filterId1.toString()),
+            jsonVal("type", FilterType.LINE.name()),
+            jsonVal("substationName1", "ragala"),
+            jsonVal("substationName2", "miamMiam"),
+            jsonVal("equipmentID", "vazy"),
+            jsonVal("equipmentName", "tata"),
+            numericalRange("nominalVoltage1", RangeType.RANGE, 5., 8.),
+            numericalRange("nominalVoltage2", RangeType.EQUALITY, 6., null),
+            jsonSet("countries1", Set.of("yoyo")),
+            jsonSet("countries2", Set.of("smurf", "schtroumph"))) + "}";
+
+        insertFilter(filterId1, lineFilter);
+
+        mvc.perform(get(URL_TEMPLATE))
+            .andExpect(status().isOk())
+            .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"LINE\"}]"));
+
+        // new script from filter
+        mvc.perform(put(URL_TEMPLATE + filterId1 + "/new-script/" + "testLineScript")).andExpect(status().isOk());
+
+        mvc.perform(get(URL_TEMPLATE))
+            .andExpect(status().isOk())
+            .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"LINE\"}, {\"name\":\"testLineScript\",\"type\":\"SCRIPT\"}]"));
+
+        // replace filter with script
+        mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
+
+        mvc.perform(get(URL_TEMPLATE))
+            .andExpect(status().isOk())
+            .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"SCRIPT\"}, {\"name\":\"testLineScript\",\"type\":\"SCRIPT\"}]"));
+
+        String scriptFilter = "{" + joinWithComma(
+            jsonVal("name", "scriptFilter"),
+            jsonVal("id", filterId2.toString()),
+            jsonVal("type", FilterType.SCRIPT.name()),
+            jsonVal("script", "test2"))
+            + "}";
+        insertFilter(filterId2, scriptFilter);
+
+        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/new-script/" + "testScript2")));
+        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/replace-with-script")));
+        mvc.perform(put(URL_TEMPLATE + filterId3 + "/new-script/" + "testScript3")).andExpect(status().isNotFound());
+        mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
+
+        filterService.deleteAll();
     }
 
     private void insertFilter(UUID filterId, String content) throws Exception {
@@ -194,5 +250,4 @@ public class FilterEntityControllerTest  {
                 jsonVal("type", range.name()))
             ).append("}");
     }
-
 }

@@ -26,7 +26,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "script_filter")
 public class ScriptFilterEntity extends AbstractFilterEntity {
-    @Column(name = "script")
+    @Column(name = "script", columnDefinition = "TEXT")
     String script;
-
 }
