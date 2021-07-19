@@ -14,6 +14,7 @@ import org.gridsuite.filter.server.dto.LineFilter;
 import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.stringtemplate.v4.ST;
 
@@ -25,6 +26,7 @@ import static java.util.stream.Collectors.joining;
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
+@Service
 public class FiltersToGroovyScript {
     private final String branchTemplate;
     private static final String NOMINAL_V = "nominalV";

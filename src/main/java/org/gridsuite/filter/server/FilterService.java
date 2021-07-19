@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -84,7 +83,7 @@ public class FilterService {
 
     private final EnumMap<FilterType, Repository<?, ?>> filterRepositories = new EnumMap<>(FilterType.class);
 
-    private final FiltersToGroovyScript filtersToScript = new FiltersToGroovyScript();
+    private FiltersToGroovyScript filtersToScript;
 
     private AbstractFilter.AbstractFilterBuilder<?, ?> passBase(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
         return builder.name(entity.getName()).id(entity.getId());
@@ -111,7 +110,10 @@ public class FilterService {
             : null;
     }
 
-    public FilterService(final ScriptFilterRepository scriptFiltersRepository, final LineFilterRepository lineFilterRepository) {
+    public FilterService(FiltersToGroovyScript filtersToScript,
+                         final ScriptFilterRepository scriptFiltersRepository,
+                         final LineFilterRepository lineFilterRepository) {
+        this.filtersToScript = filtersToScript;
         filterRepositories.put(FilterType.LINE, new Repository<LineFilterEntity, LineFilterRepository>() {
             @Override
             public LineFilterRepository getRepository() {
@@ -179,7 +181,6 @@ public class FilterService {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             }
         });
-
     }
 
     private UUID getIdOrCreate(UUID id) {
@@ -244,19 +245,17 @@ public class FilterService {
         Objects.requireNonNull(id);
 
         Optional<AbstractFilter> filter = getFilter(id);
-        AtomicReference<AbstractFilter> newFilter = new AtomicReference<>();
-        filter.ifPresentOrElse(entity -> {
-            if (entity.getType() == FilterType.SCRIPT) {
+        if (filter.isPresent()) {
+            if (filter.get().getType() == FilterType.SCRIPT) {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
-                String script = generateGroovyScriptFromFilter(entity);
-                newFilter.set(filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(entity.getId()).name(entity.getName()).script(script).build()));
-                filterRepositories.get(entity.getType()).deleteById(entity.getId());
+                String script = generateGroovyScriptFromFilter(filter.get());
+                filterRepositories.get(filter.get().getType()).deleteById(filter.get().getId());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(filter.get().getId()).name(filter.get().getName()).script(script).build());
             }
-        }, () -> {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
-            });
-        return newFilter.get();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
+        }
     }
 
     @Transactional
@@ -264,17 +263,15 @@ public class FilterService {
         Objects.requireNonNull(id);
 
         Optional<AbstractFilter> filter = getFilter(id);
-        AtomicReference<AbstractFilter> newFilter = new AtomicReference<>();
-        filter.ifPresentOrElse(entity -> {
-            if (entity.getType() == FilterType.SCRIPT) {
+        if (filter.isPresent()) {
+            if (filter.get().getType() == FilterType.SCRIPT) {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
-                String script = generateGroovyScriptFromFilter(entity);
-                newFilter.set(filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().name(scriptName).script(script).build()));
+                String script = generateGroovyScriptFromFilter(filter.get());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().name(scriptName).script(script).build());
             }
-        }, () -> {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
-            });
-        return newFilter.get();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
+        }
     }
 }
