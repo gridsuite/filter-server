@@ -24,8 +24,6 @@ import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,10 +79,6 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
         toDto(getRepository().save(fromDto(f)));
     }
 
-    default boolean renameFilter(UUID id, String newName) {
-        return getRepository().rename(id, newName) != 0;
-    }
-
     default boolean deleteById(UUID id) {
         return getRepository().removeById(id) != 0;
     }
@@ -97,7 +91,6 @@ interface Repository<FilterEntity extends AbstractFilterEntity, EntityRepository
 @Service
 public class FilterService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FilterService.class);
     private static final String FILTER_LIST = "Filter list ";
     private static final String NOT_FOUND = " not found";
     private static final String WRONG_FILTER_TYPE = "Wrong filter type, should never happen";
@@ -232,10 +225,6 @@ public class FilterService {
         return id == null ? UUID.randomUUID() : id;
     }
 
-    private static String sanitizeParam(String param) {
-        return param != null ? param.replaceAll("[\n|\r\t]", "_") : null;
-    }
-
     List<IFilterAttributes> getFilters() {
         return filterRepositories.entrySet().stream()
             .flatMap(entry -> entry.getValue().getFiltersAttributes())
@@ -272,18 +261,6 @@ public class FilterService {
     void deleteFilter(UUID id) {
         Objects.requireNonNull(id);
         if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
-        }
-    }
-
-    @Transactional
-    public void renameFilter(UUID id, String newName) {
-        Objects.requireNonNull(id);
-        Objects.requireNonNull(newName);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("rename filter of id '{}' to '{}'", id, sanitizeParam(newName));
-        }
-        if (filterRepositories.values().stream().noneMatch(repository -> repository.renameFilter(id, newName))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
     }
