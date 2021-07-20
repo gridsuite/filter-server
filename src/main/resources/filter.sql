@@ -1,6 +1,9 @@
 
     create table line_filter (
        id uuid not null,
+        creationDate timestamp,
+        description varchar(255),
+        modificationDate timestamp,
         name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
@@ -31,6 +34,9 @@
 
     create table script_filter (
        id uuid not null,
+        creationDate timestamp,
+        description varchar(255),
+        modificationDate timestamp,
         name varchar(255),
         script TEXT,
         primary key (id)

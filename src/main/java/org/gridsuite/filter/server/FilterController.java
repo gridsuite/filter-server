@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +41,7 @@ public class FilterController {
     @GetMapping(value = "filters", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all filters", response = List.class)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "All filters")})
-    public ResponseEntity<List<FilterAttributes>> getFilters() {
+    public ResponseEntity<List<IFilterAttributes>> getFilters() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
     }
 
@@ -64,6 +65,18 @@ public class FilterController {
             .body(service.createFilter(filter));
     }
 
+    @PutMapping(value = "filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Modify a filter")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been successfully modified")})
+    public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @RequestBody(required = true) AbstractFilter filter) {
+        try {
+            service.changeFilter(id, filter);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException ignored) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @DeleteMapping(value = "filters/{id}")
     @ApiOperation(value = "delete the filter")
     @ApiResponse(code = 200, message = "The filter has been deleted")
@@ -72,13 +85,12 @@ public class FilterController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = "filters/{id}/rename")
-    @ApiOperation(value = "Rename filter by name")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been renamed"),
+    @GetMapping(value = "metadata")
+    @ApiOperation(value = "get filter metadata")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "filters metadata"),
         @ApiResponse(code = 404, message = "The filter does not exists")})
-    public void renameFilter(@PathVariable("id") UUID id,
-                             @RequestBody String newName) {
-        service.renameFilter(id, newName);
+    public ResponseEntity<List<IFilterAttributes>> getFilterMetadata(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
     }
 
     @PutMapping(value = "filters/{id}/replace-with-script")
