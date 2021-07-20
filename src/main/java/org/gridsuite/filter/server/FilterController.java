@@ -66,9 +66,9 @@ public class FilterController {
     }
 
     @PutMapping(value = "filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Create a filter", response = Void.class)
+    @ApiOperation(value = "Modify a filter")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been successfully created")})
-    public ResponseEntity<AbstractFilter> changeFilter(@PathVariable UUID id, @RequestBody(required = true) AbstractFilter filter) {
+    public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @RequestBody(required = true) AbstractFilter filter) {
         try {
             service.changeFilter(id, filter);
             return ResponseEntity.ok().build();
