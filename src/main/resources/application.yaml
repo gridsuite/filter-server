@@ -31,9 +31,5 @@ spring:
               create-target: src/main/resources/filter.sql
               create-source: metadata
 
-springdoc:
-  swagger-ui:
-    path: swagger-ui.html
-
 dbName: filters
 dbApi: jdbc
