@@ -6,11 +6,10 @@
  */
 package org.gridsuite.filter.server;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.gridsuite.filter.server.dto.*;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
@@ -28,7 +27,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping(value = "/" + FilterApi.API_VERSION)
-@Api(value = "Filter server")
+@Tag(name = "Filter server")
 @ComponentScan(basePackageClasses = FilterService.class)
 public class FilterController {
 
@@ -39,16 +38,16 @@ public class FilterController {
     }
 
     @GetMapping(value = "filters", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get all filters", response = List.class)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "All filters")})
+    @Operation(summary = "Get all filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "All filters")})
     public ResponseEntity<List<IFilterAttributes>> getFilters() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
     }
 
     @GetMapping(value = "filters/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get filter by id", response = AbstractFilter.class)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter"),
-        @ApiResponse(code = 404, message = "The filter does not exists")})
+    @Operation(summary = "Get filter by id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter"),
+        @ApiResponse(responseCode = "404", description = "The filter does not exists")})
     public ResponseEntity<AbstractFilter> getFilter(@PathVariable("id") UUID id) {
         return service.getFilter(id).map(filter -> ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
@@ -57,8 +56,8 @@ public class FilterController {
     }
 
     @PostMapping(value = "filters/", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Create a filter", response = AbstractFilter.class)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been successfully created")})
+    @Operation(summary = "Create a filter")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created")})
     public ResponseEntity<AbstractFilter> createFilter(@RequestBody(required = true) AbstractFilter filter) {
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
@@ -66,8 +65,8 @@ public class FilterController {
     }
 
     @PutMapping(value = "filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Modify a filter")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter has been successfully modified")})
+    @Operation(summary = "Modify a filter")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully modified")})
     public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @RequestBody(required = true) AbstractFilter filter) {
         try {
             service.changeFilter(id, filter);
@@ -78,24 +77,24 @@ public class FilterController {
     }
 
     @DeleteMapping(value = "filters/{id}")
-    @ApiOperation(value = "delete the filter")
-    @ApiResponse(code = 200, message = "The filter has been deleted")
+    @Operation(summary = "delete the filter")
+    @ApiResponse(responseCode = "200", description = "The filter has been deleted")
     public ResponseEntity<Void> deleteFilter(@PathVariable("id") UUID id) {
         service.deleteFilter(id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "metadata")
-    @ApiOperation(value = "get filter metadata")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "filters metadata"),
-        @ApiResponse(code = 404, message = "The filter does not exists")})
+    @Operation(summary = "get filter metadata")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "filters metadata"),
+        @ApiResponse(responseCode = "404", description = "The filter does not exists")})
     public ResponseEntity<List<IFilterAttributes>> getFilterMetadata(@RequestBody List<UUID> ids) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
     }
 
     @PutMapping(value = "filters/{id}/replace-with-script")
-    @ApiOperation(value = "Replace a filter with a script filter", response = AbstractFilter.class)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The filter have been replaced successfully")})
+    @Operation(summary = "Replace a filter with a script filter")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter have been replaced successfully")})
     public ResponseEntity<AbstractFilter> replaceFilterWithScript(@PathVariable("id") UUID id) {
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
@@ -103,8 +102,8 @@ public class FilterController {
     }
 
     @PutMapping(value = "filters/{id}/new-script/{scriptName}")
-    @ApiOperation(value = "Create a new script filter from a filter", response = AbstractFilter.class)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The script filter have been created successfully")})
+    @Operation(summary = "Create a new script filter from a filter")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The script filter have been created successfully")})
     public ResponseEntity<AbstractFilter> newScriptFromFilter(@PathVariable("id") UUID id,
                                                               @PathVariable("scriptName") String scriptName) {
         return ResponseEntity.ok()

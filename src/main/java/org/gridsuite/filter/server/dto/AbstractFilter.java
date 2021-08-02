@@ -8,7 +8,7 @@ package org.gridsuite.filter.server.dto;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,7 +30,7 @@ import java.util.UUID;
     @JsonSubTypes.Type(value = ScriptFilter.class, name = "SCRIPT"),
     @JsonSubTypes.Type(value = LineFilter.class, name = "LINE")
 })
-@ApiModel(description = "Basic class for Filters", subTypes = {ScriptFilter.class, LineFilter.class}, discriminator = "type")
+@Schema(description = "Basic class for Filters", subTypes = {ScriptFilter.class, LineFilter.class}, discriminatorProperty = "type")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -1,5 +1,6 @@
 server:
   port: 5027
+  forward-headers-strategy: framework
 
 spring:
   datasource:
@@ -29,6 +30,10 @@ spring:
               #action: create
               create-target: src/main/resources/filter.sql
               create-source: metadata
+
+springdoc:
+  swagger-ui:
+    path: swagger-ui.html
 
 dbName: filters
 dbApi: jdbc

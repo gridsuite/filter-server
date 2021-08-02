@@ -6,8 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,13 +20,13 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-@ApiModel(description = "filter contingency list attributes", parent = AbstractFilter.class)
+@Schema(description = "filter contingency list attributes", allOf = AbstractFilter.class)
 public abstract class AbstractGenericFilter extends AbstractFilter {
 
-    @ApiModelProperty("Equipment ID")
+    @Schema(description = "Equipment ID")
     private String equipmentID;
 
-    @ApiModelProperty("Equipment name")
+    @Schema(description = "Equipment name")
     private String equipmentName;
 
     protected boolean isEmpty() {
