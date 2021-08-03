@@ -6,8 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -22,26 +21,26 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-@ApiModel(description = "Hvdc Filters", parent = AbstractGenericFilter.class)
+@Schema(description = "Hvdc Filters", allOf = AbstractGenericFilter.class)
 public class HvdcLineFilter extends AbstractGenericFilter {
     @Override
     public FilterType getType() {
         return FilterType.HVDC_LINE;
     }
 
-    @ApiModelProperty("SubstationName1")
+    @Schema(description = "SubstationName1")
     String substationName1;
 
-    @ApiModelProperty("SubstationName2")
+    @Schema(description = "SubstationName2")
     String substationName2;
 
-    @ApiModelProperty("Countries1")
+    @Schema(description = "Countries1")
     private Set<String> countries1;
 
-    @ApiModelProperty("Countries2")
+    @Schema(description = "Countries2")
     private Set<String> countries2;
 
-    @ApiModelProperty("Nominal voltage")
+    @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
     @Override

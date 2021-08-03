@@ -6,7 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-@ApiModel(description = "Shunt compensator Filters", parent = AbstractInjectionFilter.class)
+@Schema(description = "Shunt compensator Filters", allOf = AbstractInjectionFilter.class)
 public class ShuntCompensatorFilter extends AbstractInjectionFilter {
     @Override
     public FilterType getType() {

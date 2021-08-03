@@ -6,8 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -21,15 +20,15 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-@ApiModel(description = "Injection Filters", parent = AbstractGenericFilter.class)
+@Schema(description = "Injection Filters", allOf = AbstractGenericFilter.class)
 public abstract class AbstractInjectionFilter extends AbstractGenericFilter {
-    @ApiModelProperty("SubstationName")
+    @Schema(description = "SubstationName")
     String substationName;
 
-    @ApiModelProperty("Countries")
+    @Schema(description = "Countries")
     private Set<String> countries;
 
-    @ApiModelProperty("Nominal voltage")
+    @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
     @Override

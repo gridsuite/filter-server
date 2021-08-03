@@ -6,8 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -22,23 +21,23 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-@ApiModel(description = "Two windings transformer Filters", parent = AbstractGenericFilter.class)
+@Schema(description = "Two windings transformer Filters", allOf = AbstractGenericFilter.class)
 public class TwoWindingsTransformerFilter extends AbstractGenericFilter {
     @Override
     public FilterType getType() {
         return FilterType.TWO_WINDINGS_TRANSFORMER;
     }
 
-    @ApiModelProperty("SubstationName")
+    @Schema(description = "SubstationName")
     String substationName;
 
-    @ApiModelProperty("Countries")
+    @Schema(description = "Countries")
     private Set<String> countries;
 
-    @ApiModelProperty("Nominal voltage 1")
+    @Schema(description = "Nominal voltage 1")
     private NumericalFilter nominalVoltage1;
 
-    @ApiModelProperty("Nominal voltage 2")
+    @Schema(description = "Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
 
     @Override

@@ -6,7 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-@ApiModel(description = "Lcc converter station Filters", parent = AbstractInjectionFilter.class)
+@Schema(description = "Lcc converter station Filters", allOf = AbstractInjectionFilter.class)
 public class LccConverterStationFilter extends AbstractInjectionFilter {
     @Override
     public FilterType getType() {
