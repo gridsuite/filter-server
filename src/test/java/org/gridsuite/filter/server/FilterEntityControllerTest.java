@@ -282,6 +282,12 @@ public class FilterEntityControllerTest {
     }
 
     @Test
+    public void testHvdcLineFilter() throws Exception {
+        insertHvdcLineFilter(FilterType.HVDC_LINE, "testHvdcLine", UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+            "hvdcId1", "hvdcName1", "s1", "s2", "descr hvdc", Set.of("FR"), Set.of("UK"), RangeType.EQUALITY, 380., null);
+    }
+
+    @Test
     public void testTwoWindingsTransformerFilter() throws Exception {
         List<RangeType> rangeTypes = new ArrayList<>();
         rangeTypes.add(RangeType.EQUALITY);
@@ -507,6 +513,58 @@ public class FilterEntityControllerTest {
         }
         if (countries != null) {
             filter += ", " + jsonSet("countries", countries);
+        }
+        filter += "}";
+
+        insertFilter(id, filter);
+
+        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + id + "\"]"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(),
+            new TypeReference<>() {
+            });
+
+        assertEquals(1, filterAttributes.size());
+        assertEquals(name, filterAttributes.get(0).getName());
+        assertEquals(id, filterAttributes.get(0).getId());
+        assertEquals(type, filterAttributes.get(0).getType());
+        assertEquals(description, filterAttributes.get(0).getDescription());
+
+        mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+    }
+
+    private void insertHvdcLineFilter(FilterType type, String name, UUID id, String equipmentID, String equipmentName,
+                                       String substationName1, String substationName2, String description, Set<String> countries1,
+                                       Set<String> countries2, RangeType rangeType, Double value1, Double value2)  throws Exception {
+        String filter = "{" + joinWithComma(
+            jsonVal("name", name),
+            jsonVal("id", id.toString()),
+            jsonVal("type", type.name()));
+
+        if (equipmentID != null) {
+            filter += ", " + jsonVal("equipmentID", equipmentID);
+        }
+        if (equipmentName != null) {
+            filter += ", " + jsonVal("equipmentName", equipmentName);
+        }
+        if (substationName1 != null) {
+            filter += ", " + jsonVal("substationName1", substationName1);
+        }
+        if (substationName2 != null) {
+            filter += ", " + jsonVal("substationName2", substationName2);
+        }
+        if (description != null) {
+            filter += ", " + jsonVal("description", description);
+        }
+        if (rangeType != null) {
+            filter += ", " + numericalRange("nominalVoltage", rangeType, value1, value2);
+        }
+        if (countries1 != null) {
+            filter += ", " + jsonSet("countries1", countries1);
+        }
+        if (countries2 != null) {
+            filter += ", " + jsonSet("countries2", countries2);
         }
         filter += "}";
 
