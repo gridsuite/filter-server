@@ -6,8 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -17,12 +16,12 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 @Getter
-@ApiModel(description = "Script Filters", parent = AbstractFilter.class)
+@Schema(description = "Script Filters", allOf = AbstractFilter.class)
 @SuperBuilder
 @NoArgsConstructor
 public class ScriptFilter extends AbstractFilter {
 
-    @ApiModelProperty("Script")
+    @Schema(description = "Script")
     private String script;
 
     @Override

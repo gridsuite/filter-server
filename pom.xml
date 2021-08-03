@@ -45,9 +45,9 @@
 
     <properties>
         <java.version>11</java.version>
-        <gridsuite-dependencies.version>9</gridsuite-dependencies.version>
+        <gridsuite-dependencies.version>10</gridsuite-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
-
+        <commons-lang3.version>3.9</commons-lang3.version>
     </properties>
 
     <build>
@@ -98,6 +98,12 @@
             </dependency>
 
             <!-- project specific dependencies -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -112,10 +118,6 @@
             <artifactId>powsybl-contingency-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
@@ -128,6 +130,10 @@
             <artifactId>ST4</artifactId>
             <version>${string-template.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+        </dependency>
 
         <!-- jpa, crud repository -->
         <dependency>
@@ -139,11 +145,6 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-config-classic</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
