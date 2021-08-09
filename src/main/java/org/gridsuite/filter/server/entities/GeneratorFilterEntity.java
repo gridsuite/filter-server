@@ -9,24 +9,18 @@ package org.gridsuite.filter.server.entities;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import javax.persistence.*;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
- * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @Getter
-@Setter
 @NoArgsConstructor
 @SuperBuilder
-@MappedSuperclass
-public abstract class AbstractGenericFilterEntity extends AbstractFilterEntity {
-
-    @Column(name = "equipmentName")
-    private String equipmentName;
-    @Column(name = "equipmentId")
-    private String equipmentId;
-
+@Entity
+@Table(name = "generator_filter")
+public class GeneratorFilterEntity extends AbstractInjectionFilterEntity {
 }

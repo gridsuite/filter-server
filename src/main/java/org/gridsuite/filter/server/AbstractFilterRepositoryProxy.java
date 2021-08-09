@@ -9,16 +9,18 @@ package org.gridsuite.filter.server;
 
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.AbstractGenericFilter;
+import org.gridsuite.filter.server.dto.AbstractInjectionFilter;
 import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.AbstractGenericFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
 
-import javax.persistence.EntityNotFoundException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,7 @@ import java.util.stream.Stream;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
+ * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
 abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilterEntity, EntityRepository extends FilterRepository<FilterEntity>> {
@@ -83,9 +86,6 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
     }
 
     void modify(UUID id, AbstractFilter f) {
-        if (!getRepository().existsById(id)) {
-            throw new EntityNotFoundException(id.toString());
-        }
         f.setId(id);
         toDto(getRepository().save(fromDto(f)));
     }
@@ -108,20 +108,38 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
         return buildAbstractFilter(builder.equipmentID(entity.getEquipmentId()).equipmentName(entity.getEquipmentName()), entity);
     }
 
+    AbstractFilter.AbstractFilterBuilder<?, ?> buildInjectionFilter(AbstractInjectionFilter.AbstractInjectionFilterBuilder<?, ?> builder, AbstractInjectionFilterEntity entity) {
+        return buildGenericFilter(builder.substationName(entity.getSubstationName())
+                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries()))
+                .nominalVoltage(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage())), entity);
+    }
+
     void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, AbstractGenericFilter dto) {
         buildAbstractFilter(builder, dto);
         builder.equipmentId(dto.getEquipmentID())
             .equipmentName(dto.getEquipmentName());
     }
 
+    void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, AbstractInjectionFilter dto) {
+        buildGenericFilter(builder, dto);
+        builder.substationName(dto.getSubstationName())
+                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(dto.getCountries()))
+                .nominalVoltage(AbstractFilterRepositoryProxy.convert(dto.getNominalVoltage()));
+    }
+
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
-        /* dates a managed by jpa, so we don't process them */
+        /* modification date is managed by jpa, so we don't process it */
         builder.name(dto.getName())
             .id(getIdOrCreate(dto.getId()))
-            .description(dto.getDescription());
+            .description(dto.getDescription())
+            .creationDate(getDateOrCreate(dto.getCreationDate()));
     }
 
     UUID getIdOrCreate(UUID id) {
         return id == null ? UUID.randomUUID() : id;
+    }
+
+    Date getDateOrCreate(Date dt) {
+        return dt == null ? new Date() : dt;
     }
 }
