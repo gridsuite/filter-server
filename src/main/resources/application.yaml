@@ -31,5 +31,6 @@ spring:
               create-target: src/main/resources/filter.sql
               create-source: metadata
 
-dbName: filters
+dbName: gridsuite
+query: ?currentSchema=filters
 dbApi: jdbc
