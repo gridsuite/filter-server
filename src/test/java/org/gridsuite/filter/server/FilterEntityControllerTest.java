@@ -283,8 +283,18 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testHvdcLineFilter() throws Exception {
+        List<RangeType> rangeTypes = new ArrayList<>();
+        rangeTypes.add(RangeType.EQUALITY);
+        rangeTypes.add(RangeType.APPROX);
+        List<Double> values1 = new ArrayList<>();
+        values1.add(225.);
+        values1.add(380.);
+        List<Double> values2 = new ArrayList<>();
+        values2.add(null);
+        values2.add(5.);
+
         insertHvdcLineFilter(FilterType.HVDC_LINE, "testHvdcLine", UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "hvdcId1", "hvdcName1", "s1", "s2", "descr hvdc", Set.of("FR"), Set.of("UK"), RangeType.EQUALITY, 380., null);
+            "hvdcId1", "hvdcName1", "s1", "s2", "descr hvdc", Set.of("FR"), Set.of("UK"), rangeTypes, values1, values2);
     }
 
     @Test
@@ -536,7 +546,7 @@ public class FilterEntityControllerTest {
 
     private void insertHvdcLineFilter(FilterType type, String name, UUID id, String equipmentID, String equipmentName,
                                        String substationName1, String substationName2, String description, Set<String> countries1,
-                                       Set<String> countries2, RangeType rangeType, Double value1, Double value2)  throws Exception {
+                                       Set<String> countries2, List<RangeType> rangeTypes, List<Double> values1, List<Double> values2)  throws Exception {
         String filter = "{" + joinWithComma(
             jsonVal("name", name),
             jsonVal("id", id.toString()),
@@ -557,8 +567,10 @@ public class FilterEntityControllerTest {
         if (description != null) {
             filter += ", " + jsonVal("description", description);
         }
-        if (rangeType != null) {
-            filter += ", " + numericalRange("nominalVoltage", rangeType, value1, value2);
+        if (rangeTypes != null) {
+            for (int i = 0; i < rangeTypes.size(); ++i) {
+                filter += ", " + numericalRange("nominalVoltage" + (i + 1), rangeTypes.get(i), values1.get(i), values2.get(i));
+            }
         }
         if (countries1 != null) {
             filter += ", " + jsonSet("countries1", countries1);
