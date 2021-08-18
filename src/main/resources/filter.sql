@@ -81,7 +81,8 @@
         equipmentName varchar(255),
         substationName1 varchar(255),
         substationName2 varchar(255),
-        numericFilterId_id uuid,
+        numericFilterId1_id uuid,
+        numericFilterId2_id uuid,
         primary key (id)
     );
 
@@ -314,8 +315,13 @@ create index twoWindingsTransformerFilterEntity_countries_idx on TwoWindingsTran
        references generator_filter;
 
     alter table if exists hvdc_line_filter 
-       add constraint numericFilterId_id_fk 
-       foreign key (numericFilterId_id) 
+       add constraint numericFilterId_id_fk1 
+       foreign key (numericFilterId1_id) 
+       references numericFilter;
+
+    alter table if exists hvdc_line_filter 
+       add constraint numericFilterId_id_fk2 
+       foreign key (numericFilterId2_id) 
        references numericFilter;
 
     alter table if exists HvdcLineFilterEntity_countries1 
