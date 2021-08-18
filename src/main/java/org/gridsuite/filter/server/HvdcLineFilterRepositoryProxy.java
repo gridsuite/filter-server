@@ -44,7 +44,8 @@ class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<HvdcLi
                 .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries2()))
                 .substationName1(entity.getSubstationName1())
                 .substationName2(entity.getSubstationName2())
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage())),
+                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage1()))
+                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage2())),
             entity).build();
     }
 
@@ -57,7 +58,8 @@ class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<HvdcLi
                 .substationName2(hvdcLineFilter.getSubstationName2())
                 .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(hvdcLineFilter.getCountries1()))
                 .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(hvdcLineFilter.getCountries2()))
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(hvdcLineFilter.getNominalVoltage()));
+                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(hvdcLineFilter.getNominalVoltage1()))
+                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(hvdcLineFilter.getNominalVoltage2()));
             buildGenericFilter(hvdcLineFilterEntityBuilder, hvdcLineFilter);
             return hvdcLineFilterEntityBuilder.build();
         }

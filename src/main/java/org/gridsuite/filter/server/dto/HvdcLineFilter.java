@@ -40,8 +40,11 @@ public class HvdcLineFilter extends AbstractGenericFilter {
     @Schema(description = "Countries2")
     private Set<String> countries2;
 
-    @Schema(description = "Nominal voltage")
-    private NumericalFilter nominalVoltage;
+    @Schema(description = "Nominal voltage 1")
+    private NumericalFilter nominalVoltage1;
+
+    @Schema(description = "Nominal voltage 2")
+    private NumericalFilter nominalVoltage2;
 
     @Override
     public boolean isEmpty() {
@@ -50,6 +53,7 @@ public class HvdcLineFilter extends AbstractGenericFilter {
             && substationName2 == null
             && CollectionUtils.isEmpty(countries1)
             && CollectionUtils.isEmpty(countries2)
-            && nominalVoltage == null;
+            && nominalVoltage1 == null
+            && nominalVoltage2 == null;
     }
 }

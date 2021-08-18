@@ -410,7 +410,8 @@ public class GenerateScriptFromFiltersTest {
             "      (FiltersUtils.matchID('hvdcId1', equipment) || FiltersUtils.matchName('hvdcName1', equipment))\n" +
             "      && FiltersUtils.isLocatedIn(['FR'], equipment.converterStation1.terminal)\n" +
             "      && FiltersUtils.isLocatedIn(['IT'], equipment.converterStation2.terminal)\n" +
-            "      && FiltersUtils.isRangeNominalVoltage(equipment.nominalVoltage, 200.0, 400.0)\n" +
+            "      && FiltersUtils.isRangeNominalVoltage(equipment.converterStation1.terminal, 200.0, 400.0)\n" +
+            "      && FiltersUtils.isApproxNominalVoltage(equipment.converterStation2.terminal, 380.0, 3.0)\n" +
             "      && equipment.converterStation1.terminal.voltageLevel.substation.name.equals('s1')\n" +
             "      && equipment.converterStation2.terminal.voltageLevel.substation.name.equals('s2')\n" +
             "     ) {\n" +
@@ -425,7 +426,8 @@ public class GenerateScriptFromFiltersTest {
             .substationName2("s2")
             .countries1(countries1)
             .countries2(countries2)
-            .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(200.).value2(400.).build())
+            .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(200.).value2(400.).build())
+            .nominalVoltage2(NumericalFilter.builder().type(RangeType.APPROX).value1(380.).value2(3.).build())
             .build()));
     }
 }

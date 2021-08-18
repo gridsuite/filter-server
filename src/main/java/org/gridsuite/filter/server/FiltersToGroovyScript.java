@@ -249,8 +249,11 @@ public class FiltersToGroovyScript {
                 if (!CollectionUtils.isEmpty(hvdcLineFilter.getCountries2())) {
                     template.add(COUNTRIES + "2", hvdcLineFilter.getCountries2().stream().collect(joining("','", "['", "']")));
                 }
-                if (hvdcLineFilter.getNominalVoltage() != null) {
-                    addFilterNominalVoltage(template, hvdcLineFilter.getNominalVoltage(), null);
+                if (hvdcLineFilter.getNominalVoltage1() != null) {
+                    addFilterNominalVoltage(template, hvdcLineFilter.getNominalVoltage1(), "1");
+                }
+                if (hvdcLineFilter.getNominalVoltage2() != null) {
+                    addFilterNominalVoltage(template, hvdcLineFilter.getNominalVoltage2(), "2");
                 }
                 if (!StringUtils.isEmpty(hvdcLineFilter.getSubstationName1())) {
                     template.add(SUBSTATION_NAME + "1", hvdcLineFilter.getSubstationName1());
