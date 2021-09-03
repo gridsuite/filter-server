@@ -130,13 +130,9 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.name(dto.getName())
-            .id(getIdOrCreate(dto.getId()))
+            .id(dto.getId())
             .description(dto.getDescription())
             .creationDate(getDateOrCreate(dto.getCreationDate()));
-    }
-
-    UUID getIdOrCreate(UUID id) {
-        return id == null ? UUID.randomUUID() : id;
     }
 
     Date getDateOrCreate(Date dt) {

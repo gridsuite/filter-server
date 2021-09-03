@@ -15,8 +15,7 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
-import org.gridsuite.filter.server.dto.FilterAttributes;
-import org.gridsuite.filter.server.dto.IFilterAttributes;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.After;
@@ -135,7 +134,7 @@ public class FilterEntityControllerTest {
 
         insertFilter(filterId1, lineFilter);
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + filterId1 + "\"]"))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").contentType(APPLICATION_JSON).header("ids", filterId1))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -178,7 +177,7 @@ public class FilterEntityControllerTest {
         matchFilterDescription(filterAttributes.get(1), filterId2, "testScript", FilterType.SCRIPT, creationDate, modificationDate, "oups");
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + filterId1 + "\"]"))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").contentType(APPLICATION_JSON).header("ids", filterId1))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -202,7 +201,7 @@ public class FilterEntityControllerTest {
         modifyFilter(filterId1, generatorFilter);
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + filterId1 + "\"]"))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").contentType(APPLICATION_JSON).header("ids", filterId1))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -348,7 +347,7 @@ public class FilterEntityControllerTest {
             .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"LINE\"}]"));
 
         // new script from filter
-        mvc.perform(put(URL_TEMPLATE + filterId1 + "/new-script/" + "testLineScript")).andExpect(status().isOk());
+        mvc.perform(put(URL_TEMPLATE + filterId1 + "/new-script/" + UUID.randomUUID() + "/testLineScript")).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
@@ -369,11 +368,37 @@ public class FilterEntityControllerTest {
             + "}";
         insertFilter(filterId2, scriptFilter);
 
-        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/new-script/" + "testScript2")));
+        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/new-script/" + UUID.randomUUID() + "/testScript2")));
         assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/replace-with-script")));
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/new-script/" + "testScript3")).andExpect(status().isNotFound());
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
 
+    }
+
+    @Test
+    public void testRenameFilter() throws Exception {
+        UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
+
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+
+        // test all fields
+        String lineFilter = "{" + joinWithComma(
+                jsonVal("name", "testLine"),
+                jsonVal("id", filterId1.toString()),
+                jsonVal("type", FilterType.LINE.name()),
+                jsonVal("substationName1", "ragala"),
+                jsonVal("substationName2", "miamMiam"),
+                jsonVal("equipmentID", "vazy"),
+                jsonVal("equipmentName", "tata"),
+                numericalRange("nominalVoltage1", RangeType.RANGE, 5., 8.),
+                numericalRange("nominalVoltage2", RangeType.EQUALITY, 6., null),
+                jsonSet("countries1", Set.of("yoyo")),
+                jsonSet("countries2", Set.of("smurf", "schtroumph"))) + "}";
+
+        insertFilter(filterId1, lineFilter);
+        renameFilter(filterId1, "testLine", "newName");
     }
 
     private void matchFilterDescription(IFilterAttributes filterAttribute, UUID id, String name, FilterType type, Date creationDate, Date modificationDate, String description) throws Exception {
@@ -416,6 +441,19 @@ public class FilterEntityControllerTest {
         MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
         // Check we didn't miss anything
         JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
+    }
+
+    private void renameFilter(UUID filterId, String oldName, String newName) throws Exception {
+        mvc.perform(put(URL_TEMPLATE + "rename/" + filterId + "/" + newName)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        String strRes = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        LineFilter filter = objectMapper.readValue(strRes, new TypeReference<>() {
+        });
+        assertEquals(newName, filter.getName());
     }
 
     public StringBuilder jsonVal(String id, String val) {
@@ -471,7 +509,7 @@ public class FilterEntityControllerTest {
         insertFilter(id, filter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + id + "\"]"))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").contentType(APPLICATION_JSON).header("ids", id))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -519,7 +557,7 @@ public class FilterEntityControllerTest {
         insertFilter(id, filter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + id + "\"]"))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").contentType(APPLICATION_JSON).header("ids", id))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -571,7 +609,7 @@ public class FilterEntityControllerTest {
         insertFilter(id, filter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/metadata").contentType(APPLICATION_JSON).content("[\"" + id + "\"]"))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").contentType(APPLICATION_JSON).header("ids", id))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {

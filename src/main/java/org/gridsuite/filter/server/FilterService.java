@@ -135,6 +135,17 @@ public class FilterService {
         }
     }
 
+    public void renameFilter(UUID id, String newName) {
+        Optional<AbstractFilter> f = getFilter(id);
+        if (f.isPresent()) {
+            AbstractFilter filter = f.get();
+            filter.setName(newName);
+            filterRepositories.get(filter.getType()).insert(filter);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
+        }
+    }
+
     void deleteFilter(UUID id) {
         Objects.requireNonNull(id);
         if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
@@ -169,19 +180,20 @@ public class FilterService {
     }
 
     @Transactional
-    public AbstractFilter newScriptFromFilter(UUID id, String scriptName) {
-        Objects.requireNonNull(id);
+    public AbstractFilter newScriptFromFilter(UUID filterId, UUID scriptId, String scriptName) {
+        Objects.requireNonNull(filterId);
+        Objects.requireNonNull(scriptId);
 
-        Optional<AbstractFilter> filter = getFilter(id);
+        Optional<AbstractFilter> filter = getFilter(filterId);
         if (filter.isPresent()) {
             if (filter.get().getType() == FilterType.SCRIPT) {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
-                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().name(scriptName).script(script).build());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(scriptId).name(scriptName).script(script).build());
             }
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterId + NOT_FOUND);
         }
     }
 }
