@@ -42,9 +42,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.join;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -378,10 +376,6 @@ public class FilterEntityControllerTest {
     @Test
     public void testRenameFilter() throws Exception {
         UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
-        UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
-
-        Date creationDate = new Date();
-        Date modificationDate = new Date();
 
         // test all fields
         String lineFilter = "{" + joinWithComma(
@@ -399,6 +393,9 @@ public class FilterEntityControllerTest {
 
         insertFilter(filterId1, lineFilter);
         renameFilter(filterId1, "testLine", "newName");
+        mvc.perform(put(URL_TEMPLATE + "rename/" + UUID.randomUUID() + "/" + "newName")
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
     private void matchFilterDescription(IFilterAttributes filterAttribute, UUID id, String name, FilterType type, Date creationDate, Date modificationDate, String description) throws Exception {
