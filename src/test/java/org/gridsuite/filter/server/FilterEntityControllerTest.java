@@ -347,7 +347,7 @@ public class FilterEntityControllerTest {
             .andExpect(content().json("[{\"name\":\"testLine\",\"type\":\"LINE\"}]"));
 
         // new script from filter
-        mvc.perform(put(URL_TEMPLATE + filterId1 + "/new-script/" + UUID.randomUUID() + "/testLineScript")).andExpect(status().isOk());
+        mvc.perform(post(URL_TEMPLATE + filterId1 + "/new-script/" + UUID.randomUUID() + "/testLineScript")).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
@@ -368,7 +368,7 @@ public class FilterEntityControllerTest {
             + "}";
         insertFilter(filterId2, scriptFilter);
 
-        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/new-script/" + UUID.randomUUID() + "/testScript2")));
+        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(post(URL_TEMPLATE + filterId2 + "/new-script/" + UUID.randomUUID() + "/testScript2")));
         assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/replace-with-script")));
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/new-script/" + "testScript3")).andExpect(status().isNotFound());
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
