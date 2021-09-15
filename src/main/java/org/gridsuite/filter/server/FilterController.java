@@ -55,10 +55,12 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "/filters", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created")})
-    public ResponseEntity<AbstractFilter> createFilter(@RequestBody AbstractFilter filter) {
+    public ResponseEntity<AbstractFilter> createFilter(@PathVariable("id") UUID filterId,
+                                                       @RequestBody AbstractFilter filter) {
+        filter.setId(filterId);
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
             .body(service.createFilter(filter));
