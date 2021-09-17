@@ -132,7 +132,9 @@ public class FilterEntityControllerTest {
 
         insertFilter(filterId1, lineFilter);
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").param("ids", filterId1.toString()))
+            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
+                            .contentType(APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(List.of(filterId1))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -175,7 +177,9 @@ public class FilterEntityControllerTest {
         matchFilterDescription(filterAttributes.get(1), filterId2, "testScript", FilterType.SCRIPT, creationDate, modificationDate, "oups");
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").param("ids", filterId1.toString()))
+            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(List.of(filterId1))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -199,7 +203,9 @@ public class FilterEntityControllerTest {
         modifyFilter(filterId1, generatorFilter);
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").param("ids", filterId1.toString()))
+            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(List.of(filterId1))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -506,7 +512,9 @@ public class FilterEntityControllerTest {
         insertFilter(id, filter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").param("ids", id.toString()))
+            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(List.of(id))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -554,7 +562,9 @@ public class FilterEntityControllerTest {
         insertFilter(id, filter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").param("ids", id.toString()))
+            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(List.of(id))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -606,7 +616,9 @@ public class FilterEntityControllerTest {
         insertFilter(id, filter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").param("ids", id.toString()))
+            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(List.of(id))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {

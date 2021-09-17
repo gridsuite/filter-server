@@ -98,11 +98,11 @@ public class FilterController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/filters/metadata")
+    @PostMapping(value = "/filters/metadata")
     @Operation(summary = "get filters metadata")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "filters metadata"),
         @ApiResponse(responseCode = "404", description = "The filters don't exist")})
-    public ResponseEntity<List<IFilterAttributes>> getFilterMetadata(@RequestParam("ids") List<UUID> ids) {
+    public ResponseEntity<List<IFilterAttributes>> getFilterMetadata(@RequestBody List<UUID> ids) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
     }
 
