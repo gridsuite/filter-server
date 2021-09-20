@@ -135,12 +135,11 @@ public class FilterService {
         }
     }
 
+    @Transactional
     public void renameFilter(UUID id, String newName) {
         Optional<AbstractFilter> f = getFilter(id);
         if (f.isPresent()) {
-            AbstractFilter filter = f.get();
-            filter.setName(newName);
-            filterRepositories.get(filter.getType()).insert(filter);
+            filterRepositories.get(f.get().getType()).rename(id, newName);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
