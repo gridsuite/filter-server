@@ -81,7 +81,7 @@ public class FilterController {
     @PutMapping(value = "/filters/rename/{id}/{newName}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rename a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully renamed")})
-    public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @PathVariable String newName) {
+    public ResponseEntity<Void> renameFilter(@PathVariable UUID id, @PathVariable String newName) {
         try {
             service.renameFilter(id, newName);
             return ResponseEntity.ok().build();
