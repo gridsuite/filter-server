@@ -78,12 +78,12 @@ public class FilterController {
         }
     }
 
-    @PutMapping(value = "/filters/rename/{id}/{newName}")
+    @PostMapping(value = "/filters/{id}/rename")
     @Operation(summary = "Rename a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully renamed")})
-    public ResponseEntity<Void> renameFilter(@PathVariable UUID id, @PathVariable String newName) {
+    public ResponseEntity<Void> renameFilter(@PathVariable UUID id, @RequestBody RenameFilterAttributes renameAttributes) {
         try {
-            service.renameFilter(id, newName);
+            service.renameFilter(id, renameAttributes.getNewElementName());
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException ignored) {
             return ResponseEntity.notFound().build();

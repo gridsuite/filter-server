@@ -398,7 +398,7 @@ public class FilterEntityControllerTest {
                 jsonSet("countries2", Set.of("smurf", "schtroumph"))) + "}";
 
         insertFilter(filterId1, lineFilter);
-        renameFilter(filterId1, "testLine", "newName");
+        renameFilter(filterId1, "newName");
         mvc.perform(put(URL_TEMPLATE + "rename/" + UUID.randomUUID() + "/" + "newName")
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -446,9 +446,10 @@ public class FilterEntityControllerTest {
         JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
     }
 
-    private void renameFilter(UUID filterId, String oldName, String newName) throws Exception {
-        mvc.perform(put(URL_TEMPLATE + "rename/" + filterId + "/" + newName)
-                .contentType(APPLICATION_JSON))
+    private void renameFilter(UUID filterId, String newName) throws Exception {
+        mvc.perform(post(URL_TEMPLATE + filterId + "/rename")
+                .contentType(APPLICATION_JSON)
+                .content("{\"newElementName\": \"" + newName + "\"}"))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
         String strRes = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
