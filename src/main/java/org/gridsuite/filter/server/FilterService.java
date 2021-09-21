@@ -10,6 +10,7 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.IFilterAttributes;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ScriptFilter;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.BatteryFilterRepository;
 import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
 import org.gridsuite.filter.server.repositories.DanglingLineFilterRepository;
@@ -107,6 +108,17 @@ public class FilterService {
         return Optional.empty();
     }
 
+    Optional<AbstractFilterEntity> getFilterEntity(UUID id) {
+        Objects.requireNonNull(id);
+        for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
+            Optional<AbstractFilterEntity> res = (Optional<AbstractFilterEntity>) repository.getFilterEntity(id);
+            if (res.isPresent()) {
+                return res;
+            }
+        }
+        return Optional.empty();
+    }
+
     @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
         return filterRepositories.get(filter.getType()).insert(filter);
@@ -130,6 +142,16 @@ public class FilterService {
                     createFilter(filter);
                 }
             }
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
+        }
+    }
+
+    @Transactional
+    public void renameFilter(UUID id, String newName) {
+        Optional<AbstractFilterEntity> f = getFilterEntity(id);
+        if (f.isPresent()) {
+            f.get().setName(newName);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
@@ -169,19 +191,20 @@ public class FilterService {
     }
 
     @Transactional
-    public AbstractFilter newScriptFromFilter(UUID id, String scriptName) {
-        Objects.requireNonNull(id);
+    public AbstractFilter newScriptFromFilter(UUID filterId, UUID scriptId, String scriptName) {
+        Objects.requireNonNull(filterId);
+        Objects.requireNonNull(scriptId);
 
-        Optional<AbstractFilter> filter = getFilter(id);
+        Optional<AbstractFilter> filter = getFilter(filterId);
         if (filter.isPresent()) {
             if (filter.get().getType() == FilterType.SCRIPT) {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
-                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().name(scriptName).script(script).build());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(scriptId).name(scriptName).script(script).build());
             }
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterId + NOT_FOUND);
         }
     }
 }
