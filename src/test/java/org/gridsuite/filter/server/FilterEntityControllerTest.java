@@ -414,7 +414,7 @@ public class FilterEntityControllerTest {
     }
 
     private void insertFilter(UUID filterId, String content) throws Exception {
-        String strRes = mvc.perform(post(URL_TEMPLATE + "/" + filterId)
+        String strRes = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
             .content(content)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
