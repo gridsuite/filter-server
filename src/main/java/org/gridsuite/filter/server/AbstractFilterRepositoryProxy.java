@@ -69,6 +69,10 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
         return Optional.empty();
     }
 
+    Optional<FilterEntity> getFilterEntity(UUID id) {
+        return getRepository().findById(id);
+    }
+
     Stream<FilterAttributes> getFiltersAttributes() {
         return getRepository().getFiltersMetadata().stream().map(this::metadataToAttribute);
     }
@@ -92,10 +96,6 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
 
     boolean deleteById(UUID id) {
         return getRepository().removeById(id) != 0;
-    }
-
-    boolean rename(UUID id, String newName) {
-        return getRepository().rename(id, newName) != 0;
     }
 
     void deleteAll() {
