@@ -4,7 +4,7 @@ server:
 
 spring:
   datasource:
-    url: ${dbApi}:${dbVendor}://${hostPort}/${dbName}${query}
+    url: ${dbUrl}
     username: ${login}
     password: ${password}
 
