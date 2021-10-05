@@ -9,6 +9,7 @@ package org.gridsuite.filter.server.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.gridsuite.filter.server.utils.RangeType;
 
 /**
@@ -16,6 +17,7 @@ import org.gridsuite.filter.server.utils.RangeType;
  */
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class NumericalFilter {
