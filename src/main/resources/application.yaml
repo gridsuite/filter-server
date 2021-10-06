@@ -1,8 +1,10 @@
 server:
-  port: 5027
   forward-headers-strategy: framework
 
 spring:
+  profiles:
+    active: default,local
+
   datasource:
     url: ${dbUrl}
     username: ${login}

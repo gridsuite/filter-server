@@ -45,6 +45,7 @@
 
     <properties>
         <java.version>11</java.version>
+        <jib.container.environment>SPRING_PROFILES_ACTIVE=default</jib.container.environment>
         <gridsuite-dependencies.version>10</gridsuite-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
         <commons-lang3.version>3.9</commons-lang3.version>
