@@ -40,7 +40,7 @@ jobs:
 
       - name: Broadcast update event
         if: github.ref == 'refs/heads/main'
-        uses: gridsuite/broadcast-event@master
+        uses: gridsuite/broadcast-event@main
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           event-type: filter_server_updated
