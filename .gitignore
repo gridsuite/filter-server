@@ -1,3 +1,10 @@
+# VSCode
+/.vscode
+/.settings
+.classpath
+.factorypath
+.project
+
 # Default ignored files
 /shelf/
 /.idea/workspace.xml
