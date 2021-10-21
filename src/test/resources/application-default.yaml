@@ -6,6 +6,8 @@ spring:
     properties:
       dialect: org.hibernate.dialect.H2Dialect
       hibernate.format_sql: true
+  liquibase:
+    enabled: false
 
 logging:
   level:
