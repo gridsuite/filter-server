@@ -2,9 +2,7 @@
     create table battery_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -20,9 +18,7 @@
     create table busbar_section_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -38,9 +34,7 @@
     create table dangling_line_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -56,9 +50,7 @@
     create table generator_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -74,9 +66,7 @@
     create table hvdc_line_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName1 varchar(255),
@@ -98,9 +88,7 @@
     create table lcc_converter_station_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -116,9 +104,7 @@
     create table line_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName1 varchar(255),
@@ -141,9 +127,7 @@
     create table load_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -167,9 +151,7 @@
     create table script_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         script TEXT,
         primary key (id)
     );
@@ -177,9 +159,7 @@
     create table shunt_compensator_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -195,9 +175,7 @@
     create table static_var_compensator_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -213,9 +191,7 @@
     create table three_windings_transformer_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -233,9 +209,7 @@
     create table two_windings_transformer_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),
@@ -252,9 +226,7 @@
     create table vsc_converter_station_filter (
        id uuid not null,
         creationDate timestamp,
-        description varchar(255),
         modificationDate timestamp,
-        name varchar(255),
         equipmentId varchar(255),
         equipmentName varchar(255),
         substationName varchar(255),

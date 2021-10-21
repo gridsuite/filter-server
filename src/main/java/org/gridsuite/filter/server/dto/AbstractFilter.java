@@ -52,12 +52,7 @@ public abstract class AbstractFilter implements IFilterAttributes {
 
     UUID id;
 
-    String name;
-
     Date creationDate;
 
     Date modificationDate;
-
-    String description;
-
 }

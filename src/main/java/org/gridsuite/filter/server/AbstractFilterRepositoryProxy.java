@@ -103,9 +103,8 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
     }
 
     AbstractFilter.AbstractFilterBuilder<?, ?> buildAbstractFilter(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
-        return builder.name(entity.getName()).id(entity.getId())
-            .creationDate(entity.getCreationDate()).modificationDate(entity.getModificationDate())
-            .description(entity.getDescription());
+        return builder.id(entity.getId())
+            .creationDate(entity.getCreationDate()).modificationDate(entity.getModificationDate());
     }
 
     AbstractFilter.AbstractFilterBuilder<?, ?> buildGenericFilter(AbstractGenericFilter.AbstractGenericFilterBuilder<?, ?> builder, AbstractGenericFilterEntity entity) {
@@ -133,9 +132,7 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
 
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
-        builder.name(dto.getName())
-            .id(dto.getId())
-            .description(dto.getDescription())
+        builder.id(dto.getId())
             .creationDate(getDateOrCreate(dto.getCreationDate()));
     }
 

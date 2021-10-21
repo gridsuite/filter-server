@@ -78,18 +78,6 @@ public class FilterController {
         }
     }
 
-    @PostMapping(value = "/filters/{id}/rename")
-    @Operation(summary = "Rename a filter")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully renamed")})
-    public ResponseEntity<Void> renameFilter(@PathVariable UUID id, @RequestBody RenameFilterAttributes renameAttributes) {
-        try {
-            service.renameFilter(id, renameAttributes.getNewElementName());
-            return ResponseEntity.ok().build();
-        } catch (EntityNotFoundException ignored) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @DeleteMapping(value = "/filters/{id}")
     @Operation(summary = "delete the filter")
     @ApiResponse(responseCode = "200", description = "The filter has been deleted")
@@ -115,14 +103,13 @@ public class FilterController {
             .body(service.replaceFilterWithScript(id));
     }
 
-    @PostMapping(value = "/filters/{id}/new-script/{scriptId}/{scriptName}")
+    @PostMapping(value = "/filters/{id}/new-script/{scriptId}")
     @Operation(summary = "Create a new script filter from a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The script filter have been created successfully")})
     public ResponseEntity<AbstractFilter> newScriptFromFilter(@PathVariable("id") UUID filterId,
-                                                              @PathVariable("scriptId") UUID scriptId,
-                                                              @PathVariable("scriptName") String scriptName) {
+                                                              @PathVariable("scriptId") UUID scriptId) {
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(service.newScriptFromFilter(filterId, scriptId, scriptName));
+            .body(service.newScriptFromFilter(filterId, scriptId));
     }
 }

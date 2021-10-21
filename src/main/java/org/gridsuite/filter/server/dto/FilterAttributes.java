@@ -22,19 +22,15 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 public class FilterAttributes implements IFilterAttributes {
-    String name;
     UUID id;
     Date creationDate;
     Date modificationDate;
-    String description;
     FilterType type;
 
     public FilterAttributes(FilterMetadata filterMetadata, FilterType type) {
-        name = filterMetadata.getName();
         id = filterMetadata.getId();
         creationDate = filterMetadata.getCreationDate();
         modificationDate = filterMetadata.getModificationDate();
-        description = filterMetadata.getDescription();
         this.type = type;
     }
 }
