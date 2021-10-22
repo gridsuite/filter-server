@@ -35,7 +35,7 @@ import java.util.Set;
 public class TwoWindingsTransformerFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "countries")
     @ElementCollection
-    @CollectionTable(foreignKey = @ForeignKey(name = "twoWindingsTransformerFilterEntity_countries_fk"), indexes = {@Index(name = "twoWindingsTransformerFilterEntity_countries_idx", columnList = "twoWindingsTransformerFilterEntity_id")})
+    @CollectionTable(foreignKey = @ForeignKey(name = "twoWindingsTransformerFilterEntity_countries_fk"), indexes = {@Index(name = "twoWindingsTransformerFilterEntity_countries_idx", columnList = "two_windings_transformer_filter_entity_id")})
     Set<String> countries;
 
     @Column(name = "substationName")

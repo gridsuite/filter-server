@@ -35,12 +35,12 @@ import java.util.Set;
 public class HvdcLineFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "countries1")
     @ElementCollection
-    @CollectionTable(foreignKey = @ForeignKey(name = "hvdcLineFilterEntity_countries_fk1"), indexes = {@Index(name = "hvdcLineFilterEntity_countries_idx1", columnList = "hvdcLineFilterEntity_id")})
+    @CollectionTable(foreignKey = @ForeignKey(name = "hvdcLineFilterEntity_countries_fk1"), indexes = {@Index(name = "hvdcLineFilterEntity_countries_idx1", columnList = "hvdc_line_filter_entity_id")})
     Set<String> countries1;
 
     @Column(name = "countries2")
     @ElementCollection
-    @CollectionTable(foreignKey = @ForeignKey(name = "hvdcLineFilterEntity_countries_fk2"), indexes = {@Index(name = "hvdcLineFilterEntity_countries_idx2", columnList = "hvdcLineFilterEntity_id")})
+    @CollectionTable(foreignKey = @ForeignKey(name = "hvdcLineFilterEntity_countries_fk2"), indexes = {@Index(name = "hvdcLineFilterEntity_countries_idx2", columnList = "hvdc_line_filter_entity_id")})
     Set<String> countries2;
 
     @Column(name = "substationName1")

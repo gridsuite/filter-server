@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 /**
@@ -24,6 +25,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "script_filter")
 public class ScriptFilterEntity extends AbstractFilterEntity {
+    @Lob
     @Column(name = "script", columnDefinition = "TEXT")
     String script;
 }
