@@ -35,33 +35,33 @@ import java.util.Set;
 public class ThreeWindingsTransformerFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "countries")
     @ElementCollection
-    @CollectionTable(foreignKey = @ForeignKey(name = "threeWindingsTransformerFilterEntity_countries_fk"), indexes = {@Index(name = "threeWindingsTransformerFilterEntity_countries_idx", columnList = "threeWindingsTransformerFilterEntity_id")})
+    @CollectionTable(foreignKey = @ForeignKey(name = "threeWindingsTransformerFilterEntity_countries_fk"), indexes = {@Index(name = "threeWindingsTransformerFilterEntity_countries_idx", columnList = "three_windings_transformer_filter_entity_id")})
     Set<String> countries;
 
     @Column(name = "substationName")
     String substationName;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "numericFilterId1_id",
+    @JoinColumn(name  =  "threeWindingsTransformer_numericFilterId1_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk1"
+            name = "threeWindingsTransformer_numericFilterId_id_fk1"
         ), nullable = true)
     NumericFilterEntity nominalVoltage1;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "numericFilterId2_id",
+    @JoinColumn(name  =  "threeWindingsTransformer_numericFilterId2_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk2"
+            name = "threeWindingsTransformer_numericFilterId_id_fk2"
         ), nullable = true)
     NumericFilterEntity nominalVoltage2;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "numericFilterId3_id",
+    @JoinColumn(name  =  "threeWindingsTransformer_numericFilterId3_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk3"
+            name = "threeWindingsTransformer_numericFilterId_id_fk3"
         ), nullable = true)
     NumericFilterEntity nominalVoltage3;
 }

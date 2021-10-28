@@ -35,7 +35,7 @@ import java.util.Set;
 public class TwoWindingsTransformerFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "countries")
     @ElementCollection
-    @CollectionTable(foreignKey = @ForeignKey(name = "twoWindingsTransformerFilterEntity_countries_fk"), indexes = {@Index(name = "twoWindingsTransformerFilterEntity_countries_idx", columnList = "twoWindingsTransformerFilterEntity_id")})
+    @CollectionTable(foreignKey = @ForeignKey(name = "twoWindingsTransformerFilterEntity_countries_fk"), indexes = {@Index(name = "twoWindingsTransformerFilterEntity_countries_idx", columnList = "two_windings_transformer_filter_entity_id")})
     Set<String> countries;
 
     @Column(name = "substationName")
@@ -45,15 +45,15 @@ public class TwoWindingsTransformerFilterEntity extends AbstractGenericFilterEnt
     @JoinColumn(name  =  "numericFilterId1_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk1"
+            name = "twoWindingsTransformer_numericFilterId_id_fk1"
         ), nullable = true)
     NumericFilterEntity nominalVoltage1;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "numericFilterId2_id",
+    @JoinColumn(name  =  "twoWindingsTransformernumericFilterId2_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk2"
+            name = "twoWindingsTransformer_numericFilterId_id_fk2"
         ), nullable = true)
     NumericFilterEntity nominalVoltage2;
 }
