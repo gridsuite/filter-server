@@ -50,7 +50,7 @@ public class HvdcLineFilterEntity extends AbstractGenericFilterEntity {
     String substationName2;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "numericFilterId_id",
+    @JoinColumn(name  =  "hvdcLineFilterEntity_numericFilterId_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
             name = "numericFilterId_id_fk"
