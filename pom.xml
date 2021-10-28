@@ -15,7 +15,7 @@
     <parent>
         <groupId>com.powsybl</groupId>
         <artifactId>powsybl-parent-ws</artifactId>
-        <version>5</version>
+        <version>6</version>
         <relativePath/>
     </parent>
 
@@ -49,6 +49,7 @@
         <gridsuite-dependencies.version>11</gridsuite-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
         <commons-lang3.version>3.9</commons-lang3.version>
+        <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
     </properties>
 
     <build>
@@ -156,6 +157,11 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
             <scope>runtime</scope>
         </dependency>
 
