@@ -46,8 +46,8 @@ public class FiltersUtilsTest {
 
         Mockito.when(s1.getCountry()).thenReturn(Optional.of(Country.FR));
         Mockito.when(s2.getCountry()).thenReturn(Optional.of(Country.ES));
-        Mockito.when(vl1.getSubstation()).thenReturn(s1);
-        Mockito.when(vl2.getSubstation()).thenReturn(s2);
+        Mockito.when(vl1.getSubstation()).thenReturn(Optional.of(s1));
+        Mockito.when(vl2.getSubstation()).thenReturn(Optional.of(s2));
         Mockito.when(t1.getVoltageLevel()).thenReturn(vl1);
         Mockito.when(t2.getVoltageLevel()).thenReturn(vl2);
         Mockito.when(vl1.getNominalV()).thenReturn(225.);
