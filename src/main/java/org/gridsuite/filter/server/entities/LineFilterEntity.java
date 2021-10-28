@@ -42,7 +42,7 @@ public class LineFilterEntity extends AbstractGenericFilterEntity {
     @JoinColumn(name  =  "numericFilterId1_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk1"
+            name = "line_numericFilterId_id_fk1"
         ), nullable = true)
     NumericFilterEntity nominalVoltage1;
 
@@ -50,7 +50,7 @@ public class LineFilterEntity extends AbstractGenericFilterEntity {
     @JoinColumn(name  =  "numericFilterId2_id",
         referencedColumnName  =  "id",
         foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk2"
+            name = "line_numericFilterId_id_fk2"
         ), nullable = true)
     NumericFilterEntity nominalVoltage2;
 

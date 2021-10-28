@@ -1,6 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.10.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.10.xsd">
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-1">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-1">
         <createTable tableName="battery_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="battery_filterPK"/>
@@ -15,7 +15,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-2">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-2">
         <createTable tableName="battery_filter_entity_countries">
             <column name="battery_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -23,7 +23,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-3">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-3">
         <createTable tableName="bus_bar_section_filter_entity_countries">
             <column name="bus_bar_section_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -31,7 +31,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-4">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-4">
         <createTable tableName="busbar_section_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="busbar_section_filterPK"/>
@@ -46,7 +46,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-5">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-5">
         <createTable tableName="dangling_line_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="dangling_line_filterPK"/>
@@ -61,7 +61,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-6">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-6">
         <createTable tableName="dangling_line_filter_entity_countries">
             <column name="dangling_line_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -69,7 +69,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-7">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-7">
         <createTable tableName="generator_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="generator_filterPK"/>
@@ -84,7 +84,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-8">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-8">
         <createTable tableName="generator_filter_entity_countries">
             <column name="generator_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -92,7 +92,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-9">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-9">
         <createTable tableName="hvdc_line_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="hvdc_line_filterPK"/>
@@ -108,7 +108,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-10">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-10">
         <createTable tableName="hvdc_line_filter_entity_countries1">
             <column name="hvdc_line_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -116,7 +116,7 @@
             <column name="countries1" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-11">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-11">
         <createTable tableName="hvdc_line_filter_entity_countries2">
             <column name="hvdc_line_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -124,7 +124,7 @@
             <column name="countries2" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-12">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-12">
         <createTable tableName="lcc_converter_station_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="lcc_converter_station_filterPK"/>
@@ -139,7 +139,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-13">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-13">
         <createTable tableName="lcc_converter_station_filter_entity_countries">
             <column name="lcc_converter_station_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -147,7 +147,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-14">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-14">
         <createTable tableName="line_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="line_filterPK"/>
@@ -164,7 +164,7 @@
             <column name="numeric_filter_id2_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-15">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-15">
         <createTable tableName="line_filter_entity_countries1">
             <column name="line_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -172,7 +172,7 @@
             <column name="countries1" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-16">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-16">
         <createTable tableName="line_filter_entity_countries2">
             <column name="line_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -180,7 +180,7 @@
             <column name="countries2" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-17">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-17">
         <createTable tableName="load_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="load_filterPK"/>
@@ -195,7 +195,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-18">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-18">
         <createTable tableName="load_filter_entity_countries">
             <column name="load_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -203,7 +203,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-19">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-19">
         <createTable tableName="numeric_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="numeric_filterPK"/>
@@ -213,7 +213,7 @@
             <column name="value2" type="FLOAT8"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-20">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-20">
         <createTable tableName="script_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="script_filterPK"/>
@@ -225,7 +225,7 @@
             <column name="script" type="CLOB"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-21">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-21">
         <createTable tableName="shunt_compensator_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="shunt_compensator_filterPK"/>
@@ -240,7 +240,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-22">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-22">
         <createTable tableName="shunt_compensator_filter_entity_countries">
             <column name="shunt_compensator_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -248,7 +248,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-23">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-23">
         <createTable tableName="static_var_compensator_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="static_var_compensator_filterPK"/>
@@ -263,7 +263,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-24">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-24">
         <createTable tableName="static_var_compensator_filter_entity_countries">
             <column name="static_var_compensator_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -271,7 +271,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-25">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-25">
         <createTable tableName="three_windings_transformer_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="three_windings_transformer_filterPK"/>
@@ -284,11 +284,11 @@
             <column name="equipment_name" type="VARCHAR(255)"/>
             <column name="substation_name" type="VARCHAR(255)"/>
             <column name="numeric_filter_id1_id" type="UUID"/>
-            <column name="numeric_filter_id2_id" type="UUID"/>
-            <column name="numeric_filter_id3_id" type="UUID"/>
+            <column name="three_windings_transformer_numeric_filter_id2_id" type="UUID"/>
+            <column name="three_windings_transformer_numeric_filter_id3_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-26">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-26">
         <createTable tableName="three_windings_transformer_filter_entity_countries">
             <column name="three_windings_transformer_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -296,7 +296,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-27">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-27">
         <createTable tableName="two_windings_transformer_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="two_windings_transformer_filterPK"/>
@@ -309,10 +309,10 @@
             <column name="equipment_name" type="VARCHAR(255)"/>
             <column name="substation_name" type="VARCHAR(255)"/>
             <column name="numeric_filter_id1_id" type="UUID"/>
-            <column name="numeric_filter_id2_id" type="UUID"/>
+            <column name="two_windings_transformernumeric_filter_id2_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-28">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-28">
         <createTable tableName="two_windings_transformer_filter_entity_countries">
             <column name="two_windings_transformer_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -320,7 +320,7 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-29">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-29">
         <createTable tableName="vsc_converter_station_filter">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="vsc_converter_station_filterPK"/>
@@ -335,7 +335,7 @@
             <column name="numeric_filter_id_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-30">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-30">
         <createTable tableName="vsc_converter_station_filter_entity_countries">
             <column name="vsc_converter_station_filter_entity_id" type="UUID">
                 <constraints nullable="false"/>
@@ -343,67 +343,130 @@
             <column name="countries" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-31">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-31">
         <createIndex indexName="hvdcLineFilterEntity_countries_idx1" tableName="hvdc_line_filter_entity_countries1">
             <column name="hvdc_line_filter_entity_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-32">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-32">
         <createIndex indexName="hvdcLineFilterEntity_countries_idx2" tableName="hvdc_line_filter_entity_countries2">
             <column name="hvdc_line_filter_entity_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-33">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-33">
         <createIndex indexName="lineFilterEntity_countries_idx1" tableName="line_filter_entity_countries1">
             <column name="line_filter_entity_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-34">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-34">
         <createIndex indexName="lineFilterEntity_countries_idx2" tableName="line_filter_entity_countries2">
             <column name="line_filter_entity_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-35">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-35">
         <createIndex indexName="threeWindingsTransformerFilterEntity_countries_idx" tableName="three_windings_transformer_filter_entity_countries">
             <column name="three_windings_transformer_filter_entity_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-36">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-36">
         <createIndex indexName="twoWindingsTransformerFilterEntity_countries_idx" tableName="two_windings_transformer_filter_entity_countries">
             <column name="two_windings_transformer_filter_entity_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-37">
-        <addForeignKeyConstraint baseColumnNames="bus_bar_section_filter_entity_id" baseTableName="bus_bar_section_filter_entity_countries" constraintName="abstractInjectionFilterEntity_countries_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="busbar_section_filter" validate="true"/>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-37">
+        <addForeignKeyConstraint baseColumnNames="vsc_converter_station_filter_entity_id" baseTableName="vsc_converter_station_filter_entity_countries" constraintName="FK4imldq8qcxrnpqjc2233slvs" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="vsc_converter_station_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-38">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-38">
+        <addForeignKeyConstraint baseColumnNames="lcc_converter_station_filter_entity_id" baseTableName="lcc_converter_station_filter_entity_countries" constraintName="FK5m52yii7f36ubhsyvrkqhynhy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="lcc_converter_station_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-39">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="shunt_compensator_filter" constraintName="FK79dr8gstkf4jop4nqdbii1jb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-40">
+        <addForeignKeyConstraint baseColumnNames="shunt_compensator_filter_entity_id" baseTableName="shunt_compensator_filter_entity_countries" constraintName="FKaky6pisl642v9ydqwpyklfmfv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="shunt_compensator_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-41">
+        <addForeignKeyConstraint baseColumnNames="generator_filter_entity_id" baseTableName="generator_filter_entity_countries" constraintName="FKbf18t6dqrimcnspteth04wlw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="generator_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-42">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="busbar_section_filter" constraintName="FKeikjx33jttbsle16i0loxj0yq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-43">
+        <addForeignKeyConstraint baseColumnNames="dangling_line_filter_entity_id" baseTableName="dangling_line_filter_entity_countries" constraintName="FKfk7nxjywue1d77wgr4a1kfil0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="dangling_line_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-44">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="dangling_line_filter" constraintName="FKh8noix7v97c7x6a7xk7f2srxs" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-45">
+        <addForeignKeyConstraint baseColumnNames="bus_bar_section_filter_entity_id" baseTableName="bus_bar_section_filter_entity_countries" constraintName="FKhpm1tod75mmx6ivxaq6usby7o" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="busbar_section_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-46">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="vsc_converter_station_filter" constraintName="FKjbp4yq9xrnyh53i9u1d0v3gxy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-47">
+        <addForeignKeyConstraint baseColumnNames="static_var_compensator_filter_entity_id" baseTableName="static_var_compensator_filter_entity_countries" constraintName="FKk1srhbviy2q96fgogjirjl177" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="static_var_compensator_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-48">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="battery_filter" constraintName="FKkht1ktls08kfpne8plb9prj91" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-49">
+        <addForeignKeyConstraint baseColumnNames="battery_filter_entity_id" baseTableName="battery_filter_entity_countries" constraintName="FKl2lkcb6em92dfia4u0bs1slbl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="battery_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-50">
+        <addForeignKeyConstraint baseColumnNames="load_filter_entity_id" baseTableName="load_filter_entity_countries" constraintName="FKlu97q12kf41g00pkcbdm8xdbn" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="load_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-51">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="lcc_converter_station_filter" constraintName="FKlun85oiapaqa18d28c82px3v5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-52">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="static_var_compensator_filter" constraintName="FKlwvu0bjpq083sr9kf0q8c9oii" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-53">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="generator_filter" constraintName="FKoguooukiigchh080vwvl5m0x9" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-54">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="load_filter" constraintName="FKrs4yhno0ug8p99v6ke977ghca" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-55">
         <addForeignKeyConstraint baseColumnNames="hvdc_line_filter_entity_id" baseTableName="hvdc_line_filter_entity_countries1" constraintName="hvdcLineFilterEntity_countries_fk1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="hvdc_line_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-39">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-56">
         <addForeignKeyConstraint baseColumnNames="hvdc_line_filter_entity_id" baseTableName="hvdc_line_filter_entity_countries2" constraintName="hvdcLineFilterEntity_countries_fk2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="hvdc_line_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-40">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-57">
         <addForeignKeyConstraint baseColumnNames="line_filter_entity_id" baseTableName="line_filter_entity_countries1" constraintName="lineFilterEntity_countries_fk1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="line_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-41">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-58">
         <addForeignKeyConstraint baseColumnNames="line_filter_entity_id" baseTableName="line_filter_entity_countries2" constraintName="lineFilterEntity_countries_fk2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="line_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-42">
-        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="busbar_section_filter" constraintName="numericFilterId_id_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-59">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id1_id" baseTableName="line_filter" constraintName="line_numericFilterId_id_fk1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-43">
-        <addForeignKeyConstraint baseColumnNames="numeric_filter_id1_id" baseTableName="three_windings_transformer_filter" constraintName="numericFilterId_id_fk1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-60">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id2_id" baseTableName="line_filter" constraintName="line_numericFilterId_id_fk2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-44">
-        <addForeignKeyConstraint baseColumnNames="numeric_filter_id2_id" baseTableName="three_windings_transformer_filter" constraintName="numericFilterId_id_fk2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-61">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id_id" baseTableName="hvdc_line_filter" constraintName="numericFilterId_id_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-45">
-        <addForeignKeyConstraint baseColumnNames="numeric_filter_id3_id" baseTableName="three_windings_transformer_filter" constraintName="numericFilterId_id_fk3" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-62">
+        <addForeignKeyConstraint baseColumnNames="three_windings_transformer_numeric_filter_id2_id" baseTableName="three_windings_transformer_filter" constraintName="numericFilterId_id_fk2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-46">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-63">
+        <addForeignKeyConstraint baseColumnNames="three_windings_transformer_numeric_filter_id3_id" baseTableName="three_windings_transformer_filter" constraintName="numericFilterId_id_fk3" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-64">
         <addForeignKeyConstraint baseColumnNames="three_windings_transformer_filter_entity_id" baseTableName="three_windings_transformer_filter_entity_countries" constraintName="threeWindingsTransformerFilterEntity_countries_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="three_windings_transformer_filter" validate="true"/>
     </changeSet>
-    <changeSet author="borsenbergerjac (generated)" id="1634903632831-47">
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-65">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id1_id" baseTableName="three_windings_transformer_filter" constraintName="threeWindingsTransformer_numericFilterId_id_fk1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-66">
         <addForeignKeyConstraint baseColumnNames="two_windings_transformer_filter_entity_id" baseTableName="two_windings_transformer_filter_entity_countries" constraintName="twoWindingsTransformerFilterEntity_countries_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="two_windings_transformer_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-67">
+        <addForeignKeyConstraint baseColumnNames="numeric_filter_id1_id" baseTableName="two_windings_transformer_filter" constraintName="twoWindingsTransformer_numericFilterId_id_fk1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="borsenbergerjac (generated)" id="1635409093334-68">
+        <addForeignKeyConstraint baseColumnNames="two_windings_transformernumeric_filter_id2_id" baseTableName="two_windings_transformer_filter" constraintName="twoWindingsTransformer_numericFilterId_id_fk2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
     </changeSet>
 </databaseChangeLog>

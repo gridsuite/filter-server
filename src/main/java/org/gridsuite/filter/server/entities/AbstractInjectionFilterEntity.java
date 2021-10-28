@@ -32,7 +32,7 @@ import java.util.Set;
 public abstract class AbstractInjectionFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "countries")
     @ElementCollection
-    @CollectionTable(foreignKey = @ForeignKey(name = "abstractInjectionFilterEntity_countries_fk"))
+    @CollectionTable(foreignKey = @ForeignKey())
     Set<String> countries;
 
     @Column(name = "substationName")
@@ -41,8 +41,6 @@ public abstract class AbstractInjectionFilterEntity extends AbstractGenericFilte
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name  =  "numericFilterId_id",
         referencedColumnName  =  "id",
-        foreignKey = @ForeignKey(
-            name = "numericFilterId_id_fk"
-        ), nullable = true)
+        foreignKey = @ForeignKey(), nullable = true)
     NumericFilterEntity nominalVoltage;
 }
