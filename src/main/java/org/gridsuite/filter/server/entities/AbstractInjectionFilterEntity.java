@@ -30,6 +30,10 @@ import java.util.Set;
 @SuperBuilder
 @MappedSuperclass
 public abstract class AbstractInjectionFilterEntity extends AbstractGenericFilterEntity {
+
+    /* as AbstractInjectionFilterEntity is a mapped superclass naming constraints gives to each child class the same name
+        for the constraint, liquibase only take one of these the others are discarded, so we let hibernate pick a name
+    */
     @Column(name = "countries")
     @ElementCollection
     @CollectionTable(foreignKey = @ForeignKey())
@@ -41,6 +45,9 @@ public abstract class AbstractInjectionFilterEntity extends AbstractGenericFilte
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name  =  "numericFilterId_id",
         referencedColumnName  =  "id",
+        /* as AbstractInjectionFilterEntity is a mapped superclass naming constraints gives to each child class the same name
+           for the constraint, liquibase only take one of these the others are discarded, so we let hibernate pick a name
+            */
         foreignKey = @ForeignKey(), nullable = true)
     NumericFilterEntity nominalVoltage;
 }
