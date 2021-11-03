@@ -169,8 +169,8 @@ public class FilterEntityControllerTest {
             Collections.reverse(filterAttributes);
         }
 
-        matchFilterDescription(filterAttributes.get(0), filterId1, FilterType.LINE, creationDate, modificationDate);
-        matchFilterDescription(filterAttributes.get(1), filterId2, FilterType.SCRIPT, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.LINE, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, creationDate, modificationDate);
 
         filterAttributes = objectMapper.readValue(
             mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
@@ -367,7 +367,7 @@ public class FilterEntityControllerTest {
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
     }
 
-    private void matchFilterDescription(IFilterAttributes filterAttribute, UUID id, FilterType type, Date creationDate, Date modificationDate) {
+    private void matchFilterInfos(IFilterAttributes filterAttribute, UUID id, FilterType type, Date creationDate, Date modificationDate) {
         assertEquals(filterAttribute.getId(), id);
         assertEquals(filterAttribute.getType(), type);
         assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 1000);
