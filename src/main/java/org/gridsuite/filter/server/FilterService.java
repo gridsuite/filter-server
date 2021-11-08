@@ -97,7 +97,7 @@ public class FilterService {
                 .flatMap(entry -> entry.getValue().getFiltersAttributes(ids)).map(filter -> {
 //                     In the filter-server repository, filters are stored with types that are SCRIPT or LINE, BATTERY etc
 //                     In the other services and especially in the gridexplore, we don't need to know this implementation information.
-//                     We just need to know if the filter is of type SCRIPT or FILTRE. That's why we simplify the type here.
+//                     We just need to know if the filter is of type SCRIPT or FILTER. That's why we simplify the type here.
                     filter.setType(filter.getType().equals(FilterType.SCRIPT) ? FilterType.SCRIPT : FilterType.FILTER);
                     return filter;
                 })
