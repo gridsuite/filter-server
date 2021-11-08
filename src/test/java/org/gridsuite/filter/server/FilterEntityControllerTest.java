@@ -574,7 +574,7 @@ public class FilterEntityControllerTest {
         assertEquals(1, filterAttributes.size());
         assertEquals(name, filterAttributes.get(0).getName());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(type, filterAttributes.get(0).getType());
+        assertEquals(FilterType.FILTER, filterAttributes.get(0).getType());
         assertEquals(description, filterAttributes.get(0).getDescription());
 
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
@@ -628,7 +628,7 @@ public class FilterEntityControllerTest {
         assertEquals(1, filterAttributes.size());
         assertEquals(name, filterAttributes.get(0).getName());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(type, filterAttributes.get(0).getType());
+        assertEquals(FilterType.FILTER, filterAttributes.get(0).getType());
         assertEquals(description, filterAttributes.get(0).getDescription());
 
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
