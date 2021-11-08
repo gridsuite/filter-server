@@ -94,8 +94,8 @@ public class FilterService {
 
     List<IFilterAttributes> getFilters(List<UUID> ids) {
         return filterRepositories.entrySet().stream()
-                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
-                .collect(Collectors.toList());
+            .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
+            .collect(Collectors.toList());
     }
 
     List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
