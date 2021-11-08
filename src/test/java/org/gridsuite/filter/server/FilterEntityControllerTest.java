@@ -216,7 +216,7 @@ public class FilterEntityControllerTest {
         assertTrue(dateModification.getTime() < filterAttributes.get(0).getModificationDate().getTime());
         assertEquals(filterId1, filterAttributes.get(0).getId());
         assertEquals("descr generator", filterAttributes.get(0).getDescription());
-        assertEquals(FilterType.GENERATOR, filterAttributes.get(0).getType());
+        assertEquals(FilterType.FILTER, filterAttributes.get(0).getType());
 
         // delete
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
@@ -524,7 +524,7 @@ public class FilterEntityControllerTest {
         assertEquals(1, filterAttributes.size());
         assertEquals(name, filterAttributes.get(0).getName());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(type, filterAttributes.get(0).getType());
+        assertEquals(FilterType.FILTER, filterAttributes.get(0).getType());
         assertEquals(description, filterAttributes.get(0).getDescription());
 
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());

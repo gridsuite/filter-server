@@ -12,6 +12,7 @@ package org.gridsuite.filter.server.utils;
  */
 public enum FilterType {
     SCRIPT(""),
+    FILTER(""),
     LINE("lines"),
     GENERATOR("generators"),
     LOAD("loads"),

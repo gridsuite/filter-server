@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IFilterAttributes;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ScriptFilter;
@@ -93,8 +94,16 @@ public class FilterService {
 
     List<IFilterAttributes> getFilters(List<UUID> ids) {
         return filterRepositories.entrySet().stream()
-            .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
-            .collect(Collectors.toList());
+                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
+                .collect(Collectors.toList());
+    }
+
+    List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
+        List<FilterAttributes> filters = filterRepositories.entrySet().stream()
+                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
+                .collect(Collectors.toList());
+        filters.forEach(filter -> filter.setType(filter.getType().equals(FilterType.SCRIPT) ? FilterType.SCRIPT : FilterType.FILTER));
+        return filters;
     }
 
     Optional<AbstractFilter> getFilter(UUID id) {
