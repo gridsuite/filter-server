@@ -93,11 +93,12 @@ public class FilterService {
     }
 
     List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
-        List<FilterAttributes> filters = filterRepositories.entrySet().stream()
-                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
+        return filterRepositories.entrySet().stream()
+                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids)).map(filter -> {
+                    filter.setType(filter.getType().equals(FilterType.SCRIPT) ? FilterType.SCRIPT : FilterType.FILTER);
+                    return filter;
+                })
                 .collect(Collectors.toList());
-        filters.forEach(filter -> filter.setType(filter.getType().equals(FilterType.SCRIPT) ? FilterType.SCRIPT : FilterType.FILTER));
-        return filters;
     }
 
     Optional<AbstractFilter> getFilter(UUID id) {
