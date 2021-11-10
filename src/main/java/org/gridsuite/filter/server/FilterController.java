@@ -90,8 +90,8 @@ public class FilterController {
     @Operation(summary = "get filters metadata")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "filters metadata"),
         @ApiResponse(responseCode = "404", description = "The filters don't exist")})
-    public ResponseEntity<List<IFilterAttributes>> getFilterMetadata(@RequestBody List<UUID> ids) {
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
+    public ResponseEntity<List<FilterAttributes>> getFiltersMetadata(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFiltersMetadata(ids));
     }
 
     @PutMapping(value = "/filters/{id}/replace-with-script")

@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IFilterAttributes;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ScriptFilter;
@@ -91,10 +92,16 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    List<IFilterAttributes> getFilters(List<UUID> ids) {
+    List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
         return filterRepositories.entrySet().stream()
-            .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
-            .collect(Collectors.toList());
+                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids)).map(filter -> {
+//                     In the filter-server repository, filters are stored with types that are SCRIPT or LINE, BATTERY etc
+//                     In the other services and especially in the gridexplore, we don't need to know this implementation information.
+//                     We just need to know if the filter is of type SCRIPT or FILTER. That's why we simplify the type here.
+                    filter.setType(filter.getType().equals(FilterType.SCRIPT) ? FilterType.SCRIPT : FilterType.FILTER);
+                    return filter;
+                })
+                .collect(Collectors.toList());
     }
 
     Optional<AbstractFilter> getFilter(UUID id) {

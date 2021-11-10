@@ -207,7 +207,7 @@ public class FilterEntityControllerTest {
         assertEquals(dateCreation, filterAttributes.get(0).getCreationDate());
         assertTrue(dateModification.getTime() < filterAttributes.get(0).getModificationDate().getTime());
         assertEquals(filterId1, filterAttributes.get(0).getId());
-        assertEquals(FilterType.GENERATOR, filterAttributes.get(0).getType());
+        assertEquals(FilterType.FILTER, filterAttributes.get(0).getType());
 
         // delete
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
@@ -466,7 +466,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(type, filterAttributes.get(0).getType());
+        assertEquals(FilterType.FILTER, filterAttributes.get(0).getType());
 
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
@@ -510,7 +510,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(type, filterAttributes.get(0).getType());
+        assertEquals(FilterType.FILTER, filterAttributes.get(0).getType());
 
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
@@ -558,7 +558,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(type, filterAttributes.get(0).getType());
+        assertEquals(FilterType.FILTER, filterAttributes.get(0).getType());
 
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
