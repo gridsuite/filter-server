@@ -188,9 +188,8 @@ public class FilterService {
     }
 
     @Transactional
-    public AbstractFilter newScriptFromFilter(UUID filterId, UUID scriptId) {
+    public AbstractFilter newScriptFromFilter(UUID filterId, UUID newId) {
         Objects.requireNonNull(filterId);
-        Objects.requireNonNull(scriptId);
 
         Optional<AbstractFilter> filter = getFilter(filterId);
         if (filter.isPresent()) {
@@ -198,7 +197,7 @@ public class FilterService {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
-                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(scriptId).script(script).build());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(newId == null ? UUID.randomUUID() : newId).script(script).build());
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterId + NOT_FOUND);

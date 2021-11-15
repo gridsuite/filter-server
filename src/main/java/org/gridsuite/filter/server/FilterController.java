@@ -103,13 +103,13 @@ public class FilterController {
             .body(service.replaceFilterWithScript(id));
     }
 
-    @PostMapping(value = "/filters/{id}/new-script/{scriptId}")
+    @PostMapping(value = "/filters/{id}/new-script")
     @Operation(summary = "Create a new script filter from a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The script filter have been created successfully")})
     public ResponseEntity<AbstractFilter> newScriptFromFilter(@PathVariable("id") UUID filterId,
-                                                              @PathVariable("scriptId") UUID scriptId) {
+                                                              @RequestParam(required = false, value = "newId") UUID newId) {
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(service.newScriptFromFilter(filterId, scriptId));
+            .body(service.newScriptFromFilter(filterId, newId));
     }
 }
