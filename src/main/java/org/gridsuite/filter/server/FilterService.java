@@ -154,16 +154,6 @@ public class FilterService {
         }
     }
 
-    @Transactional
-    public void renameFilter(UUID id, String newName) {
-        Optional<AbstractFilterEntity> f = getFilterEntity(id);
-        if (f.isPresent()) {
-            f.get().setName(newName);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
-        }
-    }
-
     void deleteFilter(UUID id) {
         Objects.requireNonNull(id);
         if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
@@ -190,7 +180,7 @@ public class FilterService {
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
                 filterRepositories.get(filter.get().getType()).deleteById(filter.get().getId());
-                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(filter.get().getId()).name(filter.get().getName()).script(script).build());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(filter.get().getId()).script(script).build());
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
@@ -198,9 +188,8 @@ public class FilterService {
     }
 
     @Transactional
-    public AbstractFilter newScriptFromFilter(UUID filterId, UUID scriptId, String scriptName) {
+    public AbstractFilter newScriptFromFilter(UUID filterId, UUID newId) {
         Objects.requireNonNull(filterId);
-        Objects.requireNonNull(scriptId);
 
         Optional<AbstractFilter> filter = getFilter(filterId);
         if (filter.isPresent()) {
@@ -208,7 +197,7 @@ public class FilterService {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
-                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(scriptId).name(scriptName).script(script).build());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(newId == null ? UUID.randomUUID() : newId).script(script).build());
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterId + NOT_FOUND);

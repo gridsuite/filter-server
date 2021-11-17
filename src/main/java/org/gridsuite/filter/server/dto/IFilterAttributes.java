@@ -13,15 +13,11 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 public interface IFilterAttributes {
-    String getName();
-
     java.util.UUID getId();
 
     java.util.Date getCreationDate();
 
     java.util.Date getModificationDate();
-
-    String getDescription();
 
     FilterType getType();
 }
