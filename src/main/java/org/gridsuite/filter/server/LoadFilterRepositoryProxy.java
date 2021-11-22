@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.LoadFilter;
 import org.gridsuite.filter.server.entities.LoadFilterEntity;
 import org.gridsuite.filter.server.repositories.LoadFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class LoadFilterRepositoryProxy extends AbstractFilterRepositoryProxy<LoadFilter
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.LOAD;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.LOAD;
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.LccConverterStationFilter;
 import org.gridsuite.filter.server.entities.LccConverterStationFilterEntity;
 import org.gridsuite.filter.server.repositories.LccConverterStationFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryP
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.LCC_CONVERTER_STATION;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.LCC_CONVERTER_STATION;
     }
 
     @Override

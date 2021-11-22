@@ -16,6 +16,7 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.After;
@@ -119,7 +120,8 @@ public class FilterEntityControllerTest {
         // test all fields
         String lineFilter = "{" + joinWithComma(
             jsonVal("id", filterId1.toString()),
-            jsonVal("type", FilterType.LINE.name()),
+            jsonVal("type", FilterType.FILTER.name()),
+            jsonVal("subtype", EquipmentType.LINE.name()),
             jsonVal("substationName1", "ragala"),
             jsonVal("substationName2", "miamMiam"),
             jsonVal("equipmentID", "vazy"),
@@ -145,7 +147,8 @@ public class FilterEntityControllerTest {
         // test replace with same filter type and null value (country set & numerical range)
         String minimalLineFilter = "{" + joinWithComma(
             jsonVal("id", filterId1.toString()),
-            jsonVal("type", FilterType.LINE.name()))
+            jsonVal("type", FilterType.FILTER.name()),
+            jsonVal("subtype", EquipmentType.LINE.name()))
             + "}";
 
         modifyFilter(filterId1, minimalLineFilter);
@@ -154,6 +157,7 @@ public class FilterEntityControllerTest {
         String scriptFilter = "{" + joinWithComma(
             jsonVal("id", filterId2.toString()),
             jsonVal("type", FilterType.SCRIPT.name()),
+            jsonVal("subtype", EquipmentType.NONE.name()),
             jsonVal("script", "test")) +
             "}";
 
@@ -169,8 +173,8 @@ public class FilterEntityControllerTest {
             Collections.reverse(filterAttributes);
         }
 
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.LINE, creationDate, modificationDate);
-        matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.FILTER, EquipmentType.LINE, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, EquipmentType.NONE, creationDate, modificationDate);
 
         filterAttributes = objectMapper.readValue(
             mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
@@ -186,7 +190,8 @@ public class FilterEntityControllerTest {
 
         // test replace line filter with other filter type
         String generatorFilter = "{" + joinWithComma(
-            jsonVal("type", FilterType.GENERATOR.name()),
+            jsonVal("type", FilterType.FILTER.name()),
+            jsonVal("subtype", EquipmentType.GENERATOR.name()),
             jsonVal("substationName", "s1"),
             jsonVal("equipmentID", "eqId1"),
             jsonVal("equipmentName", "gen1"),
@@ -223,61 +228,61 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testGeneratorFilter() throws Exception {
-        insertInjectionFilter(FilterType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
                         "genId1", "genName", "s1", Set.of("FR", "IT"), RangeType.RANGE, 210., 240.);
     }
 
     @Test
     public void testLoadFilter() throws Exception {
-        insertInjectionFilter(FilterType.LOAD, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.LOAD, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "loadId1", "loadName", "s2", Set.of("BE", "NL"), RangeType.APPROX, 225., 5.);
     }
 
     @Test
     public void testShuntCompensatorFilter() throws Exception {
-        insertInjectionFilter(FilterType.SHUNT_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.SHUNT_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "shuntId1", "shuntName", "s3", Set.of("ES"), RangeType.EQUALITY, 150., null);
     }
 
     @Test
     public void testStaticVarCompensatorFilter() throws Exception {
-        insertInjectionFilter(FilterType.STATIC_VAR_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.STATIC_VAR_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "staticVarCompensatorId1", "staticVarCompensatorName", "s1", null, null, null, null);
     }
 
     @Test
     public void testBatteryFilter() throws Exception {
-        insertInjectionFilter(FilterType.BATTERY, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.BATTERY, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "batteryId1", "batteryName", null, Set.of("FR"), RangeType.RANGE, 45., 65.);
     }
 
     @Test
     public void testBusBarSectionFilter() throws Exception {
-        insertInjectionFilter(FilterType.BUSBAR_SECTION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.BUSBAR_SECTION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             null, "batteryName", null, Set.of("DE"), RangeType.EQUALITY, 380., null);
     }
 
     @Test
     public void testDanglingLineFilter() throws Exception {
-        insertInjectionFilter(FilterType.DANGLING_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.DANGLING_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "danglingLineId1", null, "s2", Set.of("FR"), RangeType.APPROX, 150., 8.);
     }
 
     @Test
     public void testLccConverterStationFilter() throws Exception {
-        insertInjectionFilter(FilterType.LCC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.LCC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "lccId1", "lccName1", "s3", Set.of("FR", "BE", "NL", "DE", "IT"), RangeType.RANGE, 20., 400.);
     }
 
     @Test
     public void testVscConverterStationFilter() throws Exception {
-        insertInjectionFilter(FilterType.VSC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertInjectionFilter(FilterType.FILTER, EquipmentType.VSC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "vscId1", "vscName1", "s2", null, RangeType.EQUALITY, 225., null);
     }
 
     @Test
     public void testHvdcLineFilter() throws Exception {
-        insertHvdcLineFilter(FilterType.HVDC_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertHvdcLineFilter(FilterType.FILTER, EquipmentType.HVDC_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "hvdcId1", "hvdcName1", "s1", "s2", Set.of("FR"), Set.of("UK"), RangeType.EQUALITY, 380., null);
     }
 
@@ -293,7 +298,7 @@ public class FilterEntityControllerTest {
         values2.add(null);
         values2.add(5.);
 
-        insertTransformerFilter(FilterType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertTransformerFilter(FilterType.FILTER, EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "2wtId1", "2wtName1", "s1", Set.of("FR", "BE", "NL"), rangeTypes, values1, values2);
     }
 
@@ -312,7 +317,7 @@ public class FilterEntityControllerTest {
         values2.add(null);
         values2.add(5.);
 
-        insertTransformerFilter(FilterType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertTransformerFilter(FilterType.FILTER, EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "3wtId1", "3wtName1", "s2", Set.of("IT", "CH"), rangeTypes, values1, values2);
     }
 
@@ -324,7 +329,8 @@ public class FilterEntityControllerTest {
 
         String lineFilter = "{" + joinWithComma(
             jsonVal("id", filterId1.toString()),
-            jsonVal("type", FilterType.LINE.name()),
+            jsonVal("type", FilterType.FILTER.name()),
+            jsonVal("subtype", EquipmentType.LINE.name()),
             jsonVal("substationName1", "ragala"),
             jsonVal("substationName2", "miamMiam"),
             jsonVal("equipmentID", "vazy"),
@@ -338,14 +344,14 @@ public class FilterEntityControllerTest {
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"type\":\"LINE\"}]"));
+            .andExpect(content().json("[{\"subtype\":\"LINE\"}]"));
 
         // new script from filter
         mvc.perform(post(URL_TEMPLATE + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"type\":\"LINE\"}, {\"type\":\"SCRIPT\"}]"));
+            .andExpect(content().json("[{\"subtype\":\"LINE\"}, {\"type\":\"SCRIPT\"}]"));
 
         // replace filter with script
         mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
@@ -357,6 +363,7 @@ public class FilterEntityControllerTest {
         String scriptFilter = "{" + joinWithComma(
             jsonVal("id", filterId2.toString()),
             jsonVal("type", FilterType.SCRIPT.name()),
+            jsonVal("subtype", EquipmentType.NONE.name()),
             jsonVal("script", "test2"))
             + "}";
         insertFilter(filterId2, scriptFilter);
@@ -367,9 +374,10 @@ public class FilterEntityControllerTest {
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
     }
 
-    private void matchFilterInfos(IFilterAttributes filterAttribute, UUID id, FilterType type, Date creationDate, Date modificationDate) {
+    private void matchFilterInfos(IFilterAttributes filterAttribute, UUID id, FilterType type, EquipmentType subtype, Date creationDate, Date modificationDate) {
         assertEquals(filterAttribute.getId(), id);
         assertEquals(filterAttribute.getType(), type);
+        assertEquals(filterAttribute.getEquipmentType(), subtype);
         assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 1000);
         assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 100);
     }
@@ -429,12 +437,13 @@ public class FilterEntityControllerTest {
             ).append("}");
     }
 
-    private void insertInjectionFilter(FilterType type, UUID id, String equipmentID, String equipmentName,
+    private void insertInjectionFilter(FilterType type, EquipmentType subtype, UUID id, String equipmentID, String equipmentName,
                                        String substationName, Set<String> countries,
                                        RangeType rangeType, Double value1, Double value2)  throws Exception {
         String filter = "{" + joinWithComma(
             jsonVal("id", id.toString()),
-            jsonVal("type", type.name()));
+            jsonVal("type", type.name()),
+            jsonVal("subtype", subtype.name()));
 
         if (equipmentID != null) {
             filter += ", " + jsonVal("equipmentID", equipmentID);
@@ -471,12 +480,13 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
-    private void insertTransformerFilter(FilterType type, UUID id, String equipmentID, String equipmentName,
-                                       String substationName, Set<String> countries,
-                                       List<RangeType> rangeTypes, List<Double> values1, List<Double> values2)  throws Exception {
+    private void insertTransformerFilter(FilterType type, EquipmentType subtype, UUID id, String equipmentID, String equipmentName,
+                                         String substationName, Set<String> countries,
+                                         List<RangeType> rangeTypes, List<Double> values1, List<Double> values2)  throws Exception {
         String filter = "{" + joinWithComma(
             jsonVal("id", id.toString()),
-            jsonVal("type", type.name()));
+            jsonVal("type", type.name()),
+            jsonVal("subtype", subtype.name()));
 
         if (equipmentID != null) {
             filter += ", " + jsonVal("equipmentID", equipmentID);
@@ -515,12 +525,13 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
-    private void insertHvdcLineFilter(FilterType type, UUID id, String equipmentID, String equipmentName,
-                                       String substationName1, String substationName2, Set<String> countries1,
-                                       Set<String> countries2, RangeType rangeType, Double value1, Double value2)  throws Exception {
+    private void insertHvdcLineFilter(FilterType type, EquipmentType subtype, UUID id, String equipmentID, String equipmentName,
+                                      String substationName1, String substationName2, Set<String> countries1,
+                                      Set<String> countries2, RangeType rangeType, Double value1, Double value2)  throws Exception {
         String filter = "{" + joinWithComma(
             jsonVal("id", id.toString()),
-            jsonVal("type", type.name()));
+            jsonVal("type", type.name()),
+            jsonVal("subtype", subtype.name()));
 
         if (equipmentID != null) {
             filter += ", " + jsonVal("equipmentID", equipmentID);

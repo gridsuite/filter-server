@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.VscConverterStationFilter;
 import org.gridsuite.filter.server.entities.VscConverterStationFilterEntity;
 import org.gridsuite.filter.server.repositories.VscConverterStationFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryP
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.VSC_CONVERTER_STATION;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.VSC_CONVERTER_STATION;
     }
 
     @Override

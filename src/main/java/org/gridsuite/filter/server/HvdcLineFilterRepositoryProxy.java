@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.HvdcLineFilter;
 import org.gridsuite.filter.server.entities.HvdcLineFilterEntity;
 import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<HvdcLi
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.HVDC_LINE;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.HVDC_LINE;
     }
 
     @Override

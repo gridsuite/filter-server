@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.EquipmentType;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -21,7 +21,7 @@ import org.gridsuite.filter.server.utils.FilterType;
 @Schema(description = "Static var compensator Filters", allOf = AbstractInjectionFilter.class)
 public class StaticVarCompensatorFilter extends AbstractInjectionFilter {
     @Override
-    public FilterType getType() {
-        return FilterType.STATIC_VAR_COMPENSATOR;
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.STATIC_VAR_COMPENSATOR;
     }
 }

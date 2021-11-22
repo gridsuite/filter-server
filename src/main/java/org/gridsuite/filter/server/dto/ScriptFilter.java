@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,5 +28,10 @@ public class ScriptFilter extends AbstractFilter {
     @Override
     public FilterType getType() {
         return FilterType.SCRIPT;
+    }
+
+    @Override
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.NONE;
     }
 }

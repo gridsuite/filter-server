@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ThreeWindingsTransformerFilter;
 import org.gridsuite.filter.server.entities.ThreeWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.ThreeWindingsTransformerFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilterReposi
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.THREE_WINDINGS_TRANSFORMER;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.THREE_WINDINGS_TRANSFORMER;
     }
 
     @Override

@@ -78,9 +78,9 @@ public class FiltersToGroovyScript {
 
     public String generateGroovyScriptFromFilters(AbstractFilter filter) {
         String script = "";
-        String equipmentsCollection = filter.getType().getCollectionName();
+        String equipmentsCollection = filter.getEquipmentType().getCollectionName();
 
-        switch (filter.getType()) {
+        switch (filter.getEquipmentType()) {
             case LINE:
                 script += lineTemplate;
                 break;
@@ -112,7 +112,7 @@ public class FiltersToGroovyScript {
 
         ST template = new ST(script);
 
-        switch (filter.getType()) {
+        switch (filter.getEquipmentType()) {
             case LINE:
                 LineFilter lineFilter = (LineFilter) filter;
                 template.add(COLLECTION_NAME, equipmentsCollection);

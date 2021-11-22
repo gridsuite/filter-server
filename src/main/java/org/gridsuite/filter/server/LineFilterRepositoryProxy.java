@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.LineFilter;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<LineFilter
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.LINE;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.LINE;
     }
 
     @Override

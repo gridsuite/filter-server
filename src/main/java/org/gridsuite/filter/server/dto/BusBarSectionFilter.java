@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.EquipmentType;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -21,7 +21,7 @@ import org.gridsuite.filter.server.utils.FilterType;
 @Schema(description = "Busbar section Filters", allOf = AbstractInjectionFilter.class)
 public class BusBarSectionFilter extends AbstractInjectionFilter {
     @Override
-    public FilterType getType() {
-        return FilterType.BUSBAR_SECTION;
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.BUSBAR_SECTION;
     }
 }

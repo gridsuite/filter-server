@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.GeneratorFilter;
 import org.gridsuite.filter.server.entities.GeneratorFilterEntity;
 import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Gener
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.GENERATOR;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.GENERATOR;
     }
 
     @Override

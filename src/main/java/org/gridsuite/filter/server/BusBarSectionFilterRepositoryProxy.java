@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.BusBarSectionFilter;
 import org.gridsuite.filter.server.entities.BusBarSectionFilterEntity;
 import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepositoryProxy<B
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.BUSBAR_SECTION;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.BUSBAR_SECTION;
     }
 
     @Override

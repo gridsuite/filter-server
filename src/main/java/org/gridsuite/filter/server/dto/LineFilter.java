@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
@@ -24,8 +24,8 @@ import java.util.Set;
 @Schema(description = "Line Filters", allOf = AbstractGenericFilter.class)
 public class LineFilter extends AbstractGenericFilter {
     @Override
-    public FilterType getType() {
-        return FilterType.LINE;
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.LINE;
     }
 
     @Schema(description = "SubstationName1")

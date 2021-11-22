@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.BatteryFilter;
 import org.gridsuite.filter.server.entities.BatteryFilterEntity;
 import org.gridsuite.filter.server.repositories.BatteryFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Battery
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.BATTERY;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.BATTERY;
     }
 
     @Override

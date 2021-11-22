@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.DanglingLineFilter;
 import org.gridsuite.filter.server.entities.DanglingLineFilterEntity;
 import org.gridsuite.filter.server.repositories.DanglingLineFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Da
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.DANGLING_LINE;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.DANGLING_LINE;
     }
 
     @Override

@@ -18,6 +18,7 @@ import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 import java.util.Date;
@@ -59,7 +60,9 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
 
     abstract FilterEntity fromDto(AbstractFilter dto);
 
-    abstract FilterType getRepositoryType();
+    abstract FilterType getFilterType();
+
+    abstract EquipmentType getFilterSubtype();
 
     Optional<AbstractFilter> getFilter(UUID id) {
         Optional<FilterEntity> element = getRepository().findById(id);
@@ -82,7 +85,7 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
     }
 
     FilterAttributes metadataToAttribute(FilterMetadata f) {
-        return new FilterAttributes(f, getRepositoryType());
+        return new FilterAttributes(f, getFilterType(), getFilterSubtype());
     }
 
     AbstractFilter insert(AbstractFilter f) {

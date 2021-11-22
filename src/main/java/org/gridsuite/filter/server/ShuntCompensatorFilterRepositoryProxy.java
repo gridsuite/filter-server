@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ShuntCompensatorFilter;
 import org.gridsuite.filter.server.entities.ShuntCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.ShuntCompensatorFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -27,8 +28,13 @@ class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterRepositoryProx
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.SHUNT_COMPENSATOR;
+    public FilterType getFilterType() {
+        return FilterType.FILTER;
+    }
+
+    @Override
+    public EquipmentType getFilterSubtype() {
+        return EquipmentType.SHUNT_COMPENSATOR;
     }
 
     @Override
