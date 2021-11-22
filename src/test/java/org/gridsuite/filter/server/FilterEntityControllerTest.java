@@ -121,7 +121,7 @@ public class FilterEntityControllerTest {
         String lineFilter = "{" + joinWithComma(
             jsonVal("id", filterId1.toString()),
             jsonVal("type", FilterType.FILTER.name()),
-            jsonVal("subtype", EquipmentType.LINE.name()),
+            jsonVal("equipmentType", EquipmentType.LINE.name()),
             jsonVal("substationName1", "ragala"),
             jsonVal("substationName2", "miamMiam"),
             jsonVal("equipmentID", "vazy"),
@@ -148,7 +148,7 @@ public class FilterEntityControllerTest {
         String minimalLineFilter = "{" + joinWithComma(
             jsonVal("id", filterId1.toString()),
             jsonVal("type", FilterType.FILTER.name()),
-            jsonVal("subtype", EquipmentType.LINE.name()))
+            jsonVal("equipmentType", EquipmentType.LINE.name()))
             + "}";
 
         modifyFilter(filterId1, minimalLineFilter);
@@ -157,7 +157,7 @@ public class FilterEntityControllerTest {
         String scriptFilter = "{" + joinWithComma(
             jsonVal("id", filterId2.toString()),
             jsonVal("type", FilterType.SCRIPT.name()),
-            jsonVal("subtype", EquipmentType.NONE.name()),
+            jsonVal("equipmentType", EquipmentType.NONE.name()),
             jsonVal("script", "test")) +
             "}";
 
@@ -191,7 +191,7 @@ public class FilterEntityControllerTest {
         // test replace line filter with other filter type
         String generatorFilter = "{" + joinWithComma(
             jsonVal("type", FilterType.FILTER.name()),
-            jsonVal("subtype", EquipmentType.GENERATOR.name()),
+            jsonVal("equipmentType", EquipmentType.GENERATOR.name()),
             jsonVal("substationName", "s1"),
             jsonVal("equipmentID", "eqId1"),
             jsonVal("equipmentName", "gen1"),
@@ -330,7 +330,7 @@ public class FilterEntityControllerTest {
         String lineFilter = "{" + joinWithComma(
             jsonVal("id", filterId1.toString()),
             jsonVal("type", FilterType.FILTER.name()),
-            jsonVal("subtype", EquipmentType.LINE.name()),
+            jsonVal("equipmentType", EquipmentType.LINE.name()),
             jsonVal("substationName1", "ragala"),
             jsonVal("substationName2", "miamMiam"),
             jsonVal("equipmentID", "vazy"),
@@ -344,14 +344,14 @@ public class FilterEntityControllerTest {
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"subtype\":\"LINE\"}]"));
+            .andExpect(content().json("[{\"equipmentType\":\"LINE\"}]"));
 
         // new script from filter
         mvc.perform(post(URL_TEMPLATE + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"subtype\":\"LINE\"}, {\"type\":\"SCRIPT\"}]"));
+            .andExpect(content().json("[{\"equipmentType\":\"LINE\"}, {\"type\":\"SCRIPT\"}]"));
 
         // replace filter with script
         mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
@@ -363,7 +363,7 @@ public class FilterEntityControllerTest {
         String scriptFilter = "{" + joinWithComma(
             jsonVal("id", filterId2.toString()),
             jsonVal("type", FilterType.SCRIPT.name()),
-            jsonVal("subtype", EquipmentType.NONE.name()),
+            jsonVal("equipmentType", EquipmentType.NONE.name()),
             jsonVal("script", "test2"))
             + "}";
         insertFilter(filterId2, scriptFilter);
@@ -374,10 +374,10 @@ public class FilterEntityControllerTest {
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
     }
 
-    private void matchFilterInfos(IFilterAttributes filterAttribute, UUID id, FilterType type, EquipmentType subtype, Date creationDate, Date modificationDate) {
+    private void matchFilterInfos(IFilterAttributes filterAttribute, UUID id, FilterType type, EquipmentType equipmentType, Date creationDate, Date modificationDate) {
         assertEquals(filterAttribute.getId(), id);
         assertEquals(filterAttribute.getType(), type);
-        assertEquals(filterAttribute.getEquipmentType(), subtype);
+        assertEquals(filterAttribute.getEquipmentType(), equipmentType);
         assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 1000);
         assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 100);
     }
@@ -437,13 +437,13 @@ public class FilterEntityControllerTest {
             ).append("}");
     }
 
-    private void insertInjectionFilter(FilterType type, EquipmentType subtype, UUID id, String equipmentID, String equipmentName,
+    private void insertInjectionFilter(FilterType type, EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                        String substationName, Set<String> countries,
                                        RangeType rangeType, Double value1, Double value2)  throws Exception {
         String filter = "{" + joinWithComma(
             jsonVal("id", id.toString()),
             jsonVal("type", type.name()),
-            jsonVal("subtype", subtype.name()));
+            jsonVal("equipmentType", equipmentType.name()));
 
         if (equipmentID != null) {
             filter += ", " + jsonVal("equipmentID", equipmentID);
@@ -480,13 +480,13 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
-    private void insertTransformerFilter(FilterType type, EquipmentType subtype, UUID id, String equipmentID, String equipmentName,
+    private void insertTransformerFilter(FilterType type, EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                          String substationName, Set<String> countries,
                                          List<RangeType> rangeTypes, List<Double> values1, List<Double> values2)  throws Exception {
         String filter = "{" + joinWithComma(
             jsonVal("id", id.toString()),
             jsonVal("type", type.name()),
-            jsonVal("subtype", subtype.name()));
+            jsonVal("equipmentType", equipmentType.name()));
 
         if (equipmentID != null) {
             filter += ", " + jsonVal("equipmentID", equipmentID);
@@ -525,13 +525,13 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
-    private void insertHvdcLineFilter(FilterType type, EquipmentType subtype, UUID id, String equipmentID, String equipmentName,
+    private void insertHvdcLineFilter(FilterType type, EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                       String substationName1, String substationName2, Set<String> countries1,
                                       Set<String> countries2, RangeType rangeType, Double value1, Double value2)  throws Exception {
         String filter = "{" + joinWithComma(
             jsonVal("id", id.toString()),
             jsonVal("type", type.name()),
-            jsonVal("subtype", subtype.name()));
+            jsonVal("equipmentType", equipmentType.name()));
 
         if (equipmentID != null) {
             filter += ", " + jsonVal("equipmentID", equipmentID);
