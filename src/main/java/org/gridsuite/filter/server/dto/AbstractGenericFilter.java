@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server.dto;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,12 +18,12 @@ import org.gridsuite.filter.server.utils.FilterType;
 /**
  * @author Borsenberger jacques <borsenberger.jacques at rte-france.com>
  */
-//@JsonTypeInfo(
-//        use = JsonTypeInfo.Id.NAME,
-//        property = "subtype",
-//        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-//        visible = true
-//)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        property = "equipmentType",
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        visible = true
+)
 @JsonSubTypes({//Below, we define the names and the binding classes.
     @JsonSubTypes.Type(value = LineFilter.class, name = "LINE"),
     @JsonSubTypes.Type(value = GeneratorFilter.class, name = "GENERATOR"),

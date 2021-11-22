@@ -27,7 +27,7 @@ import java.util.UUID;
     visible = true
 )
 @JsonSubTypes({//Below, we define the names and the binding classes.
-//    @JsonSubTypes.Type(value = ScriptFilter.class, name = "SCRIPT"),
+    @JsonSubTypes.Type(value = ScriptFilter.class, name = "SCRIPT"),
     @JsonSubTypes.Type(value = AbstractGenericFilter.class, name = "FILTER"),
 })
 //@Schema(description = "Basic class for Filters", subTypes = {ScriptFilter.class, AbstractGenericFilter.class}, discriminatorProperty = "type")
