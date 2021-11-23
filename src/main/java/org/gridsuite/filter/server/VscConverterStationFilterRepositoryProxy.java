@@ -19,7 +19,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryProxy<VscConverterStationFilterEntity, VscConverterStationFilterRepository> {
+public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryProxy<VscConverterStationFilterEntity, VscConverterStationFilterRepository> {
 
     private final VscConverterStationFilterRepository vscConverterStationFilterRepository;
 
@@ -29,11 +29,11 @@ class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryP
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FILTER;
+        return FilterType.FORM;
     }
 
     @Override
-    public EquipmentType getFilterSubtype() {
+    public EquipmentType getEquipmentType() {
         return EquipmentType.VSC_CONVERTER_STATION;
     }
 

@@ -9,6 +9,7 @@ package org.gridsuite.filter.server.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
@@ -19,11 +20,11 @@ import java.util.Set;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 @Getter
+@Setter
 @NoArgsConstructor
 @SuperBuilder
-@Schema(description = "Line Filters", allOf = AbstractGenericFilter.class)
-public class LineFilter extends AbstractGenericFilter {
-    @Override
+@Schema(description = "Line Filters", allOf = FormFilter.class)
+public class LineFilter extends AbstractEquipmentFilterForm {
     public EquipmentType getEquipmentType() {
         return EquipmentType.LINE;
     }
@@ -46,7 +47,6 @@ public class LineFilter extends AbstractGenericFilter {
     @Schema(description = "Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
 
-    @Override
     public boolean isEmpty() {
         return super.isEmpty()
             && substationName1 == null

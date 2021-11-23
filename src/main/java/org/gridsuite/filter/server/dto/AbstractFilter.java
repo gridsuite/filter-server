@@ -28,9 +28,8 @@ import java.util.UUID;
 )
 @JsonSubTypes({//Below, we define the names and the binding classes.
     @JsonSubTypes.Type(value = ScriptFilter.class, name = "SCRIPT"),
-    @JsonSubTypes.Type(value = AbstractGenericFilter.class, name = "FILTER"),
+    @JsonSubTypes.Type(value = FormFilter.class, name = "FORM"),
 })
-//@Schema(description = "Basic class for Filters", subTypes = {ScriptFilter.class, AbstractGenericFilter.class}, discriminatorProperty = "type")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -42,4 +41,6 @@ public abstract class AbstractFilter implements IFilterAttributes {
     Date creationDate;
 
     Date modificationDate;
+
+
 }

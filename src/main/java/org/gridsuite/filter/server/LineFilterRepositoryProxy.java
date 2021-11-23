@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.LineFilter;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
@@ -19,7 +20,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 
-class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<LineFilterEntity, LineFilterRepository> {
+public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<LineFilterEntity, LineFilterRepository> {
 
     private final LineFilterRepository lineFilterRepository;
 
@@ -29,11 +30,11 @@ class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<LineFilter
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FILTER;
+        return FilterType.FORM;
     }
 
     @Override
-    public EquipmentType getFilterSubtype() {
+    public EquipmentType getEquipmentType() {
         return EquipmentType.LINE;
     }
 
@@ -44,15 +45,17 @@ class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<LineFilter
 
     @Override
     public AbstractFilter toDto(LineFilterEntity entity) {
-        return buildGenericFilter(
-            LineFilter.builder()
-                .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries1()))
-                .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries2()))
-                .substationName1(entity.getSubstationName1())
-                .substationName2(entity.getSubstationName2())
-                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage1()))
-                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage2())),
-            entity).build();
+        return buildFormFilter(
+            FormFilter.builder().equipmentFilterForm(
+                LineFilter.builder()
+                    .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries1()))
+                    .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries2()))
+                    .substationName1(entity.getSubstationName1())
+                    .substationName2(entity.getSubstationName2())
+                    .nominalVoltage1(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage1()))
+                    .nominalVoltage2(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage2())),
+                    entity
+                ).build());
     }
 
     @Override

@@ -19,7 +19,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryProxy<LccConverterStationFilterEntity, LccConverterStationFilterRepository> {
+public class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryProxy<LccConverterStationFilterEntity, LccConverterStationFilterRepository> {
 
     private final LccConverterStationFilterRepository lccConverterStationFilterRepository;
 
@@ -29,11 +29,11 @@ class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryP
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FILTER;
+        return FilterType.FORM;
     }
 
     @Override
-    public EquipmentType getFilterSubtype() {
+    public EquipmentType getEquipmentType() {
         return EquipmentType.LCC_CONVERTER_STATION;
     }
 

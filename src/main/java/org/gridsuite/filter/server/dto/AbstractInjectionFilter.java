@@ -20,8 +20,8 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-@Schema(description = "Injection Filters", allOf = AbstractGenericFilter.class)
-public abstract class AbstractInjectionFilter extends AbstractGenericFilter {
+@Schema(description = "Injection Filters", allOf = FormFilter.class)
+public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "SubstationName")
     String substationName;
 

@@ -19,7 +19,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterRepositoryProxy<TwoWindingsTransformerFilterEntity, TwoWindingsTransformerFilterRepository> {
+public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterRepositoryProxy<TwoWindingsTransformerFilterEntity, TwoWindingsTransformerFilterRepository> {
 
     private final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository;
 
@@ -29,11 +29,11 @@ class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterReposito
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FILTER;
+        return FilterType.FORM;
     }
 
     @Override
-    public EquipmentType getFilterSubtype() {
+    public EquipmentType getEquipmentType() {
         return EquipmentType.TWO_WINDINGS_TRANSFORMER;
     }
 

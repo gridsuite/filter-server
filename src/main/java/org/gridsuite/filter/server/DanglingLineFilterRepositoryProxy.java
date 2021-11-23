@@ -19,7 +19,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<DanglingLineFilterEntity, DanglingLineFilterRepository> {
+public class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<DanglingLineFilterEntity, DanglingLineFilterRepository> {
 
     private final DanglingLineFilterRepository danglingLineFilterRepository;
 
@@ -29,11 +29,11 @@ class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Da
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FILTER;
+        return FilterType.FORM;
     }
 
     @Override
-    public EquipmentType getFilterSubtype() {
+    public EquipmentType getEquipmentType() {
         return EquipmentType.DANGLING_LINE;
     }
 

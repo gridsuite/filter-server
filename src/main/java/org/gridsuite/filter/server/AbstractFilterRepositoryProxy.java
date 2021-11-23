@@ -7,15 +7,8 @@
 
 package org.gridsuite.filter.server;
 
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.AbstractGenericFilter;
-import org.gridsuite.filter.server.dto.AbstractInjectionFilter;
-import org.gridsuite.filter.server.dto.FilterAttributes;
-import org.gridsuite.filter.server.dto.NumericalFilter;
-import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.entities.AbstractGenericFilterEntity;
-import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -34,7 +27,7 @@ import java.util.stream.Stream;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilterEntity, EntityRepository extends FilterRepository<FilterEntity>> {
+public abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilterEntity, EntityRepository extends FilterRepository<FilterEntity>> {
     public static final String WRONG_FILTER_TYPE = "Wrong filter type, should never happen";
 
     static <T> Set<T> cloneIfNotEmptyOrNull(Set<T> set) {
@@ -50,8 +43,8 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
 
     static NumericFilterEntity convert(NumericalFilter numericalFilter) {
         return numericalFilter != null ?
-            new NumericFilterEntity(null, numericalFilter.getType(), numericalFilter.getValue1(), numericalFilter.getValue2())
-            : null;
+                new NumericFilterEntity(null, numericalFilter.getType(), numericalFilter.getValue1(), numericalFilter.getValue2())
+                : null;
     }
 
     abstract EntityRepository getRepository();
@@ -62,7 +55,7 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
 
     abstract FilterType getFilterType();
 
-    abstract EquipmentType getFilterSubtype();
+    abstract EquipmentType getEquipmentType();
 
     Optional<AbstractFilter> getFilter(UUID id) {
         Optional<FilterEntity> element = getRepository().findById(id);
@@ -85,7 +78,7 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
     }
 
     FilterAttributes metadataToAttribute(FilterMetadata f) {
-        return new FilterAttributes(f, getFilterType(), getFilterSubtype());
+        return new FilterAttributes(f, getFilterType(), getEquipmentType());
     }
 
     AbstractFilter insert(AbstractFilter f) {
@@ -107,23 +100,23 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
 
     AbstractFilter.AbstractFilterBuilder<?, ?> buildAbstractFilter(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
         return builder.id(entity.getId())
-            .creationDate(entity.getCreationDate()).modificationDate(entity.getModificationDate());
+                .creationDate(entity.getCreationDate()).modificationDate(entity.getModificationDate());
     }
 
-    AbstractFilter.AbstractFilterBuilder<?, ?> buildGenericFilter(AbstractGenericFilter.AbstractGenericFilterBuilder<?, ?> builder, AbstractGenericFilterEntity entity) {
-        return buildAbstractFilter(builder.equipmentID(entity.getEquipmentId()).equipmentName(entity.getEquipmentName()), entity);
+    AbstractFilter.AbstractFilterBuilder<?, ?> buildFormFilter(FormFilter.FormFilterBuilder<?, ?> builder, FormFilterEntity entity) {
+        return buildAbstractFilter(builder.equipmentFilterForm(null), entity);
     }
 
     AbstractFilter.AbstractFilterBuilder<?, ?> buildInjectionFilter(AbstractInjectionFilter.AbstractInjectionFilterBuilder<?, ?> builder, AbstractInjectionFilterEntity entity) {
-        return buildGenericFilter(builder.substationName(entity.getSubstationName())
+        return buildFormFilter(builder.substationName(entity.getSubstationName())
                 .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries()))
                 .nominalVoltage(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage())), entity);
     }
 
-    void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, AbstractGenericFilter dto) {
+    void buildFormFilter(FormFilterEntity.FormFilterEntityBuilder<?, ?> builder, FormFilter dto) {
         buildAbstractFilter(builder, dto);
         builder.equipmentId(dto.getEquipmentID())
-            .equipmentName(dto.getEquipmentName());
+                .equipmentName(dto.getEquipmentName());
     }
 
     void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, AbstractInjectionFilter dto) {
@@ -136,7 +129,7 @@ abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilter
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.id(dto.getId())
-            .creationDate(getDateOrCreate(dto.getCreationDate()));
+                .creationDate(getDateOrCreate(dto.getCreationDate()));
     }
 
     Date getDateOrCreate(Date dt) {

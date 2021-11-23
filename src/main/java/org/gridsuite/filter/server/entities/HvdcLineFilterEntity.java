@@ -32,7 +32,7 @@ import java.util.Set;
 @SuperBuilder
 @Entity
 @Table(name = "hvdc_line_filter")
-public class HvdcLineFilterEntity extends AbstractGenericFilterEntity {
+public class HvdcLineFilterEntity extends FormFilterEntity {
     @Column(name = "countries1")
     @ElementCollection
     @CollectionTable(foreignKey = @ForeignKey(name = "hvdcLineFilterEntity_countries_fk1"), indexes = {@Index(name = "hvdcLineFilterEntity_countries_idx1", columnList = "hvdc_line_filter_entity_id")})

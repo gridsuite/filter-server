@@ -19,7 +19,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<GeneratorFilterEntity, GeneratorFilterRepository> {
+public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<GeneratorFilterEntity, GeneratorFilterRepository> {
 
     private final GeneratorFilterRepository generatorFilterRepository;
 
@@ -29,11 +29,11 @@ class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Gener
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FILTER;
+        return FilterType.FORM;
     }
 
     @Override
-    public EquipmentType getFilterSubtype() {
+    public EquipmentType getEquipmentType() {
         return EquipmentType.GENERATOR;
     }
 

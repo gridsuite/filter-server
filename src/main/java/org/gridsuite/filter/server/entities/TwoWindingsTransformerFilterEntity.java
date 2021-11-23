@@ -32,7 +32,7 @@ import java.util.Set;
 @SuperBuilder
 @Entity
 @Table(name = "two_windings_transformer_filter")
-public class TwoWindingsTransformerFilterEntity extends AbstractGenericFilterEntity {
+public class TwoWindingsTransformerFilterEntity extends FormFilterEntity {
     @Column(name = "countries")
     @ElementCollection
     @CollectionTable(foreignKey = @ForeignKey(name = "twoWindingsTransformerFilterEntity_countries_fk"), indexes = {@Index(name = "twoWindingsTransformerFilterEntity_countries_idx", columnList = "two_windings_transformer_filter_entity_id")})

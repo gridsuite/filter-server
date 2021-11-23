@@ -32,7 +32,7 @@ class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ScriptFi
     }
 
     @Override
-    public EquipmentType getFilterSubtype() {
+    public EquipmentType getEquipmentType() {
         return EquipmentType.NONE;
     }
 

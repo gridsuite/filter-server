@@ -21,8 +21,8 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-@Schema(description = "Three windings transformer Filters", allOf = AbstractGenericFilter.class)
-public class ThreeWindingsTransformerFilter extends AbstractGenericFilter {
+@Schema(description = "Three windings transformer Filters", allOf = FormFilter.class)
+public class ThreeWindingsTransformerFilter extends AbstractEquipmentFilterForm {
     @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.THREE_WINDINGS_TRANSFORMER;

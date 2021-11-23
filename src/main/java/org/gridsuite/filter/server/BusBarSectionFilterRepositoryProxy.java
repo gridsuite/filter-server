@@ -19,7 +19,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepositoryProxy<BusBarSectionFilterEntity, BusBarSectionFilterRepository> {
+public class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepositoryProxy<BusBarSectionFilterEntity, BusBarSectionFilterRepository> {
 
     private final BusBarSectionFilterRepository busBarSectionFilterRepository;
 
@@ -29,11 +29,11 @@ class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepositoryProxy<B
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FILTER;
+        return FilterType.FORM;
     }
 
     @Override
-    public EquipmentType getFilterSubtype() {
+    public EquipmentType getEquipmentType() {
         return EquipmentType.BUSBAR_SECTION;
     }
 
