@@ -11,14 +11,9 @@ package org.gridsuite.filter.server.repositories;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 public interface FilterMetadata {
-    String getName();
-
     java.util.UUID getId();
 
     java.util.Date getCreationDate();
 
     java.util.Date getModificationDate();
-
-    String getDescription();
-
 }

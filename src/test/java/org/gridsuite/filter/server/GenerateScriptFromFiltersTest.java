@@ -63,7 +63,6 @@ public class GenerateScriptFromFiltersTest {
                 "}\n",
             filtersToScript.generateGroovyScriptFromFilters(LineFilter.builder()
                     .id(FILTER1_UUID)
-                .name("filter1")
                 .equipmentID("lineId1")
                 .equipmentName("lineName1")
                 .substationName1("s1")
@@ -88,7 +87,6 @@ public class GenerateScriptFromFiltersTest {
                 "}\n",
             filtersToScript.generateGroovyScriptFromFilters(LineFilter.builder()
                 .id(FILTER1_UUID)
-                .name("filter2")
                 .equipmentName("lineName2")
                 .substationName1("s1")
                 .countries2(countries2)
@@ -102,7 +100,6 @@ public class GenerateScriptFromFiltersTest {
                 "}\n",
             filtersToScript.generateGroovyScriptFromFilters(LineFilter.builder()
                 .id(FILTER1_UUID)
-                .name("filter2")
                 .build()));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
@@ -119,7 +116,6 @@ public class GenerateScriptFromFiltersTest {
                 "}\n",
             filtersToScript.generateGroovyScriptFromFilters(LineFilter.builder()
                 .id(FILTER1_UUID)
-                .name("filter2")
                 .equipmentName("lineName2")
                 .substationName1("s1")
                 .countries2(countries2)
@@ -146,7 +142,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(GeneratorFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter1")
             .equipmentID("genId1")
             .equipmentName("genName1")
             .substationName("s1")
@@ -173,7 +168,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(LoadFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter2")
             .equipmentID("loadId1")
             .equipmentName("loadName1")
             .substationName("s3")
@@ -195,7 +189,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(ShuntCompensatorFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter3")
             .equipmentName("shuntName1")
             .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(380.).build())
             .build()));
@@ -218,7 +211,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(StaticVarCompensatorFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter2")
             .equipmentID("staticVarCompensatorId1")
             .substationName("s4")
             .countries(countries)
@@ -239,7 +231,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(BatteryFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter5")
             .equipmentID("batteryId1")
             .equipmentName("batteryName1")
             .substationName("s5")
@@ -255,7 +246,6 @@ public class GenerateScriptFromFiltersTest {
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(BusBarSectionFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter5")
             .build()));
     }
 
@@ -278,7 +268,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(DanglingLineFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter1")
             .equipmentID("danglingId1")
             .equipmentName("danglingName1")
             .substationName("s3")
@@ -304,7 +293,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(LccConverterStationFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter6")
             .equipmentID("lccId1")
             .equipmentName("lccName1")
             .countries(countries)
@@ -328,7 +316,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(VscConverterStationFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter7")
             .equipmentID("vscId1")
             .countries(countries)
             .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
@@ -355,7 +342,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(TwoWindingsTransformerFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter1")
             .equipmentID("2wtId1")
             .equipmentName("2wtName1")
             .substationName("s2")
@@ -385,7 +371,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(ThreeWindingsTransformerFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter1=2")
             .equipmentID("3wtId1")
             .equipmentName("3wtName1")
             .substationName("s3")
@@ -418,7 +403,6 @@ public class GenerateScriptFromFiltersTest {
             "     }\n" +
             "}\n", filtersToScript.generateGroovyScriptFromFilters(HvdcLineFilter.builder()
             .id(FILTER1_UUID)
-            .name("filter9")
             .equipmentID("hvdcId1")
             .equipmentName("hvdcName1")
             .substationName1("s1")

@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IFilterAttributes;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ScriptFilter;
@@ -91,10 +92,16 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    List<IFilterAttributes> getFilters(List<UUID> ids) {
+    List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
         return filterRepositories.entrySet().stream()
-            .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
-            .collect(Collectors.toList());
+                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids)).map(filter -> {
+//                     In the filter-server repository, filters are stored with types that are SCRIPT or LINE, BATTERY etc
+//                     In the other services and especially in the gridexplore, we don't need to know this implementation information.
+//                     We just need to know if the filter is of type SCRIPT or FILTER. That's why we simplify the type here.
+                    filter.setType(filter.getType().equals(FilterType.SCRIPT) ? FilterType.SCRIPT : FilterType.FILTER);
+                    return filter;
+                })
+                .collect(Collectors.toList());
     }
 
     Optional<AbstractFilter> getFilter(UUID id) {
@@ -147,16 +154,6 @@ public class FilterService {
         }
     }
 
-    @Transactional
-    public void renameFilter(UUID id, String newName) {
-        Optional<AbstractFilterEntity> f = getFilterEntity(id);
-        if (f.isPresent()) {
-            f.get().setName(newName);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
-        }
-    }
-
     void deleteFilter(UUID id) {
         Objects.requireNonNull(id);
         if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
@@ -183,7 +180,7 @@ public class FilterService {
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
                 filterRepositories.get(filter.get().getType()).deleteById(filter.get().getId());
-                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(filter.get().getId()).name(filter.get().getName()).script(script).build());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(filter.get().getId()).script(script).build());
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
@@ -191,9 +188,8 @@ public class FilterService {
     }
 
     @Transactional
-    public AbstractFilter newScriptFromFilter(UUID filterId, UUID scriptId, String scriptName) {
+    public AbstractFilter newScriptFromFilter(UUID filterId, UUID newId) {
         Objects.requireNonNull(filterId);
-        Objects.requireNonNull(scriptId);
 
         Optional<AbstractFilter> filter = getFilter(filterId);
         if (filter.isPresent()) {
@@ -201,7 +197,7 @@ public class FilterService {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
-                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(scriptId).name(scriptName).script(script).build());
+                return filterRepositories.get(FilterType.SCRIPT).insert(ScriptFilter.builder().id(newId == null ? UUID.randomUUID() : newId).script(script).build());
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterId + NOT_FOUND);
