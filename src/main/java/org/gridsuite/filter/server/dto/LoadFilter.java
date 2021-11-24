@@ -10,7 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
+
+import java.util.Set;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -20,6 +23,10 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 @SuperBuilder
 @Schema(description = "Load Filters", allOf = AbstractInjectionFilter.class)
 public class LoadFilter extends AbstractInjectionFilter {
+    public LoadFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericFilterEntity nominalVoltage) {
+        super(equipmentID, equipmentName, substationName, countries, nominalVoltage);
+    }
+
     @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.LOAD;

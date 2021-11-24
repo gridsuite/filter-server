@@ -10,6 +10,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.DanglingLineFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.entities.DanglingLineFilterEntity;
 import org.gridsuite.filter.server.repositories.DanglingLineFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -44,17 +45,32 @@ public class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryP
 
     @Override
     public AbstractFilter toDto(DanglingLineFilterEntity entity) {
-        return buildInjectionFilter(
-            DanglingLineFilter.builder(), entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new DanglingLineFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage()
+                )
+        );
     }
 
     @Override
     public DanglingLineFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof DanglingLineFilter) {
-            var danglingLineFilterEntityBuilder = DanglingLineFilterEntity.builder();
-            buildInjectionFilter(danglingLineFilterEntityBuilder, (DanglingLineFilter) dto);
-            return danglingLineFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof DanglingLineFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var danglingLineFilterEntityBuilder = DanglingLineFilterEntity.builder();
+        buildInjectionFilter(danglingLineFilterEntityBuilder, formFilter);
+        return danglingLineFilterEntityBuilder.build();
     }
 }

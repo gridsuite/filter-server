@@ -9,8 +9,11 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.HvdcLineFilter;
+import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.entities.HvdcLineFilterEntity;
+import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -44,29 +47,46 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
 
     @Override
     public AbstractFilter toDto(HvdcLineFilterEntity entity) {
-        return buildGenericFilter(
-            HvdcLineFilter.builder()
-                .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries1()))
-                .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries2()))
-                .substationName1(entity.getSubstationName1())
-                .substationName2(entity.getSubstationName2())
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage())),
-            entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new HvdcLineFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName1(),
+                        entity.getSubstationName2(),
+                        entity.getCountries1(),
+                        entity.getCountries2(),
+                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2())
+                        .build()
+                )
+        );
     }
 
     @Override
     public HvdcLineFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof HvdcLineFilter) {
-            var hvdcLineFilter = (HvdcLineFilter) dto;
-            var hvdcLineFilterEntityBuilder = HvdcLineFilterEntity.builder()
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof HvdcLineFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var hvdcLineFilterEntityBuilder = HvdcLineFilterEntity.builder();
+        HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) formFilter.getEquipmentFilterForm();
+        return HvdcLineFilterEntity.builder()
+                .id(formFilter.getId())
+                .creationDate(formFilter.getCreationDate())
+                .modificationDate((formFilter.getModificationDate()))
+                .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
+                .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
+                .countries1(hvdcLineFilter.getCountries1())
+                .countries2(hvdcLineFilter.getCountries2())
+                .nominalVoltage(new NumericFilterEntity(hvdcLineFilter.getNominalVoltage()))
                 .substationName1(hvdcLineFilter.getSubstationName1())
                 .substationName2(hvdcLineFilter.getSubstationName2())
-                .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(hvdcLineFilter.getCountries1()))
-                .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(hvdcLineFilter.getCountries2()))
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(hvdcLineFilter.getNominalVoltage()));
-            buildGenericFilter(hvdcLineFilterEntityBuilder, hvdcLineFilter);
-            return hvdcLineFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+                .build();
     }
 }

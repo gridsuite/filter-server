@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.TwoWindingsTransformerFilter;
 import org.gridsuite.filter.server.entities.TwoWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.TwoWindingsTransformerFilterRepository;
@@ -44,27 +45,33 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
 
     @Override
     public AbstractFilter toDto(TwoWindingsTransformerFilterEntity entity) {
-        return buildGenericFilter(
-            TwoWindingsTransformerFilter.builder()
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries()))
-                .substationName(entity.getSubstationName())
-                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage1()))
-                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage2())),
-            entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new TwoWindingsTransformerFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage1(),
+                        entity.getNominalVoltage2()
+                )
+        );
     }
 
     @Override
     public TwoWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof TwoWindingsTransformerFilter) {
-            var twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) dto;
-            var twoWindingsTransformerFilterEntityBuilder = TwoWindingsTransformerFilterEntity.builder()
-                .substationName(twoWindingsTransformerFilter.getSubstationName())
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(twoWindingsTransformerFilter.getCountries()))
-                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(twoWindingsTransformerFilter.getNominalVoltage1()))
-                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(twoWindingsTransformerFilter.getNominalVoltage2()));
-            buildGenericFilter(twoWindingsTransformerFilterEntityBuilder, twoWindingsTransformerFilter);
-            return twoWindingsTransformerFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof TwoWindingsTransformerFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var twoWindingsTransformerFilterEntityBuilder = TwoWindingsTransformerFilterEntity.builder();
+        buildAbstractFilter(twoWindingsTransformerFilterEntityBuilder, formFilter);
+        return twoWindingsTransformerFilterEntityBuilder.build();
     }
 }

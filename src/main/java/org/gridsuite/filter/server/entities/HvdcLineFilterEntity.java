@@ -7,6 +7,7 @@
 
 package org.gridsuite.filter.server.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -29,10 +30,11 @@ import java.util.Set;
  */
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 @Entity
 @Table(name = "hvdc_line_filter")
-public class HvdcLineFilterEntity extends FormFilterEntity {
+public class HvdcLineFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "countries1")
     @ElementCollection
     @CollectionTable(foreignKey = @ForeignKey(name = "hvdcLineFilterEntity_countries_fk1"), indexes = {@Index(name = "hvdcLineFilterEntity_countries_idx1", columnList = "hvdc_line_filter_entity_id")})

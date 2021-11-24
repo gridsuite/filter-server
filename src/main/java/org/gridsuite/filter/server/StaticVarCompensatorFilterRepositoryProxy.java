@@ -9,6 +9,8 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.BatteryFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.StaticVarCompensatorFilter;
 import org.gridsuite.filter.server.entities.StaticVarCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.StaticVarCompensatorFilterRepository;
@@ -44,17 +46,32 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
 
     @Override
     public AbstractFilter toDto(StaticVarCompensatorFilterEntity entity) {
-        return buildInjectionFilter(
-            StaticVarCompensatorFilter.builder(), entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new StaticVarCompensatorFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage()
+                )
+        );
     }
 
     @Override
     public StaticVarCompensatorFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof StaticVarCompensatorFilter) {
-            var staticVarCompensatorFilterEntityBuilder = StaticVarCompensatorFilterEntity.builder();
-            buildInjectionFilter(staticVarCompensatorFilterEntityBuilder, (StaticVarCompensatorFilter) dto);
-            return staticVarCompensatorFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof BatteryFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var staticVarCompensatorFilterEntityBuilder = StaticVarCompensatorFilterEntity.builder();
+        buildInjectionFilter(staticVarCompensatorFilterEntityBuilder, formFilter);
+        return staticVarCompensatorFilterEntityBuilder.build();
     }
 }

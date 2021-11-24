@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.GeneratorFilter;
 import org.gridsuite.filter.server.entities.GeneratorFilterEntity;
 import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
@@ -44,17 +45,32 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
 
     @Override
     public AbstractFilter toDto(GeneratorFilterEntity entity) {
-        return buildInjectionFilter(
-            GeneratorFilter.builder(), entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new GeneratorFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage()
+                )
+        );
     }
 
     @Override
     public GeneratorFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof GeneratorFilter) {
-            var generatorFilterEntityBuilder = GeneratorFilterEntity.builder();
-            buildInjectionFilter(generatorFilterEntityBuilder, (GeneratorFilter) dto);
-            return generatorFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof GeneratorFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var generatorFilterEntityBuilder = GeneratorFilterEntity.builder();
+        buildInjectionFilter(generatorFilterEntityBuilder, formFilter);
+        return generatorFilterEntityBuilder.build();
     }
 }

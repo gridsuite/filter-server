@@ -22,7 +22,7 @@ import java.util.Set;
 @SuperBuilder
 @Entity
 @Table(name = "line_filter")
-public class LineFilterEntity extends FormFilterEntity {
+public class LineFilterEntity extends AbstractGenericFilterEntity {
     @Column(name = "countries1")
     @ElementCollection
     @CollectionTable(foreignKey = @ForeignKey(name = "lineFilterEntity_countries_fk1"), indexes = {@Index(name = "lineFilterEntity_countries_idx1", columnList = "line_filter_entity_id")})

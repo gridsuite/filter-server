@@ -13,6 +13,9 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
+import java.util.Date;
+import java.util.UUID;
+
 /**
  * @author Borsenberger jacques <borsenberger.jacques at rte-france.com>
  */
@@ -24,6 +27,11 @@ import org.gridsuite.filter.server.utils.FilterType;
 public class FormFilter extends AbstractFilter {
 
     private AbstractEquipmentFilterForm equipmentFilterForm;
+
+    public FormFilter(UUID id, Date creationDate, Date modificationDate, AbstractEquipmentFilterForm equipmentFilterForm) {
+        super(id, creationDate, modificationDate);
+        this.equipmentFilterForm = equipmentFilterForm;
+    }
 
     @Override
     public EquipmentType getEquipmentType() {

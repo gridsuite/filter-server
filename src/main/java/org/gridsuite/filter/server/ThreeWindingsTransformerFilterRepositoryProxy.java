@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.ThreeWindingsTransformerFilter;
 import org.gridsuite.filter.server.entities.ThreeWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.ThreeWindingsTransformerFilterRepository;
@@ -44,29 +45,34 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
 
     @Override
     public AbstractFilter toDto(ThreeWindingsTransformerFilterEntity entity) {
-        return buildGenericFilter(
-            ThreeWindingsTransformerFilter.builder()
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries()))
-                .substationName(entity.getSubstationName())
-                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage1()))
-                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage2()))
-                .nominalVoltage3(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage3())),
-            entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new ThreeWindingsTransformerFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage1(),
+                        entity.getNominalVoltage2(),
+                        entity.getNominalVoltage3()
+                )
+        );
     }
 
     @Override
     public ThreeWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof ThreeWindingsTransformerFilter) {
-            var threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) dto;
-            var threeWindingsTransformerFilterEntityBuilder = ThreeWindingsTransformerFilterEntity.builder()
-                .substationName(threeWindingsTransformerFilter.getSubstationName())
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(threeWindingsTransformerFilter.getCountries()))
-                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(threeWindingsTransformerFilter.getNominalVoltage1()))
-                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(threeWindingsTransformerFilter.getNominalVoltage2()))
-                .nominalVoltage3(AbstractFilterRepositoryProxy.convert(threeWindingsTransformerFilter.getNominalVoltage3()));
-            buildGenericFilter(threeWindingsTransformerFilterEntityBuilder, threeWindingsTransformerFilter);
-            return threeWindingsTransformerFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof ThreeWindingsTransformerFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var threeWindingsTransformerFilterEntityBuilder = ThreeWindingsTransformerFilterEntity.builder();
+        buildAbstractFilter(threeWindingsTransformerFilterEntityBuilder, formFilter);
+        return threeWindingsTransformerFilterEntityBuilder.build();
     }
 }

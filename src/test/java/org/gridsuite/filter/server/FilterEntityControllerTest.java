@@ -16,6 +16,7 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.RangeType;
@@ -34,6 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -398,6 +400,23 @@ public class FilterEntityControllerTest {
         JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
     }
 
+    private void insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
+        String tmp = objectMapper.writeValueAsString(filter);
+        String strRes = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
+                        .content(objectMapper.writeValueAsString(filter))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        JSONAssert.assertEquals(objectMapper.writeValueAsString(filter), strRes, JSONCompareMode.LENIENT);
+
+        mvc.perform(get(URL_TEMPLATE))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
+        // Check we didn't miss anything
+        JSONAssert.assertEquals(String.valueOf(filter), strRes, JSONCompareMode.LENIENT);
+    }
+
     private void modifyFilter(UUID filterId, String content) throws Exception {
         mvc.perform(put(URL_TEMPLATE + filterId)
             .content(content)
@@ -528,35 +547,49 @@ public class FilterEntityControllerTest {
     private void insertHvdcLineFilter(FilterType type, EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                       String substationName1, String substationName2, Set<String> countries1,
                                       Set<String> countries2, RangeType rangeType, Double value1, Double value2)  throws Exception {
-        String filter = "{" + joinWithComma(
-            jsonVal("id", id.toString()),
-            jsonVal("type", type.name()),
-            jsonVal("equipmentType", equipmentType.name()));
+        AbstractFilter hvdcLineFilter = new FormFilter(
+                id,
+                java.sql.Date.from(Instant.now()),
+                java.sql.Date.from(Instant.now()),
+                new HvdcLineFilter(
+                        equipmentID,
+                        equipmentName,
+                        substationName1,
+                        substationName2,
+                        countries1,
+                        countries2,
+                        new NumericalFilter(rangeType, value1, value2)
+                )
+        );
+//        String filter = "{" + joinWithComma(
+//            jsonVal("id", id.toString()),
+//            jsonVal("type", type.name()),
+//            jsonVal("equipmentType", equipmentType.name()));
+//
+//        if (equipmentID != null) {
+//            filter += ", " + jsonVal("equipmentID", equipmentID);
+//        }
+//        if (equipmentName != null) {
+//            filter += ", " + jsonVal("equipmentName", equipmentName);
+//        }
+//        if (substationName1 != null) {
+//            filter += ", " + jsonVal("substationName1", substationName1);
+//        }
+//        if (substationName2 != null) {
+//            filter += ", " + jsonVal("substationName2", substationName2);
+//        }
+//        if (rangeType != null) {
+//            filter += ", " + numericalRange("nominalVoltage", rangeType, value1, value2);
+//        }
+//        if (countries1 != null) {
+//            filter += ", " + jsonSet("countries1", countries1);
+//        }
+//        if (countries2 != null) {
+//            filter += ", " + jsonSet("countries2", countries2);
+//        }
+//        filter += "}";
 
-        if (equipmentID != null) {
-            filter += ", " + jsonVal("equipmentID", equipmentID);
-        }
-        if (equipmentName != null) {
-            filter += ", " + jsonVal("equipmentName", equipmentName);
-        }
-        if (substationName1 != null) {
-            filter += ", " + jsonVal("substationName1", substationName1);
-        }
-        if (substationName2 != null) {
-            filter += ", " + jsonVal("substationName2", substationName2);
-        }
-        if (rangeType != null) {
-            filter += ", " + numericalRange("nominalVoltage", rangeType, value1, value2);
-        }
-        if (countries1 != null) {
-            filter += ", " + jsonSet("countries1", countries1);
-        }
-        if (countries2 != null) {
-            filter += ", " + jsonSet("countries2", countries2);
-        }
-        filter += "}";
-
-        insertFilter(id, filter);
+        insertFilter(id, hvdcLineFilter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
             mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")

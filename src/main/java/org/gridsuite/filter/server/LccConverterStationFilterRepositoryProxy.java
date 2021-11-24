@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.LccConverterStationFilter;
 import org.gridsuite.filter.server.entities.LccConverterStationFilterEntity;
 import org.gridsuite.filter.server.repositories.LccConverterStationFilterRepository;
@@ -44,17 +45,32 @@ public class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepo
 
     @Override
     public AbstractFilter toDto(LccConverterStationFilterEntity entity) {
-        return buildInjectionFilter(
-            LccConverterStationFilter.builder(), entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new LccConverterStationFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage()
+                )
+        );
     }
 
     @Override
     public LccConverterStationFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof LccConverterStationFilter) {
-            var lccConverterStationFilterEntityBuilder = LccConverterStationFilterEntity.builder();
-            buildInjectionFilter(lccConverterStationFilterEntityBuilder, (LccConverterStationFilter) dto);
-            return lccConverterStationFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof LccConverterStationFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var lccConverterStationFilterEntityBuilder = LccConverterStationFilterEntity.builder();
+        buildInjectionFilter(lccConverterStationFilterEntityBuilder, formFilter);
+        return lccConverterStationFilterEntityBuilder.build();
     }
 }

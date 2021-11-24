@@ -45,35 +45,35 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
 
     @Override
     public AbstractFilter toDto(LineFilterEntity entity) {
-        return buildFormFilter(
-            FormFilter.builder().equipmentFilterForm(
-                LineFilter.builder()
-                    .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries1()))
-                    .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries2()))
-                    .substationName1(entity.getSubstationName1())
-                    .substationName2(entity.getSubstationName2())
-                    .nominalVoltage1(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage1()))
-                    .nominalVoltage2(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage2())),
-                    entity
-                ).build());
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new LineFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName1(),
+                        entity.getSubstationName2(),
+                        entity.getCountries1(),
+                        entity.getCountries2(),
+                        entity.getNominalVoltage1(),
+                        entity.getNominalVoltage2()
+                )
+        );
     }
 
     @Override
     public LineFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof LineFilter) {
-            var lineFilter = (LineFilter) dto;
-            var lineFilterEntityBuilder = LineFilterEntity.builder()
-                .equipmentName(lineFilter.getEquipmentName())
-                .equipmentId(lineFilter.getEquipmentID())
-                .substationName1(lineFilter.getSubstationName1())
-                .substationName2(lineFilter.getSubstationName2())
-                .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(lineFilter.getCountries1()))
-                .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(lineFilter.getCountries2()))
-                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(lineFilter.getNominalVoltage1()))
-                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(lineFilter.getNominalVoltage2()));
-            buildGenericFilter(lineFilterEntityBuilder, lineFilter);
-            return lineFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof LineFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var lineFilterEntityBuilder = LineFilterEntity.builder();
+        buildAbstractFilter(lineFilterEntityBuilder, formFilter);
+        return lineFilterEntityBuilder.build();
     }
 }

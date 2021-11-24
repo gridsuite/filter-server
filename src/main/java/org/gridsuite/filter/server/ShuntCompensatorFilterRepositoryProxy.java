@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.ShuntCompensatorFilter;
 import org.gridsuite.filter.server.entities.ShuntCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.ShuntCompensatorFilterRepository;
@@ -44,17 +45,32 @@ public class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterReposit
 
     @Override
     public AbstractFilter toDto(ShuntCompensatorFilterEntity entity) {
-        return buildInjectionFilter(
-            ShuntCompensatorFilter.builder(), entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new ShuntCompensatorFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage()
+                )
+        );
     }
 
     @Override
     public ShuntCompensatorFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof ShuntCompensatorFilter) {
-            var shuntCompensatorFilterEntityBuilder = ShuntCompensatorFilterEntity.builder();
-            buildInjectionFilter(shuntCompensatorFilterEntityBuilder, (ShuntCompensatorFilter) dto);
-            return shuntCompensatorFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof ShuntCompensatorFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var shuntCompensatorFilterEntityBuilder = ShuntCompensatorFilterEntity.builder();
+        buildInjectionFilter(shuntCompensatorFilterEntityBuilder, formFilter);
+        return shuntCompensatorFilterEntityBuilder.build();
     }
 }

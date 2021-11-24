@@ -13,6 +13,9 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
+import java.util.Date;
+import java.util.UUID;
+
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
@@ -25,6 +28,11 @@ public class ScriptFilter extends AbstractFilter {
     @Schema(description = "Script")
     private String script;
 
+    public ScriptFilter(UUID id, Date creationDate, Date modificationDate, String script) {
+        super(id, creationDate, modificationDate);
+        this.script = script;
+    }
+
     @Override
     public FilterType getType() {
         return FilterType.SCRIPT;
@@ -34,4 +42,5 @@ public class ScriptFilter extends AbstractFilter {
     public EquipmentType getEquipmentType() {
         return EquipmentType.NONE;
     }
+
 }

@@ -7,6 +7,7 @@
 
 package org.gridsuite.filter.server;
 
+import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
@@ -98,37 +99,27 @@ public abstract class AbstractFilterRepositoryProxy<FilterEntity extends Abstrac
         getRepository().deleteAll();
     }
 
-    AbstractFilter.AbstractFilterBuilder<?, ?> buildAbstractFilter(AbstractFilter.AbstractFilterBuilder<?, ?> builder, AbstractFilterEntity entity) {
-        return builder.id(entity.getId())
-                .creationDate(entity.getCreationDate()).modificationDate(entity.getModificationDate());
-    }
-
-    AbstractFilter.AbstractFilterBuilder<?, ?> buildFormFilter(FormFilter.FormFilterBuilder<?, ?> builder, FormFilterEntity entity) {
-        return buildAbstractFilter(builder.equipmentFilterForm(null), entity);
-    }
-
-    AbstractFilter.AbstractFilterBuilder<?, ?> buildInjectionFilter(AbstractInjectionFilter.AbstractInjectionFilterBuilder<?, ?> builder, AbstractInjectionFilterEntity entity) {
-        return buildFormFilter(builder.substationName(entity.getSubstationName())
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries()))
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage())), entity);
-    }
-
-    void buildFormFilter(FormFilterEntity.FormFilterEntityBuilder<?, ?> builder, FormFilter dto) {
+    void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, FormFilter dto) {
         buildAbstractFilter(builder, dto);
-        builder.equipmentId(dto.getEquipmentID())
-                .equipmentName(dto.getEquipmentName());
+        builder.equipmentId(dto.getEquipmentFilterForm().getEquipmentID())
+                .equipmentName(dto.getEquipmentFilterForm().getEquipmentName());
     }
 
-    void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, AbstractInjectionFilter dto) {
+    void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, FormFilter dto) {
         buildGenericFilter(builder, dto);
-        builder.substationName(dto.getSubstationName())
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(dto.getCountries()))
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(dto.getNominalVoltage()));
+        if (!(dto.getEquipmentFilterForm() instanceof AbstractInjectionFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) dto.getEquipmentFilterForm();
+        builder.substationName(injectionFilter.getSubstationName())
+                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
+                .nominalVoltage(AbstractFilterRepositoryProxy.convert(injectionFilter.getNominalVoltage()));
     }
 
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.id(dto.getId())
+                .modificationDate(getDateOrCreate(dto.getCreationDate()))
                 .creationDate(getDateOrCreate(dto.getCreationDate()));
     }
 

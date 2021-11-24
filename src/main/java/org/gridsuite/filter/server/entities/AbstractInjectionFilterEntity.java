@@ -29,7 +29,7 @@ import java.util.Set;
 @NoArgsConstructor
 @SuperBuilder
 @MappedSuperclass
-public abstract class AbstractInjectionFilterEntity extends FormFilterEntity {
+public abstract class AbstractInjectionFilterEntity extends AbstractGenericFilterEntity {
 
     /* as AbstractInjectionFilterEntity is a mapped superclass naming constraints gives to each child class the same name
         for the constraint, liquibase only take one of these the others are discarded, so we let hibernate pick a name

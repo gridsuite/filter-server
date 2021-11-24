@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.VscConverterStationFilter;
 import org.gridsuite.filter.server.entities.VscConverterStationFilterEntity;
 import org.gridsuite.filter.server.repositories.VscConverterStationFilterRepository;
@@ -44,17 +45,32 @@ public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepo
 
     @Override
     public AbstractFilter toDto(VscConverterStationFilterEntity entity) {
-        return buildInjectionFilter(
-            VscConverterStationFilter.builder(), entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new VscConverterStationFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage()
+                )
+        );
     }
 
     @Override
     public VscConverterStationFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof VscConverterStationFilter) {
-            var vscConverterStationFilterEntityBuilder   = VscConverterStationFilterEntity.builder();
-            buildInjectionFilter(vscConverterStationFilterEntityBuilder, (VscConverterStationFilter) dto);
-            return vscConverterStationFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof VscConverterStationFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var vscConverterStationFilterEntityBuilder = VscConverterStationFilterEntity.builder();
+        buildInjectionFilter(vscConverterStationFilterEntityBuilder, formFilter);
+        return vscConverterStationFilterEntityBuilder.build();
     }
 }

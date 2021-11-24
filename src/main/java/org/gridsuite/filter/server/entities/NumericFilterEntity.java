@@ -10,6 +10,7 @@ package org.gridsuite.filter.server.entities;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.utils.RangeType;
 
 import javax.persistence.*;
@@ -38,5 +39,11 @@ public class NumericFilterEntity {
 
     @Column(name = "value2")
     Double value2;
+
+    public NumericFilterEntity(NumericalFilter numericalFilter) {
+        this.filterType = numericalFilter.getType();
+        this.value1 = numericalFilter.getValue1();
+        this.value2 = numericalFilter.getValue2();
+    }
 
 }

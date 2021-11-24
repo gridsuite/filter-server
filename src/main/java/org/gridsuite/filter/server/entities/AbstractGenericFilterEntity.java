@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 
 import javax.persistence.*;
 
@@ -24,7 +23,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @SuperBuilder
 @MappedSuperclass
-public class FormFilterEntity extends AbstractFilterEntity {
+public abstract class AbstractGenericFilterEntity extends AbstractFilterEntity {
 
     @Column(name = "equipmentName")
     private String equipmentName;

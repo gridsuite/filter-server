@@ -8,8 +8,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.BatteryFilter;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.BatteryFilterEntity;
 import org.gridsuite.filter.server.repositories.BatteryFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -44,17 +43,32 @@ public class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<
 
     @Override
     public AbstractFilter toDto(BatteryFilterEntity entity) {
-        return buildInjectionFilter(
-            BatteryFilter.builder(), entity).build();
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                new BatteryFilter(
+                        entity.getEquipmentId(),
+                        entity.getEquipmentName(),
+                        entity.getSubstationName(),
+                        entity.getCountries(),
+                        entity.getNominalVoltage()
+                )
+        );
     }
 
     @Override
     public BatteryFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof BatteryFilter) {
-            var batteryFilterEntityBuilder = BatteryFilterEntity.builder();
-            buildInjectionFilter(batteryFilterEntityBuilder, (BatteryFilter) dto);
-            return batteryFilterEntityBuilder.build();
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(formFilter.getEquipmentFilterForm() instanceof BatteryFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        var batteryFilterEntityBuilder = BatteryFilterEntity.builder();
+        buildInjectionFilter(batteryFilterEntityBuilder, formFilter);
+        return batteryFilterEntityBuilder.build();
     }
 }

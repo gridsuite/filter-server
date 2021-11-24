@@ -7,9 +7,11 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
@@ -20,6 +22,7 @@ import java.util.Set;
  */
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 @Schema(description = "Hvdc Filters", allOf = FormFilter.class)
 public class HvdcLineFilter extends AbstractEquipmentFilterForm {
@@ -42,6 +45,15 @@ public class HvdcLineFilter extends AbstractEquipmentFilterForm {
 
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
+
+    public HvdcLineFilter(String equipmentID, String equipmentName, String substationName1, String substationName2, Set<String> countries1, Set<String> countries2, NumericalFilter nominalVoltage) {
+        super(equipmentID, equipmentName);
+        this.substationName1 =  substationName1;
+        this.substationName2 =  substationName2;
+        this.countries1 =  countries1;
+        this.countries2 =  countries2;
+        this.nominalVoltage = nominalVoltage;
+    }
 
     @Override
     public boolean isEmpty() {

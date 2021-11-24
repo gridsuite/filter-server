@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
@@ -46,6 +47,16 @@ public class LineFilter extends AbstractEquipmentFilterForm {
 
     @Schema(description = "Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
+
+    public LineFilter(String equipmentID, String equipmentName, String substationName1, String substationName2, Set<String> countries1, Set<String> countries2, NumericFilterEntity nominalVoltage1, NumericFilterEntity nominalVoltage2) {
+        super(equipmentID, equipmentName);
+        this.substationName1 =  substationName1;
+        this.substationName2 =  substationName2;
+        this.countries1 =  countries1;
+        this.countries2 =  countries2;
+        this.nominalVoltage1 =  NumericalFilter.builder().type(nominalVoltage1.getFilterType()).value1(nominalVoltage1.getValue1()).value2(nominalVoltage1.getValue2()).build();
+        this.nominalVoltage1 =  NumericalFilter.builder().type(nominalVoltage2.getFilterType()).value1(nominalVoltage2.getValue1()).value2(nominalVoltage2.getValue2()).build();
+    }
 
     public boolean isEmpty() {
         return super.isEmpty()

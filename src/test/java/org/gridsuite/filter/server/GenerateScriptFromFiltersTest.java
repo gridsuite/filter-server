@@ -6,23 +6,12 @@
  */
 package org.gridsuite.filter.server;
 
-import org.gridsuite.filter.server.dto.BatteryFilter;
-import org.gridsuite.filter.server.dto.BusBarSectionFilter;
-import org.gridsuite.filter.server.dto.DanglingLineFilter;
-import org.gridsuite.filter.server.dto.GeneratorFilter;
-import org.gridsuite.filter.server.dto.HvdcLineFilter;
-import org.gridsuite.filter.server.dto.LccConverterStationFilter;
-import org.gridsuite.filter.server.dto.LineFilter;
-import org.gridsuite.filter.server.dto.LoadFilter;
-import org.gridsuite.filter.server.dto.NumericalFilter;
-import org.gridsuite.filter.server.dto.ShuntCompensatorFilter;
-import org.gridsuite.filter.server.dto.StaticVarCompensatorFilter;
-import org.gridsuite.filter.server.dto.ThreeWindingsTransformerFilter;
-import org.gridsuite.filter.server.dto.TwoWindingsTransformerFilter;
-import org.gridsuite.filter.server.dto.VscConverterStationFilter;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.Test;
 
+import java.sql.Date;
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.UUID;
 
@@ -61,17 +50,20 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(LineFilter.builder()
-                    .id(FILTER1_UUID)
-                .equipmentID("lineId1")
-                .equipmentName("lineName1")
-                .substationName1("s1")
-                .substationName2("s2")
-                .countries1(countries1)
-                .countries2(countries2)
-                .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
-                .nominalVoltage2(NumericalFilter.builder().type(RangeType.APPROX).value1(385.).value2(5.).build())
-                .build()));
+            filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                    FILTER1_UUID,
+                    Date.from(Instant.now()),
+                    Date.from(Instant.now()),
+                    LineFilter.builder()
+                        .equipmentID("lineId1")
+                        .equipmentName("lineName1")
+                        .substationName1("s1")
+                        .substationName2("s2")
+                        .countries1(countries1)
+                        .countries2(countries2)
+                        .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
+                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.APPROX).value1(385.).value2(5.).build())
+                        .build())));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
                 "\n" +
@@ -85,22 +77,27 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(LineFilter.builder()
-                .id(FILTER1_UUID)
-                .equipmentName("lineName2")
-                .substationName1("s1")
-                .countries2(countries2)
-                .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(380.).build())
-                .build()));
+            filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                    FILTER1_UUID,
+                    Date.from(Instant.now()),
+                    Date.from(Instant.now()),
+                    LineFilter.builder()
+                        .equipmentName("lineName2")
+                        .substationName1("s1")
+                        .countries2(countries2)
+                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(380.).build())
+                        .build())));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
                 "\n" +
                 "for (equipment in network.lines) {\n" +
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(LineFilter.builder()
-                .id(FILTER1_UUID)
-                .build()));
+            filtersToScript.generateGroovyScriptFromFilters(new FormFilter(FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                LineFilter.builder()
+                .build())));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
                 "\n" +
@@ -114,13 +111,18 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(LineFilter.builder()
-                .id(FILTER1_UUID)
-                .equipmentName("lineName2")
-                .substationName1("s1")
-                .countries2(countries2)
-                .nominalVoltage2(NumericalFilter.builder().type(RangeType.RANGE).value1(380.).build())
-                .build()));
+            filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                    FILTER1_UUID,
+                    Date.from(Instant.now()),
+                    Date.from(Instant.now()),
+                    LineFilter.builder()
+                        .equipmentName("lineName2")
+                        .substationName1("s1")
+                        .countries2(countries2)
+                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.RANGE).value1(380.).build())
+                        .build())
+            )
+        );
     }
 
     @Test
@@ -140,14 +142,18 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(GeneratorFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("genId1")
-            .equipmentName("genName1")
-            .substationName("s1")
-            .countries(countries)
-            .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                GeneratorFilter.builder()
+                    .equipmentID("genId1")
+                    .equipmentName("genName1")
+                    .substationName("s1")
+                    .countries(countries)
+                    .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
+                    .build()))
+        );
     }
 
     @Test
@@ -166,14 +172,18 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(LoadFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("loadId1")
-            .equipmentName("loadName1")
-            .substationName("s3")
-            .countries(countries)
-            .nominalVoltage(NumericalFilter.builder().type(RangeType.APPROX).value1(390.).value2(5.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                LoadFilter.builder()
+                    .equipmentID("loadId1")
+                    .equipmentName("loadName1")
+                    .substationName("s3")
+                    .countries(countries)
+                    .nominalVoltage(NumericalFilter.builder().type(RangeType.APPROX).value1(390.).value2(5.).build())
+                    .build()))
+        );
     }
 
     @Test
@@ -187,11 +197,15 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(ShuntCompensatorFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentName("shuntName1")
-            .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(380.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                ShuntCompensatorFilter.builder()
+                    .equipmentName("shuntName1")
+                    .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(380.).build())
+                    .build()))
+        );
     }
 
     @Test
@@ -209,12 +223,16 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(StaticVarCompensatorFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("staticVarCompensatorId1")
-            .substationName("s4")
-            .countries(countries)
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                StaticVarCompensatorFilter.builder()
+                    .equipmentID("staticVarCompensatorId1")
+                    .substationName("s4")
+                    .countries(countries)
+                    .build()))
+        );
     }
 
     @Test
@@ -229,13 +247,17 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(BatteryFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("batteryId1")
-            .equipmentName("batteryName1")
-            .substationName("s5")
-            .nominalVoltage(NumericalFilter.builder().type(RangeType.APPROX).value1(150.).value2(5.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                BatteryFilter.builder()
+                    .equipmentID("batteryId1")
+                    .equipmentName("batteryName1")
+                    .substationName("s5")
+                    .nominalVoltage(NumericalFilter.builder().type(RangeType.APPROX).value1(150.).value2(5.).build())
+                    .build()))
+        );
     }
 
     @Test
@@ -244,9 +266,13 @@ public class GenerateScriptFromFiltersTest {
             "\n" +
             "for (equipment in network.busbarSections) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(BusBarSectionFilter.builder()
-            .id(FILTER1_UUID)
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                BusBarSectionFilter.builder()
+                .build()))
+        );
     }
 
     @Test
@@ -266,14 +292,18 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(DanglingLineFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("danglingId1")
-            .equipmentName("danglingName1")
-            .substationName("s3")
-            .countries(countries)
-            .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(360.).value2(400.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                DanglingLineFilter.builder()
+                    .equipmentID("danglingId1")
+                    .equipmentName("danglingName1")
+                    .substationName("s3")
+                    .countries(countries)
+                    .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(360.).value2(400.).build())
+                    .build()))
+        );
     }
 
     @Test
@@ -291,12 +321,16 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(LccConverterStationFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("lccId1")
-            .equipmentName("lccName1")
-            .countries(countries)
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                LccConverterStationFilter.builder()
+                    .equipmentID("lccId1")
+                    .equipmentName("lccName1")
+                    .countries(countries)
+                    .build()))
+        );
     }
 
     @Test
@@ -314,12 +348,16 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(VscConverterStationFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("vscId1")
-            .countries(countries)
-            .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                VscConverterStationFilter.builder()
+                    .equipmentID("vscId1")
+                    .countries(countries)
+                    .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
+                    .build()))
+        );
     }
 
     @Test
@@ -340,15 +378,19 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(TwoWindingsTransformerFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("2wtId1")
-            .equipmentName("2wtName1")
-            .substationName("s2")
-            .countries(countries)
-            .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
-            .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                TwoWindingsTransformerFilter.builder()
+                    .equipmentID("2wtId1")
+                    .equipmentName("2wtName1")
+                    .substationName("s2")
+                    .countries(countries)
+                    .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
+                    .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
+                    .build()))
+        );
     }
 
     @Test
@@ -369,16 +411,20 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(ThreeWindingsTransformerFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("3wtId1")
-            .equipmentName("3wtName1")
-            .substationName("s3")
-            .countries(countries)
-            .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(210.).value2(230.).build())
-            .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(150.).build())
-            .nominalVoltage3(NumericalFilter.builder().type(RangeType.APPROX).value1(380.).value2(5.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                ThreeWindingsTransformerFilter.builder()
+                .equipmentID("3wtId1")
+                .equipmentName("3wtName1")
+                .substationName("s3")
+                .countries(countries)
+                .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(210.).value2(230.).build())
+                .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(150.).build())
+                .nominalVoltage3(NumericalFilter.builder().type(RangeType.APPROX).value1(380.).value2(5.).build())
+                .build()))
+        );
     }
 
     @Test
@@ -401,15 +447,19 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(HvdcLineFilter.builder()
-            .id(FILTER1_UUID)
-            .equipmentID("hvdcId1")
-            .equipmentName("hvdcName1")
-            .substationName1("s1")
-            .substationName2("s2")
-            .countries1(countries1)
-            .countries2(countries2)
-            .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(200.).value2(400.).build())
-            .build()));
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new FormFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                HvdcLineFilter.builder()
+                    .equipmentID("hvdcId1")
+                    .equipmentName("hvdcName1")
+                    .substationName1("s1")
+                    .substationName2("s2")
+                    .countries1(countries1)
+                    .countries2(countries2)
+                    .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(200.).value2(400.).build())
+                    .build()))
+        );
     }
 }

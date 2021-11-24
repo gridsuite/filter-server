@@ -9,13 +9,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.AbstractInjectionFilter;
-import org.gridsuite.filter.server.dto.HvdcLineFilter;
-import org.gridsuite.filter.server.dto.LineFilter;
-import org.gridsuite.filter.server.dto.NumericalFilter;
-import org.gridsuite.filter.server.dto.ThreeWindingsTransformerFilter;
-import org.gridsuite.filter.server.dto.TwoWindingsTransformerFilter;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -112,9 +106,15 @@ public class FiltersToGroovyScript {
 
         ST template = new ST(script);
 
+        if (!(filter instanceof FormFilter)) {
+            throw new PowsyblException(AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE);
+        }
+
+        FormFilter formFilter = (FormFilter) filter;
+
         switch (filter.getEquipmentType()) {
             case LINE:
-                LineFilter lineFilter = (LineFilter) filter;
+                LineFilter lineFilter = (LineFilter) formFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!lineFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -146,7 +146,7 @@ public class FiltersToGroovyScript {
                 break;
 
             case TWO_WINDINGS_TRANSFORMER:
-                TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) filter;
+                TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!twoWindingsTransformerFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -172,7 +172,7 @@ public class FiltersToGroovyScript {
                 break;
 
             case THREE_WINDINGS_TRANSFORMER:
-                ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) filter;
+                ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!threeWindingsTransformerFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -209,7 +209,7 @@ public class FiltersToGroovyScript {
             case STATIC_VAR_COMPENSATOR:
             case LCC_CONVERTER_STATION:
             case VSC_CONVERTER_STATION:
-                AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) filter;
+                AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) formFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!injectionFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -232,7 +232,7 @@ public class FiltersToGroovyScript {
                 break;
 
             case HVDC_LINE:
-                HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) filter;
+                HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) formFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!hvdcLineFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");

@@ -126,8 +126,8 @@ public class FilterService {
         return getRepository(filter.getType().name(), filter.getEquipmentType().name()).insert(filter);
     }
 
-    private AbstractFilterRepositoryProxy getRepository(String type, String subtype) {
-        return filterRepositories.get(type.equals(FilterType.SCRIPT.name()) ? type : subtype);
+    private AbstractFilterRepositoryProxy getRepository(String type, String equipmentType) {
+        return filterRepositories.get(type.equals(FilterType.SCRIPT.name()) ? type : equipmentType);
     }
 
     @Transactional
