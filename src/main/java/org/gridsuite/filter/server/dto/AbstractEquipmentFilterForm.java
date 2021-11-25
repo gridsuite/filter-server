@@ -6,8 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,6 +42,7 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@JsonIgnoreProperties(value={ "empty", "equipmentType" }, allowSetters=true, ignoreUnknown = true)
 public abstract class AbstractEquipmentFilterForm {
 
     @Schema(description = "Equipment ID")

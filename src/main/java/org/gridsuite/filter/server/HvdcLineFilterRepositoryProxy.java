@@ -18,6 +18,8 @@ import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
+import java.util.Date;
+
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
@@ -78,8 +80,8 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
         HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) formFilter.getEquipmentFilterForm();
         return HvdcLineFilterEntity.builder()
                 .id(formFilter.getId())
-                .creationDate(formFilter.getCreationDate())
-                .modificationDate((formFilter.getModificationDate()))
+                .creationDate(getDateOrCreate(formFilter.getCreationDate()))
+//                .modificationDate((formFilter.getModificationDate()))
                 .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
                 .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
                 .countries1(hvdcLineFilter.getCountries1())

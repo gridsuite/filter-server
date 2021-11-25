@@ -24,6 +24,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
+//@JsonIgnoreProperties(value={ "type", "equipmentType" }, allowGetters=true)
 public class FormFilter extends AbstractFilter {
 
     private AbstractEquipmentFilterForm equipmentFilterForm;

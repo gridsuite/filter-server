@@ -24,7 +24,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@Schema(description = "Hvdc Filters", allOf = FormFilter.class)
+@Schema(description = "Hvdc Filters", allOf = AbstractEquipmentFilterForm.class)
 public class HvdcLineFilter extends AbstractEquipmentFilterForm {
     @Override
     public EquipmentType getEquipmentType() {

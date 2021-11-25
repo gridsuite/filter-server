@@ -44,5 +44,4 @@ public abstract class AbstractFilter implements IFilterAttributes {
 
     Date modificationDate;
 
-
 }

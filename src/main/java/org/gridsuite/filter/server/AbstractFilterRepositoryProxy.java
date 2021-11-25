@@ -119,11 +119,10 @@ public abstract class AbstractFilterRepositoryProxy<FilterEntity extends Abstrac
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.id(dto.getId())
-                .modificationDate(getDateOrCreate(dto.getCreationDate()))
                 .creationDate(getDateOrCreate(dto.getCreationDate()));
     }
 
-    Date getDateOrCreate(Date dt) {
+    public static Date getDateOrCreate(Date dt) {
         return dt == null ? new Date() : dt;
     }
 }

@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -16,9 +17,9 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.gridsuite.filter.server.dto.*;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.After;
 import org.junit.Before;
@@ -35,14 +36,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.*;
@@ -284,7 +279,7 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testHvdcLineFilter() throws Exception {
-        insertHvdcLineFilter(FilterType.FORM, EquipmentType.HVDC_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+        insertHvdcLineFilter(UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "hvdcId1", "hvdcName1", "s1", "s2", Set.of("FR"), Set.of("UK"), RangeType.EQUALITY, 380., null);
     }
 
@@ -381,7 +376,7 @@ public class FilterEntityControllerTest {
         assertEquals(filterAttribute.getType(), type);
         assertEquals(filterAttribute.getEquipmentType(), equipmentType);
         assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 1000);
-        assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 100);
+        assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 1000);
     }
 
     private void insertFilter(UUID filterId, String content) throws Exception {
@@ -400,22 +395,32 @@ public class FilterEntityControllerTest {
         JSONAssert.assertEquals(content, strRes, JSONCompareMode.LENIENT);
     }
 
-    private void insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
+    private String insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
         String tmp = objectMapper.writeValueAsString(filter);
+
+        AbstractFilter f = objectMapper.readValue(tmp, AbstractFilter.class);
+
+
         String strRes = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
                         .content(objectMapper.writeValueAsString(filter))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-        JSONAssert.assertEquals(objectMapper.writeValueAsString(filter), strRes, JSONCompareMode.LENIENT);
-
         mvc.perform(get(URL_TEMPLATE))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
-        // Check we didn't miss anything
-        JSONAssert.assertEquals(String.valueOf(filter), strRes, JSONCompareMode.LENIENT);
+        mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
+
+        return strRes;
     }
+
+//    private void matchFormFilterInfos(FormFilter formFilter, UUID id, FilterType type, EquipmentType equipmentType, Date creationDate, Date modificationDate) {
+//        assertEquals(filterAttribute.getId(), id);
+//        assertEquals(filterAttribute.getType(), type);
+//        assertEquals(filterAttribute.getEquipmentType(), equipmentType);
+//        assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 1000);
+//        assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 1000);
+//    }
 
     private void modifyFilter(UUID filterId, String content) throws Exception {
         mvc.perform(put(URL_TEMPLATE + filterId)
@@ -544,13 +549,13 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
-    private void insertHvdcLineFilter(FilterType type, EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
+    private void insertHvdcLineFilter(UUID id, String equipmentID, String equipmentName,
                                       String substationName1, String substationName2, Set<String> countries1,
                                       Set<String> countries2, RangeType rangeType, Double value1, Double value2)  throws Exception {
         AbstractFilter hvdcLineFilter = new FormFilter(
                 id,
-                java.sql.Date.from(Instant.now()),
-                java.sql.Date.from(Instant.now()),
+                null,
+                null,
                 new HvdcLineFilter(
                         equipmentID,
                         equipmentName,
@@ -561,35 +566,12 @@ public class FilterEntityControllerTest {
                         new NumericalFilter(rangeType, value1, value2)
                 )
         );
-//        String filter = "{" + joinWithComma(
-//            jsonVal("id", id.toString()),
-//            jsonVal("type", type.name()),
-//            jsonVal("equipmentType", equipmentType.name()));
-//
-//        if (equipmentID != null) {
-//            filter += ", " + jsonVal("equipmentID", equipmentID);
-//        }
-//        if (equipmentName != null) {
-//            filter += ", " + jsonVal("equipmentName", equipmentName);
-//        }
-//        if (substationName1 != null) {
-//            filter += ", " + jsonVal("substationName1", substationName1);
-//        }
-//        if (substationName2 != null) {
-//            filter += ", " + jsonVal("substationName2", substationName2);
-//        }
-//        if (rangeType != null) {
-//            filter += ", " + numericalRange("nominalVoltage", rangeType, value1, value2);
-//        }
-//        if (countries1 != null) {
-//            filter += ", " + jsonSet("countries1", countries1);
-//        }
-//        if (countries2 != null) {
-//            filter += ", " + jsonSet("countries2", countries2);
-//        }
-//        filter += "}";
 
-        insertFilter(id, hvdcLineFilter);
+        String filterAsString = insertFilter(id, hvdcLineFilter);
+
+        FormFilter filterRes = objectMapper.readValue(filterAsString, FormFilter.class);
+
+        JSONAssert.assertEquals(objectMapper.writeValueAsString(hvdcLineFilter), filterAsString, JSONCompareMode.LENIENT);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
             mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
@@ -599,6 +581,8 @@ public class FilterEntityControllerTest {
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
             });
+
+        matchFilterInfos(filterAttributes.get(0), id, FilterType.FORM, EquipmentType.HVDC_LINE, new Date(), new Date());
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
