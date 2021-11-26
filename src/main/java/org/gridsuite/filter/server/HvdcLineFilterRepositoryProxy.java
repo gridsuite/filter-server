@@ -18,8 +18,6 @@ import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
-import java.util.Date;
-
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */

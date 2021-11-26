@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 import java.util.Date;
@@ -38,9 +37,9 @@ public class ScriptFilter extends AbstractFilter {
         return FilterType.SCRIPT;
     }
 
-    @Override
-    public EquipmentType getEquipmentType() {
-        return EquipmentType.NONE;
-    }
+//    @Override
+//    public EquipmentType getEquipmentType() {
+//        return EquipmentType.NONE;
+//    }
 
 }

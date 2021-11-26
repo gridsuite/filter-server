@@ -72,9 +72,10 @@ public class FiltersToGroovyScript {
 
     public String generateGroovyScriptFromFilters(AbstractFilter filter) {
         String script = "";
-        String equipmentsCollection = filter.getEquipmentType().getCollectionName();
+        FormFilter formFilter = (FormFilter) filter;
+        String equipmentsCollection = formFilter.getEquipmentFilterForm().getEquipmentType().getCollectionName();
 
-        switch (filter.getEquipmentType()) {
+        switch (formFilter.getEquipmentFilterForm().getEquipmentType()) {
             case LINE:
                 script += lineTemplate;
                 break;
@@ -110,9 +111,7 @@ public class FiltersToGroovyScript {
             throw new PowsyblException(AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE);
         }
 
-        FormFilter formFilter = (FormFilter) filter;
-
-        switch (filter.getEquipmentType()) {
+        switch (formFilter.getEquipmentFilterForm().getEquipmentType()) {
             case LINE:
                 LineFilter lineFilter = (LineFilter) formFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);

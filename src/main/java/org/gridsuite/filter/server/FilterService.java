@@ -7,10 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.FilterAttributes;
-import org.gridsuite.filter.server.dto.IFilterAttributes;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.ScriptFilter;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.BatteryFilterRepository;
 import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
@@ -123,26 +120,31 @@ public class FilterService {
 
     @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
-        return getRepository(filter.getType().name(), filter.getEquipmentType().name()).insert(filter);
+        return getRepository(filter.getType().name(), filter).insert(filter);
     }
 
-    private AbstractFilterRepositoryProxy getRepository(String type, String equipmentType) {
-        return filterRepositories.get(type.equals(FilterType.SCRIPT.name()) ? type : equipmentType);
+    private AbstractFilterRepositoryProxy getRepository(String type, AbstractFilter filter) {
+        if (type.equals(FilterType.SCRIPT.name())) {
+            return filterRepositories.get(FilterType.SCRIPT.name());
+        }
+        return filterRepositories.get(((FormFilter) filter).getEquipmentFilterForm().getEquipmentType());
     }
 
     @Transactional
     public <F extends AbstractFilter> void changeFilter(UUID id, F filter) {
         Optional<AbstractFilter> f = getFilter(id);
+        FormFilter formFilter = (FormFilter) filter;
         if (f.isPresent()) {
-            if (f.get().getEquipmentType() == filter.getEquipmentType()) {  // filter type has not changed
+            FormFilter oldFilter = (FormFilter) f.get();
+            if (oldFilter.getEquipmentFilterForm().getEquipmentType() == formFilter.getEquipmentFilterForm().getEquipmentType()) {  // filter type has not changed
                 filter.setCreationDate(f.get().getCreationDate());
-                getRepository(filter.getType().name(), filter.getEquipmentType().name()).modify(id, filter);
+                getRepository(filter.getType().name(), filter).modify(id, filter);
             } else {  // filter type has changed
                 if ((f.get().getType() == FilterType.SCRIPT && filter.getType() != FilterType.SCRIPT) ||
                     (f.get().getType() != FilterType.SCRIPT && filter.getType() == FilterType.SCRIPT)) {
                     throw new PowsyblException(WRONG_FILTER_TYPE);
                 } else {
-                    getRepository(f.get().getType().name(), f.get().getEquipmentType().name()).deleteById(id);
+                    getRepository(f.get().getType().name(), f.get()).deleteById(id);
                     filter.setId(id);
                     filter.setCreationDate(f.get().getCreationDate());
                     createFilter(filter);
@@ -178,7 +180,7 @@ public class FilterService {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
-                getRepository(filter.get().getType().name(), filter.get().getEquipmentType().name()).deleteById(filter.get().getId());
+                getRepository(filter.get().getType().name(), filter.get()).deleteById(filter.get().getId());
                 return getRepository(FilterType.SCRIPT.name(), null).insert(ScriptFilter.builder().id(filter.get().getId()).script(script).build());
             }
         } else {

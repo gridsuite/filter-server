@@ -9,7 +9,6 @@ package org.gridsuite.filter.server;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -19,7 +18,6 @@ import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
-import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.After;
 import org.junit.Before;
@@ -36,7 +34,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.join;
@@ -374,7 +371,6 @@ public class FilterEntityControllerTest {
     private void matchFilterInfos(IFilterAttributes filterAttribute, UUID id, FilterType type, EquipmentType equipmentType, Date creationDate, Date modificationDate) {
         assertEquals(filterAttribute.getId(), id);
         assertEquals(filterAttribute.getType(), type);
-        assertEquals(filterAttribute.getEquipmentType(), equipmentType);
         assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 1000);
         assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 1000);
     }
@@ -399,7 +395,6 @@ public class FilterEntityControllerTest {
         String tmp = objectMapper.writeValueAsString(filter);
 
         AbstractFilter f = objectMapper.readValue(tmp, AbstractFilter.class);
-
 
         String strRes = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
                         .content(objectMapper.writeValueAsString(filter))
