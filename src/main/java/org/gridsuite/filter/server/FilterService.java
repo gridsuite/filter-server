@@ -9,20 +9,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.repositories.BatteryFilterRepository;
-import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
-import org.gridsuite.filter.server.repositories.DanglingLineFilterRepository;
-import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
-import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
-import org.gridsuite.filter.server.repositories.LccConverterStationFilterRepository;
-import org.gridsuite.filter.server.repositories.LineFilterRepository;
-import org.gridsuite.filter.server.repositories.LoadFilterRepository;
-import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
-import org.gridsuite.filter.server.repositories.ShuntCompensatorFilterRepository;
-import org.gridsuite.filter.server.repositories.StaticVarCompensatorFilterRepository;
-import org.gridsuite.filter.server.repositories.ThreeWindingsTransformerFilterRepository;
-import org.gridsuite.filter.server.repositories.TwoWindingsTransformerFilterRepository;
-import org.gridsuite.filter.server.repositories.VscConverterStationFilterRepository;
+import org.gridsuite.filter.server.repositories.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.springframework.http.HttpStatus;
@@ -123,8 +110,7 @@ public class FilterService {
         return getRepository(filter).insert(filter);
     }
 
-    private AbstractFilterRepositoryProxy getRepository(AbstractFilter filter) {
-        var type = filter.getType();
+    private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
         if (filter.getType().equals(FilterType.SCRIPT)) {
             return filterRepositories.get(FilterType.SCRIPT.name());
         }

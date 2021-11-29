@@ -31,7 +31,7 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
-    public AbstractInjectionFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage) {
+    AbstractInjectionFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName);
         this.substationName = substationName;
         this.countries = countries;

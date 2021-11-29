@@ -59,6 +59,7 @@ public class LineFilter extends AbstractEquipmentFilterForm {
         this.nominalVoltage2 =  nominalVoltage2;
     }
 
+    @Override
     public boolean isEmpty() {
         return super.isEmpty()
             && substationName1 == null
