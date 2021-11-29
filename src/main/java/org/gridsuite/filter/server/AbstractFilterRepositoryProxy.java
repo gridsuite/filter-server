@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEntity, EntityRepository extends FilterRepository<F>> {
+public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEntity, R extends FilterRepository<F>> {
     public static final String WRONG_FILTER_TYPE = "Wrong filter type, should never happen";
 
     static <T> Set<T> cloneIfNotEmptyOrNull(Set<T> set) {
@@ -47,7 +47,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
                 : null;
     }
 
-    abstract EntityRepository getRepository();
+    abstract R getRepository();
 
     abstract AbstractFilter toDto(F filterEntity);
 
