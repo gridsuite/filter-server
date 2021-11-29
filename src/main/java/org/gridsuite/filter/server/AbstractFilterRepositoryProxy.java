@@ -12,7 +12,6 @@ import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 import java.util.Date;
@@ -56,8 +55,6 @@ public abstract class AbstractFilterRepositoryProxy<FilterEntity extends Abstrac
 
     abstract FilterType getFilterType();
 
-    abstract EquipmentType getEquipmentType();
-
     Optional<AbstractFilter> getFilter(UUID id) {
         Optional<FilterEntity> element = getRepository().findById(id);
         if (element.isPresent()) {
@@ -79,7 +76,7 @@ public abstract class AbstractFilterRepositoryProxy<FilterEntity extends Abstrac
     }
 
     FilterAttributes metadataToAttribute(FilterMetadata f) {
-        return new FilterAttributes(f, getFilterType(), getEquipmentType());
+        return new FilterAttributes(f, getFilterType());
     }
 
     AbstractFilter insert(AbstractFilter f) {
@@ -112,8 +109,8 @@ public abstract class AbstractFilterRepositoryProxy<FilterEntity extends Abstrac
         }
         AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) dto.getEquipmentFilterForm();
         builder.substationName(injectionFilter.getSubstationName())
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(injectionFilter.getNominalVoltage()));
+            .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
+            .nominalVoltage(AbstractFilterRepositoryProxy.convert(injectionFilter.getNominalVoltage()));
     }
 
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {

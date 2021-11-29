@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
 
 import java.util.Set;
@@ -23,7 +22,7 @@ import java.util.Set;
 @SuperBuilder
 @Schema(description = "Lcc converter station Filters", allOf = AbstractInjectionFilter.class)
 public class LccConverterStationFilter extends AbstractInjectionFilter {
-    public LccConverterStationFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericFilterEntity nominalVoltage) {
+    public LccConverterStationFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName, substationName, countries, nominalVoltage);
     }
 

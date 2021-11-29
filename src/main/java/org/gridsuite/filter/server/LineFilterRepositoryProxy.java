@@ -8,10 +8,9 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.FormFilter;
-import org.gridsuite.filter.server.dto.LineFilter;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
+import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -33,7 +32,6 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.LINE;
     }
@@ -56,8 +54,8 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
                         entity.getSubstationName2(),
                         entity.getCountries1(),
                         entity.getCountries2(),
-                        entity.getNominalVoltage1(),
-                        entity.getNominalVoltage2()
+                        NumericalFilter.builder().type(entity.getNominalVoltage1().getFilterType()).value1(entity.getNominalVoltage1().getValue1()).value2(entity.getNominalVoltage1().getValue2()).build(),
+                        NumericalFilter.builder().type(entity.getNominalVoltage2().getFilterType()).value1(entity.getNominalVoltage2().getValue1()).value2(entity.getNominalVoltage2().getValue2()).build()
                 )
         );
     }
@@ -72,8 +70,18 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
         if (!(formFilter.getEquipmentFilterForm() instanceof LineFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        var lineFilterEntityBuilder = LineFilterEntity.builder();
-        buildAbstractFilter(lineFilterEntityBuilder, formFilter);
-        return lineFilterEntityBuilder.build();
+        LineFilter lineFilter = (LineFilter) formFilter.getEquipmentFilterForm();
+        return LineFilterEntity.builder()
+            .id(formFilter.getId())
+            .creationDate(getDateOrCreate(formFilter.getCreationDate()))
+            .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
+            .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
+            .countries1(lineFilter.getCountries1())
+            .countries2(lineFilter.getCountries2())
+            .nominalVoltage1(new NumericFilterEntity(lineFilter.getNominalVoltage1()))
+            .nominalVoltage2(new NumericFilterEntity(lineFilter.getNominalVoltage2()))
+            .substationName1(lineFilter.getSubstationName1())
+            .substationName2(lineFilter.getSubstationName2())
+            .build();
     }
 }

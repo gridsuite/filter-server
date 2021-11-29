@@ -8,9 +8,8 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.FormFilter;
-import org.gridsuite.filter.server.dto.ThreeWindingsTransformerFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.entities.ThreeWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.ThreeWindingsTransformerFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -33,7 +32,6 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.THREE_WINDINGS_TRANSFORMER;
     }
@@ -46,18 +44,18 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
     @Override
     public AbstractFilter toDto(ThreeWindingsTransformerFilterEntity entity) {
         return new FormFilter(
-                entity.getId(),
-                entity.getCreationDate(),
-                entity.getModificationDate(),
-                new ThreeWindingsTransformerFilter(
-                        entity.getEquipmentId(),
-                        entity.getEquipmentName(),
-                        entity.getSubstationName(),
-                        entity.getCountries(),
-                        entity.getNominalVoltage1(),
-                        entity.getNominalVoltage2(),
-                        entity.getNominalVoltage3()
-                )
+            entity.getId(),
+            entity.getCreationDate(),
+            entity.getModificationDate(),
+            new ThreeWindingsTransformerFilter(
+                entity.getEquipmentId(),
+                entity.getEquipmentName(),
+                entity.getSubstationName(),
+                entity.getCountries(),
+                NumericalFilter.builder().type(entity.getNominalVoltage1().getFilterType()).value1(entity.getNominalVoltage1().getValue1()).value2(entity.getNominalVoltage1().getValue2()).build(),
+                NumericalFilter.builder().type(entity.getNominalVoltage2().getFilterType()).value1(entity.getNominalVoltage2().getValue1()).value2(entity.getNominalVoltage2().getValue2()).build(),
+                NumericalFilter.builder().type(entity.getNominalVoltage3().getFilterType()).value1(entity.getNominalVoltage3().getValue1()).value2(entity.getNominalVoltage3().getValue2()).build()
+            )
         );
     }
 
@@ -71,8 +69,16 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
         if (!(formFilter.getEquipmentFilterForm() instanceof ThreeWindingsTransformerFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        var threeWindingsTransformerFilterEntityBuilder = ThreeWindingsTransformerFilterEntity.builder();
-        buildAbstractFilter(threeWindingsTransformerFilterEntityBuilder, formFilter);
-        return threeWindingsTransformerFilterEntityBuilder.build();
+        ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
+        return ThreeWindingsTransformerFilterEntity.builder()
+                .id(formFilter.getId())
+                .creationDate(getDateOrCreate(formFilter.getCreationDate()))
+                .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
+                .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
+                .countries(threeWindingsTransformerFilter.getCountries())
+                .nominalVoltage1(new NumericFilterEntity(threeWindingsTransformerFilter.getNominalVoltage1()))
+                .nominalVoltage2(new NumericFilterEntity(threeWindingsTransformerFilter.getNominalVoltage2()))
+                .nominalVoltage3(new NumericFilterEntity(threeWindingsTransformerFilter.getNominalVoltage3()))
+                .build();
     }
 }

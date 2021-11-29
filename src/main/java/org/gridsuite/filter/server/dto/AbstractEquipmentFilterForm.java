@@ -42,7 +42,6 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@JsonIgnoreProperties(value = { "empty" }, ignoreUnknown = true)
 public abstract class AbstractEquipmentFilterForm {
 
     @Schema(description = "Equipment ID")
@@ -51,8 +50,10 @@ public abstract class AbstractEquipmentFilterForm {
     @Schema(description = "Equipment name")
     private String equipmentName;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public abstract EquipmentType getEquipmentType();
 
+    @JsonIgnore
     protected boolean isEmpty() {
         return equipmentID == null && equipmentName == null;
     }

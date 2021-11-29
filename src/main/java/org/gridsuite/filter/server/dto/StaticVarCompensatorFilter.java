@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
 
 import java.util.Set;
@@ -24,7 +23,7 @@ import java.util.Set;
 @Schema(description = "Static var compensator Filters", allOf = AbstractInjectionFilter.class)
 public class StaticVarCompensatorFilter extends AbstractInjectionFilter {
 
-    public StaticVarCompensatorFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericFilterEntity nominalVoltage) {
+    public StaticVarCompensatorFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName, substationName, countries, nominalVoltage);
     }
 

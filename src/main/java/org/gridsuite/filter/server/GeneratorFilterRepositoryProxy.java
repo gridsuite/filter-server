@@ -11,6 +11,7 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.GeneratorFilter;
+import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.entities.GeneratorFilterEntity;
 import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -33,7 +34,6 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.GENERATOR;
     }
@@ -54,7 +54,7 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
                         entity.getEquipmentName(),
                         entity.getSubstationName(),
                         entity.getCountries(),
-                        entity.getNominalVoltage()
+                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
                 )
         );
     }

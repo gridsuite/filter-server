@@ -10,6 +10,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.FormFilter;
+import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.dto.ShuntCompensatorFilter;
 import org.gridsuite.filter.server.entities.ShuntCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.ShuntCompensatorFilterRepository;
@@ -33,7 +34,6 @@ public class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterReposit
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.SHUNT_COMPENSATOR;
     }
@@ -54,7 +54,7 @@ public class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterReposit
                         entity.getEquipmentName(),
                         entity.getSubstationName(),
                         entity.getCountries(),
-                        entity.getNominalVoltage()
+                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
                 )
         );
     }

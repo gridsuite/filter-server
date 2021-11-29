@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
@@ -34,11 +33,11 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
-    public AbstractInjectionFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericFilterEntity nominalVoltage) {
+    public AbstractInjectionFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName);
         this.substationName = substationName;
         this.countries = countries;
-        this.nominalVoltage = NumericalFilter.builder().type(nominalVoltage.getFilterType()).value1(nominalVoltage.getValue1()).value2(nominalVoltage.getValue2()).build();
+        this.nominalVoltage = nominalVoltage;
     }
 
     @Override

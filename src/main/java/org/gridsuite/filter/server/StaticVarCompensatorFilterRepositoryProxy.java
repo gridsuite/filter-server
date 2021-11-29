@@ -8,10 +8,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.BatteryFilter;
-import org.gridsuite.filter.server.dto.FormFilter;
-import org.gridsuite.filter.server.dto.StaticVarCompensatorFilter;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.StaticVarCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.StaticVarCompensatorFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -34,7 +31,6 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.STATIC_VAR_COMPENSATOR;
     }
@@ -55,7 +51,7 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
                         entity.getEquipmentName(),
                         entity.getSubstationName(),
                         entity.getCountries(),
-                        entity.getNominalVoltage()
+                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
                 )
         );
     }
@@ -67,7 +63,7 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
         }
         FormFilter formFilter = (FormFilter) dto;
 
-        if (!(formFilter.getEquipmentFilterForm() instanceof BatteryFilter)) {
+        if (!(formFilter.getEquipmentFilterForm() instanceof StaticVarCompensatorFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
         var staticVarCompensatorFilterEntityBuilder = StaticVarCompensatorFilterEntity.builder();

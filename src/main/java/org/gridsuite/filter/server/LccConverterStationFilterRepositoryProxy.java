@@ -11,6 +11,7 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.LccConverterStationFilter;
+import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.entities.LccConverterStationFilterEntity;
 import org.gridsuite.filter.server.repositories.LccConverterStationFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -33,7 +34,6 @@ public class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepo
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.LCC_CONVERTER_STATION;
     }
@@ -54,7 +54,7 @@ public class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepo
                         entity.getEquipmentName(),
                         entity.getSubstationName(),
                         entity.getCountries(),
-                        entity.getNominalVoltage()
+                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
                 )
         );
     }

@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,14 +33,10 @@ public class ScriptFilter extends AbstractFilter {
         this.script = script;
     }
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public FilterType getType() {
         return FilterType.SCRIPT;
     }
-
-//    @Override
-//    public EquipmentType getEquipmentType() {
-//        return EquipmentType.NONE;
-//    }
 
 }

@@ -10,6 +10,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.FormFilter;
+import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.dto.VscConverterStationFilter;
 import org.gridsuite.filter.server.entities.VscConverterStationFilterEntity;
 import org.gridsuite.filter.server.repositories.VscConverterStationFilterRepository;
@@ -33,7 +34,6 @@ public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepo
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.VSC_CONVERTER_STATION;
     }
@@ -54,7 +54,7 @@ public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepo
                         entity.getEquipmentName(),
                         entity.getSubstationName(),
                         entity.getCountries(),
-                        entity.getNominalVoltage()
+                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
                 )
         );
     }

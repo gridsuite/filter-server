@@ -120,34 +120,39 @@ public class FilterService {
 
     @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
-        return getRepository(filter.getType().name(), filter).insert(filter);
+        return getRepository(filter).insert(filter);
     }
 
-    private AbstractFilterRepositoryProxy getRepository(String type, AbstractFilter filter) {
-        if (type.equals(FilterType.SCRIPT.name())) {
+    private AbstractFilterRepositoryProxy getRepository(AbstractFilter filter) {
+        var type = filter.getType();
+        if (filter.getType().equals(FilterType.SCRIPT)) {
             return filterRepositories.get(FilterType.SCRIPT.name());
         }
-        return filterRepositories.get(((FormFilter) filter).getEquipmentFilterForm().getEquipmentType());
+        return filterRepositories.get(((FormFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
     }
 
     @Transactional
     public <F extends AbstractFilter> void changeFilter(UUID id, F filter) {
         Optional<AbstractFilter> f = getFilter(id);
-        FormFilter formFilter = (FormFilter) filter;
         if (f.isPresent()) {
-            FormFilter oldFilter = (FormFilter) f.get();
-            if (oldFilter.getEquipmentFilterForm().getEquipmentType() == formFilter.getEquipmentFilterForm().getEquipmentType()) {  // filter type has not changed
+            if (f.get().getType() == FilterType.SCRIPT && filter.getType() == FilterType.SCRIPT) {
                 filter.setCreationDate(f.get().getCreationDate());
-                getRepository(filter.getType().name(), filter).modify(id, filter);
-            } else {  // filter type has changed
-                if ((f.get().getType() == FilterType.SCRIPT && filter.getType() != FilterType.SCRIPT) ||
-                    (f.get().getType() != FilterType.SCRIPT && filter.getType() == FilterType.SCRIPT)) {
-                    throw new PowsyblException(WRONG_FILTER_TYPE);
-                } else {
-                    getRepository(f.get().getType().name(), f.get()).deleteById(id);
-                    filter.setId(id);
+                getRepository(filter).modify(id, filter);
+            } else {
+                FormFilter formFilter = (FormFilter) filter;
+                FormFilter oldFilter = (FormFilter) f.get();
+                if (oldFilter.getEquipmentFilterForm().getEquipmentType() == formFilter.getEquipmentFilterForm().getEquipmentType()) {  // filter type has not changed
                     filter.setCreationDate(f.get().getCreationDate());
-                    createFilter(filter);
+                    getRepository(filter).modify(id, filter);
+                } else {  // filter type has changed
+                    if (f.get().getType() == FilterType.SCRIPT || filter.getType() == FilterType.SCRIPT) {
+                        throw new PowsyblException(WRONG_FILTER_TYPE);
+                    } else {
+                        getRepository(f.get()).deleteById(id);
+                        filter.setId(id);
+                        filter.setCreationDate(f.get().getCreationDate());
+                        createFilter(filter);
+                    }
                 }
             }
         } else {
@@ -180,8 +185,8 @@ public class FilterService {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
-                getRepository(filter.get().getType().name(), filter.get()).deleteById(filter.get().getId());
-                return getRepository(FilterType.SCRIPT.name(), null).insert(ScriptFilter.builder().id(filter.get().getId()).script(script).build());
+                getRepository(filter.get()).deleteById(filter.get().getId());
+                return getRepository(new ScriptFilter()).insert(ScriptFilter.builder().id(filter.get().getId()).script(script).build());
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
@@ -198,7 +203,7 @@ public class FilterService {
                 throw new PowsyblException(WRONG_FILTER_TYPE);
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
-                return getRepository(FilterType.SCRIPT.name(), null).insert(ScriptFilter.builder().id(newId == null ? UUID.randomUUID() : newId).script(script).build());
+                return getRepository(new ScriptFilter()).insert(ScriptFilter.builder().id(newId == null ? UUID.randomUUID() : newId).script(script).build());
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterId + NOT_FOUND);

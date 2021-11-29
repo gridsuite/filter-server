@@ -6,7 +6,8 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,14 +18,13 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * @author Borsenberger jacques <borsenberger.jacques at rte-france.com>
+ * @author Homer Etienne <etienne.homer at rte-france.com>
  */
 
 @Getter
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class FormFilter extends AbstractFilter {
 
     private AbstractEquipmentFilterForm equipmentFilterForm;
@@ -34,6 +34,7 @@ public class FormFilter extends AbstractFilter {
         this.equipmentFilterForm = equipmentFilterForm;
     }
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public FilterType getType() {
         return FilterType.FORM;

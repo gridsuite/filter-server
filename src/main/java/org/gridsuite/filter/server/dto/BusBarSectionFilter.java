@@ -7,10 +7,10 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
 
 import java.util.Set;
@@ -20,10 +20,11 @@ import java.util.Set;
  */
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 @Schema(description = "Busbar section Filters", allOf = AbstractInjectionFilter.class)
 public class BusBarSectionFilter extends AbstractInjectionFilter {
-    public BusBarSectionFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericFilterEntity nominalVoltage) {
+    public BusBarSectionFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName, substationName, countries, nominalVoltage);
     }
 

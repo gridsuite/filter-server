@@ -10,7 +10,6 @@ package org.gridsuite.filter.server.utils;
  * @author Etienne Homer <etienne.homer at rte-france.com>
  */
 public enum EquipmentType {
-    NONE("none"),
     LINE("lines"),
     GENERATOR("generators"),
     LOAD("loads"),

@@ -31,7 +31,6 @@ public class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.BATTERY;
     }
@@ -52,7 +51,7 @@ public class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<
                         entity.getEquipmentName(),
                         entity.getSubstationName(),
                         entity.getCountries(),
-                        entity.getNominalVoltage()
+                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
                 )
         );
     }

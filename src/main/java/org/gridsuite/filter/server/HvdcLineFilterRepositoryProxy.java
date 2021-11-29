@@ -35,7 +35,6 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
         return FilterType.FORM;
     }
 
-    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.HVDC_LINE;
     }
@@ -48,19 +47,18 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
     @Override
     public AbstractFilter toDto(HvdcLineFilterEntity entity) {
         return new FormFilter(
-                entity.getId(),
-                entity.getCreationDate(),
-                entity.getModificationDate(),
-                new HvdcLineFilter(
-                        entity.getEquipmentId(),
-                        entity.getEquipmentName(),
-                        entity.getSubstationName1(),
-                        entity.getSubstationName2(),
-                        entity.getCountries1(),
-                        entity.getCountries2(),
-                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2())
-                        .build()
-                )
+            entity.getId(),
+            entity.getCreationDate(),
+            entity.getModificationDate(),
+            new HvdcLineFilter(
+                    entity.getEquipmentId(),
+                    entity.getEquipmentName(),
+                    entity.getSubstationName1(),
+                    entity.getSubstationName2(),
+                    entity.getCountries1(),
+                    entity.getCountries2(),
+                    NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
+            )
         );
     }
 
@@ -74,12 +72,10 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
         if (!(formFilter.getEquipmentFilterForm() instanceof HvdcLineFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        var hvdcLineFilterEntityBuilder = HvdcLineFilterEntity.builder();
         HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) formFilter.getEquipmentFilterForm();
         return HvdcLineFilterEntity.builder()
                 .id(formFilter.getId())
                 .creationDate(getDateOrCreate(formFilter.getCreationDate()))
-//                .modificationDate((formFilter.getModificationDate()))
                 .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
                 .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
                 .countries1(hvdcLineFilter.getCountries1())
