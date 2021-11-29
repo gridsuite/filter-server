@@ -9,7 +9,6 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.entities.TwoWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.TwoWindingsTransformerFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -52,8 +51,8 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
                 entity.getEquipmentName(),
                 entity.getSubstationName(),
                 entity.getCountries(),
-                NumericalFilter.builder().type(entity.getNominalVoltage1().getFilterType()).value1(entity.getNominalVoltage1().getValue1()).value2(entity.getNominalVoltage1().getValue2()).build(),
-                NumericalFilter.builder().type(entity.getNominalVoltage2().getFilterType()).value1(entity.getNominalVoltage2().getValue1()).value2(entity.getNominalVoltage2().getValue2()).build()
+                convert(entity.getNominalVoltage1()),
+                convert(entity.getNominalVoltage2())
                 )
         );
     }
@@ -76,8 +75,8 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
                 .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
                 .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
                 .countries(twoWindingsTransformerFilter.getCountries())
-                .nominalVoltage1(new NumericFilterEntity(twoWindingsTransformerFilter.getNominalVoltage1()))
-                .nominalVoltage2(new NumericFilterEntity(twoWindingsTransformerFilter.getNominalVoltage2()))
+                .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))
+                .nominalVoltage2(convert(twoWindingsTransformerFilter.getNominalVoltage2()))
                 .build();
     }
 }

@@ -10,7 +10,6 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -44,19 +43,19 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
     @Override
     public AbstractFilter toDto(LineFilterEntity entity) {
         return new FormFilter(
-                entity.getId(),
-                entity.getCreationDate(),
-                entity.getModificationDate(),
-                new LineFilter(
-                        entity.getEquipmentId(),
-                        entity.getEquipmentName(),
-                        entity.getSubstationName1(),
-                        entity.getSubstationName2(),
-                        entity.getCountries1(),
-                        entity.getCountries2(),
-                        NumericalFilter.builder().type(entity.getNominalVoltage1().getFilterType()).value1(entity.getNominalVoltage1().getValue1()).value2(entity.getNominalVoltage1().getValue2()).build(),
-                        NumericalFilter.builder().type(entity.getNominalVoltage2().getFilterType()).value1(entity.getNominalVoltage2().getValue1()).value2(entity.getNominalVoltage2().getValue2()).build()
-                )
+            entity.getId(),
+            entity.getCreationDate(),
+            entity.getModificationDate(),
+            new LineFilter(
+                entity.getEquipmentId(),
+                entity.getEquipmentName(),
+                entity.getSubstationName1(),
+                entity.getSubstationName2(),
+                entity.getCountries1(),
+                entity.getCountries2(),
+                convert(entity.getNominalVoltage1()),
+                convert(entity.getNominalVoltage2())
+            )
         );
     }
 
@@ -78,8 +77,8 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
             .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
             .countries1(lineFilter.getCountries1())
             .countries2(lineFilter.getCountries2())
-            .nominalVoltage1(new NumericFilterEntity(lineFilter.getNominalVoltage1()))
-            .nominalVoltage2(new NumericFilterEntity(lineFilter.getNominalVoltage2()))
+            .nominalVoltage1(convert(lineFilter.getNominalVoltage1()))
+            .nominalVoltage2(convert(lineFilter.getNominalVoltage2()))
             .substationName1(lineFilter.getSubstationName1())
             .substationName2(lineFilter.getSubstationName2())
             .build();

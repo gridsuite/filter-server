@@ -43,16 +43,16 @@ public class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<
     @Override
     public AbstractFilter toDto(BatteryFilterEntity entity) {
         return new FormFilter(
-                entity.getId(),
-                entity.getCreationDate(),
-                entity.getModificationDate(),
-                new BatteryFilter(
-                        entity.getEquipmentId(),
-                        entity.getEquipmentName(),
-                        entity.getSubstationName(),
-                        entity.getCountries(),
-                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
-                )
+            entity.getId(),
+            entity.getCreationDate(),
+            entity.getModificationDate(),
+            new BatteryFilter(
+                entity.getEquipmentId(),
+                entity.getEquipmentName(),
+                entity.getSubstationName(),
+                entity.getCountries(),
+                convert(entity.getNominalVoltage())
+            )
         );
     }
 

@@ -11,7 +11,6 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.BusBarSectionFilter;
 import org.gridsuite.filter.server.dto.FormFilter;
-import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.entities.BusBarSectionFilterEntity;
 import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -46,16 +45,16 @@ public class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepository
     @Override
     public AbstractFilter toDto(BusBarSectionFilterEntity entity) {
         return new FormFilter(
-                entity.getId(),
-                entity.getCreationDate(),
-                entity.getModificationDate(),
-                new BusBarSectionFilter(
-                        entity.getEquipmentId(),
-                        entity.getEquipmentName(),
-                        entity.getSubstationName(),
-                        entity.getCountries(),
-                        NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
-                )
+            entity.getId(),
+            entity.getCreationDate(),
+            entity.getModificationDate(),
+            new BusBarSectionFilter(
+                entity.getEquipmentId(),
+                entity.getEquipmentName(),
+                entity.getSubstationName(),
+                entity.getCountries(),
+                convert(entity.getNominalVoltage())
+            )
         );
     }
 

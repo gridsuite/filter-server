@@ -11,9 +11,7 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.HvdcLineFilter;
-import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.entities.HvdcLineFilterEntity;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -51,13 +49,13 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
             entity.getCreationDate(),
             entity.getModificationDate(),
             new HvdcLineFilter(
-                    entity.getEquipmentId(),
-                    entity.getEquipmentName(),
-                    entity.getSubstationName1(),
-                    entity.getSubstationName2(),
-                    entity.getCountries1(),
-                    entity.getCountries2(),
-                    NumericalFilter.builder().type(entity.getNominalVoltage().getFilterType()).value1(entity.getNominalVoltage().getValue1()).value2(entity.getNominalVoltage().getValue2()).build()
+                entity.getEquipmentId(),
+                entity.getEquipmentName(),
+                entity.getSubstationName1(),
+                entity.getSubstationName2(),
+                entity.getCountries1(),
+                entity.getCountries2(),
+                convert(entity.getNominalVoltage())
             )
         );
     }
@@ -80,7 +78,7 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
                 .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
                 .countries1(hvdcLineFilter.getCountries1())
                 .countries2(hvdcLineFilter.getCountries2())
-                .nominalVoltage(new NumericFilterEntity(hvdcLineFilter.getNominalVoltage()))
+                .nominalVoltage(convert(hvdcLineFilter.getNominalVoltage()))
                 .substationName1(hvdcLineFilter.getSubstationName1())
                 .substationName2(hvdcLineFilter.getSubstationName2())
                 .build();

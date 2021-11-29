@@ -9,7 +9,6 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
-import org.gridsuite.filter.server.entities.NumericFilterEntity;
 import org.gridsuite.filter.server.entities.ThreeWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.ThreeWindingsTransformerFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -52,9 +51,9 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
                 entity.getEquipmentName(),
                 entity.getSubstationName(),
                 entity.getCountries(),
-                NumericalFilter.builder().type(entity.getNominalVoltage1().getFilterType()).value1(entity.getNominalVoltage1().getValue1()).value2(entity.getNominalVoltage1().getValue2()).build(),
-                NumericalFilter.builder().type(entity.getNominalVoltage2().getFilterType()).value1(entity.getNominalVoltage2().getValue1()).value2(entity.getNominalVoltage2().getValue2()).build(),
-                NumericalFilter.builder().type(entity.getNominalVoltage3().getFilterType()).value1(entity.getNominalVoltage3().getValue1()).value2(entity.getNominalVoltage3().getValue2()).build()
+                convert(entity.getNominalVoltage1()),
+                convert(entity.getNominalVoltage2()),
+                convert(entity.getNominalVoltage3())
             )
         );
     }
@@ -76,9 +75,9 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
                 .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
                 .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
                 .countries(threeWindingsTransformerFilter.getCountries())
-                .nominalVoltage1(new NumericFilterEntity(threeWindingsTransformerFilter.getNominalVoltage1()))
-                .nominalVoltage2(new NumericFilterEntity(threeWindingsTransformerFilter.getNominalVoltage2()))
-                .nominalVoltage3(new NumericFilterEntity(threeWindingsTransformerFilter.getNominalVoltage3()))
+                .nominalVoltage1(convert(threeWindingsTransformerFilter.getNominalVoltage1()))
+                .nominalVoltage2(convert(threeWindingsTransformerFilter.getNominalVoltage2()))
+                .nominalVoltage3(convert(threeWindingsTransformerFilter.getNominalVoltage3()))
                 .build();
     }
 }
