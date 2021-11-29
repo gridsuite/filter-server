@@ -7,7 +7,6 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -20,7 +19,6 @@ import java.util.Set;
  */
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @SuperBuilder
 @Schema(description = "Injection Filters", allOf = FormFilter.class)
 public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterForm {

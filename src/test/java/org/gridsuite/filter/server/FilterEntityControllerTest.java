@@ -17,7 +17,6 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
-import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.RangeType;
@@ -392,7 +391,6 @@ public class FilterEntityControllerTest {
         // Check we didn't miss anything
 //        JSONAssert.assertEquals(objectMapper.writeValueAsString(newFilter), strRes, JSONCompareMode.LENIENT);
     }
-
 
     private void insertInjectionFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                        String substationName, Set<String> countries,
