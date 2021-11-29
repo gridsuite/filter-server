@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-public abstract class AbstractFilterRepositoryProxy<FilterEntity extends AbstractFilterEntity, EntityRepository extends FilterRepository<FilterEntity>> {
+public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEntity, EntityRepository extends FilterRepository<F>> {
     public static final String WRONG_FILTER_TYPE = "Wrong filter type, should never happen";
 
     static <T> Set<T> cloneIfNotEmptyOrNull(Set<T> set) {
@@ -49,21 +49,21 @@ public abstract class AbstractFilterRepositoryProxy<FilterEntity extends Abstrac
 
     abstract EntityRepository getRepository();
 
-    abstract AbstractFilter toDto(FilterEntity filterEntity);
+    abstract AbstractFilter toDto(F filterEntity);
 
-    abstract FilterEntity fromDto(AbstractFilter dto);
+    abstract F fromDto(AbstractFilter dto);
 
     abstract FilterType getFilterType();
 
     Optional<AbstractFilter> getFilter(UUID id) {
-        Optional<FilterEntity> element = getRepository().findById(id);
+        Optional<F> element = getRepository().findById(id);
         if (element.isPresent()) {
             return element.map(this::toDto);
         }
         return Optional.empty();
     }
 
-    Optional<FilterEntity> getFilterEntity(UUID id) {
+    Optional<F> getFilterEntity(UUID id) {
         return getRepository().findById(id);
     }
 
