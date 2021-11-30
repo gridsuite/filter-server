@@ -94,17 +94,6 @@ public class FilterService {
         return Optional.empty();
     }
 
-    Optional<AbstractFilterEntity> getFilterEntity(UUID id) {
-        Objects.requireNonNull(id);
-        for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
-            Optional<AbstractFilterEntity> res = (Optional<AbstractFilterEntity>) repository.getFilterEntity(id);
-            if (res.isPresent()) {
-                return res;
-            }
-        }
-        return Optional.empty();
-    }
-
     @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
         return getRepository(filter).insert(filter);

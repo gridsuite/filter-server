@@ -40,10 +40,4 @@ public class NumericFilterEntity {
     @Column(name = "value2")
     Double value2;
 
-    public NumericFilterEntity(NumericalFilter numericalFilter) {
-        this.filterType = numericalFilter.getType();
-        this.value1 = numericalFilter.getValue1();
-        this.value2 = numericalFilter.getValue2();
-    }
-
 }
