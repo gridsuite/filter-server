@@ -118,26 +118,26 @@ public class FilterService {
     }
 
     @Transactional
-    public <F extends AbstractFilter> void changeFilter(UUID id, F filter) {
+    public <F extends AbstractFilter> void changeFilter(UUID id, F newFilter) {
         Optional<AbstractFilter> f = getFilter(id);
         if (f.isPresent()) {
-            if (f.get().getType() == FilterType.SCRIPT && filter.getType() == FilterType.SCRIPT) {
-                filter.setCreationDate(f.get().getCreationDate());
-                getRepository(filter).modify(id, filter);
+            if (f.get().getType() == FilterType.SCRIPT && newFilter.getType() == FilterType.SCRIPT) {
+                newFilter.setCreationDate(f.get().getCreationDate());
+                getRepository(newFilter).modify(id, newFilter);
             } else {
-                FormFilter formFilter = (FormFilter) filter;
-                FormFilter oldFilter = (FormFilter) f.get();
-                if (oldFilter.getEquipmentFilterForm().getEquipmentType() == formFilter.getEquipmentFilterForm().getEquipmentType()) {  // filter type has not changed
-                    filter.setCreationDate(f.get().getCreationDate());
-                    getRepository(filter).modify(id, filter);
+                FormFilter newFormFilter = (FormFilter) newFilter;
+                FormFilter oldFormFilter = (FormFilter) f.get();
+                if (oldFormFilter.getEquipmentFilterForm().getEquipmentType() == newFormFilter.getEquipmentFilterForm().getEquipmentType()) {  // filter type has not changed
+                    newFilter.setCreationDate(f.get().getCreationDate());
+                    getRepository(newFilter).modify(id, newFilter);
                 } else {  // filter type has changed
-                    if (f.get().getType() == FilterType.SCRIPT || filter.getType() == FilterType.SCRIPT) {
+                    if (f.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
                         throw new PowsyblException(WRONG_FILTER_TYPE);
                     } else {
                         getRepository(f.get()).deleteById(id);
-                        filter.setId(id);
-                        filter.setCreationDate(f.get().getCreationDate());
-                        createFilter(filter);
+                        newFilter.setId(id);
+                        newFilter.setCreationDate(f.get().getCreationDate());
+                        createFilter(newFilter);
                     }
                 }
             }
