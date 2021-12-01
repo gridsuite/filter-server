@@ -11,7 +11,6 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -29,10 +28,6 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
     @Override
     public FilterType getFilterType() {
         return FilterType.FORM;
-    }
-
-    public EquipmentType getEquipmentType() {
-        return EquipmentType.LINE;
     }
 
     @Override

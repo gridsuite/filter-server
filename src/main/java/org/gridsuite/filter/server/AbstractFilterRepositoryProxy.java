@@ -62,10 +62,6 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return Optional.empty();
     }
 
-    Optional<F> getFilterEntity(UUID id) {
-        return getRepository().findById(id);
-    }
-
     Stream<FilterAttributes> getFiltersAttributes() {
         return getRepository().getFiltersMetadata().stream().map(this::metadataToAttribute);
     }

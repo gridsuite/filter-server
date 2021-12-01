@@ -13,7 +13,6 @@ import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.VscConverterStationFilter;
 import org.gridsuite.filter.server.entities.VscConverterStationFilterEntity;
 import org.gridsuite.filter.server.repositories.VscConverterStationFilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -31,10 +30,6 @@ public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepo
     @Override
     public FilterType getFilterType() {
         return FilterType.FORM;
-    }
-
-    public EquipmentType getEquipmentType() {
-        return EquipmentType.VSC_CONVERTER_STATION;
     }
 
     @Override

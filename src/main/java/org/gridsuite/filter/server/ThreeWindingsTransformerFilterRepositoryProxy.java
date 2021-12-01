@@ -11,7 +11,6 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.ThreeWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.ThreeWindingsTransformerFilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -29,10 +28,6 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
     @Override
     public FilterType getFilterType() {
         return FilterType.FORM;
-    }
-
-    public EquipmentType getEquipmentType() {
-        return EquipmentType.THREE_WINDINGS_TRANSFORMER;
     }
 
     @Override

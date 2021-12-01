@@ -11,7 +11,6 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.StaticVarCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.StaticVarCompensatorFilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -29,10 +28,6 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
     @Override
     public FilterType getFilterType() {
         return FilterType.FORM;
-    }
-
-    public EquipmentType getEquipmentType() {
-        return EquipmentType.STATIC_VAR_COMPENSATOR;
     }
 
     @Override

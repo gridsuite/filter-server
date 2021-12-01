@@ -13,7 +13,6 @@ import org.gridsuite.filter.server.dto.BusBarSectionFilter;
 import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.entities.BusBarSectionFilterEntity;
 import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -31,10 +30,6 @@ public class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepository
     @Override
     public FilterType getFilterType() {
         return FilterType.FORM;
-    }
-
-    public EquipmentType getEquipmentType() {
-        return EquipmentType.BUSBAR_SECTION;
     }
 
     @Override

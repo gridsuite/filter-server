@@ -13,7 +13,6 @@ import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.GeneratorFilter;
 import org.gridsuite.filter.server.entities.GeneratorFilterEntity;
 import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -31,10 +30,6 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
     @Override
     public FilterType getFilterType() {
         return FilterType.FORM;
-    }
-
-    public EquipmentType getEquipmentType() {
-        return EquipmentType.GENERATOR;
     }
 
     @Override

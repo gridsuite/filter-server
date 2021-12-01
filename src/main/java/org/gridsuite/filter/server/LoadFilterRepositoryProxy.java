@@ -13,7 +13,6 @@ import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.LoadFilter;
 import org.gridsuite.filter.server.entities.LoadFilterEntity;
 import org.gridsuite.filter.server.repositories.LoadFilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -31,10 +30,6 @@ public class LoadFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Loa
     @Override
     public FilterType getFilterType() {
         return FilterType.FORM;
-    }
-
-    public EquipmentType getEquipmentType() {
-        return EquipmentType.LOAD;
     }
 
     @Override
