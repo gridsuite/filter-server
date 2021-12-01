@@ -10,7 +10,6 @@ package org.gridsuite.filter.server.entities;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.gridsuite.filter.server.dto.NumericalFilter;
 import org.gridsuite.filter.server.utils.RangeType;
 
 import javax.persistence.*;
