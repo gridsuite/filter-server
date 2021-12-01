@@ -66,16 +66,13 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
         HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) formFilter.getEquipmentFilterForm();
-        return HvdcLineFilterEntity.builder()
-                .id(formFilter.getId())
-                .creationDate(getDateOrCreate(formFilter.getCreationDate()))
-                .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
-                .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
-                .countries1(hvdcLineFilter.getCountries1())
-                .countries2(hvdcLineFilter.getCountries2())
-                .nominalVoltage(convert(hvdcLineFilter.getNominalVoltage()))
-                .substationName1(hvdcLineFilter.getSubstationName1())
-                .substationName2(hvdcLineFilter.getSubstationName2())
-                .build();
+        var hvdcLineFilterEntityBuilder = HvdcLineFilterEntity.builder()
+            .countries1(hvdcLineFilter.getCountries1())
+            .countries2(hvdcLineFilter.getCountries2())
+            .nominalVoltage(convert(hvdcLineFilter.getNominalVoltage()))
+            .substationName1(hvdcLineFilter.getSubstationName1())
+            .substationName2(hvdcLineFilter.getSubstationName2());
+        buildGenericFilter(hvdcLineFilterEntityBuilder, formFilter);
+        return hvdcLineFilterEntityBuilder.build();
     }
 }

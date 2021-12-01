@@ -65,17 +65,14 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
         LineFilter lineFilter = (LineFilter) formFilter.getEquipmentFilterForm();
-        return LineFilterEntity.builder()
-            .id(formFilter.getId())
-            .creationDate(getDateOrCreate(formFilter.getCreationDate()))
-            .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
-            .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
+        var lineFilterEntityBuilder =    LineFilterEntity.builder()
             .countries1(lineFilter.getCountries1())
             .countries2(lineFilter.getCountries2())
             .nominalVoltage1(convert(lineFilter.getNominalVoltage1()))
             .nominalVoltage2(convert(lineFilter.getNominalVoltage2()))
             .substationName1(lineFilter.getSubstationName1())
-            .substationName2(lineFilter.getSubstationName2())
-            .build();
+            .substationName2(lineFilter.getSubstationName2());
+        buildGenericFilter(lineFilterEntityBuilder, formFilter);
+        return lineFilterEntityBuilder.build();
     }
 }

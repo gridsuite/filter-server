@@ -64,15 +64,12 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
         }
 
         TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
-        return TwoWindingsTransformerFilterEntity.builder()
-                .id(formFilter.getId())
-                .creationDate(getDateOrCreate(formFilter.getCreationDate()))
-                .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
-                .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
-                .countries(twoWindingsTransformerFilter.getCountries())
-                .substationName(twoWindingsTransformerFilter.getSubstationName())
-                .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))
-                .nominalVoltage2(convert(twoWindingsTransformerFilter.getNominalVoltage2()))
-                .build();
+        var twoWindingsTransformerFilterEntityBuilder =  TwoWindingsTransformerFilterEntity.builder()
+            .countries(twoWindingsTransformerFilter.getCountries())
+            .substationName(twoWindingsTransformerFilter.getSubstationName())
+            .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))
+            .nominalVoltage2(convert(twoWindingsTransformerFilter.getNominalVoltage2()));
+        buildGenericFilter(twoWindingsTransformerFilterEntityBuilder, formFilter);
+        return twoWindingsTransformerFilterEntityBuilder.build();
     }
 }

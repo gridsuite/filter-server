@@ -64,16 +64,13 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
         ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
-        return ThreeWindingsTransformerFilterEntity.builder()
-                .id(formFilter.getId())
-                .creationDate(getDateOrCreate(formFilter.getCreationDate()))
-                .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
-                .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
-                .countries(threeWindingsTransformerFilter.getCountries())
-                .substationName(threeWindingsTransformerFilter.getSubstationName())
-                .nominalVoltage1(convert(threeWindingsTransformerFilter.getNominalVoltage1()))
-                .nominalVoltage2(convert(threeWindingsTransformerFilter.getNominalVoltage2()))
-                .nominalVoltage3(convert(threeWindingsTransformerFilter.getNominalVoltage3()))
-                .build();
+        var threeWindingsTransformerFilterEntityBuilder =   ThreeWindingsTransformerFilterEntity.builder()
+            .countries(threeWindingsTransformerFilter.getCountries())
+            .substationName(threeWindingsTransformerFilter.getSubstationName())
+            .nominalVoltage1(convert(threeWindingsTransformerFilter.getNominalVoltage1()))
+            .nominalVoltage2(convert(threeWindingsTransformerFilter.getNominalVoltage2()))
+            .nominalVoltage3(convert(threeWindingsTransformerFilter.getNominalVoltage3()));
+        buildGenericFilter(threeWindingsTransformerFilterEntityBuilder, formFilter);
+        return threeWindingsTransformerFilterEntityBuilder.build();
     }
 }
