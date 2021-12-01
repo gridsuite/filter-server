@@ -9,10 +9,11 @@ package org.gridsuite.filter.server.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -20,10 +21,11 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true)
 @Schema(description = "Shunt compensator Filters", allOf = AbstractInjectionFilter.class)
 public class ShuntCompensatorFilter extends AbstractInjectionFilter {
 
-    public ShuntCompensatorFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage) {
+    public ShuntCompensatorFilter(String equipmentID, String equipmentName, String substationName, SortedSet<String> countries, NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName, substationName, countries, nominalVoltage);
     }
 

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.FilterType;
 
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@ToString(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
 public class FormFilter extends AbstractFilter {
@@ -38,4 +40,5 @@ public class FormFilter extends AbstractFilter {
     public FilterType getType() {
         return FilterType.FORM;
     }
+
 }

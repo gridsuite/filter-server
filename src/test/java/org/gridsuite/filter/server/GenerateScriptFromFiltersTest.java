@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.LinkedHashSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -40,7 +41,7 @@ public class GenerateScriptFromFiltersTest {
                 "for (equipment in network.lines) {\n" +
                 "  if (\n" +
                 "      (FiltersUtils.matchID('lineId1', equipment) || FiltersUtils.matchName('lineName1', equipment))\n" +
-                "      && FiltersUtils.isLocatedIn(['FR','ES'], equipment.terminal1)\n" +
+                "      && FiltersUtils.isLocatedIn(['ES','FR'], equipment.terminal1)\n" +
                 "      && FiltersUtils.isLocatedIn(['IT','PT'], equipment.terminal2)\n" +
                 "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1, 225.0, 250.0)\n" +
                 "      && FiltersUtils.isApproxNominalVoltage(equipment.terminal2, 385.0, 5.0)\n" +
@@ -59,8 +60,8 @@ public class GenerateScriptFromFiltersTest {
                         .equipmentName("lineName1")
                         .substationName1("s1")
                         .substationName2("s2")
-                        .countries1(countries1)
-                        .countries2(countries2)
+                        .countries1(new TreeSet<>(countries1))
+                        .countries2(new TreeSet<>(countries2))
                         .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
                         .nominalVoltage2(NumericalFilter.builder().type(RangeType.APPROX).value1(385.).value2(5.).build())
                         .build())));
@@ -84,7 +85,7 @@ public class GenerateScriptFromFiltersTest {
                     LineFilter.builder()
                         .equipmentName("lineName2")
                         .substationName1("s1")
-                        .countries2(countries2)
+                        .countries2(new TreeSet<>(countries2))
                         .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(380.).build())
                         .build())));
 
@@ -118,7 +119,7 @@ public class GenerateScriptFromFiltersTest {
                     LineFilter.builder()
                         .equipmentName("lineName2")
                         .substationName1("s1")
-                        .countries2(countries2)
+                        .countries2(new TreeSet<>(countries2))
                         .nominalVoltage2(NumericalFilter.builder().type(RangeType.RANGE).value1(380.).build())
                         .build())
             )
@@ -136,7 +137,7 @@ public class GenerateScriptFromFiltersTest {
             "for (equipment in network.generators) {\n" +
             "  if (\n" +
             "      (FiltersUtils.matchID('genId1', equipment) || FiltersUtils.matchName('genName1', equipment))\n" +
-            "      && FiltersUtils.isLocatedIn(['FR','ES'], equipment.terminal)\n" +
+            "      && FiltersUtils.isLocatedIn(['ES','FR'], equipment.terminal)\n" +
             "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal, 225.0, 250.0)\n" +
             "      && equipment.terminal.voltageLevel.substation.name.equals('s1')\n" +
             "     ) {\n" +
@@ -150,7 +151,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentID("genId1")
                     .equipmentName("genName1")
                     .substationName("s1")
-                    .countries(countries)
+                    .countries(new TreeSet<>(countries))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
                     .build()))
         );
@@ -180,7 +181,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentID("loadId1")
                     .equipmentName("loadName1")
                     .substationName("s3")
-                    .countries(countries)
+                    .countries(new TreeSet<>(countries))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.APPROX).value1(390.).value2(5.).build())
                     .build()))
         );
@@ -230,7 +231,7 @@ public class GenerateScriptFromFiltersTest {
                 StaticVarCompensatorFilter.builder()
                     .equipmentID("staticVarCompensatorId1")
                     .substationName("s4")
-                    .countries(countries)
+                    .countries(new TreeSet<>(countries))
                     .build()))
         );
     }
@@ -300,7 +301,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentID("danglingId1")
                     .equipmentName("danglingName1")
                     .substationName("s3")
-                    .countries(countries)
+                    .countries(new TreeSet<>(countries))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(360.).value2(400.).build())
                     .build()))
         );
@@ -317,7 +318,7 @@ public class GenerateScriptFromFiltersTest {
             "for (equipment in network.lccConverterStations) {\n" +
             "  if (\n" +
             "      (FiltersUtils.matchID('lccId1', equipment) || FiltersUtils.matchName('lccName1', equipment))\n" +
-            "      && FiltersUtils.isLocatedIn(['IT','CH'], equipment.terminal)\n" +
+            "      && FiltersUtils.isLocatedIn(['CH','IT'], equipment.terminal)\n" +
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
@@ -328,7 +329,7 @@ public class GenerateScriptFromFiltersTest {
                 LccConverterStationFilter.builder()
                     .equipmentID("lccId1")
                     .equipmentName("lccName1")
-                    .countries(countries)
+                    .countries(new TreeSet<>(countries))
                     .build()))
         );
     }
@@ -354,7 +355,7 @@ public class GenerateScriptFromFiltersTest {
                 Date.from(Instant.now()),
                 VscConverterStationFilter.builder()
                     .equipmentID("vscId1")
-                    .countries(countries)
+                    .countries(new TreeSet<>(countries))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
                     .build()))
         );
@@ -386,7 +387,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentID("2wtId1")
                     .equipmentName("2wtName1")
                     .substationName("s2")
-                    .countries(countries)
+                    .countries(new TreeSet<>(countries))
                     .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
                     .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
                     .build()))
@@ -419,7 +420,7 @@ public class GenerateScriptFromFiltersTest {
                 .equipmentID("3wtId1")
                 .equipmentName("3wtName1")
                 .substationName("s3")
-                .countries(countries)
+                .countries(new TreeSet<>(countries))
                 .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(210.).value2(230.).build())
                 .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(150.).build())
                 .nominalVoltage3(NumericalFilter.builder().type(RangeType.APPROX).value1(380.).value2(5.).build())
@@ -456,8 +457,8 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentName("hvdcName1")
                     .substationName1("s1")
                     .substationName2("s2")
-                    .countries1(countries1)
-                    .countries2(countries2)
+                    .countries1(new TreeSet<>(countries1))
+                    .countries2(new TreeSet<>(countries2))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(200.).value2(400.).build())
                     .build()))
         );

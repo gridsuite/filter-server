@@ -14,12 +14,7 @@ import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -39,6 +34,10 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     static NumericalFilter convert(NumericFilterEntity entity) {
         return entity != null ? new NumericalFilter(entity.getFilterType(), entity.getValue1(), entity.getValue2()) : null;
+    }
+
+    static SortedSet<String> setToSorterSet(Set<String> set) {
+        return set == null || set.isEmpty() ? null : new TreeSet<>(set);
     }
 
     static NumericFilterEntity convert(NumericalFilter numericalFilter) {

@@ -50,7 +50,7 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
                 entity.getEquipmentId(),
                 entity.getEquipmentName(),
                 entity.getSubstationName(),
-                entity.getCountries(),
+                setToSorterSet(entity.getCountries()),
                 convert(entity.getNominalVoltage1()),
                 convert(entity.getNominalVoltage2()),
                 convert(entity.getNominalVoltage3())
@@ -75,6 +75,7 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
                 .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
                 .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
                 .countries(threeWindingsTransformerFilter.getCountries())
+                .substationName(threeWindingsTransformerFilter.getSubstationName())
                 .nominalVoltage1(convert(threeWindingsTransformerFilter.getNominalVoltage1()))
                 .nominalVoltage2(convert(threeWindingsTransformerFilter.getNominalVoltage2()))
                 .nominalVoltage3(convert(threeWindingsTransformerFilter.getNominalVoltage3()))

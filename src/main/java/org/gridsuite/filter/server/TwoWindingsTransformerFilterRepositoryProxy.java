@@ -50,7 +50,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
                 entity.getEquipmentId(),
                 entity.getEquipmentName(),
                 entity.getSubstationName(),
-                entity.getCountries(),
+                setToSorterSet(entity.getCountries()),
                 convert(entity.getNominalVoltage1()),
                 convert(entity.getNominalVoltage2())
                 )
@@ -75,6 +75,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
                 .equipmentId(formFilter.getEquipmentFilterForm().getEquipmentID())
                 .equipmentName(formFilter.getEquipmentFilterForm().getEquipmentName())
                 .countries(twoWindingsTransformerFilter.getCountries())
+                .substationName(twoWindingsTransformerFilter.getSubstationName())
                 .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))
                 .nominalVoltage2(convert(twoWindingsTransformerFilter.getNominalVoltage2()))
                 .build();

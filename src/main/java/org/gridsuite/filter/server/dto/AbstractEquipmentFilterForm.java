@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 
@@ -42,6 +43,7 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@ToString
 public abstract class AbstractEquipmentFilterForm {
 
     @Schema(description = "Equipment ID")

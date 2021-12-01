@@ -10,11 +10,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -23,6 +24,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true)
 @Schema(description = "Hvdc Filters", allOf = AbstractEquipmentFilterForm.class)
 public class HvdcLineFilter extends AbstractEquipmentFilterForm {
     @Override
@@ -37,15 +39,15 @@ public class HvdcLineFilter extends AbstractEquipmentFilterForm {
     String substationName2;
 
     @Schema(description = "Countries1")
-    private Set<String> countries1;
+    private SortedSet<String> countries1;
 
     @Schema(description = "Countries2")
-    private Set<String> countries2;
+    private SortedSet<String> countries2;
 
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
-    public HvdcLineFilter(String equipmentID, String equipmentName, String substationName1, String substationName2, Set<String> countries1, Set<String> countries2, NumericalFilter nominalVoltage) {
+    public HvdcLineFilter(String equipmentID, String equipmentName, String substationName1, String substationName2, SortedSet<String> countries1, SortedSet<String> countries2, NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName);
         this.substationName1 =  substationName1;
         this.substationName2 =  substationName2;

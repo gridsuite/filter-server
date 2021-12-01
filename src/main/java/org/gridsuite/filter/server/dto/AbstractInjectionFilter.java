@@ -9,29 +9,33 @@ package org.gridsuite.filter.server.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @Getter
+@Setter
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true)
 @Schema(description = "Injection Filters", allOf = FormFilter.class)
 public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "SubstationName")
     String substationName;
 
     @Schema(description = "Countries")
-    private Set<String> countries;
+    private SortedSet<String> countries;
 
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
-    AbstractInjectionFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage) {
+    AbstractInjectionFilter(String equipmentID, String equipmentName, String substationName, SortedSet<String> countries, NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName);
         this.substationName = substationName;
         this.countries = countries;

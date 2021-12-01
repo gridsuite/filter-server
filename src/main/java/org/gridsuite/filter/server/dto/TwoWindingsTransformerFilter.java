@@ -10,11 +10,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -22,6 +23,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true)
 @Schema(description = "Two windings transformer Filters", allOf = FormFilter.class)
 public class TwoWindingsTransformerFilter extends AbstractEquipmentFilterForm {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -34,7 +36,7 @@ public class TwoWindingsTransformerFilter extends AbstractEquipmentFilterForm {
     String substationName;
 
     @Schema(description = "Countries")
-    private Set<String> countries;
+    private SortedSet<String> countries;
 
     @Schema(description = "Nominal voltage 1")
     private NumericalFilter nominalVoltage1;
@@ -42,10 +44,10 @@ public class TwoWindingsTransformerFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
 
-    public TwoWindingsTransformerFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
+    public TwoWindingsTransformerFilter(String equipmentID, String equipmentName, String substationName, SortedSet<String> countries, NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
         super(equipmentID, equipmentName);
         this.substationName =  substationName;
-        this.countries =  countries;
+        this.countries = countries;
         this.nominalVoltage1 =  nominalVoltage1;
         this.nominalVoltage2 =  nominalVoltage2;
     }

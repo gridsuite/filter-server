@@ -51,8 +51,8 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
                 entity.getEquipmentName(),
                 entity.getSubstationName1(),
                 entity.getSubstationName2(),
-                entity.getCountries1(),
-                entity.getCountries2(),
+                setToSorterSet(entity.getCountries1()),
+                setToSorterSet(entity.getCountries2()),
                 convert(entity.getNominalVoltage1()),
                 convert(entity.getNominalVoltage2())
             )

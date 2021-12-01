@@ -52,7 +52,7 @@ public class LoadFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Loa
                 entity.getEquipmentId(),
                 entity.getEquipmentName(),
                 entity.getSubstationName(),
-                entity.getCountries(),
+                setToSorterSet(entity.getCountries()),
                 convert(entity.getNominalVoltage())
             )
         );

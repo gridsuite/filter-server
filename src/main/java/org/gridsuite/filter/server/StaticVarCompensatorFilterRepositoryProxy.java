@@ -50,7 +50,7 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
                 entity.getEquipmentId(),
                 entity.getEquipmentName(),
                 entity.getSubstationName(),
-                entity.getCountries(),
+                setToSorterSet(entity.getCountries()),
                 convert(entity.getNominalVoltage())
             )
         );

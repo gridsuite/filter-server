@@ -10,11 +10,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -22,6 +23,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true)
 @Schema(description = "Three windings transformer Filters", allOf = FormFilter.class)
 public class ThreeWindingsTransformerFilter extends AbstractEquipmentFilterForm {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -34,7 +36,7 @@ public class ThreeWindingsTransformerFilter extends AbstractEquipmentFilterForm 
     String substationName;
 
     @Schema(description = "Countries")
-    private Set<String> countries;
+    private SortedSet<String> countries;
 
     @Schema(description = "Nominal voltage 1")
     private NumericalFilter nominalVoltage1;
@@ -45,7 +47,7 @@ public class ThreeWindingsTransformerFilter extends AbstractEquipmentFilterForm 
     @Schema(description = "Nominal voltage 3")
     private NumericalFilter nominalVoltage3;
 
-    public ThreeWindingsTransformerFilter(String equipmentID, String equipmentName, String substationName, Set<String> countries, NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2, NumericalFilter nominalVoltage3) {
+    public ThreeWindingsTransformerFilter(String equipmentID, String equipmentName, String substationName, SortedSet<String> countries, NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2, NumericalFilter nominalVoltage3) {
         super(equipmentID, equipmentName);
         this.substationName =  substationName;
         this.countries =  countries;
