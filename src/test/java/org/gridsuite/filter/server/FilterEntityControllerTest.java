@@ -472,6 +472,7 @@ public class FilterEntityControllerTest {
         );
 
         insertFilter(id, transformerFilter);
+        checkFormFilter(id, equipmentType, new Date(), new Date());
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
             mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
@@ -507,10 +508,7 @@ public class FilterEntityControllerTest {
                 )
         );
 
-        String filterAsString = insertFilter(id, hvdcLineFilter);
-        FormFilter filterRes = objectMapper.readValue(filterAsString, FormFilter.class);
-        matchFormFilterInfos(filterRes, id, new Date(), new Date(), EquipmentType.HVDC_LINE);
-
+        insertFilter(id, hvdcLineFilter);
         checkFormFilter(id, EquipmentType.HVDC_LINE, new Date(), new Date());
 
         String filtersAsString = mvc.perform(get(URL_TEMPLATE))
@@ -564,8 +562,8 @@ public class FilterEntityControllerTest {
     private void matchFilterInfos(IFilterAttributes filterAttribute, UUID id, FilterType type, Date creationDate, Date modificationDate) {
         assertEquals(filterAttribute.getId(), id);
         assertEquals(filterAttribute.getType(), type);
-//        assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 2000);
-//        assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 2000);
+        assertTrue((creationDate.getTime() - filterAttribute.getCreationDate().getTime()) < 2000);
+        assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 2000);
     }
 
     private void matchFormFilterInfos(FormFilter formFilter, UUID id, Date creationDate, Date modificationDate, EquipmentType equipmentType) {
