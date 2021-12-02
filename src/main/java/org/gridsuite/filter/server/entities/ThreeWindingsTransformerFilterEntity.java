@@ -7,6 +7,7 @@
 
 package org.gridsuite.filter.server.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -29,6 +30,7 @@ import java.util.Set;
  */
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 @Entity
 @Table(name = "three_windings_transformer_filter")

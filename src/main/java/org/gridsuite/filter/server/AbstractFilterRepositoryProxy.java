@@ -117,4 +117,26 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
     public static Date getDateOrCreate(Date dt) {
         return dt == null ? new Date() : dt;
     }
+
+    public AbstractFilter toFormFilterDto(AbstractGenericFilterEntity entity) {
+        return new FormFilter(
+                entity.getId(),
+                entity.getCreationDate(),
+                entity.getModificationDate(),
+                buildEquipmentFormFilter(entity)
+        );
+    }
+
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return null;
+    }
+
+    public InjectionFilterAttributes buildInjectionAttributesFromEntity(AbstractInjectionFilterEntity entity) {
+        return new InjectionFilterAttributes(entity.getEquipmentId(),
+            entity.getEquipmentName(),
+            entity.getSubstationName(),
+            setToSorterSet(entity.getCountries()),
+            convert(entity.getNominalVoltage())
+        );
+    }
 }

@@ -8,9 +8,9 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.BusBarSectionFilter;
-import org.gridsuite.filter.server.dto.FormFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.BusBarSectionFilterEntity;
 import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -39,18 +39,12 @@ public class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepository
 
     @Override
     public AbstractFilter toDto(BusBarSectionFilterEntity entity) {
-        return new FormFilter(
-            entity.getId(),
-            entity.getCreationDate(),
-            entity.getModificationDate(),
-            new BusBarSectionFilter(
-                entity.getEquipmentId(),
-                entity.getEquipmentName(),
-                entity.getSubstationName(),
-                setToSorterSet(entity.getCountries()),
-                convert(entity.getNominalVoltage())
-            )
-        );
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new BusBarSectionFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override

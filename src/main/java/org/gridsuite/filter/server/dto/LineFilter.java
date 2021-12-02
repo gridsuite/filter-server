@@ -8,10 +8,7 @@ package org.gridsuite.filter.server.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
@@ -24,6 +21,7 @@ import java.util.SortedSet;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 @ToString(callSuper = true)
 @Schema(description = "Line Filters", allOf = FormFilter.class)

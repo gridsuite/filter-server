@@ -193,7 +193,7 @@ public class FilterEntityControllerTest {
                 filterId1,
                 creationDate,
                 modificationDate,
-                new GeneratorFilter("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null)
+                new GeneratorFilter(new InjectionFilterAttributes("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null))
                 )
         );
 
@@ -405,33 +405,34 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
         SortedSet sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
+        InjectionFilterAttributes injectionFilterAttributes =  new InjectionFilterAttributes(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
         switch (equipmentType) {
             case BATTERY:
-                abstractInjectionFilter = new BatteryFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new BatteryFilter(injectionFilterAttributes);
                 break;
             case BUSBAR_SECTION:
-                abstractInjectionFilter = new BusBarSectionFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new BusBarSectionFilter(injectionFilterAttributes);
                 break;
             case DANGLING_LINE:
-                abstractInjectionFilter = new DanglingLineFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new DanglingLineFilter(injectionFilterAttributes);
                 break;
             case GENERATOR:
-                abstractInjectionFilter = new GeneratorFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new GeneratorFilter(injectionFilterAttributes);
                 break;
             case LCC_CONVERTER_STATION:
-                abstractInjectionFilter = new LccConverterStationFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new LccConverterStationFilter(injectionFilterAttributes);
                 break;
             case LOAD:
-                abstractInjectionFilter = new LoadFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new LoadFilter(injectionFilterAttributes);
                 break;
             case SHUNT_COMPENSATOR:
-                abstractInjectionFilter = new ShuntCompensatorFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new ShuntCompensatorFilter(injectionFilterAttributes);
                 break;
             case STATIC_VAR_COMPENSATOR:
-                abstractInjectionFilter = new StaticVarCompensatorFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new StaticVarCompensatorFilter(injectionFilterAttributes);
                 break;
             case VSC_CONVERTER_STATION:
-                abstractInjectionFilter = new VscConverterStationFilter(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+                abstractInjectionFilter = new VscConverterStationFilter(injectionFilterAttributes);
                 break;
             default:
                 throw new PowsyblException("Equipment type not allowed");

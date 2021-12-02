@@ -17,7 +17,6 @@ import org.gridsuite.filter.server.utils.FilterType;
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
-
 class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ScriptFilterEntity, ScriptFilterRepository> {
     private final ScriptFilterRepository scriptFiltersRepository;
 

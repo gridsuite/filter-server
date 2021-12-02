@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
 import org.gridsuite.filter.server.repositories.LineFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -37,20 +38,21 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
 
     @Override
     public AbstractFilter toDto(LineFilterEntity entity) {
-        return new FormFilter(
-            entity.getId(),
-            entity.getCreationDate(),
-            entity.getModificationDate(),
-            new LineFilter(
-                entity.getEquipmentId(),
-                entity.getEquipmentName(),
-                entity.getSubstationName1(),
-                entity.getSubstationName2(),
-                setToSorterSet(entity.getCountries1()),
-                setToSorterSet(entity.getCountries2()),
-                convert(entity.getNominalVoltage1()),
-                convert(entity.getNominalVoltage2())
-            )
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        LineFilterEntity lineFilterEntity = (LineFilterEntity) entity;
+        return new LineFilter(
+            lineFilterEntity.getEquipmentId(),
+            lineFilterEntity.getEquipmentName(),
+            lineFilterEntity.getSubstationName1(),
+            lineFilterEntity.getSubstationName2(),
+            setToSorterSet(lineFilterEntity.getCountries1()),
+            setToSorterSet(lineFilterEntity.getCountries2()),
+            convert(lineFilterEntity.getNominalVoltage1()),
+            convert(lineFilterEntity.getNominalVoltage2())
         );
     }
 

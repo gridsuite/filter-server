@@ -8,9 +8,9 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.FormFilter;
-import org.gridsuite.filter.server.dto.GeneratorFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.GeneratorFilterEntity;
 import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -39,18 +39,12 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
 
     @Override
     public AbstractFilter toDto(GeneratorFilterEntity entity) {
-        return new FormFilter(
-            entity.getId(),
-            entity.getCreationDate(),
-            entity.getModificationDate(),
-            new GeneratorFilter(
-                entity.getEquipmentId(),
-                entity.getEquipmentName(),
-                entity.getSubstationName(),
-                setToSorterSet(entity.getCountries()),
-                convert(entity.getNominalVoltage())
-            )
-        );
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new GeneratorFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override

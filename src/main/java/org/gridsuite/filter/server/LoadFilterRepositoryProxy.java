@@ -8,9 +8,12 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.FormFilter;
 import org.gridsuite.filter.server.dto.LoadFilter;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.LoadFilterEntity;
 import org.gridsuite.filter.server.repositories.LoadFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -39,18 +42,12 @@ public class LoadFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Loa
 
     @Override
     public AbstractFilter toDto(LoadFilterEntity entity) {
-        return new FormFilter(
-            entity.getId(),
-            entity.getCreationDate(),
-            entity.getModificationDate(),
-            new LoadFilter(
-                entity.getEquipmentId(),
-                entity.getEquipmentName(),
-                entity.getSubstationName(),
-                setToSorterSet(entity.getCountries()),
-                convert(entity.getNominalVoltage())
-            )
-        );
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new LoadFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override

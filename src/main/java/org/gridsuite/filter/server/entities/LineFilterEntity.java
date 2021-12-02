@@ -7,6 +7,7 @@
 
 package org.gridsuite.filter.server.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -20,6 +21,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
+@AllArgsConstructor
 @Entity
 @Table(name = "line_filter")
 public class LineFilterEntity extends AbstractGenericFilterEntity {

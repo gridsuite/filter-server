@@ -7,10 +7,7 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.util.CollectionUtils;
 
@@ -22,6 +19,7 @@ import java.util.SortedSet;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 @ToString(callSuper = true)
 @Schema(description = "Injection Filters", allOf = FormFilter.class)
@@ -35,11 +33,11 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
-    AbstractInjectionFilter(String equipmentID, String equipmentName, String substationName, SortedSet<String> countries, NumericalFilter nominalVoltage) {
-        super(equipmentID, equipmentName);
-        this.substationName = substationName;
-        this.countries = countries;
-        this.nominalVoltage = nominalVoltage;
+    AbstractInjectionFilter(InjectionFilterAttributes injectionFilterAttributes) {
+        super(injectionFilterAttributes.getEquipmentID(), injectionFilterAttributes.getEquipmentName());
+        this.substationName = injectionFilterAttributes.getSubstationName();
+        this.countries = injectionFilterAttributes.getCountries();
+        this.nominalVoltage = injectionFilterAttributes.getNominalVoltage();
     }
 
     @Override

@@ -9,6 +9,8 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.BatteryFilterEntity;
 import org.gridsuite.filter.server.repositories.BatteryFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -37,18 +39,12 @@ public class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<
 
     @Override
     public AbstractFilter toDto(BatteryFilterEntity entity) {
-        return new FormFilter(
-            entity.getId(),
-            entity.getCreationDate(),
-            entity.getModificationDate(),
-            new BatteryFilter(
-                entity.getEquipmentId(),
-                entity.getEquipmentName(),
-                entity.getSubstationName(),
-                setToSorterSet(entity.getCountries()),
-                convert(entity.getNominalVoltage())
-            )
-        );
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new BatteryFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override

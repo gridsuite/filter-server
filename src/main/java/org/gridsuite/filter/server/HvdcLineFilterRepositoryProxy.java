@@ -8,9 +8,8 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.FormFilter;
-import org.gridsuite.filter.server.dto.HvdcLineFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.HvdcLineFilterEntity;
 import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -39,19 +38,20 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
 
     @Override
     public AbstractFilter toDto(HvdcLineFilterEntity entity) {
-        return new FormFilter(
-            entity.getId(),
-            entity.getCreationDate(),
-            entity.getModificationDate(),
-            new HvdcLineFilter(
-                entity.getEquipmentId(),
-                entity.getEquipmentName(),
-                entity.getSubstationName1(),
-                entity.getSubstationName2(),
-                setToSorterSet(entity.getCountries1()),
-                setToSorterSet(entity.getCountries2()),
-                convert(entity.getNominalVoltage())
-            )
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        HvdcLineFilterEntity hvdcLineFilterEntity = (HvdcLineFilterEntity) entity;
+        return new HvdcLineFilter(
+                hvdcLineFilterEntity.getEquipmentId(),
+                hvdcLineFilterEntity.getEquipmentName(),
+                hvdcLineFilterEntity.getSubstationName1(),
+                hvdcLineFilterEntity.getSubstationName2(),
+                setToSorterSet(hvdcLineFilterEntity.getCountries1()),
+                setToSorterSet(hvdcLineFilterEntity.getCountries2()),
+                convert(hvdcLineFilterEntity.getNominalVoltage())
         );
     }
 

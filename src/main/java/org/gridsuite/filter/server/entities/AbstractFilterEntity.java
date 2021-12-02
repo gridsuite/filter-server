@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,7 @@ import static javax.persistence.TemporalType.TIMESTAMP;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)

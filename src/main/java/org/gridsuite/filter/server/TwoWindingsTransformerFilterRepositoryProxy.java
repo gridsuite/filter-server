@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.TwoWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.TwoWindingsTransformerFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -37,18 +38,19 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
 
     @Override
     public AbstractFilter toDto(TwoWindingsTransformerFilterEntity entity) {
-        return new FormFilter(
-            entity.getId(),
-            entity.getCreationDate(),
-            entity.getModificationDate(),
-            new TwoWindingsTransformerFilter(
-                entity.getEquipmentId(),
-                entity.getEquipmentName(),
-                entity.getSubstationName(),
-                setToSorterSet(entity.getCountries()),
-                convert(entity.getNominalVoltage1()),
-                convert(entity.getNominalVoltage2())
-                )
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        TwoWindingsTransformerFilterEntity twoWindingsTransformerFilterEntity = (TwoWindingsTransformerFilterEntity) entity;
+        return new TwoWindingsTransformerFilter(
+            twoWindingsTransformerFilterEntity.getEquipmentId(),
+            twoWindingsTransformerFilterEntity.getEquipmentName(),
+            twoWindingsTransformerFilterEntity.getSubstationName(),
+            setToSorterSet(twoWindingsTransformerFilterEntity.getCountries()),
+            convert(twoWindingsTransformerFilterEntity.getNominalVoltage1()),
+            convert(twoWindingsTransformerFilterEntity.getNominalVoltage2())
         );
     }
 

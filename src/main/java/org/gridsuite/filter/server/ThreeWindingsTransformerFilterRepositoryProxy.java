@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.ThreeWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.ThreeWindingsTransformerFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -37,19 +38,20 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
 
     @Override
     public AbstractFilter toDto(ThreeWindingsTransformerFilterEntity entity) {
-        return new FormFilter(
-            entity.getId(),
-            entity.getCreationDate(),
-            entity.getModificationDate(),
-            new ThreeWindingsTransformerFilter(
-                entity.getEquipmentId(),
-                entity.getEquipmentName(),
-                entity.getSubstationName(),
-                setToSorterSet(entity.getCountries()),
-                convert(entity.getNominalVoltage1()),
-                convert(entity.getNominalVoltage2()),
-                convert(entity.getNominalVoltage3())
-            )
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        ThreeWindingsTransformerFilterEntity threeWindingsTransformerFilterEntity = (ThreeWindingsTransformerFilterEntity) entity;
+        return new ThreeWindingsTransformerFilter(
+            threeWindingsTransformerFilterEntity.getEquipmentId(),
+            threeWindingsTransformerFilterEntity.getEquipmentName(),
+            threeWindingsTransformerFilterEntity.getSubstationName(),
+            setToSorterSet(threeWindingsTransformerFilterEntity.getCountries()),
+            convert(threeWindingsTransformerFilterEntity.getNominalVoltage1()),
+            convert(threeWindingsTransformerFilterEntity.getNominalVoltage2()),
+            convert(threeWindingsTransformerFilterEntity.getNominalVoltage3())
         );
     }
 
