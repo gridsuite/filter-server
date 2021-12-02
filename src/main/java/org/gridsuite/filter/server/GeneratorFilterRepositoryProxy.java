@@ -43,7 +43,7 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         return new GeneratorFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 

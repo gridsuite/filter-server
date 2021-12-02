@@ -43,7 +43,7 @@ public class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterReposit
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         return new ShuntCompensatorFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 

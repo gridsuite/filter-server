@@ -43,7 +43,7 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         return new StaticVarCompensatorFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 

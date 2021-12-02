@@ -8,8 +8,10 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ScriptFilter;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.ScriptFilterEntity;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -27,6 +29,11 @@ class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ScriptFi
     @Override
     public FilterType getFilterType() {
         return FilterType.SCRIPT;
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return null;
     }
 
     @Override

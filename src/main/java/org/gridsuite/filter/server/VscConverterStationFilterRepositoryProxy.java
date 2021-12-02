@@ -43,7 +43,7 @@ public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepo
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         return new VscConverterStationFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 

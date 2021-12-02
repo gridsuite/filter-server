@@ -127,9 +127,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         );
     }
 
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
-        return null;
-    }
+    public abstract AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity);
 
     public InjectionFilterAttributes buildInjectionAttributesFromEntity(AbstractInjectionFilterEntity entity) {
         return new InjectionFilterAttributes(entity.getEquipmentId(),

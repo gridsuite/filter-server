@@ -42,7 +42,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         TwoWindingsTransformerFilterEntity twoWindingsTransformerFilterEntity = (TwoWindingsTransformerFilterEntity) entity;
         return new TwoWindingsTransformerFilter(
             twoWindingsTransformerFilterEntity.getEquipmentId(),

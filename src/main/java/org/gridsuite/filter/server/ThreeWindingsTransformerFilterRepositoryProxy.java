@@ -42,7 +42,7 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         ThreeWindingsTransformerFilterEntity threeWindingsTransformerFilterEntity = (ThreeWindingsTransformerFilterEntity) entity;
         return new ThreeWindingsTransformerFilter(
             threeWindingsTransformerFilterEntity.getEquipmentId(),

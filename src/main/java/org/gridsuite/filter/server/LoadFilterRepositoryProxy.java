@@ -46,7 +46,7 @@ public class LoadFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Loa
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         return new LoadFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 

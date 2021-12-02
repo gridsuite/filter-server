@@ -43,7 +43,7 @@ public class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepository
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         return new BusBarSectionFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 

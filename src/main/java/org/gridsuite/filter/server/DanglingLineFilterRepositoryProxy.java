@@ -43,7 +43,7 @@ public class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryP
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         return new DanglingLineFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 

@@ -42,7 +42,7 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         HvdcLineFilterEntity hvdcLineFilterEntity = (HvdcLineFilterEntity) entity;
         return new HvdcLineFilter(
                 hvdcLineFilterEntity.getEquipmentId(),

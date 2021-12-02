@@ -42,7 +42,7 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
     }
 
     @Override
-    protected AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         LineFilterEntity lineFilterEntity = (LineFilterEntity) entity;
         return new LineFilter(
             lineFilterEntity.getEquipmentId(),
