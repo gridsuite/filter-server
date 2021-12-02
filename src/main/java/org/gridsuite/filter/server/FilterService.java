@@ -110,24 +110,17 @@ public class FilterService {
     public <F extends AbstractFilter> void changeFilter(UUID id, F newFilter) {
         Optional<AbstractFilter> f = getFilter(id);
         if (f.isPresent()) {
-            if (f.get().getType() == FilterType.SCRIPT && newFilter.getType() == FilterType.SCRIPT) {
+            if (getRepository(f.get()) == getRepository(newFilter)) { // filter type has not changed
                 newFilter.setCreationDate(f.get().getCreationDate());
                 getRepository(newFilter).modify(id, newFilter);
-            } else {
-                FormFilter newFormFilter = (FormFilter) newFilter;
-                FormFilter oldFormFilter = (FormFilter) f.get();
-                if (oldFormFilter.getEquipmentFilterForm().getEquipmentType() == newFormFilter.getEquipmentFilterForm().getEquipmentType()) {  // filter type has not changed
+            } else { // filter type has changed
+                if (f.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
+                    throw new PowsyblException(WRONG_FILTER_TYPE);
+                } else {
+                    getRepository(f.get()).deleteById(id);
+                    newFilter.setId(id);
                     newFilter.setCreationDate(f.get().getCreationDate());
-                    getRepository(newFilter).modify(id, newFilter);
-                } else {  // filter type has changed
-                    if (f.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
-                        throw new PowsyblException(WRONG_FILTER_TYPE);
-                    } else {
-                        getRepository(f.get()).deleteById(id);
-                        newFilter.setId(id);
-                        newFilter.setCreationDate(f.get().getCreationDate());
-                        createFilter(newFilter);
-                    }
+                    createFilter(newFilter);
                 }
             }
         } else {
