@@ -7,7 +7,6 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.TwoWindingsTransformerFilterEntity;
@@ -56,15 +55,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
 
     @Override
     public TwoWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
-        if (!(dto instanceof FormFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        FormFilter formFilter = (FormFilter) dto;
-
-        if (!(formFilter.getEquipmentFilterForm() instanceof TwoWindingsTransformerFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-
+        FormFilter formFilter = toFormFilter(dto, TwoWindingsTransformerFilter.class);
         TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
         var twoWindingsTransformerFilterEntityBuilder =  TwoWindingsTransformerFilterEntity.builder()
             .countries(twoWindingsTransformerFilter.getCountries())

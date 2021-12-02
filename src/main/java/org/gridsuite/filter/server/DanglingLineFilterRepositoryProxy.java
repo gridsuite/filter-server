@@ -7,7 +7,6 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
@@ -49,16 +48,8 @@ public class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryP
 
     @Override
     public DanglingLineFilterEntity fromDto(AbstractFilter dto) {
-        if (!(dto instanceof FormFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        FormFilter formFilter = (FormFilter) dto;
-
-        if (!(formFilter.getEquipmentFilterForm() instanceof DanglingLineFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
         var danglingLineFilterEntityBuilder = DanglingLineFilterEntity.builder();
-        buildInjectionFilter(danglingLineFilterEntityBuilder, formFilter);
+        buildInjectionFilter(danglingLineFilterEntityBuilder, toFormFilter(dto, DanglingLineFilter.class));
         return danglingLineFilterEntityBuilder.build();
     }
 }

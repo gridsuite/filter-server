@@ -7,7 +7,6 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.LineFilterEntity;
@@ -58,14 +57,7 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
 
     @Override
     public LineFilterEntity fromDto(AbstractFilter dto) {
-        if (!(dto instanceof FormFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        FormFilter formFilter = (FormFilter) dto;
-
-        if (!(formFilter.getEquipmentFilterForm() instanceof LineFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
+        FormFilter formFilter = toFormFilter(dto, LineFilter.class);
         LineFilter lineFilter = (LineFilter) formFilter.getEquipmentFilterForm();
         var lineFilterEntityBuilder =    LineFilterEntity.builder()
             .countries1(lineFilter.getCountries1())

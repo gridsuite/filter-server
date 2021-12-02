@@ -7,7 +7,6 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
@@ -49,16 +48,8 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
 
     @Override
     public GeneratorFilterEntity fromDto(AbstractFilter dto) {
-        if (!(dto instanceof FormFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        FormFilter formFilter = (FormFilter) dto;
-
-        if (!(formFilter.getEquipmentFilterForm() instanceof GeneratorFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
         var generatorFilterEntityBuilder = GeneratorFilterEntity.builder();
-        buildInjectionFilter(generatorFilterEntityBuilder, formFilter);
+        buildInjectionFilter(generatorFilterEntityBuilder, toFormFilter(dto, GeneratorFilter.class));
         return generatorFilterEntityBuilder.build();
     }
 }

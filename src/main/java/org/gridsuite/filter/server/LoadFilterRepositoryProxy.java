@@ -7,11 +7,7 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.FormFilter;
-import org.gridsuite.filter.server.dto.LoadFilter;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.LoadFilterEntity;
@@ -52,16 +48,8 @@ public class LoadFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Loa
 
     @Override
     public LoadFilterEntity fromDto(AbstractFilter dto) {
-        if (!(dto instanceof FormFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        FormFilter formFilter = (FormFilter) dto;
-
-        if (!(formFilter.getEquipmentFilterForm() instanceof LoadFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
         var loadFilterEntityBuilder = LoadFilterEntity.builder();
-        buildInjectionFilter(loadFilterEntityBuilder, formFilter);
+        buildInjectionFilter(loadFilterEntityBuilder, toFormFilter(dto, LoadFilter.class));
         return loadFilterEntityBuilder.build();
     }
 }

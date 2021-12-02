@@ -7,7 +7,6 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
@@ -49,16 +48,8 @@ public class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterReposit
 
     @Override
     public ShuntCompensatorFilterEntity fromDto(AbstractFilter dto) {
-        if (!(dto instanceof FormFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        FormFilter formFilter = (FormFilter) dto;
-
-        if (!(formFilter.getEquipmentFilterForm() instanceof ShuntCompensatorFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
         var shuntCompensatorFilterEntityBuilder = ShuntCompensatorFilterEntity.builder();
-        buildInjectionFilter(shuntCompensatorFilterEntityBuilder, formFilter);
+        buildInjectionFilter(shuntCompensatorFilterEntityBuilder, toFormFilter(dto, ShuntCompensatorFilter.class));
         return shuntCompensatorFilterEntityBuilder.build();
     }
 }

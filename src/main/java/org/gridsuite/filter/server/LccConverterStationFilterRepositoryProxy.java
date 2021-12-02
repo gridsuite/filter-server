@@ -7,7 +7,6 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
@@ -49,16 +48,8 @@ public class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepo
 
     @Override
     public LccConverterStationFilterEntity fromDto(AbstractFilter dto) {
-        if (!(dto instanceof FormFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        FormFilter formFilter = (FormFilter) dto;
-
-        if (!(formFilter.getEquipmentFilterForm() instanceof LccConverterStationFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
         var lccConverterStationFilterEntityBuilder = LccConverterStationFilterEntity.builder();
-        buildInjectionFilter(lccConverterStationFilterEntityBuilder, formFilter);
+        buildInjectionFilter(lccConverterStationFilterEntityBuilder, toFormFilter(dto, LccConverterStationFilter.class));
         return lccConverterStationFilterEntityBuilder.build();
     }
 }

@@ -137,4 +137,16 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             convert(entity.getNominalVoltage())
         );
     }
+
+    public static FormFilter toFormFilter(AbstractFilter dto, Class clazz) {
+        if (!(dto instanceof FormFilter)) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        FormFilter formFilter = (FormFilter) dto;
+
+        if (!(clazz.isInstance(formFilter.getEquipmentFilterForm()))) {
+            throw new PowsyblException(WRONG_FILTER_TYPE);
+        }
+        return formFilter;
+    }
 }
