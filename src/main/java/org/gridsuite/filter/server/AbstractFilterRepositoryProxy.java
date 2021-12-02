@@ -138,7 +138,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         );
     }
 
-    public static FormFilter toFormFilter(AbstractFilter dto, Class clazz) {
+    public static FormFilter toFormFilter(AbstractFilter dto, Class<? extends AbstractEquipmentFilterForm> clazz) {
         if (!(dto instanceof FormFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
