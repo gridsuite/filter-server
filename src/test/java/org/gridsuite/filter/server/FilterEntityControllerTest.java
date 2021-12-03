@@ -384,16 +384,13 @@ public class FilterEntityControllerTest {
 
         String modifiedFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
         FormFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, FormFilter.class);
-//        matchFormFilterInfos(modifiedFilter, filterId, new Date(), new Date(), ((FormFilter) newFilter).getEquipmentFilterForm().getEquipmentType());
         checkFormFilter(filterId, modifiedFilter);
-//        checkEquipmentFormFilter(modifiedFilter, (FormFilter) newFilter);
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
         MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
         modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), FormFilter.class);
-//        matchFormFilterInfos(modifiedFilter, filterId, new Date(), new Date(), ((FormFilter) newFilter).getEquipmentFilterForm().getEquipmentType());
         checkFormFilter(filterId, modifiedFilter);
     }
 
