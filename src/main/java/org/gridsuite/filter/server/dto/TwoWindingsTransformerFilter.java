@@ -6,7 +6,6 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,7 +27,6 @@ import java.util.SortedSet;
 @ToString(callSuper = true)
 @Schema(description = "Two windings transformer Filters", allOf = FormFilter.class)
 public class TwoWindingsTransformerFilter extends AbstractEquipmentFilterForm {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.TWO_WINDINGS_TRANSFORMER;

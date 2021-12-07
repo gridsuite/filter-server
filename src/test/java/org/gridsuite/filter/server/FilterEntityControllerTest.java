@@ -340,10 +340,6 @@ public class FilterEntityControllerTest {
         // new script from filter
         mvc.perform(post(URL_TEMPLATE + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
 
-        String filtersAsString = mvc.perform(get(URL_TEMPLATE))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andExpect(content().json("[{\"type\":\"FORM\"}, {\"type\":\"SCRIPT\"}]"));

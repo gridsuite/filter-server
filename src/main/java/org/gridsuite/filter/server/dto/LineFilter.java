@@ -6,7 +6,6 @@
  */
 package org.gridsuite.filter.server.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -26,7 +25,6 @@ import java.util.SortedSet;
 @ToString(callSuper = true)
 @Schema(description = "Line Filters", allOf = FormFilter.class)
 public class LineFilter extends AbstractEquipmentFilterForm {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public EquipmentType getEquipmentType() {
         return EquipmentType.LINE;
     }

@@ -52,7 +52,6 @@ public abstract class AbstractEquipmentFilterForm {
     @Schema(description = "Equipment name")
     private String equipmentName;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public abstract EquipmentType getEquipmentType();
 
     @JsonIgnore
