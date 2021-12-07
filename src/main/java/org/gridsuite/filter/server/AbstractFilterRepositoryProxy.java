@@ -13,6 +13,7 @@ import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -37,7 +38,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
     }
 
     static SortedSet<String> setToSorterSet(Set<String> set) {
-        return set == null || set.isEmpty() ? null : new TreeSet<>(set);
+        return CollectionUtils.isEmpty(set) ? null : new TreeSet<>(set);
     }
 
     static NumericFilterEntity convert(NumericalFilter numericalFilter) {
