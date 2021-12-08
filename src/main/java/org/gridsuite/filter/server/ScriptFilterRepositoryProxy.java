@@ -8,8 +8,10 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ScriptFilter;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.ScriptFilterEntity;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -17,7 +19,6 @@ import org.gridsuite.filter.server.utils.FilterType;
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
-
 class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ScriptFilterEntity, ScriptFilterRepository> {
     private final ScriptFilterRepository scriptFiltersRepository;
 
@@ -26,8 +27,13 @@ class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ScriptFi
     }
 
     @Override
-    public FilterType getRepositoryType() {
+    public FilterType getFilterType() {
         return FilterType.SCRIPT;
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return null;
     }
 
     @Override
@@ -37,10 +43,7 @@ class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ScriptFi
 
     @Override
     public AbstractFilter toDto(ScriptFilterEntity entity) {
-        return buildAbstractFilter(
-            ScriptFilter.builder()
-                .script(entity.getScript()),
-            entity).build();
+        return new ScriptFilter(entity.getId(), entity.getCreationDate(), entity.getModificationDate(), entity.getScript());
     }
 
     @Override

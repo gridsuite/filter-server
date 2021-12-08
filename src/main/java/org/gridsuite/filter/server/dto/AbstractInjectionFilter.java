@@ -7,29 +7,38 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
-@Schema(description = "Injection Filters", allOf = AbstractGenericFilter.class)
-public abstract class AbstractInjectionFilter extends AbstractGenericFilter {
+@ToString(callSuper = true)
+@Schema(description = "Injection Filters", allOf = FormFilter.class)
+public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "SubstationName")
     String substationName;
 
     @Schema(description = "Countries")
-    private Set<String> countries;
+    private SortedSet<String> countries;
 
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
+
+    AbstractInjectionFilter(InjectionFilterAttributes injectionFilterAttributes) {
+        super(injectionFilterAttributes.getEquipmentID(), injectionFilterAttributes.getEquipmentName());
+        this.substationName = injectionFilterAttributes.getSubstationName();
+        this.countries = injectionFilterAttributes.getCountries();
+        this.nominalVoltage = injectionFilterAttributes.getNominalVoltage();
+    }
 
     @Override
     public boolean isEmpty() {

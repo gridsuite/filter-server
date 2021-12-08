@@ -7,9 +7,8 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.HvdcLineFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.HvdcLineFilterEntity;
 import org.gridsuite.filter.server.repositories.HvdcLineFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +17,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<HvdcLineFilterEntity, HvdcLineFilterRepository> {
+public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<HvdcLineFilterEntity, HvdcLineFilterRepository> {
 
     private final HvdcLineFilterRepository hvdcLineFilterRepository;
 
@@ -27,8 +26,8 @@ class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<HvdcLi
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.HVDC_LINE;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,29 +37,34 @@ class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<HvdcLi
 
     @Override
     public AbstractFilter toDto(HvdcLineFilterEntity entity) {
-        return buildGenericFilter(
-            HvdcLineFilter.builder()
-                .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries1()))
-                .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries2()))
-                .substationName1(entity.getSubstationName1())
-                .substationName2(entity.getSubstationName2())
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage())),
-            entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        HvdcLineFilterEntity hvdcLineFilterEntity = (HvdcLineFilterEntity) entity;
+        return new HvdcLineFilter(
+                hvdcLineFilterEntity.getEquipmentId(),
+                hvdcLineFilterEntity.getEquipmentName(),
+                hvdcLineFilterEntity.getSubstationName1(),
+                hvdcLineFilterEntity.getSubstationName2(),
+                setToSorterSet(hvdcLineFilterEntity.getCountries1()),
+                setToSorterSet(hvdcLineFilterEntity.getCountries2()),
+                convert(hvdcLineFilterEntity.getNominalVoltage())
+        );
     }
 
     @Override
     public HvdcLineFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof HvdcLineFilter) {
-            var hvdcLineFilter = (HvdcLineFilter) dto;
-            var hvdcLineFilterEntityBuilder = HvdcLineFilterEntity.builder()
-                .substationName1(hvdcLineFilter.getSubstationName1())
-                .substationName2(hvdcLineFilter.getSubstationName2())
-                .countries1(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(hvdcLineFilter.getCountries1()))
-                .countries2(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(hvdcLineFilter.getCountries2()))
-                .nominalVoltage(AbstractFilterRepositoryProxy.convert(hvdcLineFilter.getNominalVoltage()));
-            buildGenericFilter(hvdcLineFilterEntityBuilder, hvdcLineFilter);
-            return hvdcLineFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = toFormFilter(dto, HvdcLineFilter.class);
+        HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) formFilter.getEquipmentFilterForm();
+        var hvdcLineFilterEntityBuilder = HvdcLineFilterEntity.builder()
+            .countries1(hvdcLineFilter.getCountries1())
+            .countries2(hvdcLineFilter.getCountries2())
+            .nominalVoltage(convert(hvdcLineFilter.getNominalVoltage()))
+            .substationName1(hvdcLineFilter.getSubstationName1())
+            .substationName2(hvdcLineFilter.getSubstationName2());
+        buildGenericFilter(hvdcLineFilterEntityBuilder, formFilter);
+        return hvdcLineFilterEntityBuilder.build();
     }
 }

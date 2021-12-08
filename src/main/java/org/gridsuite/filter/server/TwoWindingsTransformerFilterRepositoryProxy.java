@@ -7,9 +7,8 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.TwoWindingsTransformerFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.TwoWindingsTransformerFilterEntity;
 import org.gridsuite.filter.server.repositories.TwoWindingsTransformerFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +17,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterRepositoryProxy<TwoWindingsTransformerFilterEntity, TwoWindingsTransformerFilterRepository> {
+public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterRepositoryProxy<TwoWindingsTransformerFilterEntity, TwoWindingsTransformerFilterRepository> {
 
     private final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository;
 
@@ -27,8 +26,8 @@ class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterReposito
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.TWO_WINDINGS_TRANSFORMER;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,27 +37,32 @@ class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterReposito
 
     @Override
     public AbstractFilter toDto(TwoWindingsTransformerFilterEntity entity) {
-        return buildGenericFilter(
-            TwoWindingsTransformerFilter.builder()
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(entity.getCountries()))
-                .substationName(entity.getSubstationName())
-                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage1()))
-                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(entity.getNominalVoltage2())),
-            entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        TwoWindingsTransformerFilterEntity twoWindingsTransformerFilterEntity = (TwoWindingsTransformerFilterEntity) entity;
+        return new TwoWindingsTransformerFilter(
+            twoWindingsTransformerFilterEntity.getEquipmentId(),
+            twoWindingsTransformerFilterEntity.getEquipmentName(),
+            twoWindingsTransformerFilterEntity.getSubstationName(),
+            setToSorterSet(twoWindingsTransformerFilterEntity.getCountries()),
+            convert(twoWindingsTransformerFilterEntity.getNominalVoltage1()),
+            convert(twoWindingsTransformerFilterEntity.getNominalVoltage2())
+        );
     }
 
     @Override
     public TwoWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof TwoWindingsTransformerFilter) {
-            var twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) dto;
-            var twoWindingsTransformerFilterEntityBuilder = TwoWindingsTransformerFilterEntity.builder()
-                .substationName(twoWindingsTransformerFilter.getSubstationName())
-                .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(twoWindingsTransformerFilter.getCountries()))
-                .nominalVoltage1(AbstractFilterRepositoryProxy.convert(twoWindingsTransformerFilter.getNominalVoltage1()))
-                .nominalVoltage2(AbstractFilterRepositoryProxy.convert(twoWindingsTransformerFilter.getNominalVoltage2()));
-            buildGenericFilter(twoWindingsTransformerFilterEntityBuilder, twoWindingsTransformerFilter);
-            return twoWindingsTransformerFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        FormFilter formFilter = toFormFilter(dto, TwoWindingsTransformerFilter.class);
+        TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
+        var twoWindingsTransformerFilterEntityBuilder =  TwoWindingsTransformerFilterEntity.builder()
+            .countries(twoWindingsTransformerFilter.getCountries())
+            .substationName(twoWindingsTransformerFilter.getSubstationName())
+            .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))
+            .nominalVoltage2(convert(twoWindingsTransformerFilter.getNominalVoltage2()));
+        buildGenericFilter(twoWindingsTransformerFilterEntityBuilder, formFilter);
+        return twoWindingsTransformerFilterEntityBuilder.build();
     }
 }

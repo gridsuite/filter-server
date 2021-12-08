@@ -7,9 +7,10 @@
 package org.gridsuite.filter.server.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.FilterType;
 
@@ -17,26 +18,27 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
+ * @author Homer Etienne <etienne.homer at rte-france.com>
  */
+
 @Getter
-@Schema(description = "Script Filters", allOf = AbstractFilter.class)
-@SuperBuilder
+@Setter
+@ToString(callSuper = true)
 @NoArgsConstructor
-public class ScriptFilter extends AbstractFilter {
+@SuperBuilder
+public class FormFilter extends AbstractFilter {
 
-    @Schema(description = "Script")
-    private String script;
+    private AbstractEquipmentFilterForm equipmentFilterForm;
 
-    public ScriptFilter(UUID id, Date creationDate, Date modificationDate, String script) {
+    public FormFilter(UUID id, Date creationDate, Date modificationDate, AbstractEquipmentFilterForm equipmentFilterForm) {
         super(id, creationDate, modificationDate);
-        this.script = script;
+        this.equipmentFilterForm = equipmentFilterForm;
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public FilterType getType() {
-        return FilterType.SCRIPT;
+        return FilterType.FORM;
     }
 
 }

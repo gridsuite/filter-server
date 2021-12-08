@@ -7,9 +7,9 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.VscConverterStationFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.VscConverterStationFilterEntity;
 import org.gridsuite.filter.server.repositories.VscConverterStationFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryProxy<VscConverterStationFilterEntity, VscConverterStationFilterRepository> {
+public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryProxy<VscConverterStationFilterEntity, VscConverterStationFilterRepository> {
 
     private final VscConverterStationFilterRepository vscConverterStationFilterRepository;
 
@@ -27,8 +27,8 @@ class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryP
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.VSC_CONVERTER_STATION;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,17 +38,18 @@ class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepositoryP
 
     @Override
     public AbstractFilter toDto(VscConverterStationFilterEntity entity) {
-        return buildInjectionFilter(
-            VscConverterStationFilter.builder(), entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new VscConverterStationFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override
     public VscConverterStationFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof VscConverterStationFilter) {
-            var vscConverterStationFilterEntityBuilder   = VscConverterStationFilterEntity.builder();
-            buildInjectionFilter(vscConverterStationFilterEntityBuilder, (VscConverterStationFilter) dto);
-            return vscConverterStationFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        var vscConverterStationFilterEntityBuilder = VscConverterStationFilterEntity.builder();
+        buildInjectionFilter(vscConverterStationFilterEntityBuilder, toFormFilter(dto, VscConverterStationFilter.class));
+        return vscConverterStationFilterEntityBuilder.build();
     }
 }

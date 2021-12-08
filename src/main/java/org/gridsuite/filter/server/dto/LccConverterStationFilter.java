@@ -7,21 +7,27 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.EquipmentType;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @Getter
-@NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true)
 @Schema(description = "Lcc converter station Filters", allOf = AbstractInjectionFilter.class)
 public class LccConverterStationFilter extends AbstractInjectionFilter {
+    public LccConverterStationFilter(InjectionFilterAttributes injectionFilterAttributes) {
+        super(injectionFilterAttributes);
+    }
+
     @Override
-    public FilterType getType() {
-        return FilterType.LCC_CONVERTER_STATION;
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.LCC_CONVERTER_STATION;
     }
 }

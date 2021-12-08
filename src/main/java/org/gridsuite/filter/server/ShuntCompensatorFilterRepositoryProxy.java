@@ -7,9 +7,9 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.ShuntCompensatorFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.ShuntCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.ShuntCompensatorFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ShuntCompensatorFilterEntity, ShuntCompensatorFilterRepository> {
+public class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ShuntCompensatorFilterEntity, ShuntCompensatorFilterRepository> {
 
     private final ShuntCompensatorFilterRepository shuntCompensatorFilterRepository;
 
@@ -27,8 +27,8 @@ class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterRepositoryProx
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.SHUNT_COMPENSATOR;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,17 +38,18 @@ class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterRepositoryProx
 
     @Override
     public AbstractFilter toDto(ShuntCompensatorFilterEntity entity) {
-        return buildInjectionFilter(
-            ShuntCompensatorFilter.builder(), entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new ShuntCompensatorFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override
     public ShuntCompensatorFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof ShuntCompensatorFilter) {
-            var shuntCompensatorFilterEntityBuilder = ShuntCompensatorFilterEntity.builder();
-            buildInjectionFilter(shuntCompensatorFilterEntityBuilder, (ShuntCompensatorFilter) dto);
-            return shuntCompensatorFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        var shuntCompensatorFilterEntityBuilder = ShuntCompensatorFilterEntity.builder();
+        buildInjectionFilter(shuntCompensatorFilterEntityBuilder, toFormFilter(dto, ShuntCompensatorFilter.class));
+        return shuntCompensatorFilterEntityBuilder.build();
     }
 }

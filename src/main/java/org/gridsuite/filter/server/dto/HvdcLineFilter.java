@@ -7,25 +7,29 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
-@Schema(description = "Hvdc Filters", allOf = AbstractGenericFilter.class)
-public class HvdcLineFilter extends AbstractGenericFilter {
+@ToString(callSuper = true)
+@Schema(description = "Hvdc Filters", allOf = AbstractEquipmentFilterForm.class)
+public class HvdcLineFilter extends AbstractEquipmentFilterForm {
     @Override
-    public FilterType getType() {
-        return FilterType.HVDC_LINE;
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.HVDC_LINE;
     }
 
     @Schema(description = "SubstationName1")
@@ -35,13 +39,22 @@ public class HvdcLineFilter extends AbstractGenericFilter {
     String substationName2;
 
     @Schema(description = "Countries1")
-    private Set<String> countries1;
+    private SortedSet<String> countries1;
 
     @Schema(description = "Countries2")
-    private Set<String> countries2;
+    private SortedSet<String> countries2;
 
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
+
+    public HvdcLineFilter(String equipmentID, String equipmentName, String substationName1, String substationName2, SortedSet<String> countries1, SortedSet<String> countries2, NumericalFilter nominalVoltage) {
+        super(equipmentID, equipmentName);
+        this.substationName1 =  substationName1;
+        this.substationName2 =  substationName2;
+        this.countries1 =  countries1;
+        this.countries2 =  countries2;
+        this.nominalVoltage = nominalVoltage;
+    }
 
     @Override
     public boolean isEmpty() {

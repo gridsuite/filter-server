@@ -7,21 +7,28 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.EquipmentType;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @Getter
-@NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true)
 @Schema(description = "Shunt compensator Filters", allOf = AbstractInjectionFilter.class)
 public class ShuntCompensatorFilter extends AbstractInjectionFilter {
+
+    public ShuntCompensatorFilter(InjectionFilterAttributes injectionFilterAttributes) {
+        super(injectionFilterAttributes);
+    }
+
     @Override
-    public FilterType getType() {
-        return FilterType.SHUNT_COMPENSATOR;
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.SHUNT_COMPENSATOR;
     }
 }

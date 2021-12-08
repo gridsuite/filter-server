@@ -7,9 +7,9 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.DanglingLineFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.DanglingLineFilterEntity;
 import org.gridsuite.filter.server.repositories.DanglingLineFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<DanglingLineFilterEntity, DanglingLineFilterRepository> {
+public class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<DanglingLineFilterEntity, DanglingLineFilterRepository> {
 
     private final DanglingLineFilterRepository danglingLineFilterRepository;
 
@@ -27,8 +27,8 @@ class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Da
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.DANGLING_LINE;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,17 +38,18 @@ class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Da
 
     @Override
     public AbstractFilter toDto(DanglingLineFilterEntity entity) {
-        return buildInjectionFilter(
-            DanglingLineFilter.builder(), entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new DanglingLineFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override
     public DanglingLineFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof DanglingLineFilter) {
-            var danglingLineFilterEntityBuilder = DanglingLineFilterEntity.builder();
-            buildInjectionFilter(danglingLineFilterEntityBuilder, (DanglingLineFilter) dto);
-            return danglingLineFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        var danglingLineFilterEntityBuilder = DanglingLineFilterEntity.builder();
+        buildInjectionFilter(danglingLineFilterEntityBuilder, toFormFilter(dto, DanglingLineFilter.class));
+        return danglingLineFilterEntityBuilder.build();
     }
 }

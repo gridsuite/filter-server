@@ -7,9 +7,9 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.StaticVarCompensatorFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.StaticVarCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.StaticVarCompensatorFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<StaticVarCompensatorFilterEntity, StaticVarCompensatorFilterRepository> {
+public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<StaticVarCompensatorFilterEntity, StaticVarCompensatorFilterRepository> {
 
     private final StaticVarCompensatorFilterRepository staticVarCompensatorFilterRepository;
 
@@ -27,8 +27,8 @@ class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRepository
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.STATIC_VAR_COMPENSATOR;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,17 +38,18 @@ class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRepository
 
     @Override
     public AbstractFilter toDto(StaticVarCompensatorFilterEntity entity) {
-        return buildInjectionFilter(
-            StaticVarCompensatorFilter.builder(), entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new StaticVarCompensatorFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override
     public StaticVarCompensatorFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof StaticVarCompensatorFilter) {
-            var staticVarCompensatorFilterEntityBuilder = StaticVarCompensatorFilterEntity.builder();
-            buildInjectionFilter(staticVarCompensatorFilterEntityBuilder, (StaticVarCompensatorFilter) dto);
-            return staticVarCompensatorFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        var staticVarCompensatorFilterEntityBuilder = StaticVarCompensatorFilterEntity.builder();
+        buildInjectionFilter(staticVarCompensatorFilterEntityBuilder, toFormFilter(dto, StaticVarCompensatorFilter.class));
+        return staticVarCompensatorFilterEntityBuilder.build();
     }
 }

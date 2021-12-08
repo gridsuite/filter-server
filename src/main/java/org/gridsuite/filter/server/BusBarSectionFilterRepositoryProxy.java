@@ -7,9 +7,9 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.BusBarSectionFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.BusBarSectionFilterEntity;
 import org.gridsuite.filter.server.repositories.BusBarSectionFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepositoryProxy<BusBarSectionFilterEntity, BusBarSectionFilterRepository> {
+public class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepositoryProxy<BusBarSectionFilterEntity, BusBarSectionFilterRepository> {
 
     private final BusBarSectionFilterRepository busBarSectionFilterRepository;
 
@@ -27,8 +27,8 @@ class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepositoryProxy<B
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.BUSBAR_SECTION;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,17 +38,18 @@ class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepositoryProxy<B
 
     @Override
     public AbstractFilter toDto(BusBarSectionFilterEntity entity) {
-        return buildInjectionFilter(
-            BusBarSectionFilter.builder(), entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new BusBarSectionFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override
     public BusBarSectionFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof BusBarSectionFilter) {
-            var busBarSectionFilterEntityBuilder = BusBarSectionFilterEntity.builder();
-            buildInjectionFilter(busBarSectionFilterEntityBuilder, (BusBarSectionFilter) dto);
-            return busBarSectionFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        var busBarSectionFilterEntityBuilder = BusBarSectionFilterEntity.builder();
+        buildInjectionFilter(busBarSectionFilterEntityBuilder, toFormFilter(dto, BusBarSectionFilter.class));
+        return busBarSectionFilterEntityBuilder.build();
     }
 }

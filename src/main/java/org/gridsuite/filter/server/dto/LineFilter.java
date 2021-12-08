@@ -7,25 +7,26 @@
 package org.gridsuite.filter.server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
-@Schema(description = "Line Filters", allOf = AbstractGenericFilter.class)
-public class LineFilter extends AbstractGenericFilter {
-    @Override
-    public FilterType getType() {
-        return FilterType.LINE;
+@ToString(callSuper = true)
+@Schema(description = "Line Filters", allOf = FormFilter.class)
+public class LineFilter extends AbstractEquipmentFilterForm {
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.LINE;
     }
 
     @Schema(description = "SubstationName1")
@@ -35,16 +36,26 @@ public class LineFilter extends AbstractGenericFilter {
     String substationName2;
 
     @Schema(description = "Countries1")
-    private Set<String> countries1;
+    private SortedSet<String> countries1;
 
     @Schema(description = "Countries2")
-    private Set<String> countries2;
+    private SortedSet<String> countries2;
 
     @Schema(description = "Nominal voltage 1")
     private NumericalFilter nominalVoltage1;
 
     @Schema(description = "Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
+
+    public LineFilter(String equipmentID, String equipmentName, String substationName1, String substationName2, SortedSet<String> countries1, SortedSet<String> countries2, NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
+        super(equipmentID, equipmentName);
+        this.substationName1 =  substationName1;
+        this.substationName2 =  substationName2;
+        this.countries1 =  countries1;
+        this.countries2 =  countries2;
+        this.nominalVoltage1 =  nominalVoltage1;
+        this.nominalVoltage2 =  nominalVoltage2;
+    }
 
     @Override
     public boolean isEmpty() {

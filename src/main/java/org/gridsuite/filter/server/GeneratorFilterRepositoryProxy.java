@@ -7,9 +7,9 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.GeneratorFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.GeneratorFilterEntity;
 import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<GeneratorFilterEntity, GeneratorFilterRepository> {
+public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<GeneratorFilterEntity, GeneratorFilterRepository> {
 
     private final GeneratorFilterRepository generatorFilterRepository;
 
@@ -27,8 +27,8 @@ class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Gener
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.GENERATOR;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,17 +38,18 @@ class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Gener
 
     @Override
     public AbstractFilter toDto(GeneratorFilterEntity entity) {
-        return buildInjectionFilter(
-            GeneratorFilter.builder(), entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new GeneratorFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override
     public GeneratorFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof GeneratorFilter) {
-            var generatorFilterEntityBuilder = GeneratorFilterEntity.builder();
-            buildInjectionFilter(generatorFilterEntityBuilder, (GeneratorFilter) dto);
-            return generatorFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        var generatorFilterEntityBuilder = GeneratorFilterEntity.builder();
+        buildInjectionFilter(generatorFilterEntityBuilder, toFormFilter(dto, GeneratorFilter.class));
+        return generatorFilterEntityBuilder.build();
     }
 }

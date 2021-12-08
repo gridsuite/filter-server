@@ -7,9 +7,9 @@
 
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.BatteryFilter;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.BatteryFilterEntity;
 import org.gridsuite.filter.server.repositories.BatteryFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 
-class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<BatteryFilterEntity, BatteryFilterRepository> {
+public class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<BatteryFilterEntity, BatteryFilterRepository> {
 
     private final BatteryFilterRepository batteryFilterRepository;
 
@@ -27,8 +27,8 @@ class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Battery
     }
 
     @Override
-    public FilterType getRepositoryType() {
-        return FilterType.BATTERY;
+    public FilterType getFilterType() {
+        return FilterType.FORM;
     }
 
     @Override
@@ -38,17 +38,18 @@ class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Battery
 
     @Override
     public AbstractFilter toDto(BatteryFilterEntity entity) {
-        return buildInjectionFilter(
-            BatteryFilter.builder(), entity).build();
+        return super.toFormFilterDto(entity);
+    }
+
+    @Override
+    public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
+        return new BatteryFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
     }
 
     @Override
     public BatteryFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof BatteryFilter) {
-            var batteryFilterEntityBuilder = BatteryFilterEntity.builder();
-            buildInjectionFilter(batteryFilterEntityBuilder, (BatteryFilter) dto);
-            return batteryFilterEntityBuilder.build();
-        }
-        throw new PowsyblException(WRONG_FILTER_TYPE);
+        var batteryFilterEntityBuilder = BatteryFilterEntity.builder();
+        buildInjectionFilter(batteryFilterEntityBuilder, toFormFilter(dto, BatteryFilter.class));
+        return batteryFilterEntityBuilder.build();
     }
 }
