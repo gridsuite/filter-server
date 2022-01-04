@@ -129,9 +129,8 @@ public class FilterEntityControllerTest {
         checkFormFilter(filterId1, lineFormFilter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
-                            .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(List.of(filterId1))))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
+                    .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -178,9 +177,8 @@ public class FilterEntityControllerTest {
         matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, creationDate, modificationDate);
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
-                    .contentType(APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(List.of(filterId1))))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
+                    .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -200,9 +198,8 @@ public class FilterEntityControllerTest {
         modifyFormFilter(filterId1, generatorFormFilter);
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
-                    .contentType(APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(List.of(filterId1))))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
+                    .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -443,9 +440,8 @@ public class FilterEntityControllerTest {
         checkFormFilter(id, injectionFilter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
-                    .contentType(APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(List.of(id))))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                    .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -487,9 +483,8 @@ public class FilterEntityControllerTest {
         checkFormFilter(id, transformerFilter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
-                    .contentType(APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(List.of(id))))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                    .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -536,9 +531,8 @@ public class FilterEntityControllerTest {
         matchFilterInfos(filters.get(0), id, FilterType.FORM, creationDate, modificationDate);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
-                    .contentType(APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(List.of(id))))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                    .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<>() {
@@ -550,9 +544,8 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
 
         filterAttributes = objectMapper.readValue(
-                mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/metadata")
-                                .contentType(APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(List.of(id))))
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                    .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString(),
                 new TypeReference<>() {

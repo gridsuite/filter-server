@@ -69,7 +69,7 @@ public class FilterController {
     @PutMapping(value = "/filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Modify a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully modified")})
-    public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @RequestBody(required = true) AbstractFilter filter) {
+    public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @RequestBody AbstractFilter filter) {
         try {
             service.changeFilter(id, filter);
             return ResponseEntity.ok().build();
@@ -86,11 +86,11 @@ public class FilterController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = "/filters/metadata")
+    @GetMapping(value = "/filters/metadata")
     @Operation(summary = "get filters metadata")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "filters metadata"),
         @ApiResponse(responseCode = "404", description = "The filters don't exist")})
-    public ResponseEntity<List<FilterAttributes>> getFiltersMetadata(@RequestBody List<UUID> ids) {
+    public ResponseEntity<List<FilterAttributes>> getFiltersMetadata(@RequestParam("ids") List<UUID> ids) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFiltersMetadata(ids));
     }
 
