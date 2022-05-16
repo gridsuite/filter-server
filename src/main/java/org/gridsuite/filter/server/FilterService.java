@@ -100,7 +100,7 @@ public class FilterService {
     }
 
     @Transactional
-    public <F extends AbstractFilter> AbstractFilter createFilter(UUID parentFilterId, UUID filterId) {
+    public AbstractFilter createFilter(UUID parentFilterId, UUID filterId) {
         Optional<AbstractFilter> parentFilterOptional = getFilter(parentFilterId);
         if (parentFilterOptional.isPresent()) {
             AbstractFilter parentFilter = parentFilterOptional.get();
