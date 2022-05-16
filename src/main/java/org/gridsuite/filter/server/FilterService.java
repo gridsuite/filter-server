@@ -99,6 +99,17 @@ public class FilterService {
         return getRepository(filter).insert(filter);
     }
 
+    @Transactional
+    public <F extends AbstractFilter> AbstractFilter createFilter(UUID parentFilterId, UUID filterId) {
+        Optional<AbstractFilter> parentFilterOptional = getFilter(parentFilterId);
+        if (parentFilterOptional.isPresent()) {
+            AbstractFilter parentFilter = parentFilterOptional.get();
+            parentFilter.setId(filterId);
+            return getRepository(parentFilter).insert(parentFilter);
+        }
+        return null;
+    }
+
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
         if (filter.getType().equals(FilterType.SCRIPT)) {
             return filterRepositories.get(FilterType.SCRIPT.name());
