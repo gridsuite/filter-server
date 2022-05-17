@@ -70,9 +70,10 @@ public class FilterController {
     @Operation(summary = "Create a filter from an existing filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created")})
     public ResponseEntity<AbstractFilter> createFilter(@RequestParam("duplicateFrom") UUID parentFilterId, @RequestParam("id") UUID filterId) {
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(service.createFilter(parentFilterId, filterId));
+        return service.createFilter(parentFilterId, filterId).map(filter -> ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(filter))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping(value = "/filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)

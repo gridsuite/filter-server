@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import org.checkerframework.checker.nullness.Opt;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
@@ -100,14 +101,14 @@ public class FilterService {
     }
 
     @Transactional
-    public AbstractFilter createFilter(UUID parentFilterId, UUID filterId) {
+    public Optional<AbstractFilter>  createFilter(UUID parentFilterId, UUID filterId) {
         Optional<AbstractFilter> parentFilterOptional = getFilter(parentFilterId);
         if (parentFilterOptional.isPresent()) {
             AbstractFilter parentFilter = parentFilterOptional.get();
             parentFilter.setId(filterId);
-            return getRepository(parentFilter).insert(parentFilter);
+            return Optional.of(getRepository(parentFilter).insert(parentFilter));
         }
-        return null;
+        return Optional.empty();
     }
 
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
