@@ -100,12 +100,12 @@ public class FilterService {
     }
 
     @Transactional
-    public Optional<AbstractFilter>  createFilter(UUID parentFilterId, UUID filterId) {
-        Optional<AbstractFilter> parentFilterOptional = getFilter(parentFilterId);
-        if (parentFilterOptional.isPresent()) {
-            AbstractFilter parentFilter = parentFilterOptional.get();
-            parentFilter.setId(filterId);
-            return Optional.of(getRepository(parentFilter).insert(parentFilter));
+    public Optional<AbstractFilter>  createFilter(UUID sourceFilterId, UUID filterId) {
+        Optional<AbstractFilter> sourceFilterOptional = getFilter(sourceFilterId);
+        if (sourceFilterOptional.isPresent()) {
+            AbstractFilter sourceFilter = sourceFilterOptional.get();
+            sourceFilter.setId(filterId);
+            return Optional.of(getRepository(sourceFilter).insert(sourceFilter));
         }
         return Optional.empty();
     }
