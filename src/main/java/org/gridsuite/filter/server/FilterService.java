@@ -105,7 +105,7 @@ public class FilterService {
         if (sourceFilterOptional.isPresent()) {
             AbstractFilter sourceFilter = sourceFilterOptional.get();
             sourceFilter.setId(filterId);
-            return Optional.of(getRepository(sourceFilter).insert(sourceFilter));
+            return Optional.of(createFilter(sourceFilter));
         }
         return Optional.empty();
     }

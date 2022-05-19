@@ -374,9 +374,8 @@ public class FilterEntityControllerTest {
                 lineFilter
         );
         insertFilter(filterId1, lineFormFilter);
-
         mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId1 + "&id=" + UUID.randomUUID())).andExpect(status().isOk());
-
+        checkFormFilter(filterId1, lineFormFilter);
     }
 
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
