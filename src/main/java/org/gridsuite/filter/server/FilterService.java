@@ -100,7 +100,7 @@ public class FilterService {
     }
 
     @Transactional
-    public Optional<AbstractFilter>  createFilter(UUID sourceFilterId, UUID filterId) {
+    public Optional<AbstractFilter> createFilter(UUID sourceFilterId, UUID filterId) {
         Optional<AbstractFilter> sourceFilterOptional = getFilter(sourceFilterId);
         if (sourceFilterOptional.isPresent()) {
             AbstractFilter sourceFilter = sourceFilterOptional.get();
