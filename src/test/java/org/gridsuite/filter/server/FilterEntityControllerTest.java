@@ -361,6 +361,23 @@ public class FilterEntityControllerTest {
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
     }
 
+    @Test
+    public void testDuplicateFilter() throws Exception {
+        UUID filterId1 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+        LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
+        FormFilter lineFormFilter = new FormFilter(
+                filterId1,
+                creationDate,
+                modificationDate,
+                lineFilter
+        );
+        insertFilter(filterId1, lineFormFilter);
+        mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId1 + "&id=" + UUID.randomUUID())).andExpect(status().isOk());
+        checkFormFilter(filterId1, lineFormFilter);
+    }
+
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
                         .content(objectMapper.writeValueAsString(filter))
