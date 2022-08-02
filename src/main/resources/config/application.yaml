@@ -3,3 +3,6 @@ spring:
     name: filter-server
 
 dbName: filters
+
+server:
+  max-http-header-size: 64000
