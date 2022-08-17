@@ -16,6 +16,16 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.VariantManagerConstants;
+import com.powsybl.iidm.network.test.EurostagTutorialExample1Factory;
+import com.powsybl.iidm.network.test.HvdcTestNetwork;
+import com.powsybl.iidm.network.test.ShuntTestCaseFactory;
+import com.powsybl.iidm.network.test.SvcTestCaseFactory;
+import com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory;
+import com.powsybl.network.store.client.NetworkStoreService;
+import com.powsybl.network.store.client.PreloadingStrategy;
+import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -29,16 +39,19 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.util.NestedServletException;
 
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -56,17 +69,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class FilterEntityControllerTest {
 
     public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters/";
+
     @Autowired
     private MockMvc mvc;
 
+    private Network network;
+
     @Autowired
     private FilterService filterService;
+
+    @MockBean
+    private NetworkStoreService networkStoreService;
 
     @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
 
     public static final SortedSet COUNTRIES1 = new TreeSet(Collections.singleton("France"));
     public static final SortedSet COUNTRIES2 = new TreeSet(Collections.singleton("Germany"));
+
+    private static final UUID NETWORK_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
+    private static final UUID NETWORK_UUID_2 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e5");
+    private static final UUID NETWORK_UUID_3 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e6");
+    private static final UUID NETWORK_UUID_4 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e7");
+    private static final UUID NETWORK_UUID_5 = UUID.fromString("11111111-7977-4592-2222-88027e4254e7");
+    private static final UUID NETWORK_NOT_FOUND_UUID = UUID.fromString("88888888-7977-3333-9999-88027e4254e7");
+    private static final String VARIANT_ID_1 = "variant_1";
 
     @Before
     public void setUp() {
@@ -76,6 +103,24 @@ public class FilterEntityControllerTest {
         objectMapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
         objectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
         objectMapper.disable(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE);
+
+        network = EurostagTutorialExample1Factory.createWithMoreGenerators(new NetworkFactoryImpl());
+        network.getVariantManager().cloneVariant(VariantManagerConstants.INITIAL_VARIANT_ID, VARIANT_ID_1);
+        network.getVariantManager().setWorkingVariant(VARIANT_ID_1);
+        // remove generator 'GEN2' from network in variant VARIANT_ID_1
+        network.getGenerator("GEN2").remove();
+        network.getVariantManager().setWorkingVariant(VariantManagerConstants.INITIAL_VARIANT_ID);
+
+        Network network2 = HvdcTestNetwork.createVsc(new NetworkFactoryImpl());
+        Network network3 = SvcTestCaseFactory.createWithMoreSVCs(new NetworkFactoryImpl());
+        Network network4 = ShuntTestCaseFactory.create(new NetworkFactoryImpl());
+        Network network5 = ThreeWindingsTransformerNetworkFactory.create(new NetworkFactoryImpl());
+        given(networkStoreService.getNetwork(NETWORK_UUID, PreloadingStrategy.COLLECTION)).willReturn(network);
+        given(networkStoreService.getNetwork(NETWORK_UUID_2, PreloadingStrategy.COLLECTION)).willReturn(network2);
+        given(networkStoreService.getNetwork(NETWORK_UUID_3, PreloadingStrategy.COLLECTION)).willReturn(network3);
+        given(networkStoreService.getNetwork(NETWORK_UUID_4, PreloadingStrategy.COLLECTION)).willReturn(network4);
+        given(networkStoreService.getNetwork(NETWORK_UUID_5, PreloadingStrategy.COLLECTION)).willReturn(network5);
+        given(networkStoreService.getNetwork(NETWORK_NOT_FOUND_UUID, PreloadingStrategy.COLLECTION)).willReturn(null);
 
         Configuration.setDefaults(new Configuration.Defaults() {
 
@@ -116,7 +161,7 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
-        LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
+        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.APPROX, 375., 5.));
 
         FormFilter lineFormFilter = new FormFilter(
                 filterId1,
@@ -127,6 +172,16 @@ public class FilterEntityControllerTest {
 
         insertFilter(filterId1, lineFormFilter);
         checkFormFilter(filterId1, lineFormFilter);
+
+        // export
+        assertThrows("Network '" + NETWORK_NOT_FOUND_UUID + "' not found", NestedServletException.class, () -> mvc.perform(get(URL_TEMPLATE + filterId1 + "/export?networkUuid=" + NETWORK_NOT_FOUND_UUID)
+            .contentType(APPLICATION_JSON)));
+
+        mvc.perform(get(URL_TEMPLATE + filterId1 + "/export?networkUuid=" + NETWORK_UUID)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+            .andExpect(content().json("[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\"}]"));
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
@@ -222,61 +277,61 @@ public class FilterEntityControllerTest {
     @Test
     public void testGeneratorFilter() throws Exception {
         insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-                        "genId1", "genName", "s1", Set.of("FR", "IT"), RangeType.RANGE, 210., 240.);
+                        "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]");
     }
 
     @Test
     public void testLoadFilter() throws Exception {
         insertInjectionFilter(EquipmentType.LOAD, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "loadId1", "loadName", "s2", Set.of("BE", "NL"), RangeType.APPROX, 225., 5.);
+            "LOAD", null, "P2", Set.of("FR"), RangeType.APPROX, 160., 10., NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
     }
 
     @Test
     public void testShuntCompensatorFilter() throws Exception {
         insertInjectionFilter(EquipmentType.SHUNT_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "shuntId1", "shuntName", "s3", Set.of("ES"), RangeType.EQUALITY, 150., null);
+            "SHUNT", "SHUNT", "S1", Set.of("FR"), RangeType.EQUALITY, 380., null, NETWORK_UUID_4, null, "[{\"id\":\"SHUNT\",\"type\":\"SHUNT_COMPENSATOR\"}]");
     }
 
     @Test
     public void testStaticVarCompensatorFilter() throws Exception {
         insertInjectionFilter(EquipmentType.STATIC_VAR_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "staticVarCompensatorId1", "staticVarCompensatorName", "s1", null, null, null, null);
+            "SVC3", null, "S2", null, null, null, null, NETWORK_UUID_3, null, "[{\"id\":\"SVC3\",\"type\":\"STATIC_VAR_COMPENSATOR\"}]");
     }
 
     @Test
     public void testBatteryFilter() throws Exception {
         insertInjectionFilter(EquipmentType.BATTERY, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "batteryId1", "batteryName", null, Set.of("FR"), RangeType.RANGE, 45., 65.);
+            "batteryId1", "batteryName", null, Set.of("FR"), RangeType.RANGE, 45., 65., NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testBusBarSectionFilter() throws Exception {
         insertInjectionFilter(EquipmentType.BUSBAR_SECTION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            null, "batteryName", null, Set.of("DE"), RangeType.EQUALITY, 380., null);
+            null, "batteryName", null, Set.of("DE"), RangeType.EQUALITY, 380., null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testDanglingLineFilter() throws Exception {
         insertInjectionFilter(EquipmentType.DANGLING_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.APPROX, 150., 8.);
+            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.APPROX, 150., 8., NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testLccConverterStationFilter() throws Exception {
         insertInjectionFilter(EquipmentType.LCC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "lccId1", "lccName1", "s3", Set.of("FR", "BE", "NL", "DE", "IT"), RangeType.RANGE, 20., 400.);
+            "lccId1", "lccName1", "s3", Set.of("FR", "BE", "NL", "DE", "IT"), RangeType.RANGE, 20., 400., NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testVscConverterStationFilter() throws Exception {
         insertInjectionFilter(EquipmentType.VSC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "vscId1", "vscName1", "s2", null, RangeType.EQUALITY, 225., null);
+            "vscId1", "vscName1", "s2", null, RangeType.EQUALITY, 225., null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testHvdcLineFilter() throws Exception {
         insertHvdcLineFilter(UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "hvdcId1", "hvdcName1", "s1", "s2", COUNTRIES1, COUNTRIES2, RangeType.EQUALITY, 380., null);
+            null, "HVDC", "S1", "S2", new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of("FR", "IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, "[{\"id\":\"L\",\"type\":\"HVDC_LINE\"}]");
     }
 
     @Test
@@ -285,14 +340,14 @@ public class FilterEntityControllerTest {
         rangeTypes.add(RangeType.EQUALITY);
         rangeTypes.add(RangeType.APPROX);
         List<Double> values1 = new ArrayList<>();
-        values1.add(225.);
         values1.add(380.);
+        values1.add(150.);
         List<Double> values2 = new ArrayList<>();
         values2.add(null);
         values2.add(5.);
 
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "2wtId1", "2wtName1", "s1", null, rangeTypes, values1, values2);
+            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, "[{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]");
     }
 
     @Test
@@ -302,16 +357,16 @@ public class FilterEntityControllerTest {
         rangeTypes.add(RangeType.EQUALITY);
         rangeTypes.add(RangeType.APPROX);
         List<Double> values1 = new ArrayList<>();
-        values1.add(210.);
-        values1.add(150.);
-        values1.add(380.);
+        values1.add(127.);
+        values1.add(33.);
+        values1.add(14.);
         List<Double> values2 = new ArrayList<>();
-        values2.add(240.);
+        values2.add(134.);
         values2.add(null);
-        values2.add(5.);
+        values2.add(30.);
 
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "3wtId1", "3wtName1", "s2", Set.of("IT", "CH"), rangeTypes, values1, values2);
+            "3WT", null, "SUBSTATION", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, "[{\"id\":\"3WT\",\"type\":\"THREE_WINDINGS_TRANSFORMER\"}]");
     }
 
     @Test
@@ -359,6 +414,9 @@ public class FilterEntityControllerTest {
         assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/replace-with-script")));
         mvc.perform(post(URL_TEMPLATE + filterId3 + "/new-script?newId=" + filterId2)).andExpect(status().isNotFound());
         mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
+
+        assertThrows("Filter implementation not yet supported: ScriptFilter", NestedServletException.class, () -> mvc.perform(get(URL_TEMPLATE + filterId2 + "/export?networkUuid=" + NETWORK_UUID)
+            .contentType(APPLICATION_JSON)));
     }
 
     @Test
@@ -406,8 +464,9 @@ public class FilterEntityControllerTest {
 
     private void insertInjectionFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                        String substationName, Set<String> countries,
-                                       RangeType rangeType, Double value1, Double value2)  throws Exception {
-        NumericalFilter numericalFilter = new NumericalFilter(rangeType, value1, value2);
+                                       RangeType rangeType, Double value1, Double value2,
+                                       UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
+        NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
         AbstractInjectionFilter abstractInjectionFilter;
         Date creationDate = new Date();
         Date modificationDate = new Date();
@@ -468,13 +527,19 @@ public class FilterEntityControllerTest {
         assertEquals(id, filterAttributes.get(0).getId());
         assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
 
+        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+            .andExpect(content().json(expectedJsonExport));
+
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
     private void insertTransformerFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                          String substationName, Set<String> countries,
-                                         List<RangeType> rangeTypes, List<Double> values1, List<Double> values2)  throws Exception {
-
+                                         List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
+                                         UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
         NumericalFilter numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
         NumericalFilter numericalFilter2 = new NumericalFilter(rangeTypes.get(1), values1.get(1), values2.get(1));
         AbstractEquipmentFilterForm equipmentFilterForm;
@@ -511,12 +576,19 @@ public class FilterEntityControllerTest {
         assertEquals(id, filterAttributes.get(0).getId());
         assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
 
+        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+            .andExpect(content().json(expectedJsonExport));
+
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
     private void insertHvdcLineFilter(UUID id, String equipmentID, String equipmentName,
                                       String substationName1, String substationName2, SortedSet<String> countries1,
-                                      SortedSet<String> countries2, RangeType rangeType, Double value1, Double value2)  throws Exception {
+                                      SortedSet<String> countries2, RangeType rangeType, Double value1, Double value2,
+                                      UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
         Date creationDate = new Date();
         Date modificationDate = new Date();
         FormFilter hvdcLineFilter = new FormFilter(
@@ -557,6 +629,12 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         matchFilterInfos(filterAttributes.get(0), id, FilterType.FORM, creationDate, modificationDate);
+
+        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+            .andExpect(content().json(expectedJsonExport));
 
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
 
