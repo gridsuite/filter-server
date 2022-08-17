@@ -48,7 +48,7 @@ public class FilterService {
 
     private FiltersToGroovyScript filtersToScript;
 
-    private NetworkStoreService networkStoreService;
+    private final NetworkStoreService networkStoreService;
 
     public FilterService(FiltersToGroovyScript filtersToScript,
                          final ScriptFilterRepository scriptFiltersRepository,
@@ -210,11 +210,11 @@ public class FilterService {
         return CollectionUtils.isEmpty(countries) || country.map(c -> countries.contains(c.name())).orElse(false);
     }
 
-    private boolean equipmentIdFilter(Identifiable identifiable, String equipmentId) {
+    private boolean equipmentIdFilter(Identifiable<?> identifiable, String equipmentId) {
         return equipmentId == null || identifiable.getId().equals(equipmentId);
     }
 
-    private boolean equipmentNameFilter(Identifiable identifiable, String equipmentName) {
+    private boolean equipmentNameFilter(Identifiable<?> identifiable, String equipmentName) {
         return equipmentName == null || identifiable.getNameOrId().equals(equipmentName);
     }
 
@@ -249,27 +249,27 @@ public class FilterService {
             .filter(injection -> substationNameFilter(injection.getTerminal(), injectionFilter.getSubstationName()));
     }
 
-    private List<Identifiable> getGeneratorList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getGeneratorList(Network network, FormFilter filter) {
         return getInjectionList(network.getGeneratorStream().map(gen -> gen), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getLoadList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getLoadList(Network network, FormFilter filter) {
         return getInjectionList(network.getLoadStream().map(load -> load), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getBatteryList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getBatteryList(Network network, FormFilter filter) {
         return getInjectionList(network.getBatteryStream().map(battery -> battery), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getStaticVarCompensatorList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getStaticVarCompensatorList(Network network, FormFilter filter) {
         return getInjectionList(network.getStaticVarCompensatorStream().map(svc -> svc), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getShuntCompensatorList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getShuntCompensatorList(Network network, FormFilter filter) {
         return getInjectionList(network.getShuntCompensatorStream().map(sc -> sc), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getLineList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getLineList(Network network, FormFilter filter) {
         LineFilter lineFilter = (LineFilter) filter.getEquipmentFilterForm();
         return network.getLineStream()
             .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
@@ -283,7 +283,7 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    private List<Identifiable> get2WTransformerList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> get2WTransformerList(Network network, FormFilter filter) {
         TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) filter.getEquipmentFilterForm();
         return network.getTwoWindingsTransformerStream()
             .filter(twoWindingsTransformer -> equipmentIdFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentID()))
@@ -297,7 +297,7 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    private List<Identifiable> get3WTransformerList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> get3WTransformerList(Network network, FormFilter filter) {
         ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) filter.getEquipmentFilterForm();
         return network.getThreeWindingsTransformerStream()
             .filter(threeWindingsTransformer -> equipmentIdFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentID()))
@@ -314,7 +314,7 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    private List<Identifiable> getHvdcList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getHvdcList(Network network, FormFilter filter) {
         HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) filter.getEquipmentFilterForm();
         return network.getHvdcLineStream()
             .filter(hvdcLine -> equipmentIdFilter(hvdcLine, hvdcLineFilter.getEquipmentID()))
@@ -327,24 +327,24 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    private List<Identifiable> getDanglingLineList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getDanglingLineList(Network network, FormFilter filter) {
         return getInjectionList(network.getDanglingLineStream().map(dl -> dl), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getLccConverterStationList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getLccConverterStationList(Network network, FormFilter filter) {
         return getInjectionList(network.getLccConverterStationStream().map(lcc -> lcc), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getVscConverterStationList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getVscConverterStationList(Network network, FormFilter filter) {
         return getInjectionList(network.getVscConverterStationStream().map(vsc -> vsc), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getBusbarSectionList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getBusbarSectionList(Network network, FormFilter filter) {
         return getInjectionList(network.getBusbarSectionStream().map(bbs -> bbs), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable> getIdentifiables(FormFilter filter, Network network) {
-        List<Identifiable> identifiables;
+    private List<Identifiable<?>> getIdentifiables(FormFilter filter, Network network) {
+        List<Identifiable<?>> identifiables;
         switch (filter.getEquipmentFilterForm().getEquipmentType()) {
             case GENERATOR:
                 identifiables = getGeneratorList(network, filter);
@@ -391,7 +391,7 @@ public class FilterService {
         return identifiables;
     }
 
-    private List<Identifiable> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
+    private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
         if (filter instanceof FormFilter) {
             FormFilter formFilter = (FormFilter) filter;
 
