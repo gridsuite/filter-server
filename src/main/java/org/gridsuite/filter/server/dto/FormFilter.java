@@ -41,4 +41,7 @@ public class FormFilter extends AbstractFilter {
         return FilterType.FORM;
     }
 
+    public AbstractEquipmentFilterForm getEquipmentFilterForm() {
+        return equipmentFilterForm;
+    }
 }
