@@ -45,7 +45,7 @@
 
     <properties>
         <java.version>11</java.version>
-	    <gridsuite-dependencies.version>18</gridsuite-dependencies.version>
+	    <gridsuite-dependencies.version>19-SNAPSHOT</gridsuite-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
