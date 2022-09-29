@@ -2,7 +2,9 @@ spring:
   application:
     name: filter-server
 
-dbName: filters
+powsybl-ws:
+  database:
+    name: filters
 
 server:
   max-http-header-size: 64000
