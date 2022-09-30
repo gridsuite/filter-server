@@ -12,5 +12,9 @@ package org.gridsuite.filter.server.utils;
 public enum RangeType {
     APPROX,
     EQUALITY,
-    RANGE
+    RANGE,
+    GREATER_THAN,
+    GREATER_OR_EQUAL,
+    LESS_THAN,
+    LESS_OR_EQUAL
 }
