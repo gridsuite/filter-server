@@ -7,11 +7,21 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.Country;
+import com.powsybl.iidm.network.Identifiable;
+import com.powsybl.iidm.network.Injection;
+import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.Substation;
+import com.powsybl.iidm.network.Terminal;
+import com.powsybl.network.store.client.NetworkStoreService;
+import com.powsybl.network.store.client.PreloadingStrategy;
+import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 
@@ -27,6 +38,7 @@ import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FI
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @Service
+@ComponentScan(basePackageClasses = {NetworkStoreService.class})
 public class FilterService {
 
     private static final String FILTER_LIST = "Filter list ";
@@ -35,6 +47,8 @@ public class FilterService {
     private final Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories = new HashMap<>();
 
     private FiltersToGroovyScript filtersToScript;
+
+    private final NetworkStoreService networkStoreService;
 
     public FilterService(FiltersToGroovyScript filtersToScript,
                          final ScriptFilterRepository scriptFiltersRepository,
@@ -50,7 +64,8 @@ public class FilterService {
                          final VscConverterStationFilterRepository vscConverterStationFilterRepository,
                          final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository,
                          final ThreeWindingsTransformerFilterRepository threeWindingsTransformerFilterRepository,
-                         final HvdcLineFilterRepository hvdcLineFilterRepository) {
+                         final HvdcLineFilterRepository hvdcLineFilterRepository,
+                         NetworkStoreService networkStoreService) {
         this.filtersToScript = filtersToScript;
 
         filterRepositories.put(EquipmentType.LINE.name(), new LineFilterRepositoryProxy(lineFilterRepository));
@@ -69,21 +84,22 @@ public class FilterService {
 
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
 
+        this.networkStoreService = networkStoreService;
     }
 
-    List<IFilterAttributes> getFilters() {
+    public List<IFilterAttributes> getFilters() {
         return filterRepositories.entrySet().stream()
             .flatMap(entry -> entry.getValue().getFiltersAttributes())
             .collect(Collectors.toList());
     }
 
-    List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
+    public List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
         return filterRepositories.entrySet().stream()
                 .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
                 .collect(Collectors.toList());
     }
 
-    Optional<AbstractFilter> getFilter(UUID id) {
+    public Optional<AbstractFilter> getFilter(UUID id) {
         Objects.requireNonNull(id);
         for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
             Optional<AbstractFilter> res = repository.getFilter(id);
@@ -139,7 +155,7 @@ public class FilterService {
         }
     }
 
-    void deleteFilter(UUID id) {
+    public void deleteFilter(UUID id) {
         Objects.requireNonNull(id);
         if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
@@ -187,5 +203,220 @@ public class FilterService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterId + NOT_FOUND);
         }
+    }
+
+    private boolean countryFilter(Terminal terminal, Set<String> countries) {
+        Optional<Country> country = terminal.getVoltageLevel().getSubstation().flatMap(Substation::getCountry);
+        return CollectionUtils.isEmpty(countries) || country.map(c -> countries.contains(c.name())).orElse(false);
+    }
+
+    private boolean equipmentIdFilter(Identifiable<?> identifiable, String equipmentId) {
+        return equipmentId == null || identifiable.getId().equals(equipmentId);
+    }
+
+    private boolean equipmentNameFilter(Identifiable<?> identifiable, String equipmentName) {
+        return equipmentName == null || identifiable.getNameOrId().equals(equipmentName);
+    }
+
+    private boolean substationNameFilter(Terminal terminal, String substationName) {
+        return substationName == null || terminal.getVoltageLevel().getSubstation().map(s -> s.getNameOrId().equals(substationName)).orElse(Boolean.TRUE);
+    }
+
+    private boolean filterByVoltage(double equipmentNominalVoltage, NumericalFilter numericalFilter) {
+        if (numericalFilter == null) {
+            return true;
+        }
+        switch (numericalFilter.getType()) {
+            case EQUALITY:
+                return equipmentNominalVoltage == numericalFilter.getValue1();
+            case RANGE:
+                return equipmentNominalVoltage >= numericalFilter.getValue1() && equipmentNominalVoltage <= numericalFilter.getValue2();
+            case APPROX:
+                return (equipmentNominalVoltage >= (numericalFilter.getValue1() - (numericalFilter.getValue1() * numericalFilter.getValue2() / 100.)))
+                    && (equipmentNominalVoltage <= (numericalFilter.getValue1() + (numericalFilter.getValue1() * numericalFilter.getValue2() / 100.)));
+            default:
+                throw new PowsyblException("Unknown numerical filter type");
+        }
+    }
+
+    private <I extends Injection<I>> Stream<Injection<I>> getInjectionList(Stream<Injection<I>> stream, FormFilter filter) {
+        AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) filter.getEquipmentFilterForm();
+        return stream
+            .filter(injection -> equipmentIdFilter(injection, injectionFilter.getEquipmentID()))
+            .filter(injection -> equipmentNameFilter(injection, injectionFilter.getEquipmentName()))
+            .filter(injection -> filterByVoltage(injection.getTerminal().getVoltageLevel().getNominalV(), injectionFilter.getNominalVoltage()))
+            .filter(injection -> countryFilter(injection.getTerminal(), injectionFilter.getCountries()))
+            .filter(injection -> substationNameFilter(injection.getTerminal(), injectionFilter.getSubstationName()));
+    }
+
+    private List<Identifiable<?>> getGeneratorList(Network network, FormFilter filter) {
+        return getInjectionList(network.getGeneratorStream().map(gen -> gen), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getLoadList(Network network, FormFilter filter) {
+        return getInjectionList(network.getLoadStream().map(load -> load), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getBatteryList(Network network, FormFilter filter) {
+        return getInjectionList(network.getBatteryStream().map(battery -> battery), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getStaticVarCompensatorList(Network network, FormFilter filter) {
+        return getInjectionList(network.getStaticVarCompensatorStream().map(svc -> svc), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getShuntCompensatorList(Network network, FormFilter filter) {
+        return getInjectionList(network.getShuntCompensatorStream().map(sc -> sc), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getLineList(Network network, FormFilter filter) {
+        LineFilter lineFilter = (LineFilter) filter.getEquipmentFilterForm();
+        return network.getLineStream()
+            .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
+            .filter(line -> equipmentNameFilter(line, lineFilter.getEquipmentName()))
+            .filter(line -> filterByVoltage(line.getTerminal1().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage1()) &&
+                            filterByVoltage(line.getTerminal2().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage2()))
+            .filter(line -> countryFilter(line.getTerminal1(), lineFilter.getCountries1()) &&
+                            countryFilter(line.getTerminal2(), lineFilter.getCountries2()))
+            .filter(line -> substationNameFilter(line.getTerminal1(), lineFilter.getSubstationName1()) &&
+                            substationNameFilter(line.getTerminal2(), lineFilter.getSubstationName2()))
+            .collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> get2WTransformerList(Network network, FormFilter filter) {
+        TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) filter.getEquipmentFilterForm();
+        return network.getTwoWindingsTransformerStream()
+            .filter(twoWindingsTransformer -> equipmentIdFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentID()))
+            .filter(twoWindingsTransformer -> equipmentNameFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentName()))
+            .filter(twoWindingsTransformer -> filterByVoltage(twoWindingsTransformer.getTerminal1().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage1()) &&
+                                              filterByVoltage(twoWindingsTransformer.getTerminal2().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage2()))
+            .filter(twoWindingsTransformer -> countryFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getCountries()) ||
+                                              countryFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getCountries()))
+            .filter(twoWindingsTransformer -> substationNameFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getSubstationName()) ||
+                                              substationNameFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getSubstationName()))
+            .collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> get3WTransformerList(Network network, FormFilter filter) {
+        ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) filter.getEquipmentFilterForm();
+        return network.getThreeWindingsTransformerStream()
+            .filter(threeWindingsTransformer -> equipmentIdFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentID()))
+            .filter(threeWindingsTransformer -> equipmentNameFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentName()))
+            .filter(threeWindingsTransformer -> filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
+                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
+                                                filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3()))
+            .filter(threeWindingsTransformer -> countryFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
+                                                countryFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
+                                                countryFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getCountries()))
+            .filter(threeWindingsTransformer -> substationNameFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
+                                                substationNameFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
+                                                substationNameFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getSubstationName()))
+            .collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getHvdcList(Network network, FormFilter filter) {
+        HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) filter.getEquipmentFilterForm();
+        return network.getHvdcLineStream()
+            .filter(hvdcLine -> equipmentIdFilter(hvdcLine, hvdcLineFilter.getEquipmentID()))
+            .filter(hvdcLine -> equipmentNameFilter(hvdcLine, hvdcLineFilter.getEquipmentName()))
+            .filter(hvdcLine -> filterByVoltage(hvdcLine.getNominalV(), hvdcLineFilter.getNominalVoltage()))
+            .filter(hvdcLine -> countryFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getCountries1()) &&
+                                countryFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getCountries2()))
+            .filter(hvdcLine -> substationNameFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getSubstationName1()) &&
+                                substationNameFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getSubstationName2()))
+            .collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getDanglingLineList(Network network, FormFilter filter) {
+        return getInjectionList(network.getDanglingLineStream().map(dl -> dl), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getLccConverterStationList(Network network, FormFilter filter) {
+        return getInjectionList(network.getLccConverterStationStream().map(lcc -> lcc), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getVscConverterStationList(Network network, FormFilter filter) {
+        return getInjectionList(network.getVscConverterStationStream().map(vsc -> vsc), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getBusbarSectionList(Network network, FormFilter filter) {
+        return getInjectionList(network.getBusbarSectionStream().map(bbs -> bbs), filter).collect(Collectors.toList());
+    }
+
+    private List<Identifiable<?>> getIdentifiables(FormFilter filter, Network network) {
+        List<Identifiable<?>> identifiables;
+        switch (filter.getEquipmentFilterForm().getEquipmentType()) {
+            case GENERATOR:
+                identifiables = getGeneratorList(network, filter);
+                break;
+            case LOAD:
+                identifiables = getLoadList(network, filter);
+                break;
+            case BATTERY:
+                identifiables = getBatteryList(network, filter);
+                break;
+            case STATIC_VAR_COMPENSATOR:
+                identifiables = getStaticVarCompensatorList(network, filter);
+                break;
+            case SHUNT_COMPENSATOR:
+                identifiables = getShuntCompensatorList(network, filter);
+                break;
+            case LCC_CONVERTER_STATION:
+                identifiables = getLccConverterStationList(network, filter);
+                break;
+            case VSC_CONVERTER_STATION:
+                identifiables = getVscConverterStationList(network, filter);
+                break;
+            case HVDC_LINE:
+                identifiables = getHvdcList(network, filter);
+                break;
+            case DANGLING_LINE:
+                identifiables = getDanglingLineList(network, filter);
+                break;
+            case LINE:
+                identifiables = getLineList(network, filter);
+                break;
+            case TWO_WINDINGS_TRANSFORMER:
+                identifiables = get2WTransformerList(network, filter);
+                break;
+            case THREE_WINDINGS_TRANSFORMER:
+                identifiables = get3WTransformerList(network, filter);
+                break;
+            case BUSBAR_SECTION:
+                identifiables = getBusbarSectionList(network, filter);
+                break;
+            default:
+                throw new PowsyblException("Unknown equipment type");
+        }
+        return identifiables;
+    }
+
+    private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
+        if (filter instanceof FormFilter) {
+            FormFilter formFilter = (FormFilter) filter;
+
+            Network network;
+            network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
+            if (network == null) {
+                throw new PowsyblException("Network '" + networkUuid + "' not found");
+            }
+            if (variantId != null) {
+                network.getVariantManager().setWorkingVariant(variantId);
+            }
+
+            return getIdentifiables(formFilter, network);
+        } else {
+            throw new PowsyblException("Filter implementation not yet supported: " + filter.getClass().getSimpleName());
+        }
+    }
+
+    public Optional<List<IdentifiableAttributes>> exportFilter(UUID id, UUID networkUuid, String variantId) {
+        Objects.requireNonNull(id);
+
+        return getFilter(id).map(filter ->
+            toIdentifiableFilter(filter, networkUuid, variantId).stream()
+                    .map(identifiable -> new IdentifiableAttributes(identifiable.getId(), identifiable.getType()))
+                    .collect(Collectors.toList())
+        );
     }
 }

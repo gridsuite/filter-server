@@ -123,4 +123,16 @@ public class FilterController {
             .contentType(MediaType.APPLICATION_JSON)
             .body(service.newScriptFromFilter(filterId, newId));
     }
+
+    @GetMapping(value = "/filters/{id}/export", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Export a filter to JSON format")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter on JSON format")})
+    public ResponseEntity<List<IdentifiableAttributes>> exportFilter(@PathVariable("id") UUID id,
+                                                                     @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                     @RequestParam(value = "variantId", required = false) String variantId) {
+        return service.exportFilter(id, networkUuid, variantId).map(identifiables -> ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(identifiables))
+            .orElse(ResponseEntity.notFound().build());
+    }
 }

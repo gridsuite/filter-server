@@ -7,6 +7,9 @@ on:
     tags:
       - 'v[0-9]*'
   pull_request:
+  repository_dispatch:
+    types:
+      - network_store_updated
 
 jobs:
   build:
@@ -18,6 +21,15 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
+      - name: Checkout network store sources
+        uses: actions/checkout@v1
+        with:
+          repository: powsybl/powsybl-network-store
+          ref: refs/heads/main
+
+      - name: Build and install network store client with Maven
+        run: mvn --batch-mode -Pclient -DskipTests=true --file ../powsybl-network-store/pom.xml install
 
       - name: Checkout sources
         uses: actions/checkout@v1
