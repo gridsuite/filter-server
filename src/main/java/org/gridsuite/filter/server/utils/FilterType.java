@@ -12,5 +12,7 @@ package org.gridsuite.filter.server.utils;
  */
 public enum FilterType {
     SCRIPT,
-    FORM,
+    AUTOMATIC,
+    MANUAL,
+    CSV_FILE
 }

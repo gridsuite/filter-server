@@ -38,7 +38,7 @@ public class FormFilter extends AbstractFilter {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public FilterType getType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     public AbstractEquipmentFilterForm getEquipmentFilterForm() {

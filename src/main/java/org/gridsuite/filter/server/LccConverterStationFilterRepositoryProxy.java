@@ -28,7 +28,7 @@ public class LccConverterStationFilterRepositoryProxy extends AbstractFilterRepo
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override

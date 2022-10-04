@@ -27,7 +27,7 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override

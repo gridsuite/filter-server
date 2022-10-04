@@ -228,7 +228,7 @@ public class FilterEntityControllerTest {
             Collections.reverse(filterAttributes);
         }
 
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, creationDate, modificationDate);
         matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, creationDate, modificationDate);
 
         filterAttributes = objectMapper.readValue(
@@ -239,7 +239,7 @@ public class FilterEntityControllerTest {
             new TypeReference<>() {
             });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, creationDate, modificationDate);
 
         // test replace line filter with other filter type
         AbstractFilter generatorFormFilter = new FormFilter(
@@ -260,7 +260,7 @@ public class FilterEntityControllerTest {
             new TypeReference<>() {
             });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, creationDate, modificationDate);
 
         // delete
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
@@ -559,7 +559,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
+        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -608,7 +608,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
+        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -651,7 +651,7 @@ public class FilterEntityControllerTest {
                 new TypeReference<>() {
                 });
         assertEquals(1, filters.size());
-        matchFilterInfos(filters.get(0), id, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filters.get(0), id, FilterType.AUTOMATIC, creationDate, modificationDate);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
@@ -662,7 +662,7 @@ public class FilterEntityControllerTest {
             });
 
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), id, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), id, FilterType.AUTOMATIC, creationDate, modificationDate);
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))

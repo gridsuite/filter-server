@@ -27,7 +27,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override

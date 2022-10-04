@@ -15,7 +15,6 @@ import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.Terminal;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
-import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
@@ -25,9 +24,16 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,6 +71,8 @@ public class FilterService {
                          final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository,
                          final ThreeWindingsTransformerFilterRepository threeWindingsTransformerFilterRepository,
                          final HvdcLineFilterRepository hvdcLineFilterRepository,
+                         final ManualFilterRepository manualFilterRepository,
+                         final CsvFileFilterRepository csvFileFilterRepository,
                          NetworkStoreService networkStoreService) {
         this.filtersToScript = filtersToScript;
 
@@ -83,6 +91,10 @@ public class FilterService {
         filterRepositories.put(EquipmentType.HVDC_LINE.name(), new HvdcLineFilterRepositoryProxy(hvdcLineFilterRepository));
 
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
+
+        filterRepositories.put(FilterType.MANUAL.name(), new ManualFilterRepositoryProxy(manualFilterRepository));
+
+        filterRepositories.put(FilterType.CSV_FILE.name(), new CsvFilterRepositoryProxy(csvFileFilterRepository));
 
         this.networkStoreService = networkStoreService;
     }
@@ -112,6 +124,9 @@ public class FilterService {
 
     @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
+        if (filter.getType() == FilterType.MANUAL) {
+
+        }
         return getRepository(filter).insert(filter);
     }
 
@@ -127,8 +142,8 @@ public class FilterService {
     }
 
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
-        if (filter.getType().equals(FilterType.SCRIPT)) {
-            return filterRepositories.get(FilterType.SCRIPT.name());
+        if (!filter.getType().equals(FilterType.AUTOMATIC)) {
+            return filterRepositories.get(filter.getType().name());
         }
         return filterRepositories.get(((FormFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
     }
