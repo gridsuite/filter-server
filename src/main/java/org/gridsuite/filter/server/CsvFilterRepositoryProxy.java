@@ -4,15 +4,14 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.CsvFileFilter;
-import org.gridsuite.filter.server.dto.EquipmentFilterAttributes;
-import org.gridsuite.filter.server.dto.ManualFilter;
+import org.gridsuite.filter.server.dto.CsvFileFilterEquipmentAttributes;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.CsvFileFilterEntity;
-import org.gridsuite.filter.server.entities.ManualFilterEntity;
-import org.gridsuite.filter.server.entities.ManualFilterEquipmentEntity;
+import org.gridsuite.filter.server.entities.CsvFileFilterEquipmentEntity;
 import org.gridsuite.filter.server.repositories.CsvFileFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CsvFilterRepositoryProxy extends AbstractFilterRepositoryProxy<CsvFileFilterEntity, CsvFileFilterRepository> {
@@ -32,8 +31,12 @@ public class CsvFilterRepositoryProxy extends AbstractFilterRepositoryProxy<CsvF
         return new CsvFileFilter(filterEntity.getId(),
                 filterEntity.getCreationDate(),
                 filterEntity.getModificationDate(),
-                new EquipmentFilterAttributes(filterEntity.getEquipmentId(), filterEntity.getDistributionKey()),
-                filterEntity.getEquipmentType());
+                filterEntity.getCsvFileFilterEquipmentEntityList()
+                        .stream()
+                        .map(equipment -> new CsvFileFilterEquipmentAttributes(equipment.getEquipmentType(),
+                                equipment.getEquipmentId(),
+                                equipment.getDistributionKey()))
+                        .collect(Collectors.toList()));
     }
 
     @Override
@@ -41,9 +44,13 @@ public class CsvFilterRepositoryProxy extends AbstractFilterRepositoryProxy<CsvF
         if (dto instanceof CsvFileFilter) {
             var filter = (CsvFileFilter) dto;
             var csvManualFilterEntityBuilder = CsvFileFilterEntity.builder()
-                    .equipmentType(filter.getEquipmentType())
-                    .distributionKey(filter.getEquipmentFilterAttributes().getDistributionKey())
-                    .equipmentId(filter.getEquipmentFilterAttributes().getEquipmentID());
+                    .csvFileFilterEquipmentEntityList(filter.getCsvFileFilterEquipmentAttributes()
+                            .stream()
+                            .map(attribute -> new CsvFileFilterEquipmentEntity(UUID.randomUUID(),
+                                    attribute.getEquipmentType(),
+                                    attribute.getEquipmentID(),
+                                    attribute.getDistributionKey()))
+                            .collect(Collectors.toList()));
 
             buildAbstractFilter(csvManualFilterEntityBuilder, filter);
             return csvManualFilterEntityBuilder.build();
@@ -53,7 +60,7 @@ public class CsvFilterRepositoryProxy extends AbstractFilterRepositoryProxy<CsvF
 
     @Override
     FilterType getFilterType() {
-        return FilterType.CSV_FILE;
+        return FilterType.IMPORT_CSV;
     }
 
     @Override

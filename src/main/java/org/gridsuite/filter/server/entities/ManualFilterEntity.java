@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +21,7 @@ import java.util.List;
 public class ManualFilterEntity extends AbstractFilterEntity {
 
     @Column(name = "equipmentType")
-    EquipmentType equipmentType;
+    private EquipmentType equipmentType;
 
     @OneToMany
     private List<ManualFilterEquipmentEntity> filterEquipmentEntityList;

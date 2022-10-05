@@ -94,7 +94,7 @@ public class FilterService {
 
         filterRepositories.put(FilterType.MANUAL.name(), new ManualFilterRepositoryProxy(manualFilterRepository));
 
-        filterRepositories.put(FilterType.CSV_FILE.name(), new CsvFilterRepositoryProxy(csvFileFilterRepository));
+        filterRepositories.put(FilterType.IMPORT_CSV.name(), new CsvFilterRepositoryProxy(csvFileFilterRepository));
 
         this.networkStoreService = networkStoreService;
     }
@@ -124,9 +124,6 @@ public class FilterService {
 
     @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
-        if (filter.getType() == FilterType.MANUAL) {
-
-        }
         return getRepository(filter).insert(filter);
     }
 

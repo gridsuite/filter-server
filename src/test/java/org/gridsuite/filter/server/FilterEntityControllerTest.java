@@ -31,6 +31,7 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.RangeType;
+import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -470,6 +471,11 @@ public class FilterEntityControllerTest {
         checkFormFilter(filterId1, lineFormFilter);
     }
 
+    @Test
+    public void testManualFilter() {
+
+    }
+
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
                         .content(objectMapper.writeValueAsString(filter))
@@ -721,5 +727,11 @@ public class FilterEntityControllerTest {
     private void matchScriptFilterInfos(ScriptFilter scriptFilter1, ScriptFilter scriptFilter2) {
         matchFilterInfos(scriptFilter1, scriptFilter2);
         assertTrue(scriptFilter1.getScript().contains(scriptFilter2.getScript()));
+    }
+
+    private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
+        matchFilterInfos(manualFilter1, manualFilter2);
+        assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getEquipmentFilterAttributes()).matchesSafely(manualFilter1.getEquipmentFilterAttributes()));
+
     }
 }

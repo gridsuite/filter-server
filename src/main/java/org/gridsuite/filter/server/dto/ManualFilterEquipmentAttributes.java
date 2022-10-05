@@ -4,11 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.UUID;
-
 @AllArgsConstructor
 @Getter
-public class EquipmentFilterAttributes {
+public class ManualFilterEquipmentAttributes {
 
     @Schema(description = "Equipment ID")
     private String equipmentID;

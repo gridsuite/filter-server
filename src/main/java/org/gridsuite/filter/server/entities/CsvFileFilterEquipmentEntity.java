@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.utils.EquipmentType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,11 +17,14 @@ import java.util.UUID;
 @SuperBuilder
 @AllArgsConstructor
 @Entity
-@Table(name = "manual_filter_equipment")
-public class ManualFilterEquipmentEntity {
+@Table(name = "csv_file_filter_equipment")
+public class CsvFileFilterEquipmentEntity {
     @Id
     @Column(name = "id")
     private UUID id;
+
+    @Column(name = "equipmentType")
+    private EquipmentType equipmentType;
 
     @Column(name = "equipmentId")
     private String equipmentId;
