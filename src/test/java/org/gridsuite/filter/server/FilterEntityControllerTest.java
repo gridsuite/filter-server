@@ -31,7 +31,6 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.RangeType;
-import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,14 +46,27 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.util.NestedServletException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -472,8 +484,29 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testManualFilter() {
+    public void testManualFilter() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+        ManualFilterEquipmentAttributes attributes1 = new ManualFilterEquipmentAttributes("line1", null);
+        ManualFilterEquipmentAttributes attributes2 = new ManualFilterEquipmentAttributes("line2", null);
 
+        ManualFilter manualFilter = new ManualFilter(filterId, creationDate, modificationDate, EquipmentType.LINE, List.of(attributes1, attributes2));
+        insertFilter(filterId, manualFilter);
+        checkManualFilter(filterId, manualFilter);
+    }
+
+    @Test
+    public void testCsvFilter() throws Exception {
+        UUID filterId = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+        CsvFileFilterEquipmentAttributes attributes1 = new CsvFileFilterEquipmentAttributes(EquipmentType.GENERATOR, "gen", 10d);
+        CsvFileFilterEquipmentAttributes attributes2 = new CsvFileFilterEquipmentAttributes(EquipmentType.LINE, "line", 10d);
+
+        CsvFileFilter csvFileFilter = new CsvFileFilter(filterId, creationDate, modificationDate, List.of(attributes1, attributes2));
+        insertFilter(filterId, csvFileFilter);
+        checkCsvFilter(filterId, csvFileFilter);
     }
 
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
@@ -701,6 +734,18 @@ public class FilterEntityControllerTest {
         matchScriptFilterInfos(foundFilter, scriptFilter);
     }
 
+    private void checkManualFilter(UUID filterId, ManualFilter manualFilter) throws Exception {
+        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        ManualFilter foundFilter = objectMapper.readValue(foundFilterAsString, ManualFilter.class);
+        matchManualFilterInfos(foundFilter, manualFilter);
+    }
+
+    private void checkCsvFilter(UUID filterId, CsvFileFilter csvFileFilter) throws Exception {
+        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        CsvFileFilter foundFilter = objectMapper.readValue(foundFilterAsString, CsvFileFilter.class);
+        matchCsvFilterInfos(foundFilter, csvFileFilter);
+    }
+
     private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
         assertEquals(filter1.getId(), filter2.getId());
         assertEquals(filter1.getType(), filter2.getType());
@@ -732,6 +777,12 @@ public class FilterEntityControllerTest {
     private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
         matchFilterInfos(manualFilter1, manualFilter2);
         assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getEquipmentFilterAttributes()).matchesSafely(manualFilter1.getEquipmentFilterAttributes()));
+
+    }
+
+    private void matchCsvFilterInfos(CsvFileFilter csvFileFilter1, CsvFileFilter csvFileFilter2) {
+        matchFilterInfos(csvFileFilter1, csvFileFilter2);
+        assertTrue(new MatcherJson<>(objectMapper, csvFileFilter2.getCsvFileFilterEquipmentAttributes()).matchesSafely(csvFileFilter1.getCsvFileFilterEquipmentAttributes()));
 
     }
 }

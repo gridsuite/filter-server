@@ -26,9 +26,9 @@ import java.util.UUID;
 )
 @JsonSubTypes({//Below, we define the names and the binding classes.
     @JsonSubTypes.Type(value = ScriptFilter.class, name = "SCRIPT"),
-    @JsonSubTypes.Type(value = FormFilter.class, name = "FORM"),
+    @JsonSubTypes.Type(value = FormFilter.class, name = "AUTOMATIC"),
     @JsonSubTypes.Type(value = ManualFilter.class, name = "MANUAL"),
-    @JsonSubTypes.Type(value = CsvFileFilter.class, name = "CSV_FILE")
+    @JsonSubTypes.Type(value = CsvFileFilter.class, name = "IMPORT_CSV")
 })
 @Getter
 @Setter
