@@ -438,16 +438,16 @@ public class FilterEntityControllerTest {
         List<Double> values1 = new ArrayList<>();
         values1.add(127.);
         values1.add(33.);
-        values1.add(14.);
+        values1.add(11.);
         List<Double> values2 = new ArrayList<>();
         values2.add(134.);
         values2.add(null);
-        values2.add(30.);
+        values2.add(5.);
+
+        // with this network (ThreeWindingsTransformerNetworkFactory.create), we have a single 3WT:
+        // - 3WT  term1: 132 kV term2: 33 kV  term3: 11 kV
         final String noMatch = "[]";
         final String match3WT = "[{\"id\":\"3WT\",\"type\":\"THREE_WINDINGS_TRANSFORMER\"}]";
-
-        // with this network (ThreeWindingsTransformerNetworkFactory.create), we have a single 2WT:
-        // - 3WT  term1: 132 kV term2: 33 kV  term3: 11 kV
 
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "3WT", null, "SUBSTATION", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
@@ -460,6 +460,38 @@ public class FilterEntityControllerTest {
         // IT does not match
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "3WT", null, "SUBSTATION", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+
+        // Current filters have covered OR #1/6 in get3WTransformerList
+
+        // Update filters to cover OR #2/6
+        values1.set(1, 11.);
+        values1.set(2, 33.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // Update filters to cover OR #3/6
+        values1.set(0, 33.);
+        values2.set(0, 33.);
+        values1.set(1, 132.);
+        values1.set(2, 11.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // Update filters to cover OR #4/6
+        values1.set(1, 11.);
+        values1.set(2, 132.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // Update filters to cover OR #5/6
+        values1.set(0, 10.);
+        values2.set(0, 12.);
+        values1.set(1, 132.);
+        values1.set(2, 33.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // Update filters to cover OR #6/6
+        values1.set(1, 33.);
+        values1.set(2, 132.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
     }
 
     @Test
