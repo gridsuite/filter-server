@@ -372,12 +372,61 @@ public class FilterEntityControllerTest {
         values2.add(null);
         values2.add(5.);
 
+        // with this network (EurostagTutorialExample1Factory::create), we have 2 2WT Transfos:
+        // - NGEN_NHV1  term1: 24 kV term2: 380 kV
+        // - NHV2_NLOAD term1: 380 kV term2: 150 kV
+        final String noMatch = "[]";
+        final String matchNHV2NLOAD = "[{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]";
+        final String matchNGENNHV1 = "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]";
+        final String bothMatch = "[{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"},{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]";
+
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, "[{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]");
+            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
+        // no eqpt/substation filter: only NHV2_NLOAD match because of APPROX filter
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "substationNameNotFound", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, "[]");
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
+        // bad substationName
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID, null, "[]");
+            "NHV2_NLOAD", "NHV2_NLOAD", "substationNameNotFound", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, noMatch);
+        // this network has only FR substations: IT does not match:
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID, null, noMatch);
+
+        // change APPROX into "> 24"
+        rangeTypes.set(1, RangeType.GREATER_THAN);
+        values1.set(1, 24.);
+        values2.set(1, null);
+        // NGEN_NHV1 still does not match
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
+
+        // change "> 24" into ">= 24"
+        rangeTypes.set(1, RangeType.GREATER_OR_EQUAL);
+        // both transfos now match both filters
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, bothMatch);
+
+        // change "== 380" into ">= 0"
+        // change ">= 24" into "< 380"
+        rangeTypes.set(0, RangeType.GREATER_OR_EQUAL);
+        values1.set(0, 0.);
+        rangeTypes.set(1, RangeType.LESS_THAN);
+        values1.set(1, 380.);
+        // both match
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, bothMatch);
+
+        // change "< 380" into "< 150"
+        values1.set(1, 150.);
+        // only NGEN_NHV1 match
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNGENNHV1);
+
+        // change "< 150" into "<= 150"
+        rangeTypes.set(1, RangeType.LESS_OR_EQUAL);
+        // both match
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, bothMatch);
     }
 
     @Test
@@ -394,13 +443,23 @@ public class FilterEntityControllerTest {
         values2.add(134.);
         values2.add(null);
         values2.add(30.);
+        final String noMatch = "[]";
+        final String match3WT = "[{\"id\":\"3WT\",\"type\":\"THREE_WINDINGS_TRANSFORMER\"}]";
+
+        // with this network (ThreeWindingsTransformerNetworkFactory.create), we have a single 2WT:
+        // - 3WT  term1: 132 kV term2: 33 kV  term3: 11 kV
 
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "3WT", null, "SUBSTATION", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, "[{\"id\":\"3WT\",\"type\":\"THREE_WINDINGS_TRANSFORMER\"}]");
+            "3WT", null, "SUBSTATION", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // same without eqpt / sybstation
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "3WT", null, "substationNameNotFound", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, "[]");
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // bad substationName
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "3WT", null, "SUBSTATION", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID_5, null, "[]");
+            "3WT", null, "substationNameNotFound", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+        // IT does not match
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+            "3WT", null, "SUBSTATION", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
     }
 
     @Test
