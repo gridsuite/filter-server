@@ -441,7 +441,7 @@ public class FilterEntityControllerTest {
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"type\":\"FORM\"}, {\"type\":\"SCRIPT\"}]"));
+            .andExpect(content().json("[{\"type\":\"AUTOMATIC\"}, {\"type\":\"SCRIPT\"}]"));
 
         // replace filter with script
         mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
@@ -494,19 +494,6 @@ public class FilterEntityControllerTest {
         ManualFilter manualFilter = new ManualFilter(filterId, creationDate, modificationDate, EquipmentType.LINE, List.of(attributes1, attributes2));
         insertFilter(filterId, manualFilter);
         checkManualFilter(filterId, manualFilter);
-    }
-
-    @Test
-    public void testCsvFilter() throws Exception {
-        UUID filterId = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
-        Date creationDate = new Date();
-        Date modificationDate = new Date();
-        CsvFileFilterEquipmentAttributes attributes1 = new CsvFileFilterEquipmentAttributes(EquipmentType.GENERATOR, "gen", 10d);
-        CsvFileFilterEquipmentAttributes attributes2 = new CsvFileFilterEquipmentAttributes(EquipmentType.LINE, "line", 10d);
-
-        CsvFileFilter csvFileFilter = new CsvFileFilter(filterId, creationDate, modificationDate, List.of(attributes1, attributes2));
-        insertFilter(filterId, csvFileFilter);
-        checkCsvFilter(filterId, csvFileFilter);
     }
 
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
@@ -740,12 +727,6 @@ public class FilterEntityControllerTest {
         matchManualFilterInfos(foundFilter, manualFilter);
     }
 
-    private void checkCsvFilter(UUID filterId, CsvFileFilter csvFileFilter) throws Exception {
-        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        CsvFileFilter foundFilter = objectMapper.readValue(foundFilterAsString, CsvFileFilter.class);
-        matchCsvFilterInfos(foundFilter, csvFileFilter);
-    }
-
     private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
         assertEquals(filter1.getId(), filter2.getId());
         assertEquals(filter1.getType(), filter2.getType());
@@ -777,12 +758,6 @@ public class FilterEntityControllerTest {
     private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
         matchFilterInfos(manualFilter1, manualFilter2);
         assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getFilterEquipmentsAttributes()).matchesSafely(manualFilter1.getFilterEquipmentsAttributes()));
-
-    }
-
-    private void matchCsvFilterInfos(CsvFileFilter csvFileFilter1, CsvFileFilter csvFileFilter2) {
-        matchFilterInfos(csvFileFilter1, csvFileFilter2);
-        assertTrue(new MatcherJson<>(objectMapper, csvFileFilter2.getCsvFileFilterEquipmentAttributes()).matchesSafely(csvFileFilter1.getCsvFileFilterEquipmentAttributes()));
 
     }
 }

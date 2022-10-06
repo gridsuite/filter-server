@@ -14,5 +14,4 @@ public enum FilterType {
     SCRIPT,
     AUTOMATIC,
     MANUAL,
-    IMPORT_CSV
 }

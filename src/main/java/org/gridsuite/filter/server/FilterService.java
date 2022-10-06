@@ -72,7 +72,6 @@ public class FilterService {
                          final ThreeWindingsTransformerFilterRepository threeWindingsTransformerFilterRepository,
                          final HvdcLineFilterRepository hvdcLineFilterRepository,
                          final ManualFilterRepository manualFilterRepository,
-                         final CsvFileFilterRepository csvFileFilterRepository,
                          NetworkStoreService networkStoreService) {
         this.filtersToScript = filtersToScript;
 
@@ -93,8 +92,6 @@ public class FilterService {
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
 
         filterRepositories.put(FilterType.MANUAL.name(), new ManualFilterRepositoryProxy(manualFilterRepository));
-
-        filterRepositories.put(FilterType.IMPORT_CSV.name(), new CsvFilterRepositoryProxy(csvFileFilterRepository));
 
         this.networkStoreService = networkStoreService;
     }
