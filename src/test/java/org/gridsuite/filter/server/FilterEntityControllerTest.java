@@ -74,6 +74,7 @@ public class FilterEntityControllerTest {
     private MockMvc mvc;
 
     private Network network;
+    private Network network6;
 
     @Autowired
     private FilterService filterService;
@@ -92,6 +93,7 @@ public class FilterEntityControllerTest {
     private static final UUID NETWORK_UUID_3 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e6");
     private static final UUID NETWORK_UUID_4 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e7");
     private static final UUID NETWORK_UUID_5 = UUID.fromString("11111111-7977-4592-2222-88027e4254e7");
+    private static final UUID NETWORK_UUID_6 = UUID.fromString("11111111-7977-4592-2222-88027e4254e8");
     private static final UUID NETWORK_NOT_FOUND_UUID = UUID.fromString("88888888-7977-3333-9999-88027e4254e7");
     private static final String VARIANT_ID_1 = "variant_1";
 
@@ -115,11 +117,13 @@ public class FilterEntityControllerTest {
         Network network3 = SvcTestCaseFactory.createWithMoreSVCs(new NetworkFactoryImpl());
         Network network4 = ShuntTestCaseFactory.create(new NetworkFactoryImpl());
         Network network5 = ThreeWindingsTransformerNetworkFactory.create(new NetworkFactoryImpl());
+        network6 = EurostagTutorialExample1Factory.createWithFixedCurrentLimits(new NetworkFactoryImpl());
         given(networkStoreService.getNetwork(NETWORK_UUID, PreloadingStrategy.COLLECTION)).willReturn(network);
         given(networkStoreService.getNetwork(NETWORK_UUID_2, PreloadingStrategy.COLLECTION)).willReturn(network2);
         given(networkStoreService.getNetwork(NETWORK_UUID_3, PreloadingStrategy.COLLECTION)).willReturn(network3);
         given(networkStoreService.getNetwork(NETWORK_UUID_4, PreloadingStrategy.COLLECTION)).willReturn(network4);
         given(networkStoreService.getNetwork(NETWORK_UUID_5, PreloadingStrategy.COLLECTION)).willReturn(network5);
+        given(networkStoreService.getNetwork(NETWORK_UUID_6, PreloadingStrategy.COLLECTION)).willReturn(network6);
         given(networkStoreService.getNetwork(NETWORK_NOT_FOUND_UUID, PreloadingStrategy.COLLECTION)).willReturn(null);
 
         Configuration.setDefaults(new Configuration.Defaults() {
@@ -157,19 +161,16 @@ public class FilterEntityControllerTest {
     public void testLineFilter() throws Exception {
         UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
-
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
         LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.APPROX, 375., 5.));
-
         FormFilter lineFormFilter = new FormFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
                 lineFilter
         );
-
         insertFilter(filterId1, lineFormFilter);
         checkFormFilter(filterId1, lineFormFilter);
 
@@ -208,13 +209,10 @@ public class FilterEntityControllerTest {
                         new NumericalFilter(RangeType.RANGE, 50., null)
                 )
         );
-
         modifyFormFilter(filterId1, hvdcLineFormFilter);
-
         checkFormFilter(filterId1, hvdcLineFormFilter);
 
         ScriptFilter scriptFilter = new ScriptFilter(filterId2, creationDate, modificationDate, "test");
-
         insertFilter(filterId2, scriptFilter);
         checkScriptFilter(filterId2, scriptFilter);
 
@@ -262,6 +260,16 @@ public class FilterEntityControllerTest {
         assertEquals(1, filterAttributes.size());
         matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.FORM, creationDate, modificationDate);
 
+        // update with same type filter
+        AbstractFilter generatorFormFilter2 = new FormFilter(
+                filterId1,
+                creationDate,
+                modificationDate,
+                new GeneratorFilter(new InjectionFilterAttributes("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null))
+                )
+        );
+        modifyFormFilter(filterId1, generatorFormFilter2);
+
         // delete
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
 
@@ -271,6 +279,49 @@ public class FilterEntityControllerTest {
 
         mvc.perform(put(URL_TEMPLATE + filterId2).contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(scriptFilter))).andExpect(status().isNotFound());
 
+        filterService.deleteAll();
+    }
+
+    @Test
+    public void testLineFilter2() throws Exception {
+        UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
+        UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+
+        // a 2-country network (one substation FR, one BE)
+        final double p2NominalVoltage = 63.;
+        network6.getLine("NHV1_NHV2_2").getTerminal2().getVoltageLevel().setNominalV(p2NominalVoltage); // patch just for better coverage
+
+        // apply a matching filter on countries (2 lines are matching)
+        LineFilter lineFilterBEFR = new LineFilter(null, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.EQUALITY, p2NominalVoltage, null), null);
+        FormFilter lineFormFilterBEFR = new FormFilter(
+                filterId3,
+                creationDate,
+                modificationDate,
+                lineFilterBEFR
+        );
+        insertFilter(filterId3, lineFormFilterBEFR);
+        checkFormFilter(filterId3, lineFormFilterBEFR);
+        mvc.perform(get(URL_TEMPLATE + filterId3 + "/export?networkUuid=" + NETWORK_UUID_6)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json("[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\"},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\"}]"));
+
+        // update form filter <-> script filter (rejected)
+        ScriptFilter scriptFilter = new ScriptFilter(filterId4, creationDate, modificationDate, "test");
+        insertFilter(filterId4, scriptFilter);
+        checkScriptFilter(filterId4, scriptFilter);
+        assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId3)
+                .content(objectMapper.writeValueAsString(scriptFilter))
+                .contentType(APPLICATION_JSON)));
+        assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId4)
+                .content(objectMapper.writeValueAsString(lineFormFilterBEFR))
+                .contentType(APPLICATION_JSON)));
+
+        mvc.perform(delete(URL_TEMPLATE + filterId3)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + filterId4)).andExpect(status().isOk());
         filterService.deleteAll();
     }
 
