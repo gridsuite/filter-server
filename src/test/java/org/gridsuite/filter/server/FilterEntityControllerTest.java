@@ -776,7 +776,7 @@ public class FilterEntityControllerTest {
 
     private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
         matchFilterInfos(manualFilter1, manualFilter2);
-        assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getEquipmentFilterAttributes()).matchesSafely(manualFilter1.getEquipmentFilterAttributes()));
+        assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getFilterEquipmentsAttributes()).matchesSafely(manualFilter1.getFilterEquipmentsAttributes()));
 
     }
 

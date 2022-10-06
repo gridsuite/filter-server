@@ -45,7 +45,7 @@ public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<M
             var filter = (ManualFilter) dto;
             var manualFilterEntityBuilder = ManualFilterEntity.builder()
                     .equipmentType(filter.getEquipmentType())
-                    .filterEquipmentEntityList(filter.getEquipmentFilterAttributes()
+                    .filterEquipmentEntityList(filter.getFilterEquipmentsAttributes()
                             .stream()
                             .map(attributes -> ManualFilterEquipmentEntity.builder()
                                     .id(UUID.randomUUID())
@@ -62,7 +62,7 @@ public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<M
 
     @Override
     FilterType getFilterType() {
-        return null;
+        return FilterType.MANUAL;
     }
 
     @Override

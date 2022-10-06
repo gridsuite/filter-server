@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -18,6 +19,6 @@ import java.util.List;
 @Table(name = "csv_file_filter")
 public class CsvFileFilterEntity extends AbstractFilterEntity {
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     List<CsvFileFilterEquipmentEntity> csvFileFilterEquipmentEntityList;
 }

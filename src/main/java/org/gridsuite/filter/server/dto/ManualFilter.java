@@ -19,16 +19,16 @@ import java.util.UUID;
 public class ManualFilter extends AbstractFilter {
 
     EquipmentType equipmentType;
-    List<ManualFilterEquipmentAttributes> equipmentFilterAttributes;
+    List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes;
 
     public ManualFilter(UUID id,
                         Date creationDate,
                         Date modificationDate,
                         EquipmentType equipmentType,
-                        List<ManualFilterEquipmentAttributes> equipmentFilterAttributes) {
+                        List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes) {
         super(id, creationDate, modificationDate);
         this.equipmentType = equipmentType;
-        this.equipmentFilterAttributes = equipmentFilterAttributes;
+        this.filterEquipmentsAttributes = filterEquipmentsAttributes;
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

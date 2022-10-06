@@ -11,6 +11,7 @@ import org.gridsuite.filter.server.entities.CsvFileFilterEquipmentEntity;
 import org.gridsuite.filter.server.repositories.CsvFileFilterRepository;
 import org.gridsuite.filter.server.utils.FilterType;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CsvFilterRepositoryProxy extends AbstractFilterRepositoryProxy<CsvFileFilterEntity, CsvFileFilterRepository> {
@@ -46,10 +47,11 @@ public class CsvFilterRepositoryProxy extends AbstractFilterRepositoryProxy<CsvF
                     .csvFileFilterEquipmentEntityList(filter.getCsvFileFilterEquipmentAttributes()
                             .stream()
                             .map(attribute -> CsvFileFilterEquipmentEntity.builder()
-                                                    .equipmentType(attribute.getEquipmentType())
-                                                            .equipmentId(attribute.getEquipmentID())
-                                                                    .distributionKey(attribute.getDistributionKey())
-                                                                            .build())
+                                .id(UUID.randomUUID())
+                                .equipmentType(attribute.getEquipmentType())
+                                .equipmentId(attribute.getEquipmentId())
+                                .distributionKey(attribute.getDistributionKey())
+                                .build())
                             .collect(Collectors.toList()));
 
             buildAbstractFilter(csvManualFilterEntityBuilder, filter);

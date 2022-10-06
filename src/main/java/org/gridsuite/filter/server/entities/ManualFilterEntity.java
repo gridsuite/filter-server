@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -23,6 +24,6 @@ public class ManualFilterEntity extends AbstractFilterEntity {
     @Column(name = "equipmentType")
     private EquipmentType equipmentType;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<ManualFilterEquipmentEntity> filterEquipmentEntityList;
 }

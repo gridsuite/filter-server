@@ -13,7 +13,7 @@ public class CsvFileFilterEquipmentAttributes {
     private EquipmentType equipmentType;
 
     @Schema(description = "Equipment ID")
-    private String equipmentID;
+    private String equipmentId;
 
     @Schema(description = "Distribution Key")
     private Double distributionKey;
