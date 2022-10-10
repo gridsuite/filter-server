@@ -277,10 +277,10 @@ public class FilterService {
         return network.getLineStream()
             .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
             .filter(line -> equipmentNameFilter(line, lineFilter.getEquipmentName()))
-            .filter(line -> filterByVoltage(line.getTerminal1().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage1()) && filterByVoltage(line.getTerminal2().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage2())
-                            || filterByVoltage(line.getTerminal2().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage1()) && filterByVoltage(line.getTerminal1().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage2()))
-            .filter(line -> countryFilter(line.getTerminal1(), lineFilter.getCountries1()) && countryFilter(line.getTerminal2(), lineFilter.getCountries2())
-                            || countryFilter(line.getTerminal2(), lineFilter.getCountries1()) && countryFilter(line.getTerminal1(), lineFilter.getCountries2()))
+            .filter(line -> (filterByVoltage(line.getTerminal1().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage1()) && filterByVoltage(line.getTerminal2().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage2()))
+                            || (filterByVoltage(line.getTerminal2().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage1()) && filterByVoltage(line.getTerminal1().getVoltageLevel().getNominalV(), lineFilter.getNominalVoltage2())))
+            .filter(line -> (countryFilter(line.getTerminal1(), lineFilter.getCountries1()) && countryFilter(line.getTerminal2(), lineFilter.getCountries2()))
+                            || (countryFilter(line.getTerminal2(), lineFilter.getCountries1()) && countryFilter(line.getTerminal1(), lineFilter.getCountries2())))
             .filter(line -> substationNameFilter(line.getTerminal1(), lineFilter.getSubstationName1()) &&
                             substationNameFilter(line.getTerminal2(), lineFilter.getSubstationName2()))
             .collect(Collectors.toList());
@@ -291,11 +291,11 @@ public class FilterService {
         return network.getTwoWindingsTransformerStream()
             .filter(twoWindingsTransformer -> equipmentIdFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentID()))
             .filter(twoWindingsTransformer -> equipmentNameFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentName()))
-            .filter(twoWindingsTransformer -> filterByVoltage(twoWindingsTransformer.getTerminal1().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage1()) &&
-                                              filterByVoltage(twoWindingsTransformer.getTerminal2().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage2())
+            .filter(twoWindingsTransformer -> (filterByVoltage(twoWindingsTransformer.getTerminal1().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage1()) &&
+                                              filterByVoltage(twoWindingsTransformer.getTerminal2().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage2()))
                                               ||
-                                              filterByVoltage(twoWindingsTransformer.getTerminal2().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage1()) &&
-                                              filterByVoltage(twoWindingsTransformer.getTerminal1().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage2()))
+                                              (filterByVoltage(twoWindingsTransformer.getTerminal2().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage1()) &&
+                                              filterByVoltage(twoWindingsTransformer.getTerminal1().getVoltageLevel().getNominalV(), twoWindingsTransformerFilter.getNominalVoltage2())))
             .filter(twoWindingsTransformer -> countryFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getCountries()) ||
                                               countryFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getCountries()))
             .filter(twoWindingsTransformer -> substationNameFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getSubstationName()) ||
@@ -308,29 +308,29 @@ public class FilterService {
         return network.getThreeWindingsTransformerStream()
             .filter(threeWindingsTransformer -> equipmentIdFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentID()))
             .filter(threeWindingsTransformer -> equipmentNameFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentName()))
-            .filter(threeWindingsTransformer -> filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
+            .filter(threeWindingsTransformer -> (filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
                                                 filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
-                                                filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3())
+                                                filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3()))
                                                 ||
-                                                filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
+                                                (filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
                                                 filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
-                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3())
+                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3()))
                                                 ||
-                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
+                                                (filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
                                                 filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
-                                                filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3())
+                                                filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3()))
                                                 ||
-                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
+                                                (filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
                                                 filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
-                                                filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3())
-                                                ||
-                                                filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
-                                                filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
-                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3())
-                                                ||
-                                                filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
-                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
                                                 filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3()))
+                                                ||
+                                                (filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
+                                                filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
+                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3()))
+                                                ||
+                                                (filterByVoltage(threeWindingsTransformer.getLeg3().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage1()) &&
+                                                filterByVoltage(threeWindingsTransformer.getLeg2().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage2()) &&
+                                                filterByVoltage(threeWindingsTransformer.getLeg1().getTerminal().getVoltageLevel().getNominalV(), threeWindingsTransformerFilter.getNominalVoltage3())))
             .filter(threeWindingsTransformer -> countryFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
                                                 countryFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
                                                 countryFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getCountries()))
@@ -346,8 +346,8 @@ public class FilterService {
             .filter(hvdcLine -> equipmentIdFilter(hvdcLine, hvdcLineFilter.getEquipmentID()))
             .filter(hvdcLine -> equipmentNameFilter(hvdcLine, hvdcLineFilter.getEquipmentName()))
             .filter(hvdcLine -> filterByVoltage(hvdcLine.getNominalV(), hvdcLineFilter.getNominalVoltage()))
-            .filter(hvdcLine -> countryFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getCountries1()) && countryFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getCountries2())
-                || countryFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getCountries1()) && countryFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getCountries2()))
+            .filter(hvdcLine -> (countryFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getCountries1()) && countryFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getCountries2()))
+                                || (countryFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getCountries1()) && countryFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getCountries2())))
             .filter(hvdcLine -> substationNameFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getSubstationName1()) &&
                                 substationNameFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getSubstationName2()))
             .collect(Collectors.toList());
