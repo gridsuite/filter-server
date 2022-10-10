@@ -294,22 +294,18 @@ public class FilterEntityControllerTest {
         // a 2-country network (one substation FR, one BE)
         final double p2NominalVoltage = 63.;
         network6.getLine("NHV1_NHV2_2").getTerminal2().getVoltageLevel().setNominalV(p2NominalVoltage); // patch just for better coverage
+        final String noMatch = "[]";
+        final String bothMatch = "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\"},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\"}]";
 
-        // apply a matching filter on countries (2 lines are matching)
-        LineFilter lineFilterBEFR = new LineFilter(null, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.EQUALITY, p2NominalVoltage, null), null);
-        FormFilter lineFormFilterBEFR = new FormFilter(
-                filterId3,
-                creationDate,
-                modificationDate,
-                lineFilterBEFR
-        );
-        insertFilter(filterId3, lineFormFilterBEFR);
-        checkFormFilter(filterId3, lineFormFilterBEFR);
-        mvc.perform(get(URL_TEMPLATE + filterId3 + "/export?networkUuid=" + NETWORK_UUID_6)
-                        .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-                .andExpect(content().json("[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\"},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\"}]"));
+        List<RangeType> rangeTypes = new ArrayList<>();
+        rangeTypes.add(RangeType.EQUALITY);
+        List<Double> values1 = new ArrayList<>();
+        values1.add(p2NominalVoltage);
+        List<Double> values2 = new ArrayList<>();
+        values2.add(null);
+
+        FormFilter lineFormFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, false);
 
         // update form filter <-> script filter (rejected)
         ScriptFilter scriptFilter = new ScriptFilter(filterId4, creationDate, modificationDate, "test");
@@ -324,6 +320,25 @@ public class FilterEntityControllerTest {
 
         mvc.perform(delete(URL_TEMPLATE + filterId3)).andExpect(status().isOk());
         mvc.perform(delete(URL_TEMPLATE + filterId4)).andExpect(status().isOk());
+
+        // more country filters
+        rangeTypes.add(RangeType.GREATER_OR_EQUAL);
+        rangeTypes.set(0, RangeType.GREATER_OR_EQUAL);
+        values1.set(0, 0.);
+        values1.add(0.);
+        values2.add(null);
+        insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, true);
+
+        network6.getSubstation("P2").setCountry(Country.FR);
+        insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("IT")), new TreeSet<>(Set.of("FR")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, noMatch, true);
+        insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of()), new TreeSet<>(Set.of("IT")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, noMatch, true);
+        network6.getSubstation("P1").setCountry(Country.IT);
+        insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("IT")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, true);
+
         filterService.deleteAll();
     }
 
@@ -843,6 +858,52 @@ public class FilterEntityControllerTest {
                 });
 
         assertEquals(0, filterAttributes.size());
+    }
+
+    private FormFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
+                                         String substationName, Set<String> countries1, Set<String> countries2,
+                                         List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
+                                         UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
+        NumericalFilter numericalFilter1 = null;
+        if (rangeTypes.size() >= 1) {
+            numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
+        }
+        NumericalFilter numericalFilter2 = null;
+        if (rangeTypes.size() == 2) {
+            numericalFilter2 = new NumericalFilter(rangeTypes.get(1), values1.get(1), values2.get(1));
+        }
+        AbstractEquipmentFilterForm equipmentFilterForm = new LineFilter(equipmentID, equipmentName, null, substationName, AbstractFilterRepositoryProxy.setToSorterSet(countries1), AbstractFilterRepositoryProxy.setToSorterSet(countries2), numericalFilter1, numericalFilter2);
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+        FormFilter filter = new FormFilter(
+                id,
+                creationDate,
+                modificationDate,
+                equipmentFilterForm
+        );
+        insertFilter(id, filter);
+        checkFormFilter(id, filter);
+        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertEquals(1, filterAttributes.size());
+        assertEquals(id, filterAttributes.get(0).getId());
+        assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
+
+        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonExport));
+        if (delete) {
+            mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+        }
+        return filter;
     }
 
     private void checkFormFilter(UUID filterId, FormFilter formFilter) throws Exception {
