@@ -294,7 +294,7 @@ public class FilterService {
         return filterByVoltage(terminal.getVoltageLevel().getNominalV(), numericalFilter);
     }
 
-    private boolean filterByVoltages(Branch branch, NumericalFilter numFilter1, NumericalFilter numFilter2) {
+    private boolean filterByVoltages(Branch<?> branch, NumericalFilter numFilter1, NumericalFilter numFilter2) {
         return
             // terminal 1 matches filter 1 and terminal 2 matches filter 2
             filterByVoltage(branch.getTerminal1(), numFilter1) &&
