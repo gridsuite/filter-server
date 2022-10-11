@@ -549,6 +549,11 @@ public class FilterEntityControllerTest {
 
         // Current filters have covered OR #1/6 in get3WTransformerList
 
+        // variant to increase coverage
+        values1.set(2, 500.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+
         // Update filters to cover OR #2/6
         values1.set(1, 11.);
         values1.set(2, 33.);
