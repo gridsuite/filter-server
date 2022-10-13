@@ -166,7 +166,7 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
-        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.APPROX, 375., 5.));
+        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
         FormFilter lineFormFilter = new FormFilter(
                 filterId1,
                 creationDate,
@@ -361,15 +361,15 @@ public class FilterEntityControllerTest {
         insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
             "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 27., 30., NETWORK_UUID, null, "[]");
         insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.APPROX, 35., 2., NETWORK_UUID, null, "[]");
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 34.30, 35.70, NETWORK_UUID, null, "[]");
         insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.APPROX, 15., 3., NETWORK_UUID, null, "[]");
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 14.55, 15.45, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testLoadFilter() throws Exception {
         insertInjectionFilter(EquipmentType.LOAD, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "LOAD", null, "P2", Set.of("FR"), RangeType.APPROX, 160., 10., NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
+            "LOAD", null, "P2", Set.of("FR"), RangeType.RANGE, 144., 176., NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
     }
 
     @Test
@@ -399,7 +399,7 @@ public class FilterEntityControllerTest {
     @Test
     public void testDanglingLineFilter() throws Exception {
         insertInjectionFilter(EquipmentType.DANGLING_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.APPROX, 150., 8., NETWORK_UUID, null, "[]");
+            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.RANGE, 138., 162., NETWORK_UUID, null, "[]");
     }
 
     @Test
@@ -437,13 +437,13 @@ public class FilterEntityControllerTest {
     public void testTwoWindingsTransformerFilter() throws Exception {
         List<RangeType> rangeTypes = new ArrayList<>();
         rangeTypes.add(RangeType.EQUALITY);
-        rangeTypes.add(RangeType.APPROX);
+        rangeTypes.add(RangeType.RANGE);
         List<Double> values1 = new ArrayList<>();
         values1.add(380.);
-        values1.add(150.);
+        values1.add(142.5);
         List<Double> values2 = new ArrayList<>();
         values2.add(null);
-        values2.add(5.);
+        values2.add(157.5);
 
         // with this network (EurostagTutorialExample1Factory::create), we have 2 2WT Transfos:
         // - NGEN_NHV1  term1: 24 kV term2: 380 kV
@@ -455,7 +455,7 @@ public class FilterEntityControllerTest {
 
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
-        // no eqpt/substation filter: only NHV2_NLOAD match because of APPROX filter
+        // no eqpt/substation filter: only NHV2_NLOAD match because of RANGE filter
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
                 null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
         // bad substationName
@@ -465,7 +465,7 @@ public class FilterEntityControllerTest {
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
             "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID, null, noMatch);
 
-        // change APPROX into "> 24"
+        // change RANGE into "> 24"
         rangeTypes.set(1, RangeType.GREATER_THAN);
         values1.set(1, 24.);
         values2.set(1, null);
@@ -520,7 +520,7 @@ public class FilterEntityControllerTest {
         List<RangeType> rangeTypes = new ArrayList<>();
         rangeTypes.add(RangeType.RANGE);
         rangeTypes.add(RangeType.EQUALITY);
-        rangeTypes.add(RangeType.APPROX);
+        rangeTypes.add(RangeType.EQUALITY);
         List<Double> values1 = new ArrayList<>();
         values1.add(127.);
         values1.add(33.);
@@ -528,7 +528,7 @@ public class FilterEntityControllerTest {
         List<Double> values2 = new ArrayList<>();
         values2.add(134.);
         values2.add(null);
-        values2.add(5.);
+        values2.add(null);
 
         // with this network (ThreeWindingsTransformerNetworkFactory.create), we have a single 3WT:
         // - 3WT  term1: 132 kV term2: 33 kV  term3: 11 kV

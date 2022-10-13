@@ -44,7 +44,6 @@ public class GenerateScriptFromFiltersTest {
                 "      && FiltersUtils.isLocatedIn(['ES','FR'], equipment.terminal1)\n" +
                 "      && FiltersUtils.isLocatedIn(['IT','PT'], equipment.terminal2)\n" +
                 "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1, 225.0, 250.0)\n" +
-                "      && FiltersUtils.isApproxNominalVoltage(equipment.terminal2, 385.0, 5.0)\n" +
                 "      && equipment.terminal1.voltageLevel.substation.name.equals('s1')\n" +
                 "      && equipment.terminal2.voltageLevel.substation.name.equals('s2')\n" +
                 "     ) {\n" +
@@ -63,7 +62,6 @@ public class GenerateScriptFromFiltersTest {
                         .countries1(new TreeSet<>(countries1))
                         .countries2(new TreeSet<>(countries2))
                         .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
-                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.APPROX).value1(385.).value2(5.).build())
                         .build())));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
@@ -168,7 +166,6 @@ public class GenerateScriptFromFiltersTest {
             "  if (\n" +
             "      (FiltersUtils.matchID('loadId1', equipment) || FiltersUtils.matchName('loadName1', equipment))\n" +
             "      && FiltersUtils.isLocatedIn(['IT'], equipment.terminal)\n" +
-            "      && FiltersUtils.isApproxNominalVoltage(equipment.terminal, 390.0, 5.0)\n" +
             "      && equipment.terminal.voltageLevel.substation.name.equals('s3')\n" +
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
@@ -182,7 +179,6 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentName("loadName1")
                     .substationName("s3")
                     .countries(new TreeSet<>(countries))
-                    .nominalVoltage(NumericalFilter.builder().type(RangeType.APPROX).value1(390.).value2(5.).build())
                     .build()))
         );
     }
@@ -243,7 +239,6 @@ public class GenerateScriptFromFiltersTest {
             "for (equipment in network.batteries) {\n" +
             "  if (\n" +
             "      (FiltersUtils.matchID('batteryId1', equipment) || FiltersUtils.matchName('batteryName1', equipment))\n" +
-            "      && FiltersUtils.isApproxNominalVoltage(equipment.terminal, 150.0, 5.0)\n" +
             "      && equipment.terminal.voltageLevel.substation.name.equals('s5')\n" +
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
@@ -256,7 +251,6 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentID("batteryId1")
                     .equipmentName("batteryName1")
                     .substationName("s5")
-                    .nominalVoltage(NumericalFilter.builder().type(RangeType.APPROX).value1(150.).value2(5.).build())
                     .build()))
         );
     }
@@ -407,7 +401,6 @@ public class GenerateScriptFromFiltersTest {
             "      && (FiltersUtils.isLocatedIn(['NL'], equipment.terminal1) || FiltersUtils.isLocatedIn(['NL'], equipment.terminal2) || FiltersUtils.isLocatedIn(['NL'], equipment.terminal3))\n" +
             "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1, 210.0, 230.0)\n" +
             "      && FiltersUtils.isEqualityNominalVoltage(equipment.terminal2, 150.0)\n" +
-            "      && FiltersUtils.isApproxNominalVoltage(equipment.terminal3, 380.0, 5.0)\n" +
             "      && (equipment.terminal1.voltageLevel.substation.name.equals('s3') || equipment.terminal2.voltageLevel.substation.name.equals('s3') || equipment.terminal3.voltageLevel.substation.name.equals('s3'))\n" +
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
@@ -423,7 +416,6 @@ public class GenerateScriptFromFiltersTest {
                 .countries(new TreeSet<>(countries))
                 .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(210.).value2(230.).build())
                 .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(150.).build())
-                .nominalVoltage3(NumericalFilter.builder().type(RangeType.APPROX).value1(380.).value2(5.).build())
                 .build()))
         );
     }

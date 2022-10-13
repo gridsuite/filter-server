@@ -55,12 +55,4 @@ public final class FiltersUtils {
     public static boolean isRangeNominalVoltage(Double nominalV, Double minValue, Double maxValue) {
         return (minValue == null || nominalV >= minValue) && (maxValue == null || nominalV <= maxValue);
     }
-
-    public static boolean isApproxNominalVoltage(Terminal terminal, Double value, Double percent) {
-        return isApproxNominalVoltage(terminal.getVoltageLevel().getNominalV(), value, percent);
-    }
-
-    public static boolean isApproxNominalVoltage(Double nominalV, Double value, Double percent) {
-        return (value == null || percent == null) || (nominalV >= (value - ((percent * value) / 100)) && nominalV <= (value + ((percent * value) / 100)));
-    }
 }

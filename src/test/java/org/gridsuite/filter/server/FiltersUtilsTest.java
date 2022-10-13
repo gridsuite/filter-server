@@ -65,8 +65,5 @@ public class FiltersUtilsTest {
 
         assertTrue(FiltersUtils.isRangeNominalVoltage(t1, 200., 250.));
         assertFalse(FiltersUtils.isRangeNominalVoltage(t1, 250., 300.));
-
-        assertTrue(FiltersUtils.isApproxNominalVoltage(t1, 230., 5.));
-        assertFalse(FiltersUtils.isApproxNominalVoltage(t1, 230., 2.));
     }
 }

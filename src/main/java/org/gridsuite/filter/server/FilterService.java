@@ -234,9 +234,6 @@ public class FilterService {
                 return equipmentNominalVoltage <= numericalFilter.getValue1();
             case RANGE:
                 return equipmentNominalVoltage >= numericalFilter.getValue1() && equipmentNominalVoltage <= numericalFilter.getValue2();
-            case APPROX:
-                return equipmentNominalVoltage >= (numericalFilter.getValue1() - (numericalFilter.getValue1() * numericalFilter.getValue2() / 100.))
-                    && equipmentNominalVoltage <= (numericalFilter.getValue1() + (numericalFilter.getValue1() * numericalFilter.getValue2() / 100.));
             default:
                 throw new PowsyblException("Unknown numerical filter type");
         }
