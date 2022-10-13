@@ -10,7 +10,10 @@ package org.gridsuite.filter.server.utils;
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
 public enum RangeType {
-    APPROX,
     EQUALITY,
-    RANGE
+    RANGE,
+    GREATER_THAN,
+    GREATER_OR_EQUAL,
+    LESS_THAN,
+    LESS_OR_EQUAL
 }

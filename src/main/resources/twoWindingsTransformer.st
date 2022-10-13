@@ -8,12 +8,10 @@ for (equipment in network.<collectionName>) {
       <if(countries)>(FiltersUtils.isLocatedIn(<countries>, equipment.terminal1) || FiltersUtils.isLocatedIn(<countries>, equipment.terminal2))<endif>
       <if((equipmentId || equipmentName || countries) && nominalV1Type)>&& <endif><\\>
       <if(nominalV1Equality)>FiltersUtils.isEqualityNominalVoltage(equipment.terminal1, <nominalV1>)<endif><\\>
-      <if(nominalV1Range)>FiltersUtils.isRangeNominalVoltage(equipment.terminal1, <minNominalV1>, <maxNominalV1>)<endif><\\>
-      <if(nominalV1Approx)>FiltersUtils.isApproxNominalVoltage(equipment.terminal1, <nominalV1>, <percentNominalV1>)<endif>
+      <if(nominalV1Range)>FiltersUtils.isRangeNominalVoltage(equipment.terminal1, <minNominalV1>, <maxNominalV1>)<endif>
       <if((equipmentId || equipmentName || countries || nominalV1Type) && nominalV2Type)>&& <endif><\\>
       <if(nominalV2Equality)>FiltersUtils.isEqualityNominalVoltage(equipment.terminal2, <nominalV2>)<endif><\\>
-      <if(nominalV2Range)>FiltersUtils.isRangeNominalVoltage(equipment.terminal2, <minNominalV2>, <maxNominalV2>)<endif><\\>
-      <if(nominalV2Approx)>FiltersUtils.isApproxNominalVoltage(equipment.terminal2, <nominalV2>, <percentNominalV2>)<endif>
+      <if(nominalV2Range)>FiltersUtils.isRangeNominalVoltage(equipment.terminal2, <minNominalV2>, <maxNominalV2>)<endif>
       <if((equipmentId || equipmentName || countries || nominalV1Type || nominalV2Type) && substationName)>&& <endif><\\>
       <if(substationName)>(equipment.terminal1.voltageLevel.substation.name.equals('<substationName>') || equipment.terminal2.voltageLevel.substation.name.equals('<substationName>'))<endif>
      <if(noEmptyFilter)>) {<endif>
