@@ -63,10 +63,6 @@ public class FiltersToGroovyScript {
             template.add(NOMINAL_V + indexStr + "Range", "true");
             template.add("minNominalV" + indexStr, filter.getValue1() != null ? filter.getValue1() : "null");
             template.add("maxNominalV" + indexStr, filter.getValue2() != null ? filter.getValue2() : "null");
-        } else if (filter.getType() == RangeType.APPROX) {
-            template.add(NOMINAL_V + indexStr + "Approx", "true");
-            template.add(NOMINAL_V + indexStr, filter.getValue1() != null ? filter.getValue1() : "null");
-            template.add("percentNominalV" + indexStr, filter.getValue2() != null ? filter.getValue2() : "null");
         }
     }
 

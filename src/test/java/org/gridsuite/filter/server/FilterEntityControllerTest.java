@@ -16,6 +16,7 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.Country;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.VariantManagerConstants;
 import com.powsybl.iidm.network.test.EurostagTutorialExample1Factory;
@@ -87,6 +88,8 @@ public class FilterEntityControllerTest {
     private MockMvc mvc;
 
     private Network network;
+    private Network network2;
+    private Network network6;
 
     @Autowired
     private FilterService filterService;
@@ -105,6 +108,7 @@ public class FilterEntityControllerTest {
     private static final UUID NETWORK_UUID_3 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e6");
     private static final UUID NETWORK_UUID_4 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e7");
     private static final UUID NETWORK_UUID_5 = UUID.fromString("11111111-7977-4592-2222-88027e4254e7");
+    private static final UUID NETWORK_UUID_6 = UUID.fromString("11111111-7977-4592-2222-88027e4254e8");
     private static final UUID NETWORK_NOT_FOUND_UUID = UUID.fromString("88888888-7977-3333-9999-88027e4254e7");
     private static final String VARIANT_ID_1 = "variant_1";
 
@@ -124,15 +128,17 @@ public class FilterEntityControllerTest {
         network.getGenerator("GEN2").remove();
         network.getVariantManager().setWorkingVariant(VariantManagerConstants.INITIAL_VARIANT_ID);
 
-        Network network2 = HvdcTestNetwork.createVsc(new NetworkFactoryImpl());
+        network2 = HvdcTestNetwork.createVsc(new NetworkFactoryImpl());
         Network network3 = SvcTestCaseFactory.createWithMoreSVCs(new NetworkFactoryImpl());
         Network network4 = ShuntTestCaseFactory.create(new NetworkFactoryImpl());
         Network network5 = ThreeWindingsTransformerNetworkFactory.create(new NetworkFactoryImpl());
+        network6 = EurostagTutorialExample1Factory.createWithFixedCurrentLimits(new NetworkFactoryImpl());
         given(networkStoreService.getNetwork(NETWORK_UUID, PreloadingStrategy.COLLECTION)).willReturn(network);
         given(networkStoreService.getNetwork(NETWORK_UUID_2, PreloadingStrategy.COLLECTION)).willReturn(network2);
         given(networkStoreService.getNetwork(NETWORK_UUID_3, PreloadingStrategy.COLLECTION)).willReturn(network3);
         given(networkStoreService.getNetwork(NETWORK_UUID_4, PreloadingStrategy.COLLECTION)).willReturn(network4);
         given(networkStoreService.getNetwork(NETWORK_UUID_5, PreloadingStrategy.COLLECTION)).willReturn(network5);
+        given(networkStoreService.getNetwork(NETWORK_UUID_6, PreloadingStrategy.COLLECTION)).willReturn(network6);
         given(networkStoreService.getNetwork(NETWORK_NOT_FOUND_UUID, PreloadingStrategy.COLLECTION)).willReturn(null);
 
         Configuration.setDefaults(new Configuration.Defaults() {
@@ -170,19 +176,16 @@ public class FilterEntityControllerTest {
     public void testLineFilter() throws Exception {
         UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
-
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
-        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.APPROX, 375., 5.));
-
+        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
         FormFilter lineFormFilter = new FormFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
                 lineFilter
         );
-
         insertFilter(filterId1, lineFormFilter);
         checkFormFilter(filterId1, lineFormFilter);
 
@@ -221,13 +224,10 @@ public class FilterEntityControllerTest {
                         new NumericalFilter(RangeType.RANGE, 50., null)
                 )
         );
-
         modifyFormFilter(filterId1, hvdcLineFormFilter);
-
         checkFormFilter(filterId1, hvdcLineFormFilter);
 
         ScriptFilter scriptFilter = new ScriptFilter(filterId2, creationDate, modificationDate, "test");
-
         insertFilter(filterId2, scriptFilter);
         checkScriptFilter(filterId2, scriptFilter);
 
@@ -275,6 +275,16 @@ public class FilterEntityControllerTest {
         assertEquals(1, filterAttributes.size());
         matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, creationDate, modificationDate);
 
+        // update with same type filter
+        AbstractFilter generatorFormFilter2 = new FormFilter(
+                filterId1,
+                creationDate,
+                modificationDate,
+                new GeneratorFilter(new InjectionFilterAttributes("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null))
+                )
+        );
+        modifyFormFilter(filterId1, generatorFormFilter2);
+
         // delete
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
 
@@ -283,6 +293,64 @@ public class FilterEntityControllerTest {
         mvc.perform(get(URL_TEMPLATE + filterId2)).andExpect(status().isNotFound());
 
         mvc.perform(put(URL_TEMPLATE + filterId2).contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(scriptFilter))).andExpect(status().isNotFound());
+
+        filterService.deleteAll();
+    }
+
+    @Test
+    public void testLineFilter2() throws Exception {
+        UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
+        UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+
+        // a 2-country network (one substation FR, one BE)
+        final double p2NominalVoltage = 63.;
+        network6.getLine("NHV1_NHV2_2").getTerminal2().getVoltageLevel().setNominalV(p2NominalVoltage); // patch just for better coverage
+        final String noMatch = "[]";
+        final String bothMatch = "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\"},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\"}]";
+
+        List<RangeType> rangeTypes = new ArrayList<>();
+        rangeTypes.add(RangeType.EQUALITY);
+        List<Double> values1 = new ArrayList<>();
+        values1.add(p2NominalVoltage);
+        List<Double> values2 = new ArrayList<>();
+        values2.add(null);
+
+        FormFilter lineFormFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, false);
+
+        // update form filter <-> script filter (rejected)
+        ScriptFilter scriptFilter = new ScriptFilter(filterId4, creationDate, modificationDate, "test");
+        insertFilter(filterId4, scriptFilter);
+        checkScriptFilter(filterId4, scriptFilter);
+        assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId3)
+                .content(objectMapper.writeValueAsString(scriptFilter))
+                .contentType(APPLICATION_JSON)));
+        assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId4)
+                .content(objectMapper.writeValueAsString(lineFormFilterBEFR))
+                .contentType(APPLICATION_JSON)));
+
+        mvc.perform(delete(URL_TEMPLATE + filterId3)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + filterId4)).andExpect(status().isOk());
+
+        // more country filters
+        rangeTypes.add(RangeType.GREATER_OR_EQUAL);
+        rangeTypes.set(0, RangeType.GREATER_OR_EQUAL);
+        values1.set(0, 0.);
+        values1.add(0.);
+        values2.add(null);
+        insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, true);
+
+        network6.getSubstation("P2").setCountry(Country.FR);
+        insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("IT")), new TreeSet<>(Set.of("FR")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, noMatch, true);
+        insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of()), new TreeSet<>(Set.of("IT")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, noMatch, true);
+        network6.getSubstation("P1").setCountry(Country.IT);
+        insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("IT")),
+                rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, true);
 
         filterService.deleteAll();
     }
@@ -306,15 +374,15 @@ public class FilterEntityControllerTest {
         insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
             "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 27., 30., NETWORK_UUID, null, "[]");
         insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.APPROX, 35., 2., NETWORK_UUID, null, "[]");
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 34.30, 35.70, NETWORK_UUID, null, "[]");
         insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.APPROX, 15., 3., NETWORK_UUID, null, "[]");
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 14.55, 15.45, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testLoadFilter() throws Exception {
         insertInjectionFilter(EquipmentType.LOAD, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "LOAD", null, "P2", Set.of("FR"), RangeType.APPROX, 160., 10., NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
+            "LOAD", null, "P2", Set.of("FR"), RangeType.RANGE, 144., 176., NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
     }
 
     @Test
@@ -344,7 +412,7 @@ public class FilterEntityControllerTest {
     @Test
     public void testDanglingLineFilter() throws Exception {
         insertInjectionFilter(EquipmentType.DANGLING_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.APPROX, 150., 8., NETWORK_UUID, null, "[]");
+            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.RANGE, 138., 162., NETWORK_UUID, null, "[]");
     }
 
     @Test
@@ -361,36 +429,103 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testHvdcLineFilter() throws Exception {
+        final String noMatch = "[]";
+        final String matchHVDCLine = "[{\"id\":\"L\",\"type\":\"HVDC_LINE\"}]";
         insertHvdcLineFilter(UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            null, "HVDC", "S1", "S2", new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of("FR", "IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, "[{\"id\":\"L\",\"type\":\"HVDC_LINE\"}]");
+            null, "HVDC", "S1", "S2", new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of("FR", "IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, matchHVDCLine);
         insertHvdcLineFilter(UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            null, "HVDC", "S1", "substationNameNotFound", new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of("FR", "IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, "[]");
+            null, "HVDC", "S1", "substationNameNotFound", new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of("FR", "IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, noMatch);
         insertHvdcLineFilter(UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            null, "HVDC", "substationNameNotFound", "S1", new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of("FR", "IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, "[]");
+            null, "HVDC", "substationNameNotFound", "S1", new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of("FR", "IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, noMatch);
         insertHvdcLineFilter(UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            null, "HVDC", "S1", "S2", new TreeSet<>(Set.of("IT")), new TreeSet<>(Set.of("FR")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, "[]");
+            null, "HVDC", "S1", "S2", new TreeSet<>(Set.of("IT")), new TreeSet<>(Set.of("FR")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, noMatch);
         insertHvdcLineFilter(UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            null, "HVDC", "S1", "S2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, "[]");
+                null, "HVDC", "S1", "S2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, noMatch);
+        network2.getSubstation("S1").setCountry(Country.IT);
+        insertHvdcLineFilter(UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+            null, "HVDC", "S1", "S2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("IT")), RangeType.RANGE, 380., 420., NETWORK_UUID_2, null, matchHVDCLine);
     }
 
     @Test
     public void testTwoWindingsTransformerFilter() throws Exception {
         List<RangeType> rangeTypes = new ArrayList<>();
         rangeTypes.add(RangeType.EQUALITY);
-        rangeTypes.add(RangeType.APPROX);
+        rangeTypes.add(RangeType.RANGE);
         List<Double> values1 = new ArrayList<>();
         values1.add(380.);
-        values1.add(150.);
+        values1.add(142.5);
         List<Double> values2 = new ArrayList<>();
         values2.add(null);
-        values2.add(5.);
+        values2.add(157.5);
+
+        // with this network (EurostagTutorialExample1Factory::create), we have 2 2WT Transfos:
+        // - NGEN_NHV1  term1: 24 kV term2: 380 kV
+        // - NHV2_NLOAD term1: 380 kV term2: 150 kV
+        final String noMatch = "[]";
+        final String matchNHV2NLOAD = "[{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]";
+        final String matchNGENNHV1 = "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]";
+        final String bothMatch = "[{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"},{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]";
 
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, "[{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]");
+            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
+        // no eqpt/substation filter: only NHV2_NLOAD match because of RANGE filter
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "substationNameNotFound", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, "[]");
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
+        // bad substationName
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID, null, "[]");
+            "NHV2_NLOAD", "NHV2_NLOAD", "substationNameNotFound", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, noMatch);
+        // this network has only FR substations: IT does not match:
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID, null, noMatch);
+
+        // change RANGE into "> 24"
+        rangeTypes.set(1, RangeType.GREATER_THAN);
+        values1.set(1, 24.);
+        values2.set(1, null);
+        // NGEN_NHV1 still does not match
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
+
+        // change "> 24" into ">= 24"
+        rangeTypes.set(1, RangeType.GREATER_OR_EQUAL);
+        // both transfos now match both filters
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, bothMatch);
+
+        // change "== 380" into ">= 0"
+        // change ">= 24" into "< 380"
+        rangeTypes.set(0, RangeType.GREATER_OR_EQUAL);
+        values1.set(0, 0.);
+        rangeTypes.set(1, RangeType.LESS_THAN);
+        values1.set(1, 380.);
+        // both match
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, bothMatch);
+        // add substation filter on P1 => NGENNHV1
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, "P1", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNGENNHV1);
+        // add substation filter on P2 => NHV2NLOAD
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, "P2", Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNHV2NLOAD);
+
+        // change "< 380" into "< 150"
+        values1.set(1, 150.);
+        // only NGEN_NHV1 match
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, matchNGENNHV1);
+
+        // change "< 150" into "<= 150"
+        rangeTypes.set(1, RangeType.LESS_OR_EQUAL);
+        // both match
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, bothMatch);
+
+        // change ">=0" into "> 400"
+        rangeTypes.set(0, RangeType.GREATER_OR_EQUAL);
+        values1.set(0, 400.);
+        // [400..150] not possible
+        insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR"), rangeTypes, values1, values2, NETWORK_UUID, null, noMatch);
     }
 
     @Test
@@ -398,22 +533,93 @@ public class FilterEntityControllerTest {
         List<RangeType> rangeTypes = new ArrayList<>();
         rangeTypes.add(RangeType.RANGE);
         rangeTypes.add(RangeType.EQUALITY);
-        rangeTypes.add(RangeType.APPROX);
+        rangeTypes.add(RangeType.EQUALITY);
         List<Double> values1 = new ArrayList<>();
         values1.add(127.);
         values1.add(33.);
-        values1.add(14.);
+        values1.add(11.);
         List<Double> values2 = new ArrayList<>();
         values2.add(134.);
         values2.add(null);
-        values2.add(30.);
+        values2.add(null);
+
+        // with this network (ThreeWindingsTransformerNetworkFactory.create), we have a single 3WT:
+        // - 3WT  term1: 132 kV term2: 33 kV  term3: 11 kV
+        final String noMatch = "[]";
+        final String match3WT = "[{\"id\":\"3WT\",\"type\":\"THREE_WINDINGS_TRANSFORMER\"}]";
 
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "3WT", null, "SUBSTATION", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, "[{\"id\":\"3WT\",\"type\":\"THREE_WINDINGS_TRANSFORMER\"}]");
+            "3WT", null, "SUBSTATION", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // same without eqpt / sybstation
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "3WT", null, "substationNameNotFound", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, "[]");
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // bad substationName
         insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "3WT", null, "SUBSTATION", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID_5, null, "[]");
+            "3WT", null, "substationNameNotFound", Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+        // IT does not match
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+            "3WT", null, "SUBSTATION", Set.of("IT"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+
+        // Current filters have covered OR #1/6 in get3WTransformerList
+
+        // variant to increase coverage
+        values1.set(2, 500.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+
+        // Update filters to cover OR #2/6
+        values1.set(1, 11.);
+        values1.set(2, 33.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // variant to increase coverage
+        values1.set(2, 500.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+
+        // Update filters to cover OR #3/6
+        values1.set(0, 33.);
+        values2.set(0, 33.);
+        values1.set(1, 132.);
+        values1.set(2, 11.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // variant to increase coverage
+        values1.set(2, 500.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+
+        // Update filters to cover OR #4/6
+        values1.set(1, 11.);
+        values1.set(2, 132.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // variant to increase coverage
+        values1.set(2, 500.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+
+        // Update filters to cover OR #5/6
+        values1.set(0, 10.);
+        values2.set(0, 12.);
+        values1.set(1, 132.);
+        values1.set(2, 33.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // variant to increase coverage
+        values1.set(2, 500.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
+
+        // Update filters to cover OR #6/6
+        values1.set(1, 33.);
+        values1.set(2, 132.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, match3WT);
+        // variant to increase coverage
+        values1.set(2, 500.);
+        insertTransformerFilter(EquipmentType.THREE_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
+                null, null, null, Set.of("FR", "CH"), rangeTypes, values1, values2, NETWORK_UUID_5, null, noMatch);
     }
 
     @Test
@@ -707,6 +913,52 @@ public class FilterEntityControllerTest {
                 });
 
         assertEquals(0, filterAttributes.size());
+    }
+
+    private FormFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
+                                         String substationName, Set<String> countries1, Set<String> countries2,
+                                         List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
+                                         UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
+        NumericalFilter numericalFilter1 = null;
+        if (rangeTypes.size() >= 1) {
+            numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
+        }
+        NumericalFilter numericalFilter2 = null;
+        if (rangeTypes.size() == 2) {
+            numericalFilter2 = new NumericalFilter(rangeTypes.get(1), values1.get(1), values2.get(1));
+        }
+        AbstractEquipmentFilterForm equipmentFilterForm = new LineFilter(equipmentID, equipmentName, null, substationName, AbstractFilterRepositoryProxy.setToSorterSet(countries1), AbstractFilterRepositoryProxy.setToSorterSet(countries2), numericalFilter1, numericalFilter2);
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+        FormFilter filter = new FormFilter(
+                id,
+                creationDate,
+                modificationDate,
+                equipmentFilterForm
+        );
+        insertFilter(id, filter);
+        checkFormFilter(id, filter);
+        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertEquals(1, filterAttributes.size());
+        assertEquals(id, filterAttributes.get(0).getId());
+        assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
+
+        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonExport));
+        if (delete) {
+            mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+        }
+        return filter;
     }
 
     private void checkFormFilter(UUID filterId, FormFilter formFilter) throws Exception {
