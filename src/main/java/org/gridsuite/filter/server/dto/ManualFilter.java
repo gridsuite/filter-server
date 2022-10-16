@@ -30,8 +30,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ManualFilter extends AbstractFilter {
 
-    EquipmentType equipmentType;
-    List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes;
+    private EquipmentType equipmentType;
+    private List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes;
 
     public ManualFilter(UUID id,
                         Date creationDate,
@@ -47,9 +47,5 @@ public class ManualFilter extends AbstractFilter {
     @Override
     public FilterType getType() {
         return FilterType.MANUAL;
-    }
-
-    public EquipmentType getEquipmentType() {
-        return equipmentType;
     }
 }
