@@ -948,7 +948,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
+        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
                         .contentType(APPLICATION_JSON))
