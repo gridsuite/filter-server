@@ -26,11 +26,11 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
-public class FormFilter extends AbstractFilter {
+public class AutomaticFilter extends AbstractFilter {
 
     private AbstractEquipmentFilterForm equipmentFilterForm;
 
-    public FormFilter(UUID id, Date creationDate, Date modificationDate, AbstractEquipmentFilterForm equipmentFilterForm) {
+    public AutomaticFilter(UUID id, Date creationDate, Date modificationDate, AbstractEquipmentFilterForm equipmentFilterForm) {
         super(id, creationDate, modificationDate);
         this.equipmentFilterForm = equipmentFilterForm;
     }

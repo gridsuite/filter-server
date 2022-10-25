@@ -56,15 +56,15 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
 
     @Override
     public ThreeWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
-        FormFilter formFilter = toFormFilter(dto, ThreeWindingsTransformerFilter.class);
-        ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
+        AutomaticFilter automaticFilter = toFormFilter(dto, ThreeWindingsTransformerFilter.class);
+        ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
         var threeWindingsTransformerFilterEntityBuilder =   ThreeWindingsTransformerFilterEntity.builder()
             .countries(threeWindingsTransformerFilter.getCountries())
             .substationName(threeWindingsTransformerFilter.getSubstationName())
             .nominalVoltage1(convert(threeWindingsTransformerFilter.getNominalVoltage1()))
             .nominalVoltage2(convert(threeWindingsTransformerFilter.getNominalVoltage2()))
             .nominalVoltage3(convert(threeWindingsTransformerFilter.getNominalVoltage3()));
-        buildGenericFilter(threeWindingsTransformerFilterEntityBuilder, formFilter);
+        buildGenericFilter(threeWindingsTransformerFilterEntityBuilder, automaticFilter);
         return threeWindingsTransformerFilterEntityBuilder.build();
     }
 }

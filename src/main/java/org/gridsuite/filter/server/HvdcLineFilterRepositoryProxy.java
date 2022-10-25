@@ -56,15 +56,15 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
 
     @Override
     public HvdcLineFilterEntity fromDto(AbstractFilter dto) {
-        FormFilter formFilter = toFormFilter(dto, HvdcLineFilter.class);
-        HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) formFilter.getEquipmentFilterForm();
+        AutomaticFilter automaticFilter = toFormFilter(dto, HvdcLineFilter.class);
+        HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) automaticFilter.getEquipmentFilterForm();
         var hvdcLineFilterEntityBuilder = HvdcLineFilterEntity.builder()
             .countries1(hvdcLineFilter.getCountries1())
             .countries2(hvdcLineFilter.getCountries2())
             .nominalVoltage(convert(hvdcLineFilter.getNominalVoltage()))
             .substationName1(hvdcLineFilter.getSubstationName1())
             .substationName2(hvdcLineFilter.getSubstationName2());
-        buildGenericFilter(hvdcLineFilterEntityBuilder, formFilter);
+        buildGenericFilter(hvdcLineFilterEntityBuilder, automaticFilter);
         return hvdcLineFilterEntityBuilder.build();
     }
 }
