@@ -27,7 +27,7 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override
@@ -57,8 +57,8 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
 
     @Override
     public LineFilterEntity fromDto(AbstractFilter dto) {
-        FormFilter formFilter = toFormFilter(dto, LineFilter.class);
-        LineFilter lineFilter = (LineFilter) formFilter.getEquipmentFilterForm();
+        AutomaticFilter automaticFilter = toFormFilter(dto, LineFilter.class);
+        LineFilter lineFilter = (LineFilter) automaticFilter.getEquipmentFilterForm();
         var lineFilterEntityBuilder =    LineFilterEntity.builder()
             .countries1(lineFilter.getCountries1())
             .countries2(lineFilter.getCountries2())
@@ -66,7 +66,7 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
             .nominalVoltage2(convert(lineFilter.getNominalVoltage2()))
             .substationName1(lineFilter.getSubstationName1())
             .substationName2(lineFilter.getSubstationName2());
-        buildGenericFilter(lineFilterEntityBuilder, formFilter);
+        buildGenericFilter(lineFilterEntityBuilder, automaticFilter);
         return lineFilterEntityBuilder.build();
     }
 }

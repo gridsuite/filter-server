@@ -10,7 +10,6 @@ import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
-import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
@@ -20,6 +19,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -60,6 +60,7 @@ public class FilterService {
                          final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository,
                          final ThreeWindingsTransformerFilterRepository threeWindingsTransformerFilterRepository,
                          final HvdcLineFilterRepository hvdcLineFilterRepository,
+                         final ManualFilterRepository manualFilterRepository,
                          NetworkStoreService networkStoreService) {
         this.filtersToScript = filtersToScript;
 
@@ -78,6 +79,8 @@ public class FilterService {
         filterRepositories.put(EquipmentType.HVDC_LINE.name(), new HvdcLineFilterRepositoryProxy(hvdcLineFilterRepository));
 
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
+
+        filterRepositories.put(FilterType.MANUAL.name(), new ManualFilterRepositoryProxy(manualFilterRepository));
 
         this.networkStoreService = networkStoreService;
     }
@@ -122,10 +125,10 @@ public class FilterService {
     }
 
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
-        if (filter.getType().equals(FilterType.SCRIPT)) {
-            return filterRepositories.get(FilterType.SCRIPT.name());
+        if (!filter.getType().equals(FilterType.AUTOMATIC)) {
+            return filterRepositories.get(filter.getType().name());
         }
-        return filterRepositories.get(((FormFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
+        return filterRepositories.get(((AutomaticFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
     }
 
     @Transactional
@@ -239,7 +242,7 @@ public class FilterService {
         }
     }
 
-    private <I extends Injection<I>> Stream<Injection<I>> getInjectionList(Stream<Injection<I>> stream, FormFilter filter) {
+    private <I extends Injection<I>> Stream<Injection<I>> getInjectionList(Stream<Injection<I>> stream, AutomaticFilter filter) {
         AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) filter.getEquipmentFilterForm();
         return stream
             .filter(injection -> equipmentIdFilter(injection, injectionFilter.getEquipmentID()))
@@ -249,23 +252,23 @@ public class FilterService {
             .filter(injection -> substationNameFilter(injection.getTerminal(), injectionFilter.getSubstationName()));
     }
 
-    private List<Identifiable<?>> getGeneratorList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getGeneratorList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getGeneratorStream().map(gen -> gen), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getLoadList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getLoadList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getLoadStream().map(load -> load), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getBatteryList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getBatteryList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getBatteryStream().map(battery -> battery), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getStaticVarCompensatorList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getStaticVarCompensatorList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getStaticVarCompensatorStream().map(svc -> svc), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getShuntCompensatorList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getShuntCompensatorList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getShuntCompensatorStream().map(sc -> sc), filter).collect(Collectors.toList());
     }
 
@@ -330,7 +333,7 @@ public class FilterService {
             filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage3());
     }
 
-    private List<Identifiable<?>> getLineList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getLineList(Network network, AutomaticFilter filter) {
         LineFilter lineFilter = (LineFilter) filter.getEquipmentFilterForm();
         return network.getLineStream()
             .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
@@ -342,7 +345,7 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> get2WTransformerList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> get2WTransformerList(Network network, AutomaticFilter filter) {
         TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) filter.getEquipmentFilterForm();
         return network.getTwoWindingsTransformerStream()
             .filter(twoWindingsTransformer -> equipmentIdFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentID()))
@@ -355,7 +358,7 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> get3WTransformerList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> get3WTransformerList(Network network, AutomaticFilter filter) {
         ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) filter.getEquipmentFilterForm();
         return network.getThreeWindingsTransformerStream()
             .filter(threeWindingsTransformer -> equipmentIdFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentID()))
@@ -370,7 +373,7 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getHvdcList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getHvdcList(Network network, AutomaticFilter filter) {
         HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) filter.getEquipmentFilterForm();
         return network.getHvdcLineStream()
             .filter(hvdcLine -> equipmentIdFilter(hvdcLine, hvdcLineFilter.getEquipmentID()))
@@ -382,23 +385,23 @@ public class FilterService {
             .collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getDanglingLineList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getDanglingLineList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getDanglingLineStream().map(dl -> dl), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getLccConverterStationList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getLccConverterStationList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getLccConverterStationStream().map(lcc -> lcc), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getVscConverterStationList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getVscConverterStationList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getVscConverterStationStream().map(vsc -> vsc), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getBusbarSectionList(Network network, FormFilter filter) {
+    private List<Identifiable<?>> getBusbarSectionList(Network network, AutomaticFilter filter) {
         return getInjectionList(network.getBusbarSectionStream().map(bbs -> bbs), filter).collect(Collectors.toList());
     }
 
-    private List<Identifiable<?>> getIdentifiables(FormFilter filter, Network network) {
+    private List<Identifiable<?>> getIdentifiables(AutomaticFilter filter, Network network) {
         List<Identifiable<?>> identifiables;
         switch (filter.getEquipmentFilterForm().getEquipmentType()) {
             case GENERATOR:
@@ -447,8 +450,8 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
-        if (filter instanceof FormFilter) {
-            FormFilter formFilter = (FormFilter) filter;
+        if (filter instanceof AutomaticFilter) {
+            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
 
             Network network;
             network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
@@ -459,7 +462,7 @@ public class FilterService {
                 network.getVariantManager().setWorkingVariant(variantId);
             }
 
-            return getIdentifiables(formFilter, network);
+            return getIdentifiables(automaticFilter, network);
         } else {
             throw new PowsyblException("Filter implementation not yet supported: " + filter.getClass().getSimpleName());
         }

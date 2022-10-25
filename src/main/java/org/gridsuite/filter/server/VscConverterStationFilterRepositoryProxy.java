@@ -28,7 +28,7 @@ public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepo
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override

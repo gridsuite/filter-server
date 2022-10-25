@@ -47,14 +47,27 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.util.NestedServletException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -167,14 +180,14 @@ public class FilterEntityControllerTest {
         Date modificationDate = new Date();
 
         LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
-        FormFilter lineFormFilter = new FormFilter(
+        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
                 lineFilter
         );
-        insertFilter(filterId1, lineFormFilter);
-        checkFormFilter(filterId1, lineFormFilter);
+        insertFilter(filterId1, lineAutomaticFilter);
+        checkFormFilter(filterId1, lineAutomaticFilter);
 
         // export
         assertThrows("Network '" + NETWORK_NOT_FOUND_UUID + "' not found", NestedServletException.class, () -> mvc.perform(get(URL_TEMPLATE + filterId1 + "/export?networkUuid=" + NETWORK_NOT_FOUND_UUID)
@@ -197,7 +210,7 @@ public class FilterEntityControllerTest {
         Date dateCreation = filterAttributes.get(0).getCreationDate();
         Date dateModification = filterAttributes.get(0).getModificationDate();
 
-        FormFilter hvdcLineFormFilter = new FormFilter(
+        AutomaticFilter hvdcLineAutomaticFilter = new AutomaticFilter(
                 filterId1,
                 dateCreation,
                 dateModification,
@@ -211,8 +224,8 @@ public class FilterEntityControllerTest {
                         new NumericalFilter(RangeType.RANGE, 50., null)
                 )
         );
-        modifyFormFilter(filterId1, hvdcLineFormFilter);
-        checkFormFilter(filterId1, hvdcLineFormFilter);
+        modifyFormFilter(filterId1, hvdcLineAutomaticFilter);
+        checkFormFilter(filterId1, hvdcLineAutomaticFilter);
 
         ScriptFilter scriptFilter = new ScriptFilter(filterId2, creationDate, modificationDate, "test");
         insertFilter(filterId2, scriptFilter);
@@ -228,7 +241,7 @@ public class FilterEntityControllerTest {
             Collections.reverse(filterAttributes);
         }
 
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, creationDate, modificationDate);
         matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, creationDate, modificationDate);
 
         filterAttributes = objectMapper.readValue(
@@ -239,10 +252,10 @@ public class FilterEntityControllerTest {
             new TypeReference<>() {
             });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, creationDate, modificationDate);
 
         // test replace line filter with other filter type
-        AbstractFilter generatorFormFilter = new FormFilter(
+        AbstractFilter generatorFormFilter = new AutomaticFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
@@ -260,10 +273,10 @@ public class FilterEntityControllerTest {
             new TypeReference<>() {
             });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, creationDate, modificationDate);
 
         // update with same type filter
-        AbstractFilter generatorFormFilter2 = new FormFilter(
+        AbstractFilter generatorFormFilter2 = new AutomaticFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
@@ -304,7 +317,7 @@ public class FilterEntityControllerTest {
         List<Double> values2 = new ArrayList<>();
         values2.add(null);
 
-        FormFilter lineFormFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
+        AutomaticFilter lineAutomaticFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
                 rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, false);
 
         // update form filter <-> script filter (rejected)
@@ -315,7 +328,7 @@ public class FilterEntityControllerTest {
                 .content(objectMapper.writeValueAsString(scriptFilter))
                 .contentType(APPLICATION_JSON)));
         assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId4)
-                .content(objectMapper.writeValueAsString(lineFormFilterBEFR))
+                .content(objectMapper.writeValueAsString(lineAutomaticFilterBEFR))
                 .contentType(APPLICATION_JSON)));
 
         mvc.perform(delete(URL_TEMPLATE + filterId3)).andExpect(status().isOk());
@@ -619,22 +632,22 @@ public class FilterEntityControllerTest {
 
         LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
 
-        FormFilter lineFormFilter = new FormFilter(
+        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
                 lineFilter
         );
 
-        insertFilter(filterId1, lineFormFilter);
-        checkFormFilter(filterId1, lineFormFilter);
+        insertFilter(filterId1, lineAutomaticFilter);
+        checkFormFilter(filterId1, lineAutomaticFilter);
 
         // new script from filter
         mvc.perform(post(URL_TEMPLATE + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"type\":\"FORM\"}, {\"type\":\"SCRIPT\"}]"));
+            .andExpect(content().json("[{\"type\":\"AUTOMATIC\"}, {\"type\":\"SCRIPT\"}]"));
 
         // replace filter with script
         mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
@@ -665,15 +678,28 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
         LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
-        FormFilter lineFormFilter = new FormFilter(
+        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
                 lineFilter
         );
-        insertFilter(filterId1, lineFormFilter);
+        insertFilter(filterId1, lineAutomaticFilter);
         mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId1 + "&id=" + UUID.randomUUID())).andExpect(status().isOk());
-        checkFormFilter(filterId1, lineFormFilter);
+        checkFormFilter(filterId1, lineAutomaticFilter);
+    }
+
+    @Test
+    public void testManualFilter() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+        ManualFilterEquipmentAttributes attributes1 = new ManualFilterEquipmentAttributes("line1", null);
+        ManualFilterEquipmentAttributes attributes2 = new ManualFilterEquipmentAttributes("line2", null);
+
+        ManualFilter manualFilter = new ManualFilter(filterId, creationDate, modificationDate, EquipmentType.LINE, List.of(attributes1, attributes2));
+        insertFilter(filterId, manualFilter);
+        checkManualFilter(filterId, manualFilter);
     }
 
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
@@ -691,14 +717,14 @@ public class FilterEntityControllerTest {
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
         String modifiedFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
-        FormFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, FormFilter.class);
+        AutomaticFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, AutomaticFilter.class);
         checkFormFilter(filterId, modifiedFilter);
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
         MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
-        modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), FormFilter.class);
+        modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), AutomaticFilter.class);
         checkFormFilter(filterId, modifiedFilter);
     }
 
@@ -743,7 +769,7 @@ public class FilterEntityControllerTest {
             default:
                 throw new PowsyblException("Equipment type not allowed");
         }
-        FormFilter injectionFilter = new FormFilter(
+        AutomaticFilter injectionFilter = new AutomaticFilter(
                 id,
                 creationDate,
                 modificationDate,
@@ -765,7 +791,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
+        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -794,7 +820,7 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
-        FormFilter transformerFilter = new FormFilter(
+        AutomaticFilter transformerFilter = new AutomaticFilter(
                 id,
                 creationDate,
                 modificationDate,
@@ -814,7 +840,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
+        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -831,7 +857,7 @@ public class FilterEntityControllerTest {
                                       UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
         Date creationDate = new Date();
         Date modificationDate = new Date();
-        FormFilter hvdcLineFilter = new FormFilter(
+        AutomaticFilter hvdcLineFilter = new AutomaticFilter(
                 id,
                 creationDate,
                 modificationDate,
@@ -857,7 +883,7 @@ public class FilterEntityControllerTest {
                 new TypeReference<>() {
                 });
         assertEquals(1, filters.size());
-        matchFilterInfos(filters.get(0), id, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filters.get(0), id, FilterType.AUTOMATIC, creationDate, modificationDate);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
@@ -868,7 +894,7 @@ public class FilterEntityControllerTest {
             });
 
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), id, FilterType.FORM, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), id, FilterType.AUTOMATIC, creationDate, modificationDate);
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -889,10 +915,10 @@ public class FilterEntityControllerTest {
         assertEquals(0, filterAttributes.size());
     }
 
-    private FormFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
-                                         String substationName, Set<String> countries1, Set<String> countries2,
-                                         List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
-                                         UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
+    private AutomaticFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
+                                             String substationName, Set<String> countries1, Set<String> countries2,
+                                             List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
+                                             UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
         NumericalFilter numericalFilter1 = null;
         if (rangeTypes.size() >= 1) {
             numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
@@ -904,7 +930,7 @@ public class FilterEntityControllerTest {
         AbstractEquipmentFilterForm equipmentFilterForm = new LineFilter(equipmentID, equipmentName, null, substationName, AbstractFilterRepositoryProxy.setToSorterSet(countries1), AbstractFilterRepositoryProxy.setToSorterSet(countries2), numericalFilter1, numericalFilter2);
         Date creationDate = new Date();
         Date modificationDate = new Date();
-        FormFilter filter = new FormFilter(
+        AutomaticFilter filter = new AutomaticFilter(
                 id,
                 creationDate,
                 modificationDate,
@@ -922,7 +948,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.FORM, filterAttributes.get(0).getType());
+        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
                         .contentType(APPLICATION_JSON))
@@ -935,16 +961,22 @@ public class FilterEntityControllerTest {
         return filter;
     }
 
-    private void checkFormFilter(UUID filterId, FormFilter formFilter) throws Exception {
+    private void checkFormFilter(UUID filterId, AutomaticFilter automaticFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        FormFilter foundFilter = objectMapper.readValue(foundFilterAsString, FormFilter.class);
-        matchFormFilterInfos(foundFilter, formFilter);
+        AutomaticFilter foundFilter = objectMapper.readValue(foundFilterAsString, AutomaticFilter.class);
+        matchFormFilterInfos(foundFilter, automaticFilter);
     }
 
     private void checkScriptFilter(UUID filterId, ScriptFilter scriptFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         ScriptFilter foundFilter = objectMapper.readValue(foundFilterAsString, ScriptFilter.class);
         matchScriptFilterInfos(foundFilter, scriptFilter);
+    }
+
+    private void checkManualFilter(UUID filterId, ManualFilter manualFilter) throws Exception {
+        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        ManualFilter foundFilter = objectMapper.readValue(foundFilterAsString, ManualFilter.class);
+        matchManualFilterInfos(foundFilter, manualFilter);
     }
 
     private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
@@ -961,9 +993,9 @@ public class FilterEntityControllerTest {
         assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 2000);
     }
 
-    private void matchFormFilterInfos(FormFilter formFilter1, FormFilter formFilter2) {
-        matchFilterInfos(formFilter1, formFilter2);
-        matchEquipmentFormFilter(formFilter1.getEquipmentFilterForm(), formFilter2.getEquipmentFilterForm());
+    private void matchFormFilterInfos(AutomaticFilter automaticFilter1, AutomaticFilter automaticFilter2) {
+        matchFilterInfos(automaticFilter1, automaticFilter2);
+        matchEquipmentFormFilter(automaticFilter1.getEquipmentFilterForm(), automaticFilter2.getEquipmentFilterForm());
     }
 
     private void matchEquipmentFormFilter(AbstractEquipmentFilterForm equipmentFilterForm1, AbstractEquipmentFilterForm equipmentFilterForm2) {
@@ -973,5 +1005,11 @@ public class FilterEntityControllerTest {
     private void matchScriptFilterInfos(ScriptFilter scriptFilter1, ScriptFilter scriptFilter2) {
         matchFilterInfos(scriptFilter1, scriptFilter2);
         assertTrue(scriptFilter1.getScript().contains(scriptFilter2.getScript()));
+    }
+
+    private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
+        matchFilterInfos(manualFilter1, manualFilter2);
+        assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getFilterEquipmentsAttributes()).matchesSafely(manualFilter1.getFilterEquipmentsAttributes()));
+
     }
 }

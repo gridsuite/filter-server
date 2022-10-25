@@ -27,7 +27,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override
@@ -55,14 +55,14 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
 
     @Override
     public TwoWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
-        FormFilter formFilter = toFormFilter(dto, TwoWindingsTransformerFilter.class);
-        TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) formFilter.getEquipmentFilterForm();
+        AutomaticFilter automaticFilter = toFormFilter(dto, TwoWindingsTransformerFilter.class);
+        TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
         var twoWindingsTransformerFilterEntityBuilder =  TwoWindingsTransformerFilterEntity.builder()
             .countries(twoWindingsTransformerFilter.getCountries())
             .substationName(twoWindingsTransformerFilter.getSubstationName())
             .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))
             .nominalVoltage2(convert(twoWindingsTransformerFilter.getNominalVoltage2()));
-        buildGenericFilter(twoWindingsTransformerFilterEntityBuilder, formFilter);
+        buildGenericFilter(twoWindingsTransformerFilterEntityBuilder, automaticFilter);
         return twoWindingsTransformerFilterEntityBuilder.build();
     }
 }

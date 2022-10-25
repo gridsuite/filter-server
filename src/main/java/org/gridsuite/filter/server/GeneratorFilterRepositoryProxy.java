@@ -28,7 +28,7 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override

@@ -28,7 +28,7 @@ public class BatteryFilterRepositoryProxy extends AbstractFilterRepositoryProxy<
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override

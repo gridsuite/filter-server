@@ -28,7 +28,7 @@ public class LoadFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Loa
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override

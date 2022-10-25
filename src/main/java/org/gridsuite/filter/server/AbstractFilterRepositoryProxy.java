@@ -92,13 +92,13 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         getRepository().deleteAll();
     }
 
-    void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, FormFilter dto) {
+    void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, AutomaticFilter dto) {
         buildAbstractFilter(builder, dto);
         builder.equipmentId(dto.getEquipmentFilterForm().getEquipmentID())
                 .equipmentName(dto.getEquipmentFilterForm().getEquipmentName());
     }
 
-    void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, FormFilter dto) {
+    void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, AutomaticFilter dto) {
         buildGenericFilter(builder, dto);
         if (!(dto.getEquipmentFilterForm() instanceof AbstractInjectionFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
@@ -120,7 +120,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
     }
 
     public AbstractFilter toFormFilterDto(AbstractGenericFilterEntity entity) {
-        return new FormFilter(
+        return new AutomaticFilter(
                 entity.getId(),
                 entity.getCreationDate(),
                 entity.getModificationDate(),
@@ -139,15 +139,15 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         );
     }
 
-    public static FormFilter toFormFilter(AbstractFilter dto, Class<? extends AbstractEquipmentFilterForm> clazz) {
-        if (!(dto instanceof FormFilter)) {
+    public static AutomaticFilter toFormFilter(AbstractFilter dto, Class<? extends AbstractEquipmentFilterForm> clazz) {
+        if (!(dto instanceof AutomaticFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        FormFilter formFilter = (FormFilter) dto;
+        AutomaticFilter automaticFilter = (AutomaticFilter) dto;
 
-        if (!(clazz.isInstance(formFilter.getEquipmentFilterForm()))) {
+        if (!(clazz.isInstance(automaticFilter.getEquipmentFilterForm()))) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        return formFilter;
+        return automaticFilter;
     }
 }

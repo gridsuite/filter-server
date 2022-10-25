@@ -28,7 +28,7 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.FORM;
+        return FilterType.AUTOMATIC;
     }
 
     @Override

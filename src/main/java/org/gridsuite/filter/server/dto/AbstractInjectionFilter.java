@@ -22,7 +22,7 @@ import java.util.SortedSet;
 @AllArgsConstructor
 @SuperBuilder
 @ToString(callSuper = true)
-@Schema(description = "Injection Filters", allOf = FormFilter.class)
+@Schema(description = "Injection Filters", allOf = AutomaticFilter.class)
 public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "SubstationName")
     String substationName;
