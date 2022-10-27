@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.springframework.util.CollectionUtils;
 
@@ -55,6 +56,12 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     abstract FilterType getFilterType();
 
+    abstract EquipmentType getEquipmentType();
+
+    EquipmentType getEquipmentType(UUID id) {
+        return getEquipmentType();
+    }
+
     Optional<AbstractFilter> getFilter(UUID id) {
         Optional<F> element = getRepository().findById(id);
         if (element.isPresent()) {
@@ -72,7 +79,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
     }
 
     FilterAttributes metadataToAttribute(FilterMetadata f) {
-        return new FilterAttributes(f, getFilterType());
+        return new FilterAttributes(f, getFilterType(), getEquipmentType(f.getId()));
     }
 
     AbstractFilter insert(AbstractFilter f) {

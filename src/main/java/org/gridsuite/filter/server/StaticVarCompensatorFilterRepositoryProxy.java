@@ -12,6 +12,7 @@ import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.StaticVarCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.StaticVarCompensatorFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -29,6 +30,11 @@ public class StaticVarCompensatorFilterRepositoryProxy extends AbstractFilterRep
     @Override
     public FilterType getFilterType() {
         return FilterType.AUTOMATIC;
+    }
+
+    @Override
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.STATIC_VAR_COMPENSATOR;
     }
 
     @Override

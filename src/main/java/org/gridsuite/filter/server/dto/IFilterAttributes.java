@@ -7,6 +7,7 @@
 
 package org.gridsuite.filter.server.dto;
 
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -20,4 +21,6 @@ public interface IFilterAttributes {
     java.util.Date getModificationDate();
 
     FilterType getType();
+
+    EquipmentType getEquipmentType();
 }
