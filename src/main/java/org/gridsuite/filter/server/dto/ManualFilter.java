@@ -30,6 +30,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ManualFilter extends AbstractFilter {
 
+    private EquipmentType equipmentType;
     private List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes;
 
     public ManualFilter(UUID id,

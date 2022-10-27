@@ -509,6 +509,7 @@ public class FilterService {
     private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
         if (filter != null && (filter.getType() == FilterType.AUTOMATIC || filter.getType() == FilterType.MANUAL)) {
             Network network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
+
             if (network == null) {
                 throw new PowsyblException("Network '" + networkUuid + "' not found");
             }
