@@ -346,18 +346,18 @@ public class FilterService {
             AutomaticFilter automaticFilter = (AutomaticFilter) filter;
             LineFilter lineFilter = (LineFilter) automaticFilter.getEquipmentFilterForm();
             return network.getLineStream()
-                    .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
-                    .filter(line -> equipmentNameFilter(line, lineFilter.getEquipmentName()))
-                    .filter(line -> filterByVoltages(line, lineFilter.getNominalVoltage1(), lineFilter.getNominalVoltage2()))
-                    .filter(line -> filterByCountries(line, lineFilter))
-                    .filter(line -> substationNameFilter(line.getTerminal1(), lineFilter.getSubstationName1()) &&
-                                    substationNameFilter(line.getTerminal2(), lineFilter.getSubstationName2()))
-                    .collect(Collectors.toList());
+                .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
+                .filter(line -> equipmentNameFilter(line, lineFilter.getEquipmentName()))
+                .filter(line -> filterByVoltages(line, lineFilter.getNominalVoltage1(), lineFilter.getNominalVoltage2()))
+                .filter(line -> filterByCountries(line, lineFilter))
+                .filter(line -> substationNameFilter(line.getTerminal1(), lineFilter.getSubstationName1()) &&
+                                substationNameFilter(line.getTerminal2(), lineFilter.getSubstationName2()))
+                .collect(Collectors.toList());
         } else if (filter instanceof ManualFilter) {
             List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
             return network.getLineStream()
-                    .filter(line -> equipmentIds.contains(line.getId()))
-                    .collect(Collectors.toList());
+                .filter(line -> equipmentIds.contains(line.getId()))
+                .collect(Collectors.toList());
         } else {
             return List.of();
         }
@@ -368,14 +368,14 @@ public class FilterService {
             AutomaticFilter automaticFilter = (AutomaticFilter) filter;
             TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
             return network.getTwoWindingsTransformerStream()
-                    .filter(twoWindingsTransformer -> equipmentIdFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentID()))
-                    .filter(twoWindingsTransformer -> equipmentNameFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentName()))
-                    .filter(twoWindingsTransformer -> filterByVoltages(twoWindingsTransformer, twoWindingsTransformerFilter.getNominalVoltage1(), twoWindingsTransformerFilter.getNominalVoltage2()))
-                    .filter(twoWindingsTransformer -> countryFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getCountries()) ||
-                                                      countryFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getCountries()))
-                    .filter(twoWindingsTransformer -> substationNameFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getSubstationName()) ||
-                                                      substationNameFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getSubstationName()))
-                    .collect(Collectors.toList());
+                .filter(twoWindingsTransformer -> equipmentIdFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentID()))
+                .filter(twoWindingsTransformer -> equipmentNameFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentName()))
+                .filter(twoWindingsTransformer -> filterByVoltages(twoWindingsTransformer, twoWindingsTransformerFilter.getNominalVoltage1(), twoWindingsTransformerFilter.getNominalVoltage2()))
+                .filter(twoWindingsTransformer -> countryFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getCountries()) ||
+                                                  countryFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getCountries()))
+                .filter(twoWindingsTransformer -> substationNameFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getSubstationName()) ||
+                                                  substationNameFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getSubstationName()))
+                .collect(Collectors.toList());
         } else if (filter instanceof ManualFilter) {
             List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
 
@@ -392,22 +392,22 @@ public class FilterService {
             AutomaticFilter automaticFilter = (AutomaticFilter) filter;
             ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
             return network.getThreeWindingsTransformerStream()
-                    .filter(threeWindingsTransformer -> equipmentIdFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentID()))
-                    .filter(threeWindingsTransformer -> equipmentNameFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentName()))
-                    .filter(threeWindingsTransformer -> filterByVoltages(threeWindingsTransformer, threeWindingsTransformerFilter))
-                    .filter(threeWindingsTransformer -> countryFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
-                                                        countryFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
-                                                        countryFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getCountries()))
-                    .filter(threeWindingsTransformer -> substationNameFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
-                                                        substationNameFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
-                                                        substationNameFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getSubstationName()))
-                    .collect(Collectors.toList());
+                .filter(threeWindingsTransformer -> equipmentIdFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentID()))
+                .filter(threeWindingsTransformer -> equipmentNameFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentName()))
+                .filter(threeWindingsTransformer -> filterByVoltages(threeWindingsTransformer, threeWindingsTransformerFilter))
+                .filter(threeWindingsTransformer -> countryFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
+                                                    countryFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
+                                                    countryFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getCountries()))
+                .filter(threeWindingsTransformer -> substationNameFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
+                                                    substationNameFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
+                                                    substationNameFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getSubstationName()))
+                .collect(Collectors.toList());
         } else if (filter instanceof ManualFilter) {
             List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
 
             return network.getThreeWindingsTransformerStream()
-                    .filter(threeWindingsTransformer -> equipmentIds.contains(threeWindingsTransformer.getId()))
-                    .collect(Collectors.toList());
+                .filter(threeWindingsTransformer -> equipmentIds.contains(threeWindingsTransformer.getId()))
+                .collect(Collectors.toList());
         } else {
             return List.of();
         }
@@ -418,18 +418,18 @@ public class FilterService {
             AutomaticFilter automaticFilter = (AutomaticFilter) filter;
             HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) automaticFilter.getEquipmentFilterForm();
             return network.getHvdcLineStream()
-                    .filter(hvdcLine -> equipmentIdFilter(hvdcLine, hvdcLineFilter.getEquipmentID()))
-                    .filter(hvdcLine -> equipmentNameFilter(hvdcLine, hvdcLineFilter.getEquipmentName()))
-                    .filter(hvdcLine -> filterByVoltage(hvdcLine.getNominalV(), hvdcLineFilter.getNominalVoltage()))
-                    .filter(hvdcLine -> filterByCountries(hvdcLine, hvdcLineFilter))
-                    .filter(hvdcLine -> substationNameFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getSubstationName1()) &&
-                                        substationNameFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getSubstationName2()))
-                    .collect(Collectors.toList());
+                .filter(hvdcLine -> equipmentIdFilter(hvdcLine, hvdcLineFilter.getEquipmentID()))
+                .filter(hvdcLine -> equipmentNameFilter(hvdcLine, hvdcLineFilter.getEquipmentName()))
+                .filter(hvdcLine -> filterByVoltage(hvdcLine.getNominalV(), hvdcLineFilter.getNominalVoltage()))
+                .filter(hvdcLine -> filterByCountries(hvdcLine, hvdcLineFilter))
+                .filter(hvdcLine -> substationNameFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getSubstationName1()) &&
+                                    substationNameFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getSubstationName2()))
+                .collect(Collectors.toList());
         } else if (filter instanceof ManualFilter) {
             List<String> equipmentsIds = getManuelFilterEquipmentIds((ManualFilter) filter);
             return network.getHvdcLineStream()
-                    .filter(hvdcLine -> equipmentsIds.contains(hvdcLine.getId()))
-                    .collect(Collectors.toList());
+                .filter(hvdcLine -> equipmentsIds.contains(hvdcLine.getId()))
+                .collect(Collectors.toList());
         } else {
             return List.of();
         }
@@ -437,9 +437,9 @@ public class FilterService {
 
     private List<String> getManuelFilterEquipmentIds(ManualFilter manualFilter) {
         return manualFilter.getFilterEquipmentsAttributes()
-                .stream()
-                .map(ManualFilterEquipmentAttributes::getEquipmentID)
-                .collect(Collectors.toList());
+            .stream()
+            .map(ManualFilterEquipmentAttributes::getEquipmentID)
+            .collect(Collectors.toList());
     }
 
     private List<Identifiable<?>> getDanglingLineList(Network network, AbstractFilter filter) {
