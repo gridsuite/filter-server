@@ -7,6 +7,8 @@
 
 package org.gridsuite.filter.server.repositories;
 
+import org.gridsuite.filter.server.utils.EquipmentType;
+
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
@@ -16,4 +18,6 @@ public interface FilterMetadata {
     java.util.Date getCreationDate();
 
     java.util.Date getModificationDate();
+
+    EquipmentType getEquipmentType();
 }

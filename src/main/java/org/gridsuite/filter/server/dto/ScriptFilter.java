@@ -29,7 +29,7 @@ public class ScriptFilter extends AbstractFilter {
     private String script;
 
     public ScriptFilter(UUID id, Date creationDate, Date modificationDate, String script) {
-        super(id, creationDate, modificationDate);
+        super(id, creationDate, modificationDate, null);
         this.script = script;
     }
 
