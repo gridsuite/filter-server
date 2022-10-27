@@ -380,7 +380,7 @@ public class FilterService {
             List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
 
             return network.getTwoWindingsTransformerStream()
-                    .filter(twoWindingsTransformer -> equipmentIds.contains(twoWindingsTransformer))
+                    .filter(twoWindingsTransformer -> equipmentIds.contains(twoWindingsTransformer.getId()))
                     .collect(Collectors.toList());
         } else {
             return List.of();
@@ -507,7 +507,7 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
-        if (filter != null && (filter.getType() == FilterType.AUTOMATIC || filter.getType() == FilterType.MANUAL)) {
+        if (filter.getType() == FilterType.AUTOMATIC || filter.getType() == FilterType.MANUAL) {
             Network network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
 
             if (network == null) {
@@ -526,8 +526,8 @@ public class FilterService {
 
     private List<IdentifiableAttributes> getIdentifiableAttributes(AbstractFilter filter, UUID networkUuid, String variantId) {
         if (filter instanceof ManualFilter &&
-                (filter.getEquipmentType() == EquipmentType.GENERATOR ||
-                        filter.getEquipmentType() == EquipmentType.LOAD)) {
+            (filter.getEquipmentType() == EquipmentType.GENERATOR ||
+             filter.getEquipmentType() == EquipmentType.LOAD)) {
             ManualFilter manualFilter = (ManualFilter) filter;
             return toIdentifiableFilter(filter, networkUuid, variantId)
                     .stream()
