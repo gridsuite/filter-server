@@ -282,12 +282,12 @@ public class FilterService {
 
     private boolean filterByCountries(Terminal terminal1, Terminal terminal2, SortedSet<String> filter1, SortedSet<String> filter2) {
         return
-                // terminal 1 matches filter 1 and terminal 2 matches filter 2
-                countryFilter(terminal1, filter1) &&
-                        countryFilter(terminal2, filter2)
-                        || // or the opposite
-                        countryFilter(terminal1, filter2) &&
-                                countryFilter(terminal2, filter1);
+            // terminal 1 matches filter 1 and terminal 2 matches filter 2
+            countryFilter(terminal1, filter1) &&
+            countryFilter(terminal2, filter2)
+            || // or the opposite
+            countryFilter(terminal1, filter2) &&
+            countryFilter(terminal2, filter1);
     }
 
     private boolean filterByCountries(Line line, LineFilter filter) {
@@ -304,41 +304,41 @@ public class FilterService {
 
     private boolean filterByVoltages(Branch<?> branch, NumericalFilter numFilter1, NumericalFilter numFilter2) {
         return
-                // terminal 1 matches filter 1 and terminal 2 matches filter 2
-                filterByVoltage(branch.getTerminal1(), numFilter1) &&
-                        filterByVoltage(branch.getTerminal2(), numFilter2)
-                        || // or the opposite
-                        filterByVoltage(branch.getTerminal1(), numFilter2) &&
-                                filterByVoltage(branch.getTerminal2(), numFilter1);
+            // terminal 1 matches filter 1 and terminal 2 matches filter 2
+            filterByVoltage(branch.getTerminal1(), numFilter1) &&
+            filterByVoltage(branch.getTerminal2(), numFilter2)
+            || // or the opposite
+            filterByVoltage(branch.getTerminal1(), numFilter2) &&
+            filterByVoltage(branch.getTerminal2(), numFilter1);
     }
 
     private boolean filterByVoltages(ThreeWindingsTransformer transformer, ThreeWindingsTransformerFilter filter) {
         return
-                // leg 1 matches filter 1, leg 2 matches filter 2, and leg 3 filter 3
-                filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage1()) &&
-                        filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage2()) &&
-                        filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage3())
-                        // or any other combination :
-                        || // keep leg1 on filter 1, switch legs 2/3
-                        filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage1()) &&
-                                filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage2()) &&
-                                filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage3())
-                        || // now leg2 matches filter 1
-                        filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage1()) &&
-                                filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage2()) &&
-                                filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage3())
-                        || // keep leg2 on filter 1, switch legs 1/3
-                        filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage1()) &&
-                                filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage2()) &&
-                                filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage3())
-                        || // now leg3 matches filter 1
-                        filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage1()) &&
-                                filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage2()) &&
-                                filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage3())
-                        || // keep leg3 on filter 1, switch legs 1/2
-                        filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage1()) &&
-                                filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage2()) &&
-                                filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage3());
+            // leg 1 matches filter 1, leg 2 matches filter 2, and leg 3 filter 3
+            filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage1()) &&
+            filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage2()) &&
+            filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage3())
+            // or any other combination :
+            || // keep leg1 on filter 1, switch legs 2/3
+            filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage1()) &&
+            filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage2()) &&
+            filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage3())
+            || // now leg2 matches filter 1
+            filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage1()) &&
+            filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage2()) &&
+            filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage3())
+            || // keep leg2 on filter 1, switch legs 1/3
+            filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage1()) &&
+            filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage2()) &&
+            filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage3())
+            || // now leg3 matches filter 1
+            filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage1()) &&
+            filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage2()) &&
+            filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage3())
+            || // keep leg3 on filter 1, switch legs 1/2
+            filterByVoltage(transformer.getLeg3().getTerminal(), filter.getNominalVoltage1()) &&
+            filterByVoltage(transformer.getLeg2().getTerminal(), filter.getNominalVoltage2()) &&
+            filterByVoltage(transformer.getLeg1().getTerminal(), filter.getNominalVoltage3());
     }
 
     private List<Identifiable<?>> getLineList(Network network, AbstractFilter filter) {
