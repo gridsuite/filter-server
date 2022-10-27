@@ -694,12 +694,18 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date creationDate = new Date();
         Date modificationDate = new Date();
-        ManualFilterEquipmentAttributes attributes1 = new ManualFilterEquipmentAttributes("line1", null);
-        ManualFilterEquipmentAttributes attributes2 = new ManualFilterEquipmentAttributes("line2", null);
+        ManualFilterEquipmentAttributes attributes1 = new ManualFilterEquipmentAttributes("GEN", 7d);
+        ManualFilterEquipmentAttributes attributes2 = new ManualFilterEquipmentAttributes("GEN2", 9d);
 
-        ManualFilter manualFilter = new ManualFilter(filterId, creationDate, modificationDate, EquipmentType.LINE, List.of(attributes1, attributes2));
+        ManualFilter manualFilter = new ManualFilter(filterId, creationDate, modificationDate, EquipmentType.GENERATOR, List.of(attributes1, attributes2));
         insertFilter(filterId, manualFilter);
         checkManualFilter(filterId, manualFilter);
+
+        mvc.perform(get(URL_TEMPLATE + filterId + "/export?networkUuid=" + NETWORK_UUID)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json("[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n"));
     }
 
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
