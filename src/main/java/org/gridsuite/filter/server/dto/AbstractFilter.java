@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.utils.EquipmentType;
 
 import java.util.Date;
 import java.util.UUID;
@@ -42,5 +43,7 @@ public abstract class AbstractFilter implements IFilterAttributes {
     Date creationDate;
 
     Date modificationDate;
+
+    EquipmentType equipmentType;
 
 }

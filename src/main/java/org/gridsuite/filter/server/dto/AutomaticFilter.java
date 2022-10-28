@@ -31,7 +31,7 @@ public class AutomaticFilter extends AbstractFilter {
     private AbstractEquipmentFilterForm equipmentFilterForm;
 
     public AutomaticFilter(UUID id, Date creationDate, Date modificationDate, AbstractEquipmentFilterForm equipmentFilterForm) {
-        super(id, creationDate, modificationDate);
+        super(id, creationDate, modificationDate, equipmentFilterForm.getEquipmentType());
         this.equipmentFilterForm = equipmentFilterForm;
     }
 

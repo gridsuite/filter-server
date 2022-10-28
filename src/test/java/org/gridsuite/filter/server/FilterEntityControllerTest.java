@@ -694,12 +694,59 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date creationDate = new Date();
         Date modificationDate = new Date();
-        ManualFilterEquipmentAttributes attributes1 = new ManualFilterEquipmentAttributes("line1", null);
-        ManualFilterEquipmentAttributes attributes2 = new ManualFilterEquipmentAttributes("line2", null);
 
-        ManualFilter manualFilter = new ManualFilter(filterId, creationDate, modificationDate, EquipmentType.LINE, List.of(attributes1, attributes2));
+        // Create manual filter for generators
+        ManualFilterEquipmentAttributes gen1 = new ManualFilterEquipmentAttributes("GEN", 7d);
+        ManualFilterEquipmentAttributes gen2 = new ManualFilterEquipmentAttributes("GEN2", 9d);
+        ManualFilter manualFilter = new ManualFilter(filterId, creationDate, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
         insertFilter(filterId, manualFilter);
         checkManualFilter(filterId, manualFilter);
+        checkManualFilterExport(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n");
+
+        // Create manual filter for lines
+        UUID lineFilterId = UUID.randomUUID();
+        ManualFilterEquipmentAttributes line1 = new ManualFilterEquipmentAttributes("NHV1_NHV2_1", null);
+        ManualFilterEquipmentAttributes line2 = new ManualFilterEquipmentAttributes("NHV1_NHV2_2", null);
+        ManualFilter lineManualFilter = new ManualFilter(lineFilterId, creationDate, modificationDate, EquipmentType.LINE, List.of(line1, line2));
+        insertFilter(lineFilterId, lineManualFilter);
+        checkManualFilter(lineFilterId, lineManualFilter);
+        checkManualFilterExport(lineFilterId, "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]");
+
+        // Create manual filter for Two Windings Transformer
+        UUID twoWinTransformerManualFilterId = UUID.randomUUID();
+        ManualFilterEquipmentAttributes twoWT1 = new ManualFilterEquipmentAttributes("NGEN_NHV1", null);
+        ManualFilterEquipmentAttributes twoWT2 = new ManualFilterEquipmentAttributes("NHV2_NLOAD", null);
+        ManualFilterEquipmentAttributes twoWT3 = new ManualFilterEquipmentAttributes("twoWT3", null);
+        ManualFilter twoWinTransformerManualFilter = new ManualFilter(twoWinTransformerManualFilterId, creationDate, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
+        insertFilter(twoWinTransformerManualFilterId, twoWinTransformerManualFilter);
+        checkManualFilter(twoWinTransformerManualFilterId, twoWinTransformerManualFilter);
+        checkManualFilterExport(twoWinTransformerManualFilterId, "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]");
+
+        // Create manual filter for Three Windings Transformer
+        UUID threeWTransformerManualFilterId = UUID.randomUUID();
+        ManualFilterEquipmentAttributes threeWT1 = new ManualFilterEquipmentAttributes("threeWT1", null);
+        ManualFilterEquipmentAttributes threeWT2 = new ManualFilterEquipmentAttributes("threeWT2", null);
+        ManualFilter threeWinTransformerManualFilter = new ManualFilter(threeWTransformerManualFilterId, creationDate, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
+        insertFilter(threeWTransformerManualFilterId, threeWinTransformerManualFilter);
+        checkManualFilter(threeWTransformerManualFilterId, threeWinTransformerManualFilter);
+        checkManualFilterExport(threeWTransformerManualFilterId, "[]");
+
+        // Create manual filter for hvdc
+        UUID hvdcFilterId = UUID.randomUUID();
+        ManualFilterEquipmentAttributes hvdc1 = new ManualFilterEquipmentAttributes("threeWT1", null);
+        ManualFilterEquipmentAttributes hvdc2 = new ManualFilterEquipmentAttributes("threeWT2", null);
+        ManualFilter hvdcManualFilter = new ManualFilter(hvdcFilterId, creationDate, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
+        insertFilter(hvdcFilterId, hvdcManualFilter);
+        checkManualFilter(hvdcFilterId, hvdcManualFilter);
+        checkManualFilterExport(hvdcFilterId, "[]");
+    }
+
+    private void checkManualFilterExport(UUID filterId, String expectedJson) throws Exception {
+        mvc.perform(get(URL_TEMPLATE + filterId + "/export?networkUuid=" + NETWORK_UUID)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJson));
     }
 
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
