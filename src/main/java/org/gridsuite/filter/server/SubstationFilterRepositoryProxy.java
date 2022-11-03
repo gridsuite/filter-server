@@ -14,6 +14,7 @@ import org.gridsuite.filter.server.dto.SubstationFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.SubstationFilterEntity;
 import org.gridsuite.filter.server.repositories.SubstationFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -31,6 +32,11 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
     @Override
     public FilterType getFilterType() {
         return FilterType.AUTOMATIC;
+    }
+
+    @Override
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.SUBSTATION;
     }
 
     @Override

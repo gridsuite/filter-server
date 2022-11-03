@@ -14,6 +14,7 @@ import org.gridsuite.filter.server.dto.VoltageLevelFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.VoltageLevelFilterEntity;
 import org.gridsuite.filter.server.repositories.VoltageLevelFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -31,6 +32,11 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
     @Override
     public FilterType getFilterType() {
         return FilterType.AUTOMATIC;
+    }
+
+    @Override
+    public EquipmentType getEquipmentType() {
+        return EquipmentType.VOLTAGE_LEVEL;
     }
 
     @Override

@@ -45,5 +45,4 @@ public abstract class AbstractFilter implements IFilterAttributes {
     Date modificationDate;
 
     EquipmentType equipmentType;
-
 }
