@@ -37,7 +37,9 @@ import org.gridsuite.filter.server.utils.EquipmentType;
         @JsonSubTypes.Type(value = VscConverterStationFilter.class, name = "VSC_CONVERTER_STATION"),
         @JsonSubTypes.Type(value = TwoWindingsTransformerFilter.class, name = "TWO_WINDINGS_TRANSFORMER"),
         @JsonSubTypes.Type(value = ThreeWindingsTransformerFilter.class, name = "THREE_WINDINGS_TRANSFORMER"),
-        @JsonSubTypes.Type(value = HvdcLineFilter.class, name = "HVDC_LINE")
+        @JsonSubTypes.Type(value = HvdcLineFilter.class, name = "HVDC_LINE"),
+        @JsonSubTypes.Type(value = VoltageLevelFilter.class, name = "VOLTAGE_LEVEL"),
+        @JsonSubTypes.Type(value = SubstationFilter.class, name = "SUBSTATION"),
 })
 @Getter
 @NoArgsConstructor

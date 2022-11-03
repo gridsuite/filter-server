@@ -60,6 +60,8 @@ public class FilterService {
                          final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository,
                          final ThreeWindingsTransformerFilterRepository threeWindingsTransformerFilterRepository,
                          final HvdcLineFilterRepository hvdcLineFilterRepository,
+                         final VoltageLevelFilterRepository voltageLevelFilterRepository,
+                         final SubstationFilterRepository substationFilterRepository,
                          final ManualFilterRepository manualFilterRepository,
                          NetworkStoreService networkStoreService) {
         this.filtersToScript = filtersToScript;
@@ -77,6 +79,8 @@ public class FilterService {
         filterRepositories.put(EquipmentType.TWO_WINDINGS_TRANSFORMER.name(), new TwoWindingsTransformerFilterRepositoryProxy(twoWindingsTransformerFilterRepository));
         filterRepositories.put(EquipmentType.THREE_WINDINGS_TRANSFORMER.name(), new ThreeWindingsTransformerFilterRepositoryProxy(threeWindingsTransformerFilterRepository));
         filterRepositories.put(EquipmentType.HVDC_LINE.name(), new HvdcLineFilterRepositoryProxy(hvdcLineFilterRepository));
+        filterRepositories.put(EquipmentType.VOLTAGE_LEVEL.name(), new VoltageLevelFilterRepositoryProxy(voltageLevelFilterRepository));
+        filterRepositories.put(EquipmentType.SUBSTATION.name(), new SubstationFilterRepositoryProxy(substationFilterRepository));
 
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
 
@@ -208,6 +212,16 @@ public class FilterService {
         return CollectionUtils.isEmpty(countries) || country.map(c -> countries.contains(c.name())).orElse(false);
     }
 
+    private boolean countryFilter(VoltageLevel voltageLevel, Set<String> countries) {
+        Optional<Country> country = voltageLevel.getSubstation().flatMap(Substation::getCountry);
+        return CollectionUtils.isEmpty(countries) || country.map(c -> countries.contains(c.name())).orElse(false);
+    }
+
+    private boolean countryFilter(Substation substation, Set<String> countries) {
+        Optional<Country> country = substation.getCountry();
+        return CollectionUtils.isEmpty(countries) || country.map(c -> countries.contains(c.name())).orElse(false);
+    }
+
     private boolean equipmentIdFilter(Identifiable<?> identifiable, String equipmentId) {
         return equipmentId == null || identifiable.getId().equals(equipmentId);
     }
@@ -299,7 +313,11 @@ public class FilterService {
     }
 
     private boolean filterByVoltage(Terminal terminal, NumericalFilter numericalFilter) {
-        return filterByVoltage(terminal.getVoltageLevel().getNominalV(), numericalFilter);
+        return filterByVoltage(terminal.getVoltageLevel(), numericalFilter);
+    }
+
+    private boolean filterByVoltage(VoltageLevel voltageLevel, NumericalFilter numericalFilter) {
+        return filterByVoltage(voltageLevel.getNominalV(), numericalFilter);
     }
 
     private boolean filterByVoltages(Branch<?> branch, NumericalFilter numFilter1, NumericalFilter numFilter2) {
@@ -435,6 +453,45 @@ public class FilterService {
         }
     }
 
+    private List<Identifiable<?>> getVoltageLevelList(Network network, AbstractFilter filter) {
+        if (filter instanceof AutomaticFilter) {
+            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
+            VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) automaticFilter.getEquipmentFilterForm();
+            return network.getVoltageLevelStream()
+                .filter(voltageLevel -> equipmentIdFilter(voltageLevel, voltageLevelFilter.getEquipmentID()))
+                .filter(voltageLevel -> equipmentNameFilter(voltageLevel, voltageLevelFilter.getEquipmentName()))
+                .filter(voltageLevel -> filterByVoltage(voltageLevel, voltageLevelFilter.getNominalVoltage()))
+                .filter(voltageLevel -> countryFilter(voltageLevel, voltageLevelFilter.getCountries()))
+                .collect(Collectors.toList());
+        } else if (filter instanceof ManualFilter) {
+            List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+            return network.getVoltageLevelStream()
+                .filter(voltageLevel -> equipmentIds.contains(voltageLevel.getId()))
+                .collect(Collectors.toList());
+        } else {
+            return List.of();
+        }
+    }
+
+    private List<Identifiable<?>> getSubstationList(Network network, AbstractFilter filter) {
+        if (filter instanceof AutomaticFilter) {
+            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
+            SubstationFilter substationFilter = (SubstationFilter) automaticFilter.getEquipmentFilterForm();
+            return network.getSubstationStream()
+                .filter(substation -> equipmentIdFilter(substation, substationFilter.getEquipmentID()))
+                .filter(substation -> equipmentNameFilter(substation, substationFilter.getEquipmentName()))
+                .filter(substation -> countryFilter(substation, substationFilter.getCountries()))
+                .collect(Collectors.toList());
+        } else if (filter instanceof ManualFilter) {
+            List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+            return network.getSubstationStream()
+                .filter(substation -> equipmentIds.contains(substation.getId()))
+                .collect(Collectors.toList());
+        } else {
+            return List.of();
+        }
+    }
+
     private List<String> getManuelFilterEquipmentIds(ManualFilter manualFilter) {
         return manualFilter.getFilterEquipmentsAttributes()
             .stream()
@@ -499,6 +556,12 @@ public class FilterService {
                 break;
             case BUSBAR_SECTION:
                 identifiables = getBusbarSectionList(network, filter);
+                break;
+            case VOLTAGE_LEVEL:
+                identifiables = getVoltageLevelList(network, filter);
+                break;
+            case SUBSTATION:
+                identifiables = getSubstationList(network, filter);
                 break;
             default:
                 throw new PowsyblException("Unknown equipment type");
