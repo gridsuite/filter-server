@@ -16,6 +16,7 @@ import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.ManualFilterEntity;
 import org.gridsuite.filter.server.entities.ManualFilterEquipmentEntity;
 import org.gridsuite.filter.server.repositories.ManualFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 import java.util.UUID;
@@ -74,6 +75,18 @@ public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<M
     @Override
     FilterType getFilterType() {
         return FilterType.MANUAL;
+    }
+
+    @Override
+    public EquipmentType getEquipmentType() {
+        throw new UnsupportedOperationException("A filter id must be provided to get equipment type !!");
+    }
+
+    @Override
+    public EquipmentType getEquipmentType(UUID id) {
+        return manualFilterRepository.findById(id)
+            .map(ManualFilterEntity::getEquipmentType)
+            .orElseThrow(() -> new PowsyblException("Manual filter " + id + " not found"));
     }
 
     @Override

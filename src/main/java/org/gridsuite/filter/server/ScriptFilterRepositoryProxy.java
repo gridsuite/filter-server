@@ -14,6 +14,7 @@ import org.gridsuite.filter.server.dto.ScriptFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.ScriptFilterEntity;
 import org.gridsuite.filter.server.repositories.ScriptFilterRepository;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 /**
@@ -29,6 +30,11 @@ class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ScriptFi
     @Override
     public FilterType getFilterType() {
         return FilterType.SCRIPT;
+    }
+
+    @Override
+    public EquipmentType getEquipmentType() {
+        return null;
     }
 
     @Override

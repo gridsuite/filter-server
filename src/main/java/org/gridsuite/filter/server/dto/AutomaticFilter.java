@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
 import java.util.Date;
@@ -39,6 +40,12 @@ public class AutomaticFilter extends AbstractFilter {
     @Override
     public FilterType getType() {
         return FilterType.AUTOMATIC;
+    }
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Override
+    public EquipmentType getEquipmentType() {
+        return equipmentFilterForm.getEquipmentType();
     }
 
     public AbstractEquipmentFilterForm getEquipmentFilterForm() {
