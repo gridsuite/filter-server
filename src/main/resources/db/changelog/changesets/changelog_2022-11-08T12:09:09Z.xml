@@ -1,0 +1,17 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="braquartdav (generated)" id="1667912025145-1">
+        <addColumn tableName="line_filter">
+            <column name="line_filter_entity_numeric_filter_id_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="braquartdav (generated)" id="1667912025145-2">
+        <addForeignKeyConstraint baseColumnNames="line_filter_entity_numeric_filter_id_id" baseTableName="line_filter" constraintName="lineNumericFilterId_id_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="numeric_filter" validate="true"/>
+    </changeSet>
+    <changeSet author="braquartdav (generated)" id="1667912025145-3">
+        <dropColumn columnName="NUMERIC_FILTER_ID1_ID" tableName="LINE_FILTER"/>
+    </changeSet>
+    <changeSet author="braquartdav (generated)" id="1667912025145-4">
+        <dropColumn columnName="NUMERIC_FILTER_ID2_ID" tableName="LINE_FILTER"/>
+    </changeSet>
+</databaseChangeLog>

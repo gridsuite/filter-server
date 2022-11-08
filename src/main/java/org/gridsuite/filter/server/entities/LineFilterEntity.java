@@ -41,19 +41,10 @@ public class LineFilterEntity extends AbstractGenericFilterEntity {
     String substationName2;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "numericFilterId1_id",
-        referencedColumnName  =  "id",
-        foreignKey = @ForeignKey(
-            name = "line_numericFilterId_id_fk1"
-        ), nullable = true)
-    NumericFilterEntity nominalVoltage1;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "numericFilterId2_id",
-        referencedColumnName  =  "id",
-        foreignKey = @ForeignKey(
-            name = "line_numericFilterId_id_fk2"
-        ), nullable = true)
-    NumericFilterEntity nominalVoltage2;
-
+    @JoinColumn(name  =  "lineFilterEntity_numericFilterId_id",
+            referencedColumnName  =  "id",
+            foreignKey = @ForeignKey(
+                    name = "lineNumericFilterId_id_fk"
+            ), nullable = true)
+    NumericFilterEntity nominalVoltage;
 }

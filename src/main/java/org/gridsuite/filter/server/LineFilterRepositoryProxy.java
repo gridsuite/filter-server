@@ -56,8 +56,7 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
             lineFilterEntity.getSubstationName2(),
             setToSorterSet(lineFilterEntity.getCountries1()),
             setToSorterSet(lineFilterEntity.getCountries2()),
-            convert(lineFilterEntity.getNominalVoltage1()),
-            convert(lineFilterEntity.getNominalVoltage2())
+            convert(lineFilterEntity.getNominalVoltage())
         );
     }
 
@@ -68,8 +67,7 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
         var lineFilterEntityBuilder =    LineFilterEntity.builder()
             .countries1(lineFilter.getCountries1())
             .countries2(lineFilter.getCountries2())
-            .nominalVoltage1(convert(lineFilter.getNominalVoltage1()))
-            .nominalVoltage2(convert(lineFilter.getNominalVoltage2()))
+            .nominalVoltage(convert(lineFilter.getNominalVoltage()))
             .substationName1(lineFilter.getSubstationName1())
             .substationName2(lineFilter.getSubstationName2());
         buildGenericFilter(lineFilterEntityBuilder, automaticFilter);

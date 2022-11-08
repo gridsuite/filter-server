@@ -43,7 +43,7 @@ public class GenerateScriptFromFiltersTest {
                 "      (FiltersUtils.matchID('lineId1', equipment) || FiltersUtils.matchName('lineName1', equipment))\n" +
                 "      && FiltersUtils.isLocatedIn(['ES','FR'], equipment.terminal1)\n" +
                 "      && FiltersUtils.isLocatedIn(['IT','PT'], equipment.terminal2)\n" +
-                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1, 225.0, 250.0)\n" +
+                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1.nominalVoltage, 225.0, 250.0)\n" +
                 "      && equipment.terminal1.voltageLevel.substation.name.equals('s1')\n" +
                 "      && equipment.terminal2.voltageLevel.substation.name.equals('s2')\n" +
                 "     ) {\n" +
@@ -61,7 +61,7 @@ public class GenerateScriptFromFiltersTest {
                         .substationName2("s2")
                         .countries1(new TreeSet<>(countries1))
                         .countries2(new TreeSet<>(countries2))
-                        .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
+                        .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
                         .build())));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
@@ -70,7 +70,7 @@ public class GenerateScriptFromFiltersTest {
                 "  if (\n" +
                 "      (FiltersUtils.matchName('lineName2', equipment))\n" +
                 "      && FiltersUtils.isLocatedIn(['IT','PT'], equipment.terminal2)\n" +
-                "      && FiltersUtils.isEqualityNominalVoltage(equipment.terminal2, 380.0)\n" +
+                "      && FiltersUtils.isEqualityNominalVoltage(equipment.terminal1, 380.0)\n" +
                 "      && equipment.terminal1.voltageLevel.substation.name.equals('s1')\n" +
                 "     ) {\n" +
                 "           filter(equipment.id) { equipments equipment.id }\n" +
@@ -84,7 +84,7 @@ public class GenerateScriptFromFiltersTest {
                         .equipmentName("lineName2")
                         .substationName1("s1")
                         .countries2(new TreeSet<>(countries2))
-                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(380.).build())
+                        .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(380.).build())
                         .build())));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
@@ -104,7 +104,7 @@ public class GenerateScriptFromFiltersTest {
                 "  if (\n" +
                 "      (FiltersUtils.matchName('lineName2', equipment))\n" +
                 "      && FiltersUtils.isLocatedIn(['IT','PT'], equipment.terminal2)\n" +
-                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal2, 380.0, null)\n" +
+                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1.nominalVoltage, 380.0, null)\n" +
                 "      && equipment.terminal1.voltageLevel.substation.name.equals('s1')\n" +
                 "     ) {\n" +
                 "           filter(equipment.id) { equipments equipment.id }\n" +
@@ -118,7 +118,7 @@ public class GenerateScriptFromFiltersTest {
                         .equipmentName("lineName2")
                         .substationName1("s1")
                         .countries2(new TreeSet<>(countries2))
-                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.RANGE).value1(380.).build())
+                        .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(380.).build())
                         .build())
             )
         );

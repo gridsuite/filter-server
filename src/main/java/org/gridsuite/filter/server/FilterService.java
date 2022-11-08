@@ -320,14 +320,19 @@ public class FilterService {
         return filterByVoltage(voltageLevel.getNominalV(), numericalFilter);
     }
 
-    private boolean filterByVoltages(Branch<?> branch, NumericalFilter numFilter1, NumericalFilter numFilter2) {
+    private boolean filterByVoltages(Line line, NumericalFilter numFilter) {
+        // in a line, both terminal should have the same nominal voltage
+        return filterByVoltage(line.getTerminal1(), numFilter) || filterByVoltage(line.getTerminal2(), numFilter);
+    }
+
+    private boolean filterByVoltages(TwoWindingsTransformer transformer, NumericalFilter numFilter1, NumericalFilter numFilter2) {
         return
             // terminal 1 matches filter 1 and terminal 2 matches filter 2
-            filterByVoltage(branch.getTerminal1(), numFilter1) &&
-            filterByVoltage(branch.getTerminal2(), numFilter2)
+            filterByVoltage(transformer.getTerminal1(), numFilter1) &&
+            filterByVoltage(transformer.getTerminal2(), numFilter2)
             || // or the opposite
-            filterByVoltage(branch.getTerminal1(), numFilter2) &&
-            filterByVoltage(branch.getTerminal2(), numFilter1);
+            filterByVoltage(transformer.getTerminal1(), numFilter2) &&
+            filterByVoltage(transformer.getTerminal2(), numFilter1);
     }
 
     private boolean filterByVoltages(ThreeWindingsTransformer transformer, ThreeWindingsTransformerFilter filter) {
@@ -366,7 +371,7 @@ public class FilterService {
             return network.getLineStream()
                 .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
                 .filter(line -> equipmentNameFilter(line, lineFilter.getEquipmentName()))
-                .filter(line -> filterByVoltages(line, lineFilter.getNominalVoltage1(), lineFilter.getNominalVoltage2()))
+                .filter(line -> filterByVoltages(line, lineFilter.getNominalVoltage()))
                 .filter(line -> filterByCountries(line, lineFilter))
                 .filter(line -> substationNameFilter(line.getTerminal1(), lineFilter.getSubstationName1()) &&
                                 substationNameFilter(line.getTerminal2(), lineFilter.getSubstationName2()))

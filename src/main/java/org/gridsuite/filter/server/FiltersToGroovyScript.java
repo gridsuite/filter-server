@@ -82,13 +82,13 @@ public class FiltersToGroovyScript {
 
         switch (automaticFilter.getEquipmentFilterForm().getEquipmentType()) {
             case LINE:
-                script += lineTemplate;
+                script = lineTemplate;
                 break;
             case TWO_WINDINGS_TRANSFORMER:
-                script += twoWindingsTransformerTemplate;
+                script = twoWindingsTransformerTemplate;
                 break;
             case THREE_WINDINGS_TRANSFORMER:
-                script += threeWindingsTransformerTemplate;
+                script = threeWindingsTransformerTemplate;
                 break;
             case GENERATOR:
             case LOAD:
@@ -99,19 +99,19 @@ public class FiltersToGroovyScript {
             case STATIC_VAR_COMPENSATOR:
             case LCC_CONVERTER_STATION:
             case VSC_CONVERTER_STATION:
-                script += injectionTemplate;
+                script = injectionTemplate;
                 break;
 
             case HVDC_LINE:
-                script += hvdcLineTemplate;
+                script = hvdcLineTemplate;
                 break;
 
             case VOLTAGE_LEVEL:
-                script += voltageLevelTemplate;
+                script = voltageLevelTemplate;
                 break;
 
             case SUBSTATION:
-                script += substationTemplate;
+                script = substationTemplate;
                 break;
 
             default:
@@ -139,11 +139,8 @@ public class FiltersToGroovyScript {
                 if (!CollectionUtils.isEmpty(lineFilter.getCountries2())) {
                     template.add(COUNTRIES + "2", lineFilter.getCountries2().stream().collect(joining("','", "['", "']")));
                 }
-                if (lineFilter.getNominalVoltage1() != null) {
-                    addFilterNominalVoltage(template, lineFilter.getNominalVoltage1(), "1");
-                }
-                if (lineFilter.getNominalVoltage2() != null) {
-                    addFilterNominalVoltage(template, lineFilter.getNominalVoltage2(), "2");
+                if (lineFilter.getNominalVoltage() != null) {
+                    addFilterNominalVoltage(template, lineFilter.getNominalVoltage(), null);
                 }
                 if (!StringUtils.isEmpty(lineFilter.getSubstationName1())) {
                     template.add(SUBSTATION_NAME + "1", lineFilter.getSubstationName1());
