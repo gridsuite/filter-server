@@ -38,6 +38,8 @@ public class FiltersToGroovyScript {
     private final String twoWindingsTransformerTemplate;
     private final String threeWindingsTransformerTemplate;
     private final String hvdcLineTemplate;
+    private final String voltageLevelTemplate;
+    private final String substationTemplate;
 
     private static final String NOMINAL_V = "nominalV";
 
@@ -48,6 +50,8 @@ public class FiltersToGroovyScript {
             twoWindingsTransformerTemplate = IOUtils.toString(new ClassPathResource("twoWindingsTransformer.st").getInputStream(), Charset.defaultCharset());
             threeWindingsTransformerTemplate = IOUtils.toString(new ClassPathResource("threeWindingsTransformer.st").getInputStream(), Charset.defaultCharset());
             hvdcLineTemplate = IOUtils.toString(new ClassPathResource("hvdcLine.st").getInputStream(), Charset.defaultCharset());
+            voltageLevelTemplate = IOUtils.toString(new ClassPathResource("voltageLevel.st").getInputStream(), Charset.defaultCharset());
+            substationTemplate = IOUtils.toString(new ClassPathResource("substation.st").getInputStream(), Charset.defaultCharset());
         } catch (IOException e) {
             throw new PowsyblException("Unable to load templates for groovy script generation !!");
         }
@@ -68,6 +72,11 @@ public class FiltersToGroovyScript {
 
     public String generateGroovyScriptFromFilters(AbstractFilter filter) {
         String script = "";
+
+        if (!(filter instanceof AutomaticFilter)) {
+            throw new PowsyblException(AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE);
+        }
+
         AutomaticFilter automaticFilter = (AutomaticFilter) filter;
         String equipmentsCollection = automaticFilter.getEquipmentFilterForm().getEquipmentType().getCollectionName();
 
@@ -97,15 +106,19 @@ public class FiltersToGroovyScript {
                 script += hvdcLineTemplate;
                 break;
 
+            case VOLTAGE_LEVEL:
+                script += voltageLevelTemplate;
+                break;
+
+            case SUBSTATION:
+                script += substationTemplate;
+                break;
+
             default:
                 throw new PowsyblException("Filter type not allowed");
         }
 
         ST template = new ST(script);
-
-        if (!(filter instanceof AutomaticFilter)) {
-            throw new PowsyblException(AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE);
-        }
 
         switch (automaticFilter.getEquipmentFilterForm().getEquipmentType()) {
             case LINE:
@@ -252,6 +265,43 @@ public class FiltersToGroovyScript {
                 }
                 if (!StringUtils.isEmpty(hvdcLineFilter.getSubstationName2())) {
                     template.add(SUBSTATION_NAME + "2", hvdcLineFilter.getSubstationName2());
+                }
+                break;
+
+            case VOLTAGE_LEVEL:
+                VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) automaticFilter.getEquipmentFilterForm();
+                template.add(COLLECTION_NAME, equipmentsCollection);
+                if (!voltageLevelFilter.isEmpty()) {
+                    template.add(NO_EMPTY_FILTER, "true");
+                }
+                if (voltageLevelFilter.getEquipmentID() != null) {
+                    template.add(EQUIPMENT_ID, voltageLevelFilter.getEquipmentID());
+                }
+                if (voltageLevelFilter.getEquipmentName() != null) {
+                    template.add(EQUIPMENT_NAME, voltageLevelFilter.getEquipmentName());
+                }
+                if (!CollectionUtils.isEmpty(voltageLevelFilter.getCountries())) {
+                    template.add(COUNTRIES, voltageLevelFilter.getCountries().stream().collect(joining("','", "['", "']")));
+                }
+                if (voltageLevelFilter.getNominalVoltage() != null) {
+                    addFilterNominalVoltage(template, voltageLevelFilter.getNominalVoltage(), null);
+                }
+                break;
+
+            case SUBSTATION:
+                SubstationFilter substationFilter = (SubstationFilter) automaticFilter.getEquipmentFilterForm();
+                template.add(COLLECTION_NAME, equipmentsCollection);
+                if (!substationFilter.isEmpty()) {
+                    template.add(NO_EMPTY_FILTER, "true");
+                }
+                if (substationFilter.getEquipmentID() != null) {
+                    template.add(EQUIPMENT_ID, substationFilter.getEquipmentID());
+                }
+                if (substationFilter.getEquipmentName() != null) {
+                    template.add(EQUIPMENT_NAME, substationFilter.getEquipmentName());
+                }
+                if (!CollectionUtils.isEmpty(substationFilter.getCountries())) {
+                    template.add(COUNTRIES, substationFilter.getCountries().stream().collect(joining("','", "['", "']")));
                 }
                 break;
 

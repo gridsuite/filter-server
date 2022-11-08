@@ -623,6 +623,42 @@ public class FilterEntityControllerTest {
     }
 
     @Test
+    public void testVoltageLevelFilter() throws Exception {
+        insertVoltageLevelFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "VLGEN", "VLGEN", Set.of("FR", "IT"), RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"VLGEN\",\"type\":\"VOLTAGE_LEVEL\"}]");
+        insertVoltageLevelFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "VLGEN", "VLGEN", null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"VLGEN\",\"type\":\"VOLTAGE_LEVEL\"}]");
+        insertVoltageLevelFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "VLGEN", "nameNotFound", null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[]");
+        insertVoltageLevelFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "VLGEN", "VLGEN", null, RangeType.RANGE, 20., 27., NETWORK_UUID, null, "[{\"id\":\"VLGEN\",\"type\":\"VOLTAGE_LEVEL\"}]");
+        insertVoltageLevelFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "VLGEN", "VLGEN", null, RangeType.RANGE, 29., 36., NETWORK_UUID, null, "[]");
+        insertVoltageLevelFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "VLGEN", "VLGEN", Set.of("FR", "IT"), RangeType.EQUALITY, 150., null, NETWORK_UUID, null, "[]");
+        insertVoltageLevelFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "VLGEN", "VLGEN", Set.of("FR", "IT"), RangeType.EQUALITY, 24., null, NETWORK_UUID, null, "[{\"id\":\"VLGEN\",\"type\":\"VOLTAGE_LEVEL\"}]");
+        insertVoltageLevelFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "VLGEN", "VLGEN", Set.of("ES", "PT"), null, null, null, NETWORK_UUID, null, "[]");
+    }
+
+    @Test
+    public void testSubstationFilter() throws Exception {
+        insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "P1", "P1", Set.of("FR", "IT"), NETWORK_UUID, null, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"}]");
+        insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "P1", "P1", null, NETWORK_UUID, null, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"}]");
+        insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "P1", "nameNotFound", null, NETWORK_UUID, null, "[]");
+        insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "P1", "P1", Set.of("ES", "PT"), NETWORK_UUID, null, "[]");
+        insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "P2", "P2", Set.of("FR", "IT"), NETWORK_UUID, null, "[{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]");
+        insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
+            "P2", "P2", Set.of("ES", "PT"), NETWORK_UUID, null, "[]");
+    }
+
+    @Test
     public void testFilterToScript() throws Exception {
         UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
@@ -739,6 +775,25 @@ public class FilterEntityControllerTest {
         insertFilter(hvdcFilterId, hvdcManualFilter);
         checkManualFilter(hvdcFilterId, hvdcManualFilter);
         checkManualFilterExportAndMetadata(hvdcFilterId, "[]", EquipmentType.HVDC_LINE);
+
+        // Create manual filter for voltage levels
+        UUID voltageLevelFilterId = UUID.randomUUID();
+        ManualFilterEquipmentAttributes vl1 = new ManualFilterEquipmentAttributes("VLHV1", null);
+        ManualFilterEquipmentAttributes vl2 = new ManualFilterEquipmentAttributes("VLHV2", null);
+        ManualFilter vlManualFilter = new ManualFilter(voltageLevelFilterId, creationDate, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
+        insertFilter(voltageLevelFilterId, vlManualFilter);
+        checkManualFilter(voltageLevelFilterId, vlManualFilter);
+        checkManualFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n", EquipmentType.VOLTAGE_LEVEL);
+
+        // Create manual filter for substations
+        UUID substationFilterId = UUID.randomUUID();
+        ManualFilterEquipmentAttributes s1 = new ManualFilterEquipmentAttributes("P1", null);
+        ManualFilterEquipmentAttributes s2 = new ManualFilterEquipmentAttributes("P2", null);
+        ManualFilterEquipmentAttributes s3 = new ManualFilterEquipmentAttributes("P3", null);
+        ManualFilter sManualFilter = new ManualFilter(substationFilterId, creationDate, modificationDate, EquipmentType.SUBSTATION, List.of(s1, s2, s3));
+        insertFilter(substationFilterId, sManualFilter);
+        checkManualFilter(substationFilterId, sManualFilter);
+        checkManualFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
     }
 
     private void checkManualFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
@@ -1024,6 +1079,84 @@ public class FilterEntityControllerTest {
         return filter;
     }
 
+    private void insertVoltageLevelFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
+                                          RangeType rangeType, Double value1, Double value2,
+                                          UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
+        NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
+        SortedSet sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
+        VoltageLevelFilter voltageLevelFilter = new VoltageLevelFilter(equipmentID, equipmentName, sortedCountries, numericalFilter);
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+
+        AutomaticFilter filter = new AutomaticFilter(
+            id,
+            creationDate,
+            modificationDate,
+            voltageLevelFilter
+        );
+
+        insertFilter(id, filter);
+        checkFormFilter(id, filter);
+
+        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(),
+            new TypeReference<>() {
+            });
+
+        assertEquals(1, filterAttributes.size());
+        assertEquals(id, filterAttributes.get(0).getId());
+        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+
+        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+            .andExpect(content().json(expectedJsonExport));
+
+        mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+    }
+
+    private void insertSubstationFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
+                                        UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
+        SortedSet sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
+        SubstationFilter substationFilter = new SubstationFilter(equipmentID, equipmentName, sortedCountries);
+        Date creationDate = new Date();
+        Date modificationDate = new Date();
+
+        AutomaticFilter filter = new AutomaticFilter(
+            id,
+            creationDate,
+            modificationDate,
+            substationFilter
+        );
+
+        insertFilter(id, filter);
+        checkFormFilter(id, filter);
+
+        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(),
+            new TypeReference<>() {
+            });
+
+        assertEquals(1, filterAttributes.size());
+        assertEquals(id, filterAttributes.get(0).getId());
+        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+
+        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+            .andExpect(content().json(expectedJsonExport));
+
+        mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+    }
+
     private void checkFormFilter(UUID filterId, AutomaticFilter automaticFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         AutomaticFilter foundFilter = objectMapper.readValue(foundFilterAsString, AutomaticFilter.class);
@@ -1075,6 +1208,5 @@ public class FilterEntityControllerTest {
     private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
         matchFilterInfos(manualFilter1, manualFilter2);
         assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getFilterEquipmentsAttributes()).matchesSafely(manualFilter1.getFilterEquipmentsAttributes()));
-
     }
 }

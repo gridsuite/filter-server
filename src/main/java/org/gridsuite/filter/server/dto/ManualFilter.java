@@ -51,7 +51,7 @@ public class ManualFilter extends AbstractFilter {
         return filterEquipmentsAttributes.stream()
                 .filter(attribute -> attribute.getEquipmentID().equals(equipmentId))
                 .findFirst()
-                .map(equipment -> equipment.getDistributionKey())
+                .map(ManualFilterEquipmentAttributes::getDistributionKey)
                 .orElse(null);
     }
 }

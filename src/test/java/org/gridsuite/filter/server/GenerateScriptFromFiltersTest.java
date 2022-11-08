@@ -455,4 +455,60 @@ public class GenerateScriptFromFiltersTest {
                     .build()))
         );
     }
+
+    @Test
+    public void generateScriptVoltageLevelFilterTest() {
+        LinkedHashSet<String> countries = new LinkedHashSet<>();
+        countries.add("FR");
+        countries.add("ES");
+
+        assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
+            "\n" +
+            "for (equipment in network.voltageLevels) {\n" +
+            "  if (\n" +
+            "      (FiltersUtils.matchID('vlId1', equipment) || FiltersUtils.matchName('vlName1', equipment))\n" +
+            "      && FiltersUtils.isLocatedIn(['ES','FR'], equipment)\n" +
+            "      && FiltersUtils.isRangeNominalVoltage(equipment, 190.0, 250.0)\n" +
+            "     ) {\n" +
+            "           filter(equipment.id) { equipments equipment.id }\n" +
+            "     }\n" +
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            FILTER1_UUID,
+            Date.from(Instant.now()),
+            Date.from(Instant.now()),
+            VoltageLevelFilter.builder()
+                .equipmentID("vlId1")
+                .equipmentName("vlName1")
+                .countries(new TreeSet<>(countries))
+                .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(190.).value2(250.).build())
+                .build()))
+        );
+    }
+
+    @Test
+    public void generateScriptSubstationFilterTest() {
+        LinkedHashSet<String> countries = new LinkedHashSet<>();
+        countries.add("ES");
+        countries.add("PT");
+
+        assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
+            "\n" +
+            "for (equipment in network.substations) {\n" +
+            "  if (\n" +
+            "      (FiltersUtils.matchID('sId1', equipment) || FiltersUtils.matchName('sName1', equipment))\n" +
+            "      && FiltersUtils.isLocatedIn(['ES','PT'], equipment)\n" +
+            "     ) {\n" +
+            "           filter(equipment.id) { equipments equipment.id }\n" +
+            "     }\n" +
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            FILTER1_UUID,
+            Date.from(Instant.now()),
+            Date.from(Instant.now()),
+            SubstationFilter.builder()
+                .equipmentID("sId1")
+                .equipmentName("sName1")
+                .countries(new TreeSet<>(countries))
+                .build()))
+        );
+    }
 }

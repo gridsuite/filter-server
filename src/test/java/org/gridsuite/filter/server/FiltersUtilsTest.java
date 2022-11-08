@@ -65,5 +65,15 @@ public class FiltersUtilsTest {
 
         assertTrue(FiltersUtils.isRangeNominalVoltage(t1, 200., 250.));
         assertFalse(FiltersUtils.isRangeNominalVoltage(t1, 250., 300.));
+
+        assertTrue(FiltersUtils.isLocatedIn(List.of("FR", "ES"), vl1));
+        assertFalse(FiltersUtils.isLocatedIn(List.of("PT", "ES"), vl1));
+        assertFalse(FiltersUtils.isLocatedIn(List.of("FR"), vl2));
+        assertTrue(FiltersUtils.isLocatedIn(List.of("PT", "ES"), vl2));
+
+        assertTrue(FiltersUtils.isLocatedIn(List.of("FR"), s1));
+        assertFalse(FiltersUtils.isLocatedIn(List.of("ES"), s1));
+        assertTrue(FiltersUtils.isLocatedIn(List.of("ES"), s2));
+        assertFalse(FiltersUtils.isLocatedIn(List.of("PT"), s2));
     }
 }

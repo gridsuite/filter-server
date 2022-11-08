@@ -10,6 +10,7 @@ import com.powsybl.iidm.network.Country;
 import com.powsybl.iidm.network.Identifiable;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.Terminal;
+import com.powsybl.iidm.network.VoltageLevel;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
@@ -40,8 +41,22 @@ public final class FiltersUtils {
         return filterCountries.isEmpty() || country.map(c -> filterCountries.contains(c.name())).orElse(false);
     }
 
+    public static boolean isLocatedIn(List<String> filterCountries, VoltageLevel voltageLevel) {
+        Optional<Country> country = voltageLevel.getSubstation().flatMap(Substation::getCountry);
+        return filterCountries.isEmpty() || country.map(c -> filterCountries.contains(c.name())).orElse(false);
+    }
+
+    public static boolean isLocatedIn(List<String> filterCountries, Substation substation) {
+        Optional<Country> country = substation.getCountry();
+        return filterCountries.isEmpty() || country.map(c -> filterCountries.contains(c.name())).orElse(false);
+    }
+
     public static boolean isEqualityNominalVoltage(Terminal terminal, Double value) {
-        return isEqualityNominalVoltage(terminal.getVoltageLevel().getNominalV(), value);
+        return isEqualityNominalVoltage(terminal.getVoltageLevel(), value);
+    }
+
+    public static boolean isEqualityNominalVoltage(VoltageLevel voltageLevel, Double value) {
+        return isEqualityNominalVoltage(voltageLevel.getNominalV(), value);
     }
 
     public static boolean isEqualityNominalVoltage(Double nominalV, Double value) {
@@ -49,7 +64,11 @@ public final class FiltersUtils {
     }
 
     public static boolean isRangeNominalVoltage(Terminal terminal, Double minValue, Double maxValue) {
-        return isRangeNominalVoltage(terminal.getVoltageLevel().getNominalV(), minValue, maxValue);
+        return isRangeNominalVoltage(terminal.getVoltageLevel(), minValue, maxValue);
+    }
+
+    public static boolean isRangeNominalVoltage(VoltageLevel voltageLevel, Double minValue, Double maxValue) {
+        return isRangeNominalVoltage(voltageLevel.getNominalV(), minValue, maxValue);
     }
 
     public static boolean isRangeNominalVoltage(Double nominalV, Double minValue, Double maxValue) {

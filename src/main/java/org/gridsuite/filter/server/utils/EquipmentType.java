@@ -22,7 +22,9 @@ public enum EquipmentType {
     VSC_CONVERTER_STATION("vscConverterStations"),
     TWO_WINDINGS_TRANSFORMER("twoWindingsTransformers"),
     THREE_WINDINGS_TRANSFORMER("threeWindingsTransformers"),
-    HVDC_LINE("hvdcLines");
+    HVDC_LINE("hvdcLines"),
+    SUBSTATION("substations"),
+    VOLTAGE_LEVEL("voltageLevels");
 
     private final String collectionName;
 
