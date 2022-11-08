@@ -43,7 +43,7 @@ public class GenerateScriptFromFiltersTest {
                 "      (FiltersUtils.matchID('lineId1', equipment) || FiltersUtils.matchName('lineName1', equipment))\n" +
                 "      && FiltersUtils.isLocatedIn(['ES','FR'], equipment.terminal1)\n" +
                 "      && FiltersUtils.isLocatedIn(['IT','PT'], equipment.terminal2)\n" +
-                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1.nominalVoltage, 225.0, 250.0)\n" +
+                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1, 225.0, 250.0)\n" +
                 "      && equipment.terminal1.voltageLevel.substation.name.equals('s1')\n" +
                 "      && equipment.terminal2.voltageLevel.substation.name.equals('s2')\n" +
                 "     ) {\n" +
@@ -104,7 +104,7 @@ public class GenerateScriptFromFiltersTest {
                 "  if (\n" +
                 "      (FiltersUtils.matchName('lineName2', equipment))\n" +
                 "      && FiltersUtils.isLocatedIn(['IT','PT'], equipment.terminal2)\n" +
-                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1.nominalVoltage, 380.0, null)\n" +
+                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal1, 380.0, null)\n" +
                 "      && equipment.terminal1.voltageLevel.substation.name.equals('s1')\n" +
                 "     ) {\n" +
                 "           filter(equipment.id) { equipments equipment.id }\n" +

@@ -10,7 +10,7 @@ for (equipment in network.<collectionName>) {
       <if(countries2)>FiltersUtils.isLocatedIn(<countries2>, equipment.terminal2)<endif>
       <if((equipmentId || equipmentName || countries1 || countries2) && nominalVType)>&& <endif><\\>
       <if(nominalVEquality)>FiltersUtils.isEqualityNominalVoltage(equipment.terminal1, <nominalV>)<endif><\\>
-      <if(nominalVRange)>FiltersUtils.isRangeNominalVoltage(equipment.terminal1.nominalVoltage, <minNominalV>, <maxNominalV>)<endif>
+      <if(nominalVRange)>FiltersUtils.isRangeNominalVoltage(equipment.terminal1, <minNominalV>, <maxNominalV>)<endif>
       <if((equipmentId || equipmentName || countries1 || countries2 || nominalVType) && substationName1)>&& <endif><\\>
       <if(substationName1)>equipment.terminal1.voltageLevel.substation.name.equals('<substationName1>')<endif>
       <if((equipmentId || equipmentName || countries1 || countries2 || nominalVType) && substationName2)>&& <endif><\\>
