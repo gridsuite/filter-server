@@ -13,5 +13,5 @@ import org.gridsuite.filter.server.entities.ManualFilterEntity;
  * @author Seddik Yengui <seddik.yengui at rte-france.com>
  */
 
-public interface ManualFilterRepository extends FilterRepository<ManualFilterEntity> {
+public interface IdentifierListFilterRepository extends FilterRepository<ManualFilterEntity> {
 }

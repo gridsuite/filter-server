@@ -11,11 +11,11 @@ import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.ManualFilterEquipmentAttributes;
-import org.gridsuite.filter.server.dto.ManualFilter;
+import org.gridsuite.filter.server.dto.IdentifierListFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.ManualFilterEntity;
 import org.gridsuite.filter.server.entities.ManualFilterEquipmentEntity;
-import org.gridsuite.filter.server.repositories.ManualFilterRepository;
+import org.gridsuite.filter.server.repositories.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
@@ -26,21 +26,21 @@ import java.util.stream.Collectors;
  * @author Seddik Yengui <seddik.yengui at rte-france.com>
  */
 
-public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ManualFilterEntity, ManualFilterRepository> {
-    private final ManualFilterRepository manualFilterRepository;
+public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ManualFilterEntity, IdentifierListFilterRepository> {
+    private final IdentifierListFilterRepository identifierListFilterRepository;
 
-    public ManualFilterRepositoryProxy(ManualFilterRepository manualFilterRepository) {
-        this.manualFilterRepository = manualFilterRepository;
+    public ManualFilterRepositoryProxy(IdentifierListFilterRepository identifierListFilterRepository) {
+        this.identifierListFilterRepository = identifierListFilterRepository;
     }
 
     @Override
-    ManualFilterRepository getRepository() {
-        return manualFilterRepository;
+    IdentifierListFilterRepository getRepository() {
+        return identifierListFilterRepository;
     }
 
     @Override
     AbstractFilter toDto(ManualFilterEntity filterEntity) {
-        return new ManualFilter(filterEntity.getId(),
+        return new IdentifierListFilter(filterEntity.getId(),
                 filterEntity.getCreationDate(),
                 filterEntity.getModificationDate(),
                 filterEntity.getEquipmentType(),
@@ -53,8 +53,8 @@ public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<M
 
     @Override
     ManualFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof ManualFilter) {
-            var filter = (ManualFilter) dto;
+        if (dto instanceof IdentifierListFilter) {
+            var filter = (IdentifierListFilter) dto;
             var manualFilterEntityBuilder = ManualFilterEntity.builder()
                     .equipmentType(filter.getEquipmentType())
                     .filterEquipmentEntityList(filter.getFilterEquipmentsAttributes()
@@ -84,7 +84,7 @@ public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<M
 
     @Override
     public EquipmentType getEquipmentType(UUID id) {
-        return manualFilterRepository.findById(id)
+        return identifierListFilterRepository.findById(id)
             .map(ManualFilterEntity::getEquipmentType)
             .orElseThrow(() -> new PowsyblException("Manual filter " + id + " not found"));
     }

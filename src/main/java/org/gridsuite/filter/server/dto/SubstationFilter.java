@@ -25,7 +25,7 @@ import java.util.SortedSet;
 @AllArgsConstructor
 @SuperBuilder
 @ToString(callSuper = true)
-@Schema(description = "Substation Filters", allOf = AutomaticFilter.class)
+@Schema(description = "Substation Filters", allOf = CriteriaFilter.class)
 public class SubstationFilter extends AbstractEquipmentFilterForm {
     @Override
     public EquipmentType getEquipmentType() {

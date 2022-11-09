@@ -50,7 +50,7 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                     FILTER1_UUID,
                     Date.from(Instant.now()),
                     Date.from(Instant.now()),
@@ -76,7 +76,7 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                     FILTER1_UUID,
                     Date.from(Instant.now()),
                     Date.from(Instant.now()),
@@ -92,7 +92,7 @@ public class GenerateScriptFromFiltersTest {
                 "for (equipment in network.lines) {\n" +
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(FILTER1_UUID,
+            filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
                 LineFilter.builder()
@@ -110,7 +110,7 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                     FILTER1_UUID,
                     Date.from(Instant.now()),
                     Date.from(Instant.now()),
@@ -141,7 +141,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -170,7 +170,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -194,7 +194,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -220,7 +220,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -243,7 +243,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -261,7 +261,7 @@ public class GenerateScriptFromFiltersTest {
             "\n" +
             "for (equipment in network.busbarSections) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -287,7 +287,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -316,7 +316,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -343,7 +343,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -373,7 +373,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -405,7 +405,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -440,7 +440,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 Date.from(Instant.now()),
@@ -472,7 +472,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
             FILTER1_UUID,
             Date.from(Instant.now()),
             Date.from(Instant.now()),
@@ -500,7 +500,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
             FILTER1_UUID,
             Date.from(Instant.now()),
             Date.from(Instant.now()),

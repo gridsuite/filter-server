@@ -9,7 +9,7 @@ package org.gridsuite.filter.server;
 
 import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.AutomaticFilter;
+import org.gridsuite.filter.server.dto.CriteriaFilter;
 import org.gridsuite.filter.server.dto.VoltageLevelFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.VoltageLevelFilterEntity;
@@ -62,12 +62,12 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
 
     @Override
     public VoltageLevelFilterEntity fromDto(AbstractFilter dto) {
-        AutomaticFilter automaticFilter = toFormFilter(dto, VoltageLevelFilter.class);
-        VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) automaticFilter.getEquipmentFilterForm();
+        CriteriaFilter criteriaFilter = toFormFilter(dto, VoltageLevelFilter.class);
+        VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) criteriaFilter.getEquipmentFilterForm();
         var voltageLevelFilterEntityBuilder =  VoltageLevelFilterEntity.builder()
             .countries(voltageLevelFilter.getCountries())
             .nominalVoltage(convert(voltageLevelFilter.getNominalVoltage()));
-        buildGenericFilter(voltageLevelFilterEntityBuilder, automaticFilter);
+        buildGenericFilter(voltageLevelFilterEntityBuilder, criteriaFilter);
         return voltageLevelFilterEntityBuilder.build();
     }
 }

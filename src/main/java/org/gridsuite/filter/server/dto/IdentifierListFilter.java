@@ -28,15 +28,15 @@ import java.util.UUID;
 @Schema(description = "Manual Filters", allOf = AbstractFilter.class)
 @SuperBuilder
 @NoArgsConstructor
-public class ManualFilter extends AbstractFilter {
+public class IdentifierListFilter extends AbstractFilter {
 
     private List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes;
 
-    public ManualFilter(UUID id,
-                        Date creationDate,
-                        Date modificationDate,
-                        EquipmentType equipmentType,
-                        List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes) {
+    public IdentifierListFilter(UUID id,
+                                Date creationDate,
+                                Date modificationDate,
+                                EquipmentType equipmentType,
+                                List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes) {
         super(id, creationDate, modificationDate, equipmentType);
         this.filterEquipmentsAttributes = filterEquipmentsAttributes;
     }

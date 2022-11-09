@@ -180,14 +180,14 @@ public class FilterEntityControllerTest {
         Date modificationDate = new Date();
 
         LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
-        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
+        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
                 lineFilter
         );
-        insertFilter(filterId1, lineAutomaticFilter);
-        checkFormFilter(filterId1, lineAutomaticFilter);
+        insertFilter(filterId1, lineCriteriaFilter);
+        checkFormFilter(filterId1, lineCriteriaFilter);
 
         // export
         assertThrows("Network '" + NETWORK_NOT_FOUND_UUID + "' not found", NestedServletException.class, () -> mvc.perform(get(URL_TEMPLATE + filterId1 + "/export?networkUuid=" + NETWORK_NOT_FOUND_UUID)
@@ -210,7 +210,7 @@ public class FilterEntityControllerTest {
         Date dateCreation = filterAttributes.get(0).getCreationDate();
         Date dateModification = filterAttributes.get(0).getModificationDate();
 
-        AutomaticFilter hvdcLineAutomaticFilter = new AutomaticFilter(
+        CriteriaFilter hvdcLineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 dateCreation,
                 dateModification,
@@ -224,8 +224,8 @@ public class FilterEntityControllerTest {
                         new NumericalFilter(RangeType.RANGE, 50., null)
                 )
         );
-        modifyFormFilter(filterId1, hvdcLineAutomaticFilter);
-        checkFormFilter(filterId1, hvdcLineAutomaticFilter);
+        modifyFormFilter(filterId1, hvdcLineCriteriaFilter);
+        checkFormFilter(filterId1, hvdcLineCriteriaFilter);
 
         ScriptFilter scriptFilter = new ScriptFilter(filterId2, creationDate, modificationDate, "test");
         insertFilter(filterId2, scriptFilter);
@@ -255,7 +255,7 @@ public class FilterEntityControllerTest {
         matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, creationDate, modificationDate);
 
         // test replace line filter with other filter type
-        AbstractFilter generatorFormFilter = new AutomaticFilter(
+        AbstractFilter generatorFormFilter = new CriteriaFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
@@ -276,7 +276,7 @@ public class FilterEntityControllerTest {
         matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, EquipmentType.GENERATOR, creationDate, modificationDate);
 
         // update with same type filter
-        AbstractFilter generatorFormFilter2 = new AutomaticFilter(
+        AbstractFilter generatorFormFilter2 = new CriteriaFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
@@ -317,7 +317,7 @@ public class FilterEntityControllerTest {
         List<Double> values2 = new ArrayList<>();
         values2.add(null);
 
-        AutomaticFilter lineAutomaticFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
+        CriteriaFilter lineCriteriaFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
                 rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, false);
 
         // update form filter <-> script filter (rejected)
@@ -328,7 +328,7 @@ public class FilterEntityControllerTest {
                 .content(objectMapper.writeValueAsString(scriptFilter))
                 .contentType(APPLICATION_JSON)));
         assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId4)
-                .content(objectMapper.writeValueAsString(lineAutomaticFilterBEFR))
+                .content(objectMapper.writeValueAsString(lineCriteriaFilterBEFR))
                 .contentType(APPLICATION_JSON)));
 
         mvc.perform(delete(URL_TEMPLATE + filterId3)).andExpect(status().isOk());
@@ -668,15 +668,15 @@ public class FilterEntityControllerTest {
 
         LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
 
-        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
+        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
                 lineFilter
         );
 
-        insertFilter(filterId1, lineAutomaticFilter);
-        checkFormFilter(filterId1, lineAutomaticFilter);
+        insertFilter(filterId1, lineCriteriaFilter);
+        checkFormFilter(filterId1, lineCriteriaFilter);
 
         // new script from filter
         mvc.perform(post(URL_TEMPLATE + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
@@ -714,15 +714,15 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
         LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
-        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
+        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 creationDate,
                 modificationDate,
                 lineFilter
         );
-        insertFilter(filterId1, lineAutomaticFilter);
+        insertFilter(filterId1, lineCriteriaFilter);
         mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId1 + "&id=" + UUID.randomUUID())).andExpect(status().isOk());
-        checkFormFilter(filterId1, lineAutomaticFilter);
+        checkFormFilter(filterId1, lineCriteriaFilter);
     }
 
     @Test
@@ -734,18 +734,18 @@ public class FilterEntityControllerTest {
         // Create manual filter for generators
         ManualFilterEquipmentAttributes gen1 = new ManualFilterEquipmentAttributes("GEN", 7d);
         ManualFilterEquipmentAttributes gen2 = new ManualFilterEquipmentAttributes("GEN2", 9d);
-        ManualFilter manualFilter = new ManualFilter(filterId, creationDate, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
-        insertFilter(filterId, manualFilter);
-        checkManualFilter(filterId, manualFilter);
+        IdentifierListFilter identifierListFilter = new IdentifierListFilter(filterId, creationDate, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
+        insertFilter(filterId, identifierListFilter);
+        checkManualFilter(filterId, identifierListFilter);
         checkManualFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n", EquipmentType.GENERATOR);
 
         // Create manual filter for lines
         UUID lineFilterId = UUID.randomUUID();
         ManualFilterEquipmentAttributes line1 = new ManualFilterEquipmentAttributes("NHV1_NHV2_1", null);
         ManualFilterEquipmentAttributes line2 = new ManualFilterEquipmentAttributes("NHV1_NHV2_2", null);
-        ManualFilter lineManualFilter = new ManualFilter(lineFilterId, creationDate, modificationDate, EquipmentType.LINE, List.of(line1, line2));
-        insertFilter(lineFilterId, lineManualFilter);
-        checkManualFilter(lineFilterId, lineManualFilter);
+        IdentifierListFilter lineIdentifierListFilter = new IdentifierListFilter(lineFilterId, creationDate, modificationDate, EquipmentType.LINE, List.of(line1, line2));
+        insertFilter(lineFilterId, lineIdentifierListFilter);
+        checkManualFilter(lineFilterId, lineIdentifierListFilter);
         checkManualFilterExportAndMetadata(lineFilterId, "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]", EquipmentType.LINE);
 
         // Create manual filter for Two Windings Transformer
@@ -753,36 +753,36 @@ public class FilterEntityControllerTest {
         ManualFilterEquipmentAttributes twoWT1 = new ManualFilterEquipmentAttributes("NGEN_NHV1", null);
         ManualFilterEquipmentAttributes twoWT2 = new ManualFilterEquipmentAttributes("NHV2_NLOAD", null);
         ManualFilterEquipmentAttributes twoWT3 = new ManualFilterEquipmentAttributes("twoWT3", null);
-        ManualFilter twoWinTransformerManualFilter = new ManualFilter(twoWinTransformerManualFilterId, creationDate, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
-        insertFilter(twoWinTransformerManualFilterId, twoWinTransformerManualFilter);
-        checkManualFilter(twoWinTransformerManualFilterId, twoWinTransformerManualFilter);
+        IdentifierListFilter twoWinTransformerIdentifierListFilter = new IdentifierListFilter(twoWinTransformerManualFilterId, creationDate, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
+        insertFilter(twoWinTransformerManualFilterId, twoWinTransformerIdentifierListFilter);
+        checkManualFilter(twoWinTransformerManualFilterId, twoWinTransformerIdentifierListFilter);
         checkManualFilterExportAndMetadata(twoWinTransformerManualFilterId, "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]", EquipmentType.TWO_WINDINGS_TRANSFORMER);
 
         // Create manual filter for Three Windings Transformer
         UUID threeWTransformerManualFilterId = UUID.randomUUID();
         ManualFilterEquipmentAttributes threeWT1 = new ManualFilterEquipmentAttributes("threeWT1", null);
         ManualFilterEquipmentAttributes threeWT2 = new ManualFilterEquipmentAttributes("threeWT2", null);
-        ManualFilter threeWinTransformerManualFilter = new ManualFilter(threeWTransformerManualFilterId, creationDate, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
-        insertFilter(threeWTransformerManualFilterId, threeWinTransformerManualFilter);
-        checkManualFilter(threeWTransformerManualFilterId, threeWinTransformerManualFilter);
+        IdentifierListFilter threeWinTransformerIdentifierListFilter = new IdentifierListFilter(threeWTransformerManualFilterId, creationDate, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
+        insertFilter(threeWTransformerManualFilterId, threeWinTransformerIdentifierListFilter);
+        checkManualFilter(threeWTransformerManualFilterId, threeWinTransformerIdentifierListFilter);
         checkManualFilterExportAndMetadata(threeWTransformerManualFilterId, "[]", EquipmentType.THREE_WINDINGS_TRANSFORMER);
 
         // Create manual filter for hvdc
         UUID hvdcFilterId = UUID.randomUUID();
         ManualFilterEquipmentAttributes hvdc1 = new ManualFilterEquipmentAttributes("threeWT1", null);
         ManualFilterEquipmentAttributes hvdc2 = new ManualFilterEquipmentAttributes("threeWT2", null);
-        ManualFilter hvdcManualFilter = new ManualFilter(hvdcFilterId, creationDate, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
-        insertFilter(hvdcFilterId, hvdcManualFilter);
-        checkManualFilter(hvdcFilterId, hvdcManualFilter);
+        IdentifierListFilter hvdcIdentifierListFilter = new IdentifierListFilter(hvdcFilterId, creationDate, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
+        insertFilter(hvdcFilterId, hvdcIdentifierListFilter);
+        checkManualFilter(hvdcFilterId, hvdcIdentifierListFilter);
         checkManualFilterExportAndMetadata(hvdcFilterId, "[]", EquipmentType.HVDC_LINE);
 
         // Create manual filter for voltage levels
         UUID voltageLevelFilterId = UUID.randomUUID();
         ManualFilterEquipmentAttributes vl1 = new ManualFilterEquipmentAttributes("VLHV1", null);
         ManualFilterEquipmentAttributes vl2 = new ManualFilterEquipmentAttributes("VLHV2", null);
-        ManualFilter vlManualFilter = new ManualFilter(voltageLevelFilterId, creationDate, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
-        insertFilter(voltageLevelFilterId, vlManualFilter);
-        checkManualFilter(voltageLevelFilterId, vlManualFilter);
+        IdentifierListFilter vlIdentifierListFilter = new IdentifierListFilter(voltageLevelFilterId, creationDate, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
+        insertFilter(voltageLevelFilterId, vlIdentifierListFilter);
+        checkManualFilter(voltageLevelFilterId, vlIdentifierListFilter);
         checkManualFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n", EquipmentType.VOLTAGE_LEVEL);
 
         // Create manual filter for substations
@@ -790,9 +790,9 @@ public class FilterEntityControllerTest {
         ManualFilterEquipmentAttributes s1 = new ManualFilterEquipmentAttributes("P1", null);
         ManualFilterEquipmentAttributes s2 = new ManualFilterEquipmentAttributes("P2", null);
         ManualFilterEquipmentAttributes s3 = new ManualFilterEquipmentAttributes("P3", null);
-        ManualFilter sManualFilter = new ManualFilter(substationFilterId, creationDate, modificationDate, EquipmentType.SUBSTATION, List.of(s1, s2, s3));
-        insertFilter(substationFilterId, sManualFilter);
-        checkManualFilter(substationFilterId, sManualFilter);
+        IdentifierListFilter sIdentifierListFilter = new IdentifierListFilter(substationFilterId, creationDate, modificationDate, EquipmentType.SUBSTATION, List.of(s1, s2, s3));
+        insertFilter(substationFilterId, sIdentifierListFilter);
+        checkManualFilter(substationFilterId, sIdentifierListFilter);
         checkManualFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
     }
 
@@ -832,14 +832,14 @@ public class FilterEntityControllerTest {
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
         String modifiedFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
-        AutomaticFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, AutomaticFilter.class);
+        CriteriaFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, CriteriaFilter.class);
         checkFormFilter(filterId, modifiedFilter);
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
         MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
-        modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), AutomaticFilter.class);
+        modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), CriteriaFilter.class);
         checkFormFilter(filterId, modifiedFilter);
     }
 
@@ -884,7 +884,7 @@ public class FilterEntityControllerTest {
             default:
                 throw new PowsyblException("Equipment type not allowed");
         }
-        AutomaticFilter injectionFilter = new AutomaticFilter(
+        CriteriaFilter injectionFilter = new CriteriaFilter(
                 id,
                 creationDate,
                 modificationDate,
@@ -936,7 +936,7 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
-        AutomaticFilter transformerFilter = new AutomaticFilter(
+        CriteriaFilter transformerFilter = new CriteriaFilter(
                 id,
                 creationDate,
                 modificationDate,
@@ -974,7 +974,7 @@ public class FilterEntityControllerTest {
                                       UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
         Date creationDate = new Date();
         Date modificationDate = new Date();
-        AutomaticFilter hvdcLineFilter = new AutomaticFilter(
+        CriteriaFilter hvdcLineFilter = new CriteriaFilter(
                 id,
                 creationDate,
                 modificationDate,
@@ -1032,10 +1032,10 @@ public class FilterEntityControllerTest {
         assertEquals(0, filterAttributes.size());
     }
 
-    private AutomaticFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
-                                             String substationName, Set<String> countries1, Set<String> countries2,
-                                             List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
-                                             UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
+    private CriteriaFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
+                                            String substationName, Set<String> countries1, Set<String> countries2,
+                                            List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
+                                            UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
         NumericalFilter numericalFilter1 = null;
         if (rangeTypes.size() >= 1) {
             numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
@@ -1047,7 +1047,7 @@ public class FilterEntityControllerTest {
         AbstractEquipmentFilterForm equipmentFilterForm = new LineFilter(equipmentID, equipmentName, null, substationName, AbstractFilterRepositoryProxy.setToSorterSet(countries1), AbstractFilterRepositoryProxy.setToSorterSet(countries2), numericalFilter1, numericalFilter2);
         Date creationDate = new Date();
         Date modificationDate = new Date();
-        AutomaticFilter filter = new AutomaticFilter(
+        CriteriaFilter filter = new CriteriaFilter(
                 id,
                 creationDate,
                 modificationDate,
@@ -1088,7 +1088,7 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
-        AutomaticFilter filter = new AutomaticFilter(
+        CriteriaFilter filter = new CriteriaFilter(
             id,
             creationDate,
             modificationDate,
@@ -1126,7 +1126,7 @@ public class FilterEntityControllerTest {
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
-        AutomaticFilter filter = new AutomaticFilter(
+        CriteriaFilter filter = new CriteriaFilter(
             id,
             creationDate,
             modificationDate,
@@ -1157,10 +1157,10 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
-    private void checkFormFilter(UUID filterId, AutomaticFilter automaticFilter) throws Exception {
+    private void checkFormFilter(UUID filterId, CriteriaFilter criteriaFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        AutomaticFilter foundFilter = objectMapper.readValue(foundFilterAsString, AutomaticFilter.class);
-        matchFormFilterInfos(foundFilter, automaticFilter);
+        CriteriaFilter foundFilter = objectMapper.readValue(foundFilterAsString, CriteriaFilter.class);
+        matchFormFilterInfos(foundFilter, criteriaFilter);
     }
 
     private void checkScriptFilter(UUID filterId, ScriptFilter scriptFilter) throws Exception {
@@ -1169,10 +1169,10 @@ public class FilterEntityControllerTest {
         matchScriptFilterInfos(foundFilter, scriptFilter);
     }
 
-    private void checkManualFilter(UUID filterId, ManualFilter manualFilter) throws Exception {
+    private void checkManualFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        ManualFilter foundFilter = objectMapper.readValue(foundFilterAsString, ManualFilter.class);
-        matchManualFilterInfos(foundFilter, manualFilter);
+        IdentifierListFilter foundFilter = objectMapper.readValue(foundFilterAsString, IdentifierListFilter.class);
+        matchManualFilterInfos(foundFilter, identifierListFilter);
     }
 
     private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
@@ -1191,9 +1191,9 @@ public class FilterEntityControllerTest {
         assertEquals(filterAttribute.getEquipmentType(), equipmentType);
     }
 
-    private void matchFormFilterInfos(AutomaticFilter automaticFilter1, AutomaticFilter automaticFilter2) {
-        matchFilterInfos(automaticFilter1, automaticFilter2);
-        matchEquipmentFormFilter(automaticFilter1.getEquipmentFilterForm(), automaticFilter2.getEquipmentFilterForm());
+    private void matchFormFilterInfos(CriteriaFilter criteriaFilter1, CriteriaFilter criteriaFilter2) {
+        matchFilterInfos(criteriaFilter1, criteriaFilter2);
+        matchEquipmentFormFilter(criteriaFilter1.getEquipmentFilterForm(), criteriaFilter2.getEquipmentFilterForm());
     }
 
     private void matchEquipmentFormFilter(AbstractEquipmentFilterForm equipmentFilterForm1, AbstractEquipmentFilterForm equipmentFilterForm2) {
@@ -1205,8 +1205,8 @@ public class FilterEntityControllerTest {
         assertTrue(scriptFilter1.getScript().contains(scriptFilter2.getScript()));
     }
 
-    private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
-        matchFilterInfos(manualFilter1, manualFilter2);
-        assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getFilterEquipmentsAttributes()).matchesSafely(manualFilter1.getFilterEquipmentsAttributes()));
+    private void matchManualFilterInfos(IdentifierListFilter identifierListFilter1, IdentifierListFilter identifierListFilter2) {
+        matchFilterInfos(identifierListFilter1, identifierListFilter2);
+        assertTrue(new MatcherJson<>(objectMapper, identifierListFilter2.getFilterEquipmentsAttributes()).matchesSafely(identifierListFilter1.getFilterEquipmentsAttributes()));
     }
 }
