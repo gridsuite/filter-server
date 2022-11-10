@@ -39,7 +39,7 @@ public class CriteriaFilter extends AbstractFilter {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public FilterType getType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

@@ -31,7 +31,7 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

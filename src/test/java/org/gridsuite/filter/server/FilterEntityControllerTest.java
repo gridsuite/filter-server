@@ -241,7 +241,7 @@ public class FilterEntityControllerTest {
             Collections.reverse(filterAttributes);
         }
 
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.HVDC_LINE, creationDate, modificationDate);
         matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, null, creationDate, modificationDate);
 
         filterAttributes = objectMapper.readValue(
@@ -252,7 +252,7 @@ public class FilterEntityControllerTest {
             new TypeReference<>() {
             });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.HVDC_LINE, creationDate, modificationDate);
 
         // test replace line filter with other filter type
         AbstractFilter generatorFormFilter = new CriteriaFilter(
@@ -273,7 +273,7 @@ public class FilterEntityControllerTest {
             new TypeReference<>() {
             });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, EquipmentType.GENERATOR, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.GENERATOR, creationDate, modificationDate);
 
         // update with same type filter
         AbstractFilter generatorFormFilter2 = new CriteriaFilter(
@@ -683,7 +683,7 @@ public class FilterEntityControllerTest {
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"type\":\"AUTOMATIC\"}, {\"type\":\"SCRIPT\"}]"));
+            .andExpect(content().json("[{\"type\":\"CRITERIA\"}, {\"type\":\"SCRIPT\"}]"));
 
         // replace filter with script
         mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
@@ -726,77 +726,77 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testManualFilter() throws Exception {
+    public void testIdentifierListFilter() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date creationDate = new Date();
         Date modificationDate = new Date();
 
-        // Create manual filter for generators
-        ManualFilterEquipmentAttributes gen1 = new ManualFilterEquipmentAttributes("GEN", 7d);
-        ManualFilterEquipmentAttributes gen2 = new ManualFilterEquipmentAttributes("GEN2", 9d);
+        // Create identifier list filter for generators
+        IdentifierListFilterEquipmentAttributes gen1 = new IdentifierListFilterEquipmentAttributes("GEN", 7d);
+        IdentifierListFilterEquipmentAttributes gen2 = new IdentifierListFilterEquipmentAttributes("GEN2", 9d);
         IdentifierListFilter identifierListFilter = new IdentifierListFilter(filterId, creationDate, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
         insertFilter(filterId, identifierListFilter);
-        checkManualFilter(filterId, identifierListFilter);
-        checkManualFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n", EquipmentType.GENERATOR);
+        checkIdentifierListFilter(filterId, identifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n", EquipmentType.GENERATOR);
 
-        // Create manual filter for lines
+        // Create identifier list filter for lines
         UUID lineFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes line1 = new ManualFilterEquipmentAttributes("NHV1_NHV2_1", null);
-        ManualFilterEquipmentAttributes line2 = new ManualFilterEquipmentAttributes("NHV1_NHV2_2", null);
+        IdentifierListFilterEquipmentAttributes line1 = new IdentifierListFilterEquipmentAttributes("NHV1_NHV2_1", null);
+        IdentifierListFilterEquipmentAttributes line2 = new IdentifierListFilterEquipmentAttributes("NHV1_NHV2_2", null);
         IdentifierListFilter lineIdentifierListFilter = new IdentifierListFilter(lineFilterId, creationDate, modificationDate, EquipmentType.LINE, List.of(line1, line2));
         insertFilter(lineFilterId, lineIdentifierListFilter);
-        checkManualFilter(lineFilterId, lineIdentifierListFilter);
-        checkManualFilterExportAndMetadata(lineFilterId, "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]", EquipmentType.LINE);
+        checkIdentifierListFilter(lineFilterId, lineIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(lineFilterId, "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]", EquipmentType.LINE);
 
-        // Create manual filter for Two Windings Transformer
-        UUID twoWinTransformerManualFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes twoWT1 = new ManualFilterEquipmentAttributes("NGEN_NHV1", null);
-        ManualFilterEquipmentAttributes twoWT2 = new ManualFilterEquipmentAttributes("NHV2_NLOAD", null);
-        ManualFilterEquipmentAttributes twoWT3 = new ManualFilterEquipmentAttributes("twoWT3", null);
-        IdentifierListFilter twoWinTransformerIdentifierListFilter = new IdentifierListFilter(twoWinTransformerManualFilterId, creationDate, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
-        insertFilter(twoWinTransformerManualFilterId, twoWinTransformerIdentifierListFilter);
-        checkManualFilter(twoWinTransformerManualFilterId, twoWinTransformerIdentifierListFilter);
-        checkManualFilterExportAndMetadata(twoWinTransformerManualFilterId, "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]", EquipmentType.TWO_WINDINGS_TRANSFORMER);
+        // Create identifier list filter for Two Windings Transformer
+        UUID twoWinTransformerIdentifierListFilterId = UUID.randomUUID();
+        IdentifierListFilterEquipmentAttributes twoWT1 = new IdentifierListFilterEquipmentAttributes("NGEN_NHV1", null);
+        IdentifierListFilterEquipmentAttributes twoWT2 = new IdentifierListFilterEquipmentAttributes("NHV2_NLOAD", null);
+        IdentifierListFilterEquipmentAttributes twoWT3 = new IdentifierListFilterEquipmentAttributes("twoWT3", null);
+        IdentifierListFilter twoWinTransformerIdentifierListFilter = new IdentifierListFilter(twoWinTransformerIdentifierListFilterId, creationDate, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
+        insertFilter(twoWinTransformerIdentifierListFilterId, twoWinTransformerIdentifierListFilter);
+        checkIdentifierListFilter(twoWinTransformerIdentifierListFilterId, twoWinTransformerIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(twoWinTransformerIdentifierListFilterId, "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]", EquipmentType.TWO_WINDINGS_TRANSFORMER);
 
-        // Create manual filter for Three Windings Transformer
-        UUID threeWTransformerManualFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes threeWT1 = new ManualFilterEquipmentAttributes("threeWT1", null);
-        ManualFilterEquipmentAttributes threeWT2 = new ManualFilterEquipmentAttributes("threeWT2", null);
-        IdentifierListFilter threeWinTransformerIdentifierListFilter = new IdentifierListFilter(threeWTransformerManualFilterId, creationDate, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
-        insertFilter(threeWTransformerManualFilterId, threeWinTransformerIdentifierListFilter);
-        checkManualFilter(threeWTransformerManualFilterId, threeWinTransformerIdentifierListFilter);
-        checkManualFilterExportAndMetadata(threeWTransformerManualFilterId, "[]", EquipmentType.THREE_WINDINGS_TRANSFORMER);
+        // Create identifier list filter for Three Windings Transformer
+        UUID threeWTransformerIdentifierListFilterId = UUID.randomUUID();
+        IdentifierListFilterEquipmentAttributes threeWT1 = new IdentifierListFilterEquipmentAttributes("threeWT1", null);
+        IdentifierListFilterEquipmentAttributes threeWT2 = new IdentifierListFilterEquipmentAttributes("threeWT2", null);
+        IdentifierListFilter threeWinTransformerIdentifierListFilter = new IdentifierListFilter(threeWTransformerIdentifierListFilterId, creationDate, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
+        insertFilter(threeWTransformerIdentifierListFilterId, threeWinTransformerIdentifierListFilter);
+        checkIdentifierListFilter(threeWTransformerIdentifierListFilterId, threeWinTransformerIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(threeWTransformerIdentifierListFilterId, "[]", EquipmentType.THREE_WINDINGS_TRANSFORMER);
 
-        // Create manual filter for hvdc
+        // Create identifier list filter for hvdc
         UUID hvdcFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes hvdc1 = new ManualFilterEquipmentAttributes("threeWT1", null);
-        ManualFilterEquipmentAttributes hvdc2 = new ManualFilterEquipmentAttributes("threeWT2", null);
+        IdentifierListFilterEquipmentAttributes hvdc1 = new IdentifierListFilterEquipmentAttributes("threeWT1", null);
+        IdentifierListFilterEquipmentAttributes hvdc2 = new IdentifierListFilterEquipmentAttributes("threeWT2", null);
         IdentifierListFilter hvdcIdentifierListFilter = new IdentifierListFilter(hvdcFilterId, creationDate, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
         insertFilter(hvdcFilterId, hvdcIdentifierListFilter);
-        checkManualFilter(hvdcFilterId, hvdcIdentifierListFilter);
-        checkManualFilterExportAndMetadata(hvdcFilterId, "[]", EquipmentType.HVDC_LINE);
+        checkIdentifierListFilter(hvdcFilterId, hvdcIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(hvdcFilterId, "[]", EquipmentType.HVDC_LINE);
 
-        // Create manual filter for voltage levels
+        // Create identifier list filter for voltage levels
         UUID voltageLevelFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes vl1 = new ManualFilterEquipmentAttributes("VLHV1", null);
-        ManualFilterEquipmentAttributes vl2 = new ManualFilterEquipmentAttributes("VLHV2", null);
+        IdentifierListFilterEquipmentAttributes vl1 = new IdentifierListFilterEquipmentAttributes("VLHV1", null);
+        IdentifierListFilterEquipmentAttributes vl2 = new IdentifierListFilterEquipmentAttributes("VLHV2", null);
         IdentifierListFilter vlIdentifierListFilter = new IdentifierListFilter(voltageLevelFilterId, creationDate, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
         insertFilter(voltageLevelFilterId, vlIdentifierListFilter);
-        checkManualFilter(voltageLevelFilterId, vlIdentifierListFilter);
-        checkManualFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n", EquipmentType.VOLTAGE_LEVEL);
+        checkIdentifierListFilter(voltageLevelFilterId, vlIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n", EquipmentType.VOLTAGE_LEVEL);
 
-        // Create manual filter for substations
+        // Create identifier list filter for substations
         UUID substationFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes s1 = new ManualFilterEquipmentAttributes("P1", null);
-        ManualFilterEquipmentAttributes s2 = new ManualFilterEquipmentAttributes("P2", null);
-        ManualFilterEquipmentAttributes s3 = new ManualFilterEquipmentAttributes("P3", null);
+        IdentifierListFilterEquipmentAttributes s1 = new IdentifierListFilterEquipmentAttributes("P1", null);
+        IdentifierListFilterEquipmentAttributes s2 = new IdentifierListFilterEquipmentAttributes("P2", null);
+        IdentifierListFilterEquipmentAttributes s3 = new IdentifierListFilterEquipmentAttributes("P3", null);
         IdentifierListFilter sIdentifierListFilter = new IdentifierListFilter(substationFilterId, creationDate, modificationDate, EquipmentType.SUBSTATION, List.of(s1, s2, s3));
         insertFilter(substationFilterId, sIdentifierListFilter);
-        checkManualFilter(substationFilterId, sIdentifierListFilter);
-        checkManualFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
+        checkIdentifierListFilter(substationFilterId, sIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
     }
 
-    private void checkManualFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
+    private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
         mvc.perform(get(URL_TEMPLATE + filterId + "/export?networkUuid=" + NETWORK_UUID)
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -813,7 +813,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(filterId, filterAttributes.get(0).getId());
-        assertEquals(FilterType.MANUAL, filterAttributes.get(0).getType());
+        assertEquals(FilterType.IDENTIFIER_LIST, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
     }
 
@@ -906,7 +906,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
@@ -956,7 +956,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
@@ -1000,7 +1000,7 @@ public class FilterEntityControllerTest {
                 new TypeReference<>() {
                 });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), id, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, creationDate, modificationDate);
 
         filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
@@ -1011,7 +1011,7 @@ public class FilterEntityControllerTest {
             });
 
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), id, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, creationDate, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, creationDate, modificationDate);
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -1065,7 +1065,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(EquipmentType.LINE, filterAttributes.get(0).getEquipmentType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
@@ -1108,7 +1108,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -1146,7 +1146,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -1169,10 +1169,10 @@ public class FilterEntityControllerTest {
         matchScriptFilterInfos(foundFilter, scriptFilter);
     }
 
-    private void checkManualFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
+    private void checkIdentifierListFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         IdentifierListFilter foundFilter = objectMapper.readValue(foundFilterAsString, IdentifierListFilter.class);
-        matchManualFilterInfos(foundFilter, identifierListFilter);
+        matchIdentifierListFilterInfos(foundFilter, identifierListFilter);
     }
 
     private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
@@ -1205,7 +1205,7 @@ public class FilterEntityControllerTest {
         assertTrue(scriptFilter1.getScript().contains(scriptFilter2.getScript()));
     }
 
-    private void matchManualFilterInfos(IdentifierListFilter identifierListFilter1, IdentifierListFilter identifierListFilter2) {
+    private void matchIdentifierListFilterInfos(IdentifierListFilter identifierListFilter1, IdentifierListFilter identifierListFilter2) {
         matchFilterInfos(identifierListFilter1, identifierListFilter2);
         assertTrue(new MatcherJson<>(objectMapper, identifierListFilter2.getFilterEquipmentsAttributes()).matchesSafely(identifierListFilter1.getFilterEquipmentsAttributes()));
     }

@@ -31,7 +31,7 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

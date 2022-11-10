@@ -29,7 +29,7 @@ public class BusBarSectionFilterRepositoryProxy extends AbstractFilterRepository
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

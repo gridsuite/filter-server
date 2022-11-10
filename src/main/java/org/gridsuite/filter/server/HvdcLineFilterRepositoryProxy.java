@@ -28,7 +28,7 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

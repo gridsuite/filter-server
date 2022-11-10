@@ -84,7 +84,7 @@ public class FilterService {
 
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
 
-        filterRepositories.put(FilterType.MANUAL.name(), new ManualFilterRepositoryProxy(identifierListFilterRepository));
+        filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
         this.networkStoreService = networkStoreService;
     }
@@ -129,7 +129,7 @@ public class FilterService {
     }
 
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
-        if (!filter.getType().equals(FilterType.AUTOMATIC)) {
+        if (!filter.getType().equals(FilterType.CRITERIA)) {
             return filterRepositories.get(filter.getType().name());
         }
         return filterRepositories.get(((CriteriaFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
@@ -495,7 +495,7 @@ public class FilterService {
     private List<String> getManuelFilterEquipmentIds(IdentifierListFilter identifierListFilter) {
         return identifierListFilter.getFilterEquipmentsAttributes()
             .stream()
-            .map(ManualFilterEquipmentAttributes::getEquipmentID)
+            .map(IdentifierListFilterEquipmentAttributes::getEquipmentID)
             .collect(Collectors.toList());
     }
 
@@ -570,7 +570,7 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
-        if (filter.getType() == FilterType.AUTOMATIC || filter.getType() == FilterType.MANUAL) {
+        if (filter.getType() == FilterType.CRITERIA || filter.getType() == FilterType.IDENTIFIER_LIST) {
             Network network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
 
             if (network == null) {

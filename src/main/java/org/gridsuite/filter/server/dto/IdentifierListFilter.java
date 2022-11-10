@@ -25,18 +25,18 @@ import java.util.UUID;
  */
 
 @Getter
-@Schema(description = "Manual Filters", allOf = AbstractFilter.class)
+@Schema(description = "Identifier list Filters", allOf = AbstractFilter.class)
 @SuperBuilder
 @NoArgsConstructor
 public class IdentifierListFilter extends AbstractFilter {
 
-    private List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes;
+    private List<IdentifierListFilterEquipmentAttributes> filterEquipmentsAttributes;
 
     public IdentifierListFilter(UUID id,
                                 Date creationDate,
                                 Date modificationDate,
                                 EquipmentType equipmentType,
-                                List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes) {
+                                List<IdentifierListFilterEquipmentAttributes> filterEquipmentsAttributes) {
         super(id, creationDate, modificationDate, equipmentType);
         this.filterEquipmentsAttributes = filterEquipmentsAttributes;
     }
@@ -44,14 +44,14 @@ public class IdentifierListFilter extends AbstractFilter {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public FilterType getType() {
-        return FilterType.MANUAL;
+        return FilterType.IDENTIFIER_LIST;
     }
 
     public Double getDistributionKey(String equipmentId) {
         return filterEquipmentsAttributes.stream()
                 .filter(attribute -> attribute.getEquipmentID().equals(equipmentId))
                 .findFirst()
-                .map(ManualFilterEquipmentAttributes::getDistributionKey)
+                .map(IdentifierListFilterEquipmentAttributes::getDistributionKey)
                 .orElse(null);
     }
 }

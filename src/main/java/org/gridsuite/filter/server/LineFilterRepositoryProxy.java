@@ -28,7 +28,7 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override
