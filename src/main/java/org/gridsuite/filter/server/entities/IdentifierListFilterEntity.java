@@ -29,12 +29,12 @@ import java.util.List;
 @SuperBuilder
 @AllArgsConstructor
 @Entity
-@Table(name = "manual_filter")
-public class ManualFilterEntity extends AbstractFilterEntity {
+@Table(name = "identifier_list_filter")
+public class IdentifierListFilterEntity extends AbstractFilterEntity {
 
     @Column(name = "equipmentType")
     private EquipmentType equipmentType;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<ManualFilterEquipmentEntity> filterEquipmentEntityList;
+    private List<IdentifierListFilterEquipmentEntity> filterEquipmentEntityList;
 }

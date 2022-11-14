@@ -27,8 +27,8 @@ import java.util.UUID;
 @SuperBuilder
 @AllArgsConstructor
 @Entity
-@Table(name = "manual_filter_equipment")
-public class ManualFilterEquipmentEntity {
+@Table(name = "identifier_list_filter_equipment")
+public class IdentifierListFilterEquipmentEntity {
     @Id
     @Column(name = "id")
     private UUID id;
