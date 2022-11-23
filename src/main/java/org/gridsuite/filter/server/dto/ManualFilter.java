@@ -33,11 +33,10 @@ public class ManualFilter extends AbstractFilter {
     private List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes;
 
     public ManualFilter(UUID id,
-                        Date creationDate,
                         Date modificationDate,
                         EquipmentType equipmentType,
                         List<ManualFilterEquipmentAttributes> filterEquipmentsAttributes) {
-        super(id, creationDate, modificationDate, equipmentType);
+        super(id, modificationDate, equipmentType);
         this.filterEquipmentsAttributes = filterEquipmentsAttributes;
     }
 

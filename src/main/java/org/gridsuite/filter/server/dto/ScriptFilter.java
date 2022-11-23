@@ -29,8 +29,8 @@ public class ScriptFilter extends AbstractFilter {
     @Schema(description = "Script")
     private String script;
 
-    public ScriptFilter(UUID id, Date creationDate, Date modificationDate, String script) {
-        super(id, creationDate, modificationDate, null);
+    public ScriptFilter(UUID id, Date modificationDate, String script) {
+        super(id, modificationDate, null);
         this.script = script;
     }
 

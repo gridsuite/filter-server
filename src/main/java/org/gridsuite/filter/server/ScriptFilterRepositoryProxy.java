@@ -49,7 +49,7 @@ class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ScriptFi
 
     @Override
     public AbstractFilter toDto(ScriptFilterEntity entity) {
-        return new ScriptFilter(entity.getId(), entity.getCreationDate(), entity.getModificationDate(), entity.getScript());
+        return new ScriptFilter(entity.getId(), entity.getModificationDate(), entity.getScript());
     }
 
     @Override

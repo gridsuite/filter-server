@@ -41,7 +41,6 @@ public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<M
     @Override
     AbstractFilter toDto(ManualFilterEntity filterEntity) {
         return new ManualFilter(filterEntity.getId(),
-                filterEntity.getCreationDate(),
                 filterEntity.getModificationDate(),
                 filterEntity.getEquipmentType(),
                 filterEntity.getFilterEquipmentEntityList()
