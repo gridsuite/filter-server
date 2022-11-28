@@ -40,8 +40,6 @@ public abstract class AbstractFilter implements IFilterAttributes {
 
     UUID id;
 
-    Date creationDate;
-
     Date modificationDate;
 
     EquipmentType equipmentType;

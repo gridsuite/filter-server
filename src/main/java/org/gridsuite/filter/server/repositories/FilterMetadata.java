@@ -13,7 +13,5 @@ package org.gridsuite.filter.server.repositories;
 public interface FilterMetadata {
     java.util.UUID getId();
 
-    java.util.Date getCreationDate();
-
     java.util.Date getModificationDate();
 }

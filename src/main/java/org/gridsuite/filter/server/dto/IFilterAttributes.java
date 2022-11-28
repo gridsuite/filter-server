@@ -16,8 +16,6 @@ import org.gridsuite.filter.server.utils.FilterType;
 public interface IFilterAttributes {
     java.util.UUID getId();
 
-    java.util.Date getCreationDate();
-
     java.util.Date getModificationDate();
 
     FilterType getType();
