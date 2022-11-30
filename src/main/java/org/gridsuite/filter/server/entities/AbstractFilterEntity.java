@@ -36,10 +36,6 @@ public abstract class AbstractFilterEntity {
     @Column(name = "id")
     private UUID id;
 
-    @Temporal(TIMESTAMP)
-    @Column(name = "creationDate")
-    private Date creationDate;
-
     @LastModifiedDate
     @Temporal(TIMESTAMP)
     @Column(name = "modificationDate")

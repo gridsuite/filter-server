@@ -26,14 +26,12 @@ import java.util.UUID;
 @NoArgsConstructor
 public class FilterAttributes implements IFilterAttributes {
     UUID id;
-    Date creationDate;
     Date modificationDate;
     FilterType type;
     EquipmentType equipmentType;
 
     public FilterAttributes(FilterMetadata filterMetadata, FilterType type, EquipmentType equipmentType) {
         id = filterMetadata.getId();
-        creationDate = filterMetadata.getCreationDate();
         modificationDate = filterMetadata.getModificationDate();
         this.type = type;
         this.equipmentType = equipmentType;

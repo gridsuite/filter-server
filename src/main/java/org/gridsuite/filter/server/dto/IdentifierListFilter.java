@@ -33,11 +33,10 @@ public class IdentifierListFilter extends AbstractFilter {
     private List<IdentifierListFilterEquipmentAttributes> filterEquipmentsAttributes;
 
     public IdentifierListFilter(UUID id,
-                                Date creationDate,
                                 Date modificationDate,
                                 EquipmentType equipmentType,
                                 List<IdentifierListFilterEquipmentAttributes> filterEquipmentsAttributes) {
-        super(id, creationDate, modificationDate, equipmentType);
+        super(id, modificationDate, equipmentType);
         this.filterEquipmentsAttributes = filterEquipmentsAttributes;
     }
 

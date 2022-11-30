@@ -140,7 +140,6 @@ public class FilterService {
         Optional<AbstractFilter> f = getFilter(id);
         if (f.isPresent()) {
             if (getRepository(f.get()) == getRepository(newFilter)) { // filter type has not changed
-                newFilter.setCreationDate(f.get().getCreationDate());
                 getRepository(newFilter).modify(id, newFilter);
             } else { // filter type has changed
                 if (f.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
@@ -148,7 +147,6 @@ public class FilterService {
                 } else {
                     getRepository(f.get()).deleteById(id);
                     newFilter.setId(id);
-                    newFilter.setCreationDate(f.get().getCreationDate());
                     createFilter(newFilter);
                 }
             }

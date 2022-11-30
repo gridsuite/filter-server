@@ -118,8 +118,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
-        builder.id(dto.getId())
-                .creationDate(getDateOrCreate(dto.getCreationDate()));
+        builder.id(dto.getId());
     }
 
     public static Date getDateOrCreate(Date dt) {
@@ -129,7 +128,6 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
     public AbstractFilter toFormFilterDto(AbstractGenericFilterEntity entity) {
         return new CriteriaFilter(
                 entity.getId(),
-                entity.getCreationDate(),
                 entity.getModificationDate(),
                 buildEquipmentFormFilter(entity)
         );

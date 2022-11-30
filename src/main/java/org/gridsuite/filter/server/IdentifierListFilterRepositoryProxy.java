@@ -41,7 +41,6 @@ public class IdentifierListFilterRepositoryProxy extends AbstractFilterRepositor
     @Override
     AbstractFilter toDto(IdentifierListFilterEntity filterEntity) {
         return new IdentifierListFilter(filterEntity.getId(),
-                filterEntity.getCreationDate(),
                 filterEntity.getModificationDate(),
                 filterEntity.getEquipmentType(),
                 filterEntity.getFilterEquipmentEntityList()
