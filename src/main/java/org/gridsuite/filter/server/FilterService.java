@@ -173,7 +173,6 @@ public class FilterService {
     @Transactional
     public AbstractFilter replaceFilterWithScript(UUID id) {
         Objects.requireNonNull(id);
-
         Optional<AbstractFilter> filter = getFilter(id);
         if (filter.isPresent()) {
             if (filter.get().getType() == FilterType.SCRIPT) {
