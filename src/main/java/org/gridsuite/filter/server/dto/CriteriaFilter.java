@@ -33,6 +33,7 @@ public class CriteriaFilter extends AbstractFilter {
 
     public CriteriaFilter(UUID id, Date modificationDate, AbstractEquipmentFilterForm equipmentFilterForm) {
         super(id, modificationDate, equipmentFilterForm.getEquipmentType());
+        this.equipmentFilterForm = equipmentFilterForm;
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
