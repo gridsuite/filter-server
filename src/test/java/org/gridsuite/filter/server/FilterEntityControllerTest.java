@@ -240,7 +240,6 @@ public class FilterEntityControllerTest {
         matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
         matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, null, modificationDate);
 
-
         filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
                     .contentType(APPLICATION_JSON))
@@ -270,7 +269,6 @@ public class FilterEntityControllerTest {
             });
         assertEquals(1, filterAttributes.size());
         matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.GENERATOR, modificationDate);
-
 
         // update with same type filter
         AbstractFilter generatorFormFilter2 = new CriteriaFilter(
@@ -999,7 +997,6 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
-
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
