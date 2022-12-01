@@ -80,9 +80,9 @@ public class FilterController {
     @PutMapping(value = "/filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Modify a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully modified")})
-    public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @RequestBody AbstractFilter filter) {
+    public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @RequestBody AbstractFilter filter, @RequestHeader("userId") String userId) {
         try {
-            service.changeFilter(id, filter);
+            service.changeFilter(id, filter, userId);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException ignored) {
             return ResponseEntity.notFound().build();
@@ -108,10 +108,10 @@ public class FilterController {
     @PutMapping(value = "/filters/{id}/replace-with-script")
     @Operation(summary = "Replace a filter with a script filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter have been replaced successfully")})
-    public ResponseEntity<AbstractFilter> replaceFilterWithScript(@PathVariable("id") UUID id) {
+    public ResponseEntity<AbstractFilter> replaceFilterWithScript(@PathVariable("id") UUID id, @RequestHeader("userId") String userId) {
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(service.replaceFilterWithScript(id));
+            .body(service.replaceFilterWithScript(id, userId));
     }
 
     @PostMapping(value = "/filters/{id}/new-script")

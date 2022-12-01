@@ -1,6 +1,12 @@
 spring:
   application:
     name: filter-server
+  cloud:
+    stream:
+      bindings:
+        publishElementUpdate-out-0:
+          destination:  ${powsybl-ws.rabbitmq.destination.prefix:}element.update
+      output-bindings: publishElementUpdate
 
 powsybl-ws:
   database:

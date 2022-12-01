@@ -1,6 +1,10 @@
 server:
   port: 5027
 
+spring:
+  rabbitmq:
+    addresses: localhost
+
 powsybl-ws:
   database:
     host: localhost
