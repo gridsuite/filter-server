@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
+import com.powsybl.iidm.network.EnergySource;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.Test;
@@ -132,6 +133,7 @@ public class GenerateScriptFromFiltersTest {
             "  if (\n" +
             "      (FiltersUtils.matchID('genId1', equipment) || FiltersUtils.matchName('genName1', equipment))\n" +
             "      && FiltersUtils.isLocatedIn(['ES','FR'], equipment.terminal)\n" +
+            "      && FiltersUtils.isEnergySource(equipment, 'HYDRO')\n" +
             "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal, 225.0, 250.0)\n" +
             "      && equipment.terminal.voltageLevel.substation.name.equals('s1')\n" +
             "     ) {\n" +
@@ -146,7 +148,31 @@ public class GenerateScriptFromFiltersTest {
                     .substationName("s1")
                     .countries(new TreeSet<>(countries))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
+                    .energySource(EnergySource.HYDRO)
                     .build()))
+        );
+
+        assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
+                "\n" +
+                "for (equipment in network.generators) {\n" +
+                "  if (\n" +
+                "      (FiltersUtils.matchID('genId1', equipment) || FiltersUtils.matchName('genName1', equipment))\n" +
+                "      && FiltersUtils.isLocatedIn(['ES','FR'], equipment.terminal)\n" +
+                "      && FiltersUtils.isRangeNominalVoltage(equipment.terminal, 63.0, 400.0)\n" +
+                "      && equipment.terminal.voltageLevel.substation.name.equals('s1')\n" +
+                "     ) {\n" +
+                "           filter(equipment.id) { equipments equipment.id }\n" +
+                "     }\n" +
+                "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
+                FILTER1_UUID,
+                Date.from(Instant.now()),
+                GeneratorFilter.builder()
+                        .equipmentID("genId1")
+                        .equipmentName("genName1")
+                        .substationName("s1")
+                        .countries(new TreeSet<>(countries))
+                        .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(63.).value2(400.).build())
+                        .build()))
         );
     }
 

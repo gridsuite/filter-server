@@ -6,12 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
-import com.powsybl.iidm.network.Country;
-import com.powsybl.iidm.network.Generator;
-import com.powsybl.iidm.network.Identifiable;
-import com.powsybl.iidm.network.Substation;
-import com.powsybl.iidm.network.Terminal;
-import com.powsybl.iidm.network.VoltageLevel;
+import com.powsybl.iidm.network.*;
 import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -43,6 +38,7 @@ public class FiltersUtilsTest {
         VoltageLevel vl2 = Mockito.mock(VoltageLevel.class);
         Terminal t1 = Mockito.mock(Terminal.class);
         Terminal t2 = Mockito.mock(Terminal.class);
+        Generator g = Mockito.mock(Generator.class);
 
         Mockito.when(s1.getCountry()).thenReturn(Optional.of(Country.FR));
         Mockito.when(s2.getCountry()).thenReturn(Optional.of(Country.ES));
@@ -52,6 +48,7 @@ public class FiltersUtilsTest {
         Mockito.when(t2.getVoltageLevel()).thenReturn(vl2);
         Mockito.when(vl1.getNominalV()).thenReturn(225.);
         Mockito.when(vl2.getNominalV()).thenReturn(380.);
+        Mockito.when(g.getEnergySource()).thenReturn(EnergySource.NUCLEAR);
 
         assertTrue(FiltersUtils.isLocatedIn(List.of("FR", "ES"), t1));
         assertTrue(FiltersUtils.isLocatedIn(List.of("ES", "IT"), t2));
@@ -75,5 +72,8 @@ public class FiltersUtilsTest {
         assertFalse(FiltersUtils.isLocatedIn(List.of("ES"), s1));
         assertTrue(FiltersUtils.isLocatedIn(List.of("ES"), s2));
         assertFalse(FiltersUtils.isLocatedIn(List.of("PT"), s2));
+
+        assertFalse(FiltersUtils.isEnergySource(g, "WIND"));
+        assertTrue(FiltersUtils.isEnergySource(g, "NUCLEAR"));
     }
 }

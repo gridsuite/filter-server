@@ -253,6 +253,10 @@ public class FilterService {
         }
     }
 
+    private boolean filterByEnergySource(Generator generator, EnergySource energySource) {
+        return energySource == null || generator.getEnergySource() == energySource;
+    }
+
     private <I extends Injection<I>> Stream<Injection<I>> getInjectionList(Stream<Injection<I>> stream, AbstractFilter filter) {
         if (filter instanceof CriteriaFilter) {
             CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
@@ -272,7 +276,17 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> getGeneratorList(Network network, AbstractFilter filter) {
-        return getInjectionList(network.getGeneratorStream().map(gen -> gen), filter).collect(Collectors.toList());
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            GeneratorFilter generatorFilter = (GeneratorFilter) criteriaFilter.getEquipmentFilterForm();
+            return getInjectionList(network.getGeneratorStream().map(injection -> injection), filter)
+                    .filter(injection -> filterByEnergySource((Generator) injection, generatorFilter.getEnergySource()))
+                    .collect(Collectors.toList());
+        } else if (filter instanceof IdentifierListFilter) {
+            return getInjectionList(network.getGeneratorStream().map(generator -> generator), filter).collect(Collectors.toList());
+        } else {
+            return List.of();
+        }
     }
 
     private List<Identifiable<?>> getLoadList(Network network, AbstractFilter filter) {
