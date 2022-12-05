@@ -27,6 +27,7 @@ import com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
+
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -41,6 +42,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.stream.binder.test.OutputDestination;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -60,6 +64,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -79,10 +84,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(classes = {FilterApplication.class})
+@ContextConfiguration(classes = {FilterApplication.class, TestChannelBinderConfiguration.class})
 public class FilterEntityControllerTest {
 
     public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters/";
+    private static final long TIMEOUT = 1000;
 
     @Autowired
     private MockMvc mvc;
@@ -98,6 +104,9 @@ public class FilterEntityControllerTest {
     private NetworkStoreService networkStoreService;
 
     @Autowired
+    private OutputDestination output;
+
+    @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
 
     public static final SortedSet COUNTRIES1 = new TreeSet(Collections.singleton("France"));
@@ -111,6 +120,9 @@ public class FilterEntityControllerTest {
     private static final UUID NETWORK_UUID_6 = UUID.fromString("11111111-7977-4592-2222-88027e4254e8");
     private static final UUID NETWORK_NOT_FOUND_UUID = UUID.fromString("88888888-7977-3333-9999-88027e4254e7");
     private static final String VARIANT_ID_1 = "variant_1";
+    private static final String USER_ID_HEADER = "userId";
+
+    private String elementUpdateDestination = "element.update";
 
     @Before
     public void setUp() {
@@ -164,8 +176,26 @@ public class FilterEntityControllerTest {
     }
 
     @After
-    public void cleanUp() {
+    public void tearDown() {
+        List<String> destinations = List.of(elementUpdateDestination);
+
+        cleanDB();
+        assertQueuesEmptyThenClear(destinations, output);
+    }
+
+    private void cleanDB() {
         filterService.deleteAll();
+
+    }
+
+    private void assertQueuesEmptyThenClear(List<String> destinations, OutputDestination output) {
+        try {
+            destinations.forEach(destination -> assertNull("Should not be any messages in queue " + destination + " : ", output.receive(TIMEOUT, destination)));
+        } catch (NullPointerException e) {
+            // Ignoring
+        } finally {
+            output.clear(); // purge in order to not fail the other tests
+        }
     }
 
     public String joinWithComma(Object... array) {
@@ -174,6 +204,7 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testLineFilter() throws Exception {
+        String userId = "userId";
         UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
         Date modificationDate = new Date();
@@ -220,7 +251,7 @@ public class FilterEntityControllerTest {
                         new NumericalFilter(RangeType.RANGE, 50., null)
                 )
         );
-        modifyFormFilter(filterId1, hvdcLineAutomaticFilter);
+        modifyFormFilter(filterId1, hvdcLineAutomaticFilter, userId);
         checkFormFilter(filterId1, hvdcLineAutomaticFilter);
 
         ScriptFilter scriptFilter = new ScriptFilter(filterId2, modificationDate, "test");
@@ -258,7 +289,7 @@ public class FilterEntityControllerTest {
                 )
         );
 
-        modifyFormFilter(filterId1, generatorFormFilter);
+        modifyFormFilter(filterId1, generatorFormFilter, userId);
 
         filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
@@ -277,7 +308,7 @@ public class FilterEntityControllerTest {
                 new GeneratorFilter(new InjectionFilterAttributes("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null))
                 )
         );
-        modifyFormFilter(filterId1, generatorFormFilter2);
+        modifyFormFilter(filterId1, generatorFormFilter2, userId);
 
         // delete
         mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
@@ -286,13 +317,14 @@ public class FilterEntityControllerTest {
 
         mvc.perform(get(URL_TEMPLATE + filterId2)).andExpect(status().isNotFound());
 
-        mvc.perform(put(URL_TEMPLATE + filterId2).contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(scriptFilter))).andExpect(status().isNotFound());
+        mvc.perform(put(URL_TEMPLATE + filterId2).contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(scriptFilter)).header(USER_ID_HEADER, userId)).andExpect(status().isNotFound());
 
         filterService.deleteAll();
     }
 
     @Test
     public void testLineFilter2() throws Exception {
+        String userId = "userId";
         UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
         UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
         Date modificationDate = new Date();
@@ -319,10 +351,12 @@ public class FilterEntityControllerTest {
         checkScriptFilter(filterId4, scriptFilter);
         assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId3)
                 .content(objectMapper.writeValueAsString(scriptFilter))
-                .contentType(APPLICATION_JSON)));
+                .contentType(APPLICATION_JSON)
+                .header(USER_ID_HEADER, userId)));
         assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId4)
                 .content(objectMapper.writeValueAsString(lineAutomaticFilterBEFR))
-                .contentType(APPLICATION_JSON)));
+                .contentType(APPLICATION_JSON)
+                .header(USER_ID_HEADER, userId)));
 
         mvc.perform(delete(URL_TEMPLATE + filterId3)).andExpect(status().isOk());
         mvc.perform(delete(URL_TEMPLATE + filterId4)).andExpect(status().isOk());
@@ -653,6 +687,7 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testFilterToScript() throws Exception {
+        String userId = "userId";
         UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
         UUID filterId3 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
@@ -677,7 +712,9 @@ public class FilterEntityControllerTest {
             .andExpect(content().json("[{\"type\":\"AUTOMATIC\"}, {\"type\":\"SCRIPT\"}]"));
 
         // replace filter with script
-        mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
+        mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script").header(USER_ID_HEADER, userId)).andExpect(status().isOk());
+
+        checkElementUpdatedMessageSent(filterId1, userId);
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
@@ -690,10 +727,10 @@ public class FilterEntityControllerTest {
         insertFilter(filterId2, scriptFilter);
         checkScriptFilter(filterId2, new ScriptFilter(filterId2, modificationDate, "test"));
 
-        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(post(URL_TEMPLATE + filterId2 + "/new-script?newId=" + UUID.randomUUID())));
-        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/replace-with-script")));
+        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(post(URL_TEMPLATE + filterId2 + "/new-script?newId=" + UUID.randomUUID()).header(USER_ID_HEADER, userId)));
+        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/replace-with-script").header(USER_ID_HEADER, userId)));
         mvc.perform(post(URL_TEMPLATE + filterId3 + "/new-script?newId=" + filterId2)).andExpect(status().isNotFound());
-        mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script")).andExpect(status().isNotFound());
+        mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script").header(USER_ID_HEADER, userId)).andExpect(status().isNotFound());
 
         assertThrows("Filter implementation not yet supported: ScriptFilter", NestedServletException.class, () -> mvc.perform(get(URL_TEMPLATE + filterId2 + "/export?networkUuid=" + NETWORK_UUID)
             .contentType(APPLICATION_JSON)));
@@ -813,11 +850,14 @@ public class FilterEntityControllerTest {
         return objectMapper.readValue(response, AbstractFilter.class);
     }
 
-    private void modifyFormFilter(UUID filterId, AbstractFilter newFilter) throws Exception {
+    private void modifyFormFilter(UUID filterId, AbstractFilter newFilter, String userId) throws Exception {
         mvc.perform(put(URL_TEMPLATE + filterId)
             .content(objectMapper.writeValueAsString(newFilter))
-            .contentType(APPLICATION_JSON))
+            .contentType(APPLICATION_JSON)
+            .header(USER_ID_HEADER, userId))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        checkElementUpdatedMessageSent(filterId, userId);
 
         String modifiedFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
         AutomaticFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, AutomaticFilter.class);
@@ -1188,5 +1228,11 @@ public class FilterEntityControllerTest {
     private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
         matchFilterInfos(manualFilter1, manualFilter2);
         assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getFilterEquipmentsAttributes()).matchesSafely(manualFilter1.getFilterEquipmentsAttributes()));
+    }
+
+    private void checkElementUpdatedMessageSent(UUID elementUuid, String userId) {
+        Message<byte[]> message = output.receive(TIMEOUT, elementUpdateDestination);
+        assertEquals(elementUuid, message.getHeaders().get(NotificationService.HEADER_ELEMENT_UUID));
+        assertEquals(userId, message.getHeaders().get(NotificationService.HEADER_MODIFIED_BY));
     }
 }
