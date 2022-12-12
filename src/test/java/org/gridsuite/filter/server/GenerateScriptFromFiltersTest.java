@@ -50,7 +50,7 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                     FILTER1_UUID,
                     Date.from(Instant.now()),
                     LineFilter.builder()
@@ -75,7 +75,7 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                     FILTER1_UUID,
                     Date.from(Instant.now()),
                     LineFilter.builder()
@@ -90,7 +90,7 @@ public class GenerateScriptFromFiltersTest {
                 "for (equipment in network.lines) {\n" +
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(FILTER1_UUID,
+            filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(FILTER1_UUID,
                 Date.from(Instant.now()),
                 LineFilter.builder()
                 .build())));
@@ -107,7 +107,7 @@ public class GenerateScriptFromFiltersTest {
                 "           filter(equipment.id) { equipments equipment.id }\n" +
                 "     }\n" +
                 "}\n",
-            filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                     FILTER1_UUID,
                     Date.from(Instant.now()),
                     LineFilter.builder()
@@ -137,7 +137,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 GeneratorFilter.builder()
@@ -165,7 +165,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 LoadFilter.builder()
@@ -188,7 +188,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 ShuntCompensatorFilter.builder()
@@ -213,7 +213,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 StaticVarCompensatorFilter.builder()
@@ -235,7 +235,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 BatteryFilter.builder()
@@ -252,7 +252,7 @@ public class GenerateScriptFromFiltersTest {
             "\n" +
             "for (equipment in network.busbarSections) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 BusBarSectionFilter.builder()
@@ -277,7 +277,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 DanglingLineFilter.builder()
@@ -305,7 +305,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 LccConverterStationFilter.builder()
@@ -331,7 +331,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 VscConverterStationFilter.builder()
@@ -360,7 +360,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 TwoWindingsTransformerFilter.builder()
@@ -391,7 +391,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 ThreeWindingsTransformerFilter.builder()
@@ -425,7 +425,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
                 FILTER1_UUID,
                 Date.from(Instant.now()),
                 HvdcLineFilter.builder()
@@ -456,7 +456,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
             FILTER1_UUID,
             Date.from(Instant.now()),
             VoltageLevelFilter.builder()
@@ -483,7 +483,7 @@ public class GenerateScriptFromFiltersTest {
             "     ) {\n" +
             "           filter(equipment.id) { equipments equipment.id }\n" +
             "     }\n" +
-            "}\n", filtersToScript.generateGroovyScriptFromFilters(new AutomaticFilter(
+            "}\n", filtersToScript.generateGroovyScriptFromFilters(new CriteriaFilter(
             FILTER1_UUID,
             Date.from(Instant.now()),
             SubstationFilter.builder()

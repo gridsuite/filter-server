@@ -11,12 +11,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.utils.EquipmentType;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.UUID;
+import java.util.List;
 
 /**
  * @author Seddik Yengui <seddik.yengui at rte-france.com>
@@ -27,15 +29,12 @@ import java.util.UUID;
 @SuperBuilder
 @AllArgsConstructor
 @Entity
-@Table(name = "manual_filter_equipment")
-public class ManualFilterEquipmentEntity {
-    @Id
-    @Column(name = "id")
-    private UUID id;
+@Table(name = "identifier_list_filter")
+public class IdentifierListFilterEntity extends AbstractFilterEntity {
 
-    @Column(name = "equipmentId")
-    private String equipmentId;
+    @Column(name = "equipmentType")
+    private EquipmentType equipmentType;
 
-    @Column(name = "distributionKey")
-    private Double distributionKey;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<IdentifierListFilterEquipmentEntity> filterEquipmentEntityList;
 }

@@ -29,7 +29,7 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

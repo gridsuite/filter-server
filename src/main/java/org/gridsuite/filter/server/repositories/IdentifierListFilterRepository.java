@@ -7,11 +7,11 @@
 
 package org.gridsuite.filter.server.repositories;
 
-import org.gridsuite.filter.server.entities.ManualFilterEntity;
+import org.gridsuite.filter.server.entities.IdentifierListFilterEntity;
 
 /**
  * @author Seddik Yengui <seddik.yengui at rte-france.com>
  */
 
-public interface ManualFilterRepository extends FilterRepository<ManualFilterEntity> {
+public interface IdentifierListFilterRepository extends FilterRepository<IdentifierListFilterEntity> {
 }

@@ -99,13 +99,13 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         getRepository().deleteAll();
     }
 
-    void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, AutomaticFilter dto) {
+    void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, CriteriaFilter dto) {
         buildAbstractFilter(builder, dto);
         builder.equipmentId(dto.getEquipmentFilterForm().getEquipmentID())
                 .equipmentName(dto.getEquipmentFilterForm().getEquipmentName());
     }
 
-    void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, AutomaticFilter dto) {
+    void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, CriteriaFilter dto) {
         buildGenericFilter(builder, dto);
         if (!(dto.getEquipmentFilterForm() instanceof AbstractInjectionFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
@@ -126,7 +126,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
     }
 
     public AbstractFilter toFormFilterDto(AbstractGenericFilterEntity entity) {
-        return new AutomaticFilter(
+        return new CriteriaFilter(
                 entity.getId(),
                 entity.getModificationDate(),
                 buildEquipmentFormFilter(entity)
@@ -144,15 +144,15 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         );
     }
 
-    public static AutomaticFilter toFormFilter(AbstractFilter dto, Class<? extends AbstractEquipmentFilterForm> clazz) {
-        if (!(dto instanceof AutomaticFilter)) {
+    public static CriteriaFilter toFormFilter(AbstractFilter dto, Class<? extends AbstractEquipmentFilterForm> clazz) {
+        if (!(dto instanceof CriteriaFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        AutomaticFilter automaticFilter = (AutomaticFilter) dto;
+        CriteriaFilter criteriaFilter = (CriteriaFilter) dto;
 
-        if (!(clazz.isInstance(automaticFilter.getEquipmentFilterForm()))) {
+        if (!(clazz.isInstance(criteriaFilter.getEquipmentFilterForm()))) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        return automaticFilter;
+        return criteriaFilter;
     }
 }
