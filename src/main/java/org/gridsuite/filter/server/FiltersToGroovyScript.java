@@ -30,6 +30,7 @@ public class FiltersToGroovyScript {
     private static final String NO_EMPTY_FILTER = "noEmptyFilter";
     private static final String EQUIPMENT_ID = "equipmentId";
     private static final String EQUIPMENT_NAME = "equipmentName";
+    private static final String ENERGY_SOURCE = "energySource";
     private static final String COUNTRIES = "countries";
     private static final String SUBSTATION_NAME = "substationName";
 
@@ -40,6 +41,7 @@ public class FiltersToGroovyScript {
     private final String hvdcLineTemplate;
     private final String voltageLevelTemplate;
     private final String substationTemplate;
+    private final String generatorTemplate;
 
     private static final String NOMINAL_V = "nominalV";
 
@@ -52,8 +54,32 @@ public class FiltersToGroovyScript {
             hvdcLineTemplate = IOUtils.toString(new ClassPathResource("hvdcLine.st").getInputStream(), Charset.defaultCharset());
             voltageLevelTemplate = IOUtils.toString(new ClassPathResource("voltageLevel.st").getInputStream(), Charset.defaultCharset());
             substationTemplate = IOUtils.toString(new ClassPathResource("substation.st").getInputStream(), Charset.defaultCharset());
+            generatorTemplate = IOUtils.toString(new ClassPathResource("generator.st").getInputStream(), Charset.defaultCharset());
         } catch (IOException e) {
             throw new PowsyblException("Unable to load templates for groovy script generation !!");
+        }
+    }
+
+    private void addInjectionFilter(ST template,  AbstractEquipmentFilterForm filterForm) {
+        AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) filterForm;
+        template.add(COLLECTION_NAME, filterForm.getEquipmentType().getCollectionName());
+        if (!injectionFilter.isEmpty()) {
+            template.add(NO_EMPTY_FILTER, "true");
+        }
+        if (injectionFilter.getEquipmentID() != null) {
+            template.add(EQUIPMENT_ID, injectionFilter.getEquipmentID());
+        }
+        if (injectionFilter.getEquipmentName() != null) {
+            template.add(EQUIPMENT_NAME, injectionFilter.getEquipmentName());
+        }
+        if (!CollectionUtils.isEmpty(injectionFilter.getCountries())) {
+            template.add(COUNTRIES, injectionFilter.getCountries().stream().collect(joining("','", "['", "']")));
+        }
+        if (injectionFilter.getNominalVoltage() != null) {
+            addFilterNominalVoltage(template, injectionFilter.getNominalVoltage(), null);
+        }
+        if (!StringUtils.isEmpty(injectionFilter.getSubstationName())) {
+            template.add(SUBSTATION_NAME, injectionFilter.getSubstationName());
         }
     }
 
@@ -90,7 +116,6 @@ public class FiltersToGroovyScript {
             case THREE_WINDINGS_TRANSFORMER:
                 script += threeWindingsTransformerTemplate;
                 break;
-            case GENERATOR:
             case LOAD:
             case BATTERY:
             case DANGLING_LINE:
@@ -112,6 +137,10 @@ public class FiltersToGroovyScript {
 
             case SUBSTATION:
                 script += substationTemplate;
+                break;
+
+            case GENERATOR:
+                script += generatorTemplate;
                 break;
 
             default:
@@ -208,7 +237,6 @@ public class FiltersToGroovyScript {
                 }
                 break;
 
-            case GENERATOR:
             case LOAD:
             case BATTERY:
             case DANGLING_LINE:
@@ -217,25 +245,14 @@ public class FiltersToGroovyScript {
             case STATIC_VAR_COMPENSATOR:
             case LCC_CONVERTER_STATION:
             case VSC_CONVERTER_STATION:
-                AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) criteriaFilter.getEquipmentFilterForm();
-                template.add(COLLECTION_NAME, equipmentsCollection);
-                if (!injectionFilter.isEmpty()) {
-                    template.add(NO_EMPTY_FILTER, "true");
-                }
-                if (injectionFilter.getEquipmentID() != null) {
-                    template.add(EQUIPMENT_ID, injectionFilter.getEquipmentID());
-                }
-                if (injectionFilter.getEquipmentName() != null) {
-                    template.add(EQUIPMENT_NAME, injectionFilter.getEquipmentName());
-                }
-                if (!CollectionUtils.isEmpty(injectionFilter.getCountries())) {
-                    template.add(COUNTRIES, injectionFilter.getCountries().stream().collect(joining("','", "['", "']")));
-                }
-                if (injectionFilter.getNominalVoltage() != null) {
-                    addFilterNominalVoltage(template, injectionFilter.getNominalVoltage(), null);
-                }
-                if (!StringUtils.isEmpty(injectionFilter.getSubstationName())) {
-                    template.add(SUBSTATION_NAME, injectionFilter.getSubstationName());
+                addInjectionFilter(template, criteriaFilter.getEquipmentFilterForm());
+                break;
+
+            case GENERATOR:
+                addInjectionFilter(template, criteriaFilter.getEquipmentFilterForm());
+                GeneratorFilter generatorFilter = (GeneratorFilter) criteriaFilter.getEquipmentFilterForm();
+                if (generatorFilter.getEnergySource() != null) {
+                    template.add(ENERGY_SOURCE, generatorFilter.getEnergySource());
                 }
                 break;
 

@@ -9,7 +9,6 @@ package org.gridsuite.filter.server;
 
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.entities.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.GeneratorFilterEntity;
 import org.gridsuite.filter.server.repositories.GeneratorFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
@@ -49,13 +48,22 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
 
     @Override
     public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
-        return new GeneratorFilter(buildInjectionAttributesFromEntity((AbstractInjectionFilterEntity) entity));
+        GeneratorFilterEntity generatorFilterEntity = (GeneratorFilterEntity) entity;
+        return new GeneratorFilter(generatorFilterEntity.getEquipmentId(),
+                generatorFilterEntity.getEquipmentName(),
+                generatorFilterEntity.getSubstationName(),
+                AbstractFilterRepositoryProxy.setToSorterSet(generatorFilterEntity.getCountries()),
+                AbstractFilterRepositoryProxy.convert(generatorFilterEntity.getNominalVoltage()),
+                generatorFilterEntity.getEnergySource());
     }
 
     @Override
     public GeneratorFilterEntity fromDto(AbstractFilter dto) {
         var generatorFilterEntityBuilder = GeneratorFilterEntity.builder();
-        buildInjectionFilter(generatorFilterEntityBuilder, toFormFilter(dto, GeneratorFilter.class));
+        CriteriaFilter criteriaFilter = toFormFilter(dto, GeneratorFilter.class);
+        buildInjectionFilter(generatorFilterEntityBuilder, criteriaFilter);
+        GeneratorFilter generatorFilter = (GeneratorFilter) criteriaFilter.getEquipmentFilterForm();
+        generatorFilterEntityBuilder.energySource(generatorFilter.getEnergySource());
         return generatorFilterEntityBuilder.build();
     }
 }

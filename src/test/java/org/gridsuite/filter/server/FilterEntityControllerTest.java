@@ -17,6 +17,7 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Country;
+import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.VariantManagerConstants;
 import com.powsybl.iidm.network.test.EurostagTutorialExample1Factory;
@@ -254,8 +255,7 @@ public class FilterEntityControllerTest {
         AbstractFilter generatorFormFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
-                new GeneratorFilter(new InjectionFilterAttributes("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null))
-                )
+                new GeneratorFilter("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null), null)
         );
 
         modifyFormFilter(filterId1, generatorFormFilter);
@@ -274,8 +274,7 @@ public class FilterEntityControllerTest {
         AbstractFilter generatorFormFilter2 = new CriteriaFilter(
                 filterId1,
                 modificationDate,
-                new GeneratorFilter(new InjectionFilterAttributes("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null))
-                )
+                new GeneratorFilter("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null), null)
         );
         modifyFormFilter(filterId1, generatorFormFilter2);
 
@@ -350,74 +349,87 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testGeneratorFilter() throws Exception {
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "nameNotFound", "P1", null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", null, null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "substationNameNotFound", null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.EQUALITY, 145., null, NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 19., 22., NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 27., 30., NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 34.30, 35.70, NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 14.55, 15.45, NETWORK_UUID, null, "[]");
+        final String generatorUuid = "42b70a4d-e0c4-413a-8e3e-78e9027d300f";
+        final String noMatch = "[]";
+        final String oneMatch = "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]";
+        final String bothMatch = "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}, {\"id\":\"GEN2\",\"type\":\"GENERATOR\"}]";
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, oneMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", null, RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, oneMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "nameNotFound", "P1", null, RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", null, null, RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, oneMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "substationNameNotFound", null, RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.EQUALITY, 145., null, null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 19., 22., null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 27., 30., null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 34.30, 35.70, null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 14.55, 15.45, null, NETWORK_UUID, null, noMatch);
+        // no filter at all
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            null, null, null, null, null, 0., 0., null, NETWORK_UUID, null, bothMatch);
+        // no SOLAR generator
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            null, null, null, null, null, 0., 0., EnergySource.SOLAR, NETWORK_UUID, null, noMatch);
+        // 2 OTHER generators in our network
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            null, null, null, null, null, 0., 0., EnergySource.OTHER, NETWORK_UUID, null, bothMatch);
     }
 
     @Test
     public void testLoadFilter() throws Exception {
         insertInjectionFilter(EquipmentType.LOAD, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "LOAD", null, "P2", Set.of("FR"), RangeType.RANGE, 144., 176., NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
+            "LOAD", null, "P2", Set.of("FR"), RangeType.RANGE, 144., 176., null, NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
     }
 
     @Test
     public void testShuntCompensatorFilter() throws Exception {
         insertInjectionFilter(EquipmentType.SHUNT_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "SHUNT", "SHUNT", "S1", Set.of("FR"), RangeType.EQUALITY, 380., null, NETWORK_UUID_4, null, "[{\"id\":\"SHUNT\",\"type\":\"SHUNT_COMPENSATOR\"}]");
+            "SHUNT", "SHUNT", "S1", Set.of("FR"), RangeType.EQUALITY, 380., null, null, NETWORK_UUID_4, null, "[{\"id\":\"SHUNT\",\"type\":\"SHUNT_COMPENSATOR\"}]");
     }
 
     @Test
     public void testStaticVarCompensatorFilter() throws Exception {
         insertInjectionFilter(EquipmentType.STATIC_VAR_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "SVC3", null, "S2", null, null, null, null, NETWORK_UUID_3, null, "[{\"id\":\"SVC3\",\"type\":\"STATIC_VAR_COMPENSATOR\"}]");
+            "SVC3", null, "S2", null, null, null, null, null, NETWORK_UUID_3, null, "[{\"id\":\"SVC3\",\"type\":\"STATIC_VAR_COMPENSATOR\"}]");
     }
 
     @Test
     public void testBatteryFilter() throws Exception {
         insertInjectionFilter(EquipmentType.BATTERY, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "batteryId1", "batteryName", null, Set.of("FR"), RangeType.RANGE, 45., 65., NETWORK_UUID, null, "[]");
+            "batteryId1", "batteryName", null, Set.of("FR"), RangeType.RANGE, 45., 65., null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testBusBarSectionFilter() throws Exception {
         insertInjectionFilter(EquipmentType.BUSBAR_SECTION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            null, "batteryName", null, Set.of("DE"), RangeType.EQUALITY, 380., null, NETWORK_UUID, null, "[]");
+            null, "batteryName", null, Set.of("DE"), RangeType.EQUALITY, 380., null, null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testDanglingLineFilter() throws Exception {
         insertInjectionFilter(EquipmentType.DANGLING_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.RANGE, 138., 162., NETWORK_UUID, null, "[]");
+            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.RANGE, 138., 162., null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testLccConverterStationFilter() throws Exception {
         insertInjectionFilter(EquipmentType.LCC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "lccId1", "lccName1", "s3", Set.of("FR", "BE", "NL", "DE", "IT"), RangeType.RANGE, 20., 400., NETWORK_UUID, null, "[]");
+            "lccId1", "lccName1", "s3", Set.of("FR", "BE", "NL", "DE", "IT"), RangeType.RANGE, 20., 400., null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testVscConverterStationFilter() throws Exception {
         insertInjectionFilter(EquipmentType.VSC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "vscId1", "vscName1", "s2", null, RangeType.EQUALITY, 225., null, NETWORK_UUID, null, "[]");
+            "vscId1", "vscName1", "s2", null, RangeType.EQUALITY, 225., null, null, NETWORK_UUID, null, "[]");
     }
 
     @Test
@@ -833,7 +845,7 @@ public class FilterEntityControllerTest {
 
     private void insertInjectionFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                        String substationName, Set<String> countries,
-                                       RangeType rangeType, Double value1, Double value2,
+                                       RangeType rangeType, Double value1, Double value2, EnergySource energySource,
                                        UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
         NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
         AbstractInjectionFilter abstractInjectionFilter;
@@ -851,7 +863,12 @@ public class FilterEntityControllerTest {
                 abstractInjectionFilter = new DanglingLineFilter(injectionFilterAttributes);
                 break;
             case GENERATOR:
-                abstractInjectionFilter = new GeneratorFilter(injectionFilterAttributes);
+                abstractInjectionFilter = new GeneratorFilter(injectionFilterAttributes.getEquipmentID(),
+                        injectionFilterAttributes.getEquipmentName(),
+                        injectionFilterAttributes.getSubstationName(),
+                        injectionFilterAttributes.getCountries(),
+                        injectionFilterAttributes.getNominalVoltage(),
+                        energySource);
                 break;
             case LCC_CONVERTER_STATION:
                 abstractInjectionFilter = new LccConverterStationFilter(injectionFilterAttributes);
