@@ -10,12 +10,12 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.ManualFilterEquipmentAttributes;
-import org.gridsuite.filter.server.dto.ManualFilter;
+import org.gridsuite.filter.server.dto.IdentifierListFilterEquipmentAttributes;
+import org.gridsuite.filter.server.dto.IdentifierListFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.entities.ManualFilterEntity;
-import org.gridsuite.filter.server.entities.ManualFilterEquipmentEntity;
-import org.gridsuite.filter.server.repositories.ManualFilterRepository;
+import org.gridsuite.filter.server.entities.IdentifierListFilterEntity;
+import org.gridsuite.filter.server.entities.IdentifierListFilterEquipmentEntity;
+import org.gridsuite.filter.server.repositories.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
@@ -26,54 +26,54 @@ import java.util.stream.Collectors;
  * @author Seddik Yengui <seddik.yengui at rte-france.com>
  */
 
-public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<ManualFilterEntity, ManualFilterRepository> {
-    private final ManualFilterRepository manualFilterRepository;
+public class IdentifierListFilterRepositoryProxy extends AbstractFilterRepositoryProxy<IdentifierListFilterEntity, IdentifierListFilterRepository> {
+    private final IdentifierListFilterRepository identifierListFilterRepository;
 
-    public ManualFilterRepositoryProxy(ManualFilterRepository manualFilterRepository) {
-        this.manualFilterRepository = manualFilterRepository;
+    public IdentifierListFilterRepositoryProxy(IdentifierListFilterRepository identifierListFilterRepository) {
+        this.identifierListFilterRepository = identifierListFilterRepository;
     }
 
     @Override
-    ManualFilterRepository getRepository() {
-        return manualFilterRepository;
+    IdentifierListFilterRepository getRepository() {
+        return identifierListFilterRepository;
     }
 
     @Override
-    AbstractFilter toDto(ManualFilterEntity filterEntity) {
-        return new ManualFilter(filterEntity.getId(),
+    AbstractFilter toDto(IdentifierListFilterEntity filterEntity) {
+        return new IdentifierListFilter(filterEntity.getId(),
                 filterEntity.getModificationDate(),
                 filterEntity.getEquipmentType(),
                 filterEntity.getFilterEquipmentEntityList()
                         .stream()
-                        .map(entity -> new ManualFilterEquipmentAttributes(entity.getEquipmentId(),
+                        .map(entity -> new IdentifierListFilterEquipmentAttributes(entity.getEquipmentId(),
                                                                      entity.getDistributionKey()))
                         .collect(Collectors.toList()));
     }
 
     @Override
-    ManualFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof ManualFilter) {
-            var filter = (ManualFilter) dto;
-            var manualFilterEntityBuilder = ManualFilterEntity.builder()
+    IdentifierListFilterEntity fromDto(AbstractFilter dto) {
+        if (dto instanceof IdentifierListFilter) {
+            var filter = (IdentifierListFilter) dto;
+            var identifierListFilterEntityBuilder = IdentifierListFilterEntity.builder()
                     .equipmentType(filter.getEquipmentType())
                     .filterEquipmentEntityList(filter.getFilterEquipmentsAttributes()
                             .stream()
-                            .map(attributes -> ManualFilterEquipmentEntity.builder()
+                            .map(attributes -> IdentifierListFilterEquipmentEntity.builder()
                                     .id(UUID.randomUUID())
                                     .equipmentId(attributes.getEquipmentID())
                                     .distributionKey(attributes.getDistributionKey())
                                     .build())
                             .collect(Collectors.toList()));
 
-            buildAbstractFilter(manualFilterEntityBuilder, filter);
-            return manualFilterEntityBuilder.build();
+            buildAbstractFilter(identifierListFilterEntityBuilder, filter);
+            return identifierListFilterEntityBuilder.build();
         }
         throw new PowsyblException(WRONG_FILTER_TYPE);
     }
 
     @Override
     FilterType getFilterType() {
-        return FilterType.MANUAL;
+        return FilterType.IDENTIFIER_LIST;
     }
 
     @Override
@@ -83,9 +83,9 @@ public class ManualFilterRepositoryProxy extends AbstractFilterRepositoryProxy<M
 
     @Override
     public EquipmentType getEquipmentType(UUID id) {
-        return manualFilterRepository.findById(id)
-            .map(ManualFilterEntity::getEquipmentType)
-            .orElseThrow(() -> new PowsyblException("Manual filter " + id + " not found"));
+        return identifierListFilterRepository.findById(id)
+            .map(IdentifierListFilterEntity::getEquipmentType)
+            .orElseThrow(() -> new PowsyblException("Identifier list filter " + id + " not found"));
     }
 
     @Override

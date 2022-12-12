@@ -25,7 +25,7 @@ import java.util.SortedSet;
 @AllArgsConstructor
 @SuperBuilder
 @ToString(callSuper = true)
-@Schema(description = "Three windings transformer Filters", allOf = AutomaticFilter.class)
+@Schema(description = "Three windings transformer Filters", allOf = CriteriaFilter.class)
 public class ThreeWindingsTransformerFilter extends AbstractEquipmentFilterForm {
     @Override
     public EquipmentType getEquipmentType() {

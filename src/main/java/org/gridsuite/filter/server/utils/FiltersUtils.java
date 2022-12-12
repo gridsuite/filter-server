@@ -6,11 +6,7 @@
  */
 package org.gridsuite.filter.server.utils;
 
-import com.powsybl.iidm.network.Country;
-import com.powsybl.iidm.network.Identifiable;
-import com.powsybl.iidm.network.Substation;
-import com.powsybl.iidm.network.Terminal;
-import com.powsybl.iidm.network.VoltageLevel;
+import com.powsybl.iidm.network.*;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
@@ -73,5 +69,9 @@ public final class FiltersUtils {
 
     public static boolean isRangeNominalVoltage(Double nominalV, Double minValue, Double maxValue) {
         return (minValue == null || nominalV >= minValue) && (maxValue == null || nominalV <= maxValue);
+    }
+
+    public static boolean isEnergySource(Generator generator, String energySource) {
+        return generator.getEnergySource().name().equalsIgnoreCase(energySource);
     }
 }

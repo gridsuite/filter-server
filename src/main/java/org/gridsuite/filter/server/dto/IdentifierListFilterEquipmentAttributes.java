@@ -18,7 +18,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class ManualFilterEquipmentAttributes {
+public class IdentifierListFilterEquipmentAttributes {
 
     @Schema(description = "Equipment ID")
     private String equipmentID;

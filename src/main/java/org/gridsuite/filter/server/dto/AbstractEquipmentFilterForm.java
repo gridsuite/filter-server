@@ -25,21 +25,21 @@ import org.gridsuite.filter.server.utils.EquipmentType;
         visible = true
 )
 @JsonSubTypes({//Below, we define the names and the binding classes.
-        @JsonSubTypes.Type(value = LineFilter.class, name = "LINE"),
-        @JsonSubTypes.Type(value = GeneratorFilter.class, name = "GENERATOR"),
-        @JsonSubTypes.Type(value = LoadFilter.class, name = "LOAD"),
-        @JsonSubTypes.Type(value = ShuntCompensatorFilter.class, name = "SHUNT_COMPENSATOR"),
-        @JsonSubTypes.Type(value = StaticVarCompensatorFilter.class, name = "STATIC_VAR_COMPENSATOR"),
-        @JsonSubTypes.Type(value = BatteryFilter.class, name = "BATTERY"),
-        @JsonSubTypes.Type(value = BusBarSectionFilter.class, name = "BUSBAR_SECTION"),
-        @JsonSubTypes.Type(value = DanglingLineFilter.class, name = "DANGLING_LINE"),
-        @JsonSubTypes.Type(value = LccConverterStationFilter.class, name = "LCC_CONVERTER_STATION"),
-        @JsonSubTypes.Type(value = VscConverterStationFilter.class, name = "VSC_CONVERTER_STATION"),
-        @JsonSubTypes.Type(value = TwoWindingsTransformerFilter.class, name = "TWO_WINDINGS_TRANSFORMER"),
-        @JsonSubTypes.Type(value = ThreeWindingsTransformerFilter.class, name = "THREE_WINDINGS_TRANSFORMER"),
-        @JsonSubTypes.Type(value = HvdcLineFilter.class, name = "HVDC_LINE"),
-        @JsonSubTypes.Type(value = VoltageLevelFilter.class, name = "VOLTAGE_LEVEL"),
-        @JsonSubTypes.Type(value = SubstationFilter.class, name = "SUBSTATION"),
+    @JsonSubTypes.Type(value = LineFilter.class, name = "LINE"),
+    @JsonSubTypes.Type(value = GeneratorFilter.class, name = "GENERATOR"),
+    @JsonSubTypes.Type(value = LoadFilter.class, name = "LOAD"),
+    @JsonSubTypes.Type(value = ShuntCompensatorFilter.class, name = "SHUNT_COMPENSATOR"),
+    @JsonSubTypes.Type(value = StaticVarCompensatorFilter.class, name = "STATIC_VAR_COMPENSATOR"),
+    @JsonSubTypes.Type(value = BatteryFilter.class, name = "BATTERY"),
+    @JsonSubTypes.Type(value = BusBarSectionFilter.class, name = "BUSBAR_SECTION"),
+    @JsonSubTypes.Type(value = DanglingLineFilter.class, name = "DANGLING_LINE"),
+    @JsonSubTypes.Type(value = LccConverterStationFilter.class, name = "LCC_CONVERTER_STATION"),
+    @JsonSubTypes.Type(value = VscConverterStationFilter.class, name = "VSC_CONVERTER_STATION"),
+    @JsonSubTypes.Type(value = TwoWindingsTransformerFilter.class, name = "TWO_WINDINGS_TRANSFORMER"),
+    @JsonSubTypes.Type(value = ThreeWindingsTransformerFilter.class, name = "THREE_WINDINGS_TRANSFORMER"),
+    @JsonSubTypes.Type(value = HvdcLineFilter.class, name = "HVDC_LINE"),
+    @JsonSubTypes.Type(value = VoltageLevelFilter.class, name = "VOLTAGE_LEVEL"),
+    @JsonSubTypes.Type(value = SubstationFilter.class, name = "SUBSTATION"),
 })
 @Getter
 @NoArgsConstructor

@@ -17,6 +17,7 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Country;
+import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.VariantManagerConstants;
 import com.powsybl.iidm.network.test.EurostagTutorialExample1Factory;
@@ -179,13 +180,13 @@ public class FilterEntityControllerTest {
         Date modificationDate = new Date();
 
         LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
-        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
+        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
                 lineFilter
         );
-        insertFilter(filterId1, lineAutomaticFilter);
-        checkFormFilter(filterId1, lineAutomaticFilter);
+        insertFilter(filterId1, lineCriteriaFilter);
+        checkFormFilter(filterId1, lineCriteriaFilter);
 
         // export
         assertThrows("Network '" + NETWORK_NOT_FOUND_UUID + "' not found", NestedServletException.class, () -> mvc.perform(get(URL_TEMPLATE + filterId1 + "/export?networkUuid=" + NETWORK_NOT_FOUND_UUID)
@@ -207,7 +208,7 @@ public class FilterEntityControllerTest {
 
         Date dateModification = filterAttributes.get(0).getModificationDate();
 
-        AutomaticFilter hvdcLineAutomaticFilter = new AutomaticFilter(
+        CriteriaFilter hvdcLineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 dateModification,
                 new HvdcLineFilter(
@@ -220,8 +221,8 @@ public class FilterEntityControllerTest {
                         new NumericalFilter(RangeType.RANGE, 50., null)
                 )
         );
-        modifyFormFilter(filterId1, hvdcLineAutomaticFilter);
-        checkFormFilter(filterId1, hvdcLineAutomaticFilter);
+        modifyFormFilter(filterId1, hvdcLineCriteriaFilter);
+        checkFormFilter(filterId1, hvdcLineCriteriaFilter);
 
         ScriptFilter scriptFilter = new ScriptFilter(filterId2, modificationDate, "test");
         insertFilter(filterId2, scriptFilter);
@@ -237,7 +238,7 @@ public class FilterEntityControllerTest {
             Collections.reverse(filterAttributes);
         }
 
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
         matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, null, modificationDate);
 
         filterAttributes = objectMapper.readValue(
@@ -248,14 +249,13 @@ public class FilterEntityControllerTest {
             new TypeReference<>() {
             });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
 
         // test replace line filter with other filter type
-        AbstractFilter generatorFormFilter = new AutomaticFilter(
+        AbstractFilter generatorFormFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
-                new GeneratorFilter(new InjectionFilterAttributes("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null))
-                )
+                new GeneratorFilter("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null), null)
         );
 
         modifyFormFilter(filterId1, generatorFormFilter);
@@ -268,14 +268,13 @@ public class FilterEntityControllerTest {
             new TypeReference<>() {
             });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.AUTOMATIC, EquipmentType.GENERATOR, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.GENERATOR, modificationDate);
 
         // update with same type filter
-        AbstractFilter generatorFormFilter2 = new AutomaticFilter(
+        AbstractFilter generatorFormFilter2 = new CriteriaFilter(
                 filterId1,
                 modificationDate,
-                new GeneratorFilter(new InjectionFilterAttributes("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null))
-                )
+                new GeneratorFilter("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null), null)
         );
         modifyFormFilter(filterId1, generatorFormFilter2);
 
@@ -310,7 +309,7 @@ public class FilterEntityControllerTest {
         List<Double> values2 = new ArrayList<>();
         values2.add(null);
 
-        AutomaticFilter lineAutomaticFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
+        CriteriaFilter lineCriteriaFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
                 rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, false);
 
         // update form filter <-> script filter (rejected)
@@ -321,7 +320,7 @@ public class FilterEntityControllerTest {
                 .content(objectMapper.writeValueAsString(scriptFilter))
                 .contentType(APPLICATION_JSON)));
         assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId4)
-                .content(objectMapper.writeValueAsString(lineAutomaticFilterBEFR))
+                .content(objectMapper.writeValueAsString(lineCriteriaFilterBEFR))
                 .contentType(APPLICATION_JSON)));
 
         mvc.perform(delete(URL_TEMPLATE + filterId3)).andExpect(status().isOk());
@@ -350,74 +349,87 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testGeneratorFilter() throws Exception {
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "nameNotFound", "P1", null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", null, null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "substationNameNotFound", null, RangeType.RANGE, 15., 30., NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.EQUALITY, 145., null, NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 19., 22., NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 27., 30., NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 34.30, 35.70, NETWORK_UUID, null, "[]");
-        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 14.55, 15.45, NETWORK_UUID, null, "[]");
+        final String generatorUuid = "42b70a4d-e0c4-413a-8e3e-78e9027d300f";
+        final String noMatch = "[]";
+        final String oneMatch = "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]";
+        final String bothMatch = "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}, {\"id\":\"GEN2\",\"type\":\"GENERATOR\"}]";
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, oneMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", null, RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, oneMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "nameNotFound", "P1", null, RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", null, null, RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, oneMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "substationNameNotFound", null, RangeType.RANGE, 15., 30., null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.EQUALITY, 145., null, null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 19., 22., null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 27., 30., null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 34.30, 35.70, null, NETWORK_UUID, null, noMatch);
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            "GEN", "GEN", "P1", Set.of("FR", "IT"), RangeType.RANGE, 14.55, 15.45, null, NETWORK_UUID, null, noMatch);
+        // no filter at all
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            null, null, null, null, null, 0., 0., null, NETWORK_UUID, null, bothMatch);
+        // no SOLAR generator
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            null, null, null, null, null, 0., 0., EnergySource.SOLAR, NETWORK_UUID, null, noMatch);
+        // 2 OTHER generators in our network
+        insertInjectionFilter(EquipmentType.GENERATOR, UUID.fromString(generatorUuid),
+            null, null, null, null, null, 0., 0., EnergySource.OTHER, NETWORK_UUID, null, bothMatch);
     }
 
     @Test
     public void testLoadFilter() throws Exception {
         insertInjectionFilter(EquipmentType.LOAD, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "LOAD", null, "P2", Set.of("FR"), RangeType.RANGE, 144., 176., NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
+            "LOAD", null, "P2", Set.of("FR"), RangeType.RANGE, 144., 176., null, NETWORK_UUID, VARIANT_ID_1, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]");
     }
 
     @Test
     public void testShuntCompensatorFilter() throws Exception {
         insertInjectionFilter(EquipmentType.SHUNT_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "SHUNT", "SHUNT", "S1", Set.of("FR"), RangeType.EQUALITY, 380., null, NETWORK_UUID_4, null, "[{\"id\":\"SHUNT\",\"type\":\"SHUNT_COMPENSATOR\"}]");
+            "SHUNT", "SHUNT", "S1", Set.of("FR"), RangeType.EQUALITY, 380., null, null, NETWORK_UUID_4, null, "[{\"id\":\"SHUNT\",\"type\":\"SHUNT_COMPENSATOR\"}]");
     }
 
     @Test
     public void testStaticVarCompensatorFilter() throws Exception {
         insertInjectionFilter(EquipmentType.STATIC_VAR_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "SVC3", null, "S2", null, null, null, null, NETWORK_UUID_3, null, "[{\"id\":\"SVC3\",\"type\":\"STATIC_VAR_COMPENSATOR\"}]");
+            "SVC3", null, "S2", null, null, null, null, null, NETWORK_UUID_3, null, "[{\"id\":\"SVC3\",\"type\":\"STATIC_VAR_COMPENSATOR\"}]");
     }
 
     @Test
     public void testBatteryFilter() throws Exception {
         insertInjectionFilter(EquipmentType.BATTERY, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "batteryId1", "batteryName", null, Set.of("FR"), RangeType.RANGE, 45., 65., NETWORK_UUID, null, "[]");
+            "batteryId1", "batteryName", null, Set.of("FR"), RangeType.RANGE, 45., 65., null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testBusBarSectionFilter() throws Exception {
         insertInjectionFilter(EquipmentType.BUSBAR_SECTION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            null, "batteryName", null, Set.of("DE"), RangeType.EQUALITY, 380., null, NETWORK_UUID, null, "[]");
+            null, "batteryName", null, Set.of("DE"), RangeType.EQUALITY, 380., null, null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testDanglingLineFilter() throws Exception {
         insertInjectionFilter(EquipmentType.DANGLING_LINE, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.RANGE, 138., 162., NETWORK_UUID, null, "[]");
+            "danglingLineId1", null, "s2", Set.of("FR"), RangeType.RANGE, 138., 162., null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testLccConverterStationFilter() throws Exception {
         insertInjectionFilter(EquipmentType.LCC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "lccId1", "lccName1", "s3", Set.of("FR", "BE", "NL", "DE", "IT"), RangeType.RANGE, 20., 400., NETWORK_UUID, null, "[]");
+            "lccId1", "lccName1", "s3", Set.of("FR", "BE", "NL", "DE", "IT"), RangeType.RANGE, 20., 400., null, NETWORK_UUID, null, "[]");
     }
 
     @Test
     public void testVscConverterStationFilter() throws Exception {
         insertInjectionFilter(EquipmentType.VSC_CONVERTER_STATION, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "vscId1", "vscName1", "s2", null, RangeType.EQUALITY, 225., null, NETWORK_UUID, null, "[]");
+            "vscId1", "vscName1", "s2", null, RangeType.EQUALITY, 225., null, null, NETWORK_UUID, null, "[]");
     }
 
     @Test
@@ -660,21 +672,21 @@ public class FilterEntityControllerTest {
 
         LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
 
-        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
+        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
                 lineFilter
         );
 
-        insertFilter(filterId1, lineAutomaticFilter);
-        checkFormFilter(filterId1, lineAutomaticFilter);
+        insertFilter(filterId1, lineCriteriaFilter);
+        checkFormFilter(filterId1, lineCriteriaFilter);
 
         // new script from filter
         mvc.perform(post(URL_TEMPLATE + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
-            .andExpect(content().json("[{\"type\":\"AUTOMATIC\"}, {\"type\":\"SCRIPT\"}]"));
+            .andExpect(content().json("[{\"type\":\"CRITERIA\"}, {\"type\":\"SCRIPT\"}]"));
 
         // replace filter with script
         mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script")).andExpect(status().isOk());
@@ -704,87 +716,87 @@ public class FilterEntityControllerTest {
         UUID filterId1 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
         Date modificationDate = new Date();
         LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
-        AutomaticFilter lineAutomaticFilter = new AutomaticFilter(
+        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
                 lineFilter
         );
-        insertFilter(filterId1, lineAutomaticFilter);
+        insertFilter(filterId1, lineCriteriaFilter);
         mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId1 + "&id=" + UUID.randomUUID())).andExpect(status().isOk());
-        checkFormFilter(filterId1, lineAutomaticFilter);
+        checkFormFilter(filterId1, lineCriteriaFilter);
     }
 
     @Test
-    public void testManualFilter() throws Exception {
+    public void testIdentifierListFilter() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
-        // Create manual filter for generators
-        ManualFilterEquipmentAttributes gen1 = new ManualFilterEquipmentAttributes("GEN", 7d);
-        ManualFilterEquipmentAttributes gen2 = new ManualFilterEquipmentAttributes("GEN2", 9d);
-        ManualFilter manualFilter = new ManualFilter(filterId, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
-        insertFilter(filterId, manualFilter);
-        checkManualFilter(filterId, manualFilter);
-        checkManualFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n", EquipmentType.GENERATOR);
-
-        // Create manual filter for lines
+        // Create identifier list filter for generators
+        IdentifierListFilterEquipmentAttributes gen1 = new IdentifierListFilterEquipmentAttributes("GEN", 7d);
+        IdentifierListFilterEquipmentAttributes gen2 = new IdentifierListFilterEquipmentAttributes("GEN2", 9d);
+        IdentifierListFilter identifierListFilter = new IdentifierListFilter(filterId, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
+        insertFilter(filterId, identifierListFilter);
+        checkIdentifierListFilter(filterId, identifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n", EquipmentType.GENERATOR);
+        // Create identifier list filter for lines
         UUID lineFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes line1 = new ManualFilterEquipmentAttributes("NHV1_NHV2_1", null);
-        ManualFilterEquipmentAttributes line2 = new ManualFilterEquipmentAttributes("NHV1_NHV2_2", null);
-        ManualFilter lineManualFilter = new ManualFilter(lineFilterId, modificationDate, EquipmentType.LINE, List.of(line1, line2));
-        insertFilter(lineFilterId, lineManualFilter);
-        checkManualFilter(lineFilterId, lineManualFilter);
-        checkManualFilterExportAndMetadata(lineFilterId, "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]", EquipmentType.LINE);
 
-        // Create manual filter for Two Windings Transformer
-        UUID twoWinTransformerManualFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes twoWT1 = new ManualFilterEquipmentAttributes("NGEN_NHV1", null);
-        ManualFilterEquipmentAttributes twoWT2 = new ManualFilterEquipmentAttributes("NHV2_NLOAD", null);
-        ManualFilterEquipmentAttributes twoWT3 = new ManualFilterEquipmentAttributes("twoWT3", null);
-        ManualFilter twoWinTransformerManualFilter = new ManualFilter(twoWinTransformerManualFilterId, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
-        insertFilter(twoWinTransformerManualFilterId, twoWinTransformerManualFilter);
-        checkManualFilter(twoWinTransformerManualFilterId, twoWinTransformerManualFilter);
-        checkManualFilterExportAndMetadata(twoWinTransformerManualFilterId, "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]", EquipmentType.TWO_WINDINGS_TRANSFORMER);
+        IdentifierListFilterEquipmentAttributes line1 = new IdentifierListFilterEquipmentAttributes("NHV1_NHV2_1", null);
+        IdentifierListFilterEquipmentAttributes line2 = new IdentifierListFilterEquipmentAttributes("NHV1_NHV2_2", null);
+        IdentifierListFilter lineIdentifierListFilter = new IdentifierListFilter(lineFilterId, modificationDate, EquipmentType.LINE, List.of(line1, line2));
+        insertFilter(lineFilterId, lineIdentifierListFilter);
+        checkIdentifierListFilter(lineFilterId, lineIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(lineFilterId, "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]", EquipmentType.LINE);
 
-        // Create manual filter for Three Windings Transformer
-        UUID threeWTransformerManualFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes threeWT1 = new ManualFilterEquipmentAttributes("threeWT1", null);
-        ManualFilterEquipmentAttributes threeWT2 = new ManualFilterEquipmentAttributes("threeWT2", null);
-        ManualFilter threeWinTransformerManualFilter = new ManualFilter(threeWTransformerManualFilterId, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
-        insertFilter(threeWTransformerManualFilterId, threeWinTransformerManualFilter);
-        checkManualFilter(threeWTransformerManualFilterId, threeWinTransformerManualFilter);
-        checkManualFilterExportAndMetadata(threeWTransformerManualFilterId, "[]", EquipmentType.THREE_WINDINGS_TRANSFORMER);
+        // Create identifier list filter for Two Windings Transformer
+        UUID twoWinTransformerIdentifierListFilterId = UUID.randomUUID();
+        IdentifierListFilterEquipmentAttributes twoWT1 = new IdentifierListFilterEquipmentAttributes("NGEN_NHV1", null);
+        IdentifierListFilterEquipmentAttributes twoWT2 = new IdentifierListFilterEquipmentAttributes("NHV2_NLOAD", null);
+        IdentifierListFilterEquipmentAttributes twoWT3 = new IdentifierListFilterEquipmentAttributes("twoWT3", null);
+        IdentifierListFilter twoWinTransformerIdentifierListFilter = new IdentifierListFilter(twoWinTransformerIdentifierListFilterId, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
+        insertFilter(twoWinTransformerIdentifierListFilterId, twoWinTransformerIdentifierListFilter);
+        checkIdentifierListFilter(twoWinTransformerIdentifierListFilterId, twoWinTransformerIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(twoWinTransformerIdentifierListFilterId, "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]", EquipmentType.TWO_WINDINGS_TRANSFORMER);
 
-        // Create manual filter for hvdc
+        // Create identifier list filter for Three Windings Transformer
+        UUID threeWTransformerIdentifierListFilterId = UUID.randomUUID();
+        IdentifierListFilterEquipmentAttributes threeWT1 = new IdentifierListFilterEquipmentAttributes("threeWT1", null);
+        IdentifierListFilterEquipmentAttributes threeWT2 = new IdentifierListFilterEquipmentAttributes("threeWT2", null);
+        IdentifierListFilter threeWinTransformerIdentifierListFilter = new IdentifierListFilter(threeWTransformerIdentifierListFilterId, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
+        insertFilter(threeWTransformerIdentifierListFilterId, threeWinTransformerIdentifierListFilter);
+        checkIdentifierListFilter(threeWTransformerIdentifierListFilterId, threeWinTransformerIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(threeWTransformerIdentifierListFilterId, "[]", EquipmentType.THREE_WINDINGS_TRANSFORMER);
+
+        // Create identifier list filter for hvdc
         UUID hvdcFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes hvdc1 = new ManualFilterEquipmentAttributes("threeWT1", null);
-        ManualFilterEquipmentAttributes hvdc2 = new ManualFilterEquipmentAttributes("threeWT2", null);
-        ManualFilter hvdcManualFilter = new ManualFilter(hvdcFilterId, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
-        insertFilter(hvdcFilterId, hvdcManualFilter);
-        checkManualFilter(hvdcFilterId, hvdcManualFilter);
-        checkManualFilterExportAndMetadata(hvdcFilterId, "[]", EquipmentType.HVDC_LINE);
+        IdentifierListFilterEquipmentAttributes hvdc1 = new IdentifierListFilterEquipmentAttributes("threeWT1", null);
+        IdentifierListFilterEquipmentAttributes hvdc2 = new IdentifierListFilterEquipmentAttributes("threeWT2", null);
+        IdentifierListFilter hvdcIdentifierListFilter = new IdentifierListFilter(hvdcFilterId, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
+        insertFilter(hvdcFilterId, hvdcIdentifierListFilter);
+        checkIdentifierListFilter(hvdcFilterId, hvdcIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(hvdcFilterId, "[]", EquipmentType.HVDC_LINE);
 
-        // Create manual filter for voltage levels
+        // Create identifier list filter for voltage levels
         UUID voltageLevelFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes vl1 = new ManualFilterEquipmentAttributes("VLHV1", null);
-        ManualFilterEquipmentAttributes vl2 = new ManualFilterEquipmentAttributes("VLHV2", null);
-        ManualFilter vlManualFilter = new ManualFilter(voltageLevelFilterId, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
-        insertFilter(voltageLevelFilterId, vlManualFilter);
-        checkManualFilter(voltageLevelFilterId, vlManualFilter);
-        checkManualFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n", EquipmentType.VOLTAGE_LEVEL);
+        IdentifierListFilterEquipmentAttributes vl1 = new IdentifierListFilterEquipmentAttributes("VLHV1", null);
+        IdentifierListFilterEquipmentAttributes vl2 = new IdentifierListFilterEquipmentAttributes("VLHV2", null);
+        IdentifierListFilter vlIdentifierListFilter = new IdentifierListFilter(voltageLevelFilterId, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
+        insertFilter(voltageLevelFilterId, vlIdentifierListFilter);
+        checkIdentifierListFilter(voltageLevelFilterId, vlIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n", EquipmentType.VOLTAGE_LEVEL);
 
-        // Create manual filter for substations
+        // Create identifier list filter for substations
         UUID substationFilterId = UUID.randomUUID();
-        ManualFilterEquipmentAttributes s1 = new ManualFilterEquipmentAttributes("P1", null);
-        ManualFilterEquipmentAttributes s2 = new ManualFilterEquipmentAttributes("P2", null);
-        ManualFilterEquipmentAttributes s3 = new ManualFilterEquipmentAttributes("P3", null);
-        ManualFilter sManualFilter = new ManualFilter(substationFilterId, modificationDate, EquipmentType.SUBSTATION, List.of(s1, s2, s3));
-        insertFilter(substationFilterId, sManualFilter);
-        checkManualFilter(substationFilterId, sManualFilter);
-        checkManualFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
+        IdentifierListFilterEquipmentAttributes s1 = new IdentifierListFilterEquipmentAttributes("P1", null);
+        IdentifierListFilterEquipmentAttributes s2 = new IdentifierListFilterEquipmentAttributes("P2", null);
+        IdentifierListFilterEquipmentAttributes s3 = new IdentifierListFilterEquipmentAttributes("P3", null);
+        IdentifierListFilter sIdentifierListFilter = new IdentifierListFilter(substationFilterId, modificationDate, EquipmentType.SUBSTATION, List.of(s1, s2, s3));
+        insertFilter(substationFilterId, sIdentifierListFilter);
+        checkIdentifierListFilter(substationFilterId, sIdentifierListFilter);
+        checkIdentifierListFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
     }
 
-    private void checkManualFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
+    private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
         mvc.perform(get(URL_TEMPLATE + filterId + "/export?networkUuid=" + NETWORK_UUID)
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -801,7 +813,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(filterId, filterAttributes.get(0).getId());
-        assertEquals(FilterType.MANUAL, filterAttributes.get(0).getType());
+        assertEquals(FilterType.IDENTIFIER_LIST, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
     }
 
@@ -820,20 +832,20 @@ public class FilterEntityControllerTest {
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
         String modifiedFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
-        AutomaticFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, AutomaticFilter.class);
+        CriteriaFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, CriteriaFilter.class);
         checkFormFilter(filterId, modifiedFilter);
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
         MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
-        modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), AutomaticFilter.class);
+        modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), CriteriaFilter.class);
         checkFormFilter(filterId, modifiedFilter);
     }
 
     private void insertInjectionFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                        String substationName, Set<String> countries,
-                                       RangeType rangeType, Double value1, Double value2,
+                                       RangeType rangeType, Double value1, Double value2, EnergySource energySource,
                                        UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
         NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
         AbstractInjectionFilter abstractInjectionFilter;
@@ -851,7 +863,12 @@ public class FilterEntityControllerTest {
                 abstractInjectionFilter = new DanglingLineFilter(injectionFilterAttributes);
                 break;
             case GENERATOR:
-                abstractInjectionFilter = new GeneratorFilter(injectionFilterAttributes);
+                abstractInjectionFilter = new GeneratorFilter(injectionFilterAttributes.getEquipmentID(),
+                        injectionFilterAttributes.getEquipmentName(),
+                        injectionFilterAttributes.getSubstationName(),
+                        injectionFilterAttributes.getCountries(),
+                        injectionFilterAttributes.getNominalVoltage(),
+                        energySource);
                 break;
             case LCC_CONVERTER_STATION:
                 abstractInjectionFilter = new LccConverterStationFilter(injectionFilterAttributes);
@@ -871,7 +888,7 @@ public class FilterEntityControllerTest {
             default:
                 throw new PowsyblException("Equipment type not allowed");
         }
-        AutomaticFilter injectionFilter = new AutomaticFilter(
+        CriteriaFilter injectionFilter = new CriteriaFilter(
                 id,
 
                 modificationDate,
@@ -893,7 +910,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
@@ -922,7 +939,7 @@ public class FilterEntityControllerTest {
         }
         Date modificationDate = new Date();
 
-        AutomaticFilter transformerFilter = new AutomaticFilter(
+        CriteriaFilter transformerFilter = new CriteriaFilter(
                 id,
 
                 modificationDate,
@@ -942,7 +959,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
@@ -959,7 +976,7 @@ public class FilterEntityControllerTest {
                                       SortedSet<String> countries2, RangeType rangeType, Double value1, Double value2,
                                       UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
         Date modificationDate = new Date();
-        AutomaticFilter hvdcLineFilter = new AutomaticFilter(
+        CriteriaFilter hvdcLineFilter = new CriteriaFilter(
                 id,
 
                 modificationDate,
@@ -985,7 +1002,7 @@ public class FilterEntityControllerTest {
                 new TypeReference<>() {
                 });
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), id, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
 
         filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
@@ -996,7 +1013,7 @@ public class FilterEntityControllerTest {
             });
 
         assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), id, FilterType.AUTOMATIC, EquipmentType.HVDC_LINE, modificationDate);
+        matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -1017,10 +1034,10 @@ public class FilterEntityControllerTest {
         assertEquals(0, filterAttributes.size());
     }
 
-    private AutomaticFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
-                                             String substationName, Set<String> countries1, Set<String> countries2,
-                                             List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
-                                             UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
+    private CriteriaFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
+                                            String substationName, Set<String> countries1, Set<String> countries2,
+                                            List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
+                                            UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
         NumericalFilter numericalFilter1 = null;
         if (rangeTypes.size() >= 1) {
             numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
@@ -1031,7 +1048,7 @@ public class FilterEntityControllerTest {
         }
         AbstractEquipmentFilterForm equipmentFilterForm = new LineFilter(equipmentID, equipmentName, null, substationName, AbstractFilterRepositoryProxy.setToSorterSet(countries1), AbstractFilterRepositoryProxy.setToSorterSet(countries2), numericalFilter1, numericalFilter2);
         Date modificationDate = new Date();
-        AutomaticFilter filter = new AutomaticFilter(
+        CriteriaFilter filter = new CriteriaFilter(
                 id,
 
                 modificationDate,
@@ -1049,7 +1066,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(EquipmentType.LINE, filterAttributes.get(0).getEquipmentType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
@@ -1071,7 +1088,7 @@ public class FilterEntityControllerTest {
         VoltageLevelFilter voltageLevelFilter = new VoltageLevelFilter(equipmentID, equipmentName, sortedCountries, numericalFilter);
         Date modificationDate = new Date();
 
-        AutomaticFilter filter = new AutomaticFilter(
+        CriteriaFilter filter = new CriteriaFilter(
             id,
 
             modificationDate,
@@ -1091,7 +1108,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -1108,7 +1125,7 @@ public class FilterEntityControllerTest {
         SubstationFilter substationFilter = new SubstationFilter(equipmentID, equipmentName, sortedCountries);
         Date modificationDate = new Date();
 
-        AutomaticFilter filter = new AutomaticFilter(
+        CriteriaFilter filter = new CriteriaFilter(
             id,
 
             modificationDate,
@@ -1128,7 +1145,7 @@ public class FilterEntityControllerTest {
 
         assertEquals(1, filterAttributes.size());
         assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.AUTOMATIC, filterAttributes.get(0).getType());
+        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
 
         mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
@@ -1139,10 +1156,10 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
     }
 
-    private void checkFormFilter(UUID filterId, AutomaticFilter automaticFilter) throws Exception {
+    private void checkFormFilter(UUID filterId, CriteriaFilter criteriaFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        AutomaticFilter foundFilter = objectMapper.readValue(foundFilterAsString, AutomaticFilter.class);
-        matchFormFilterInfos(foundFilter, automaticFilter);
+        CriteriaFilter foundFilter = objectMapper.readValue(foundFilterAsString, CriteriaFilter.class);
+        matchFormFilterInfos(foundFilter, criteriaFilter);
     }
 
     private void checkScriptFilter(UUID filterId, ScriptFilter scriptFilter) throws Exception {
@@ -1151,10 +1168,10 @@ public class FilterEntityControllerTest {
         matchScriptFilterInfos(foundFilter, scriptFilter);
     }
 
-    private void checkManualFilter(UUID filterId, ManualFilter manualFilter) throws Exception {
+    private void checkIdentifierListFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        ManualFilter foundFilter = objectMapper.readValue(foundFilterAsString, ManualFilter.class);
-        matchManualFilterInfos(foundFilter, manualFilter);
+        IdentifierListFilter foundFilter = objectMapper.readValue(foundFilterAsString, IdentifierListFilter.class);
+        matchIdentifierListFilterInfos(foundFilter, identifierListFilter);
     }
 
     private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
@@ -1171,9 +1188,9 @@ public class FilterEntityControllerTest {
         assertEquals(filterAttribute.getEquipmentType(), equipmentType);
     }
 
-    private void matchFormFilterInfos(AutomaticFilter automaticFilter1, AutomaticFilter automaticFilter2) {
-        matchFilterInfos(automaticFilter1, automaticFilter2);
-        matchEquipmentFormFilter(automaticFilter1.getEquipmentFilterForm(), automaticFilter2.getEquipmentFilterForm());
+    private void matchFormFilterInfos(CriteriaFilter criteriaFilter1, CriteriaFilter criteriaFilter2) {
+        matchFilterInfos(criteriaFilter1, criteriaFilter2);
+        matchEquipmentFormFilter(criteriaFilter1.getEquipmentFilterForm(), criteriaFilter2.getEquipmentFilterForm());
     }
 
     private void matchEquipmentFormFilter(AbstractEquipmentFilterForm equipmentFilterForm1, AbstractEquipmentFilterForm equipmentFilterForm2) {
@@ -1185,8 +1202,8 @@ public class FilterEntityControllerTest {
         assertTrue(scriptFilter1.getScript().contains(scriptFilter2.getScript()));
     }
 
-    private void matchManualFilterInfos(ManualFilter manualFilter1, ManualFilter manualFilter2) {
-        matchFilterInfos(manualFilter1, manualFilter2);
-        assertTrue(new MatcherJson<>(objectMapper, manualFilter2.getFilterEquipmentsAttributes()).matchesSafely(manualFilter1.getFilterEquipmentsAttributes()));
+    private void matchIdentifierListFilterInfos(IdentifierListFilter identifierListFilter1, IdentifierListFilter identifierListFilter2) {
+        matchFilterInfos(identifierListFilter1, identifierListFilter2);
+        assertTrue(new MatcherJson<>(objectMapper, identifierListFilter2.getFilterEquipmentsAttributes()).matchesSafely(identifierListFilter1.getFilterEquipmentsAttributes()));
     }
 }

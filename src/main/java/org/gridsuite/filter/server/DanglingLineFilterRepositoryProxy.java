@@ -29,7 +29,7 @@ public class DanglingLineFilterRepositoryProxy extends AbstractFilterRepositoryP
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

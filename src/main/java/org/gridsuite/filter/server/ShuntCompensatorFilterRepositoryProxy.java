@@ -29,7 +29,7 @@ public class ShuntCompensatorFilterRepositoryProxy extends AbstractFilterReposit
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

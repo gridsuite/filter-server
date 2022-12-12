@@ -7,12 +7,12 @@
 
 package org.gridsuite.filter.server.entities;
 
+import com.powsybl.iidm.network.EnergySource;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -23,4 +23,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "generator_filter")
 public class GeneratorFilterEntity extends AbstractInjectionFilterEntity {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "energySource")
+    EnergySource energySource;
 }

@@ -29,7 +29,7 @@ public class LoadFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Loa
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

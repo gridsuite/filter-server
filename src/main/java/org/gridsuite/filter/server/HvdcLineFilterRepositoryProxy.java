@@ -28,7 +28,7 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override
@@ -62,15 +62,15 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
 
     @Override
     public HvdcLineFilterEntity fromDto(AbstractFilter dto) {
-        AutomaticFilter automaticFilter = toFormFilter(dto, HvdcLineFilter.class);
-        HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) automaticFilter.getEquipmentFilterForm();
+        CriteriaFilter criteriaFilter = toFormFilter(dto, HvdcLineFilter.class);
+        HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) criteriaFilter.getEquipmentFilterForm();
         var hvdcLineFilterEntityBuilder = HvdcLineFilterEntity.builder()
             .countries1(hvdcLineFilter.getCountries1())
             .countries2(hvdcLineFilter.getCountries2())
             .nominalVoltage(convert(hvdcLineFilter.getNominalVoltage()))
             .substationName1(hvdcLineFilter.getSubstationName1())
             .substationName2(hvdcLineFilter.getSubstationName2());
-        buildGenericFilter(hvdcLineFilterEntityBuilder, automaticFilter);
+        buildGenericFilter(hvdcLineFilterEntityBuilder, criteriaFilter);
         return hvdcLineFilterEntityBuilder.build();
     }
 }

@@ -23,7 +23,7 @@ import java.util.SortedSet;
 @AllArgsConstructor
 @SuperBuilder
 @ToString(callSuper = true)
-@Schema(description = "Line Filters", allOf = AutomaticFilter.class)
+@Schema(description = "Line Filters", allOf = CriteriaFilter.class)
 public class LineFilter extends AbstractEquipmentFilterForm {
     public EquipmentType getEquipmentType() {
         return EquipmentType.LINE;
