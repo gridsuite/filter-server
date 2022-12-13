@@ -64,7 +64,7 @@ public class FilterService {
                          final HvdcLineFilterRepository hvdcLineFilterRepository,
                          final VoltageLevelFilterRepository voltageLevelFilterRepository,
                          final SubstationFilterRepository substationFilterRepository,
-                         final ManualFilterRepository manualFilterRepository,
+                         final IdentifierListFilterRepository identifierListFilterRepository,
                          NetworkStoreService networkStoreService,
                          NotificationService notificationService) {
         this.filtersToScript = filtersToScript;
@@ -87,7 +87,7 @@ public class FilterService {
 
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
 
-        filterRepositories.put(FilterType.MANUAL.name(), new ManualFilterRepositoryProxy(manualFilterRepository));
+        filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
         this.networkStoreService = networkStoreService;
         this.notificationService = notificationService;
@@ -133,10 +133,10 @@ public class FilterService {
     }
 
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
-        if (!filter.getType().equals(FilterType.AUTOMATIC)) {
+        if (!filter.getType().equals(FilterType.CRITERIA)) {
             return filterRepositories.get(filter.getType().name());
         }
-        return filterRepositories.get(((AutomaticFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
+        return filterRepositories.get(((CriteriaFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
     }
 
     @Transactional
@@ -261,18 +261,22 @@ public class FilterService {
         }
     }
 
+    private boolean filterByEnergySource(Generator generator, EnergySource energySource) {
+        return energySource == null || generator.getEnergySource() == energySource;
+    }
+
     private <I extends Injection<I>> Stream<Injection<I>> getInjectionList(Stream<Injection<I>> stream, AbstractFilter filter) {
-        if (filter instanceof AutomaticFilter) {
-            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
-            AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) automaticFilter.getEquipmentFilterForm();
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) criteriaFilter.getEquipmentFilterForm();
             return stream
                     .filter(injection -> equipmentIdFilter(injection, injectionFilter.getEquipmentID()))
                     .filter(injection -> equipmentNameFilter(injection, injectionFilter.getEquipmentName()))
                     .filter(injection -> filterByVoltage(injection.getTerminal().getVoltageLevel().getNominalV(), injectionFilter.getNominalVoltage()))
                     .filter(injection -> countryFilter(injection.getTerminal(), injectionFilter.getCountries()))
                     .filter(injection -> substationNameFilter(injection.getTerminal(), injectionFilter.getSubstationName()));
-        } else if (filter instanceof ManualFilter) {
-            List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+        } else if (filter instanceof IdentifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
         } else {
             return Stream.empty();
@@ -280,7 +284,17 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> getGeneratorList(Network network, AbstractFilter filter) {
-        return getInjectionList(network.getGeneratorStream().map(gen -> gen), filter).collect(Collectors.toList());
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            GeneratorFilter generatorFilter = (GeneratorFilter) criteriaFilter.getEquipmentFilterForm();
+            return getInjectionList(network.getGeneratorStream().map(injection -> injection), filter)
+                    .filter(injection -> filterByEnergySource((Generator) injection, generatorFilter.getEnergySource()))
+                    .collect(Collectors.toList());
+        } else if (filter instanceof IdentifierListFilter) {
+            return getInjectionList(network.getGeneratorStream().map(generator -> generator), filter).collect(Collectors.toList());
+        } else {
+            return List.of();
+        }
     }
 
     private List<Identifiable<?>> getLoadList(Network network, AbstractFilter filter) {
@@ -365,9 +379,9 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> getLineList(Network network, AbstractFilter filter) {
-        if (filter instanceof AutomaticFilter) {
-            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
-            LineFilter lineFilter = (LineFilter) automaticFilter.getEquipmentFilterForm();
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            LineFilter lineFilter = (LineFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getLineStream()
                 .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
                 .filter(line -> equipmentNameFilter(line, lineFilter.getEquipmentName()))
@@ -376,8 +390,8 @@ public class FilterService {
                 .filter(line -> substationNameFilter(line.getTerminal1(), lineFilter.getSubstationName1()) &&
                                 substationNameFilter(line.getTerminal2(), lineFilter.getSubstationName2()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof ManualFilter) {
-            List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+        } else if (filter instanceof IdentifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return network.getLineStream()
                 .filter(line -> equipmentIds.contains(line.getId()))
                 .collect(Collectors.toList());
@@ -387,9 +401,9 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> get2WTransformerList(Network network, AbstractFilter filter) {
-        if (filter instanceof AutomaticFilter) {
-            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
-            TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getTwoWindingsTransformerStream()
                 .filter(twoWindingsTransformer -> equipmentIdFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentID()))
                 .filter(twoWindingsTransformer -> equipmentNameFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentName()))
@@ -399,8 +413,8 @@ public class FilterService {
                 .filter(twoWindingsTransformer -> substationNameFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getSubstationName()) ||
                                                   substationNameFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getSubstationName()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof ManualFilter) {
-            List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+        } else if (filter instanceof IdentifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
 
             return network.getTwoWindingsTransformerStream()
                     .filter(twoWindingsTransformer -> equipmentIds.contains(twoWindingsTransformer.getId()))
@@ -411,9 +425,9 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> get3WTransformerList(Network network, AbstractFilter filter) {
-        if (filter instanceof AutomaticFilter) {
-            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
-            ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getThreeWindingsTransformerStream()
                 .filter(threeWindingsTransformer -> equipmentIdFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentID()))
                 .filter(threeWindingsTransformer -> equipmentNameFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentName()))
@@ -425,8 +439,8 @@ public class FilterService {
                                                     substationNameFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
                                                     substationNameFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getSubstationName()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof ManualFilter) {
-            List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+        } else if (filter instanceof IdentifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
 
             return network.getThreeWindingsTransformerStream()
                 .filter(threeWindingsTransformer -> equipmentIds.contains(threeWindingsTransformer.getId()))
@@ -437,9 +451,9 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> getHvdcList(Network network, AbstractFilter filter) {
-        if (filter instanceof AutomaticFilter) {
-            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
-            HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) automaticFilter.getEquipmentFilterForm();
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getHvdcLineStream()
                 .filter(hvdcLine -> equipmentIdFilter(hvdcLine, hvdcLineFilter.getEquipmentID()))
                 .filter(hvdcLine -> equipmentNameFilter(hvdcLine, hvdcLineFilter.getEquipmentName()))
@@ -448,8 +462,8 @@ public class FilterService {
                 .filter(hvdcLine -> substationNameFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getSubstationName1()) &&
                                     substationNameFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getSubstationName2()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof ManualFilter) {
-            List<String> equipmentsIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+        } else if (filter instanceof IdentifierListFilter) {
+            List<String> equipmentsIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return network.getHvdcLineStream()
                 .filter(hvdcLine -> equipmentsIds.contains(hvdcLine.getId()))
                 .collect(Collectors.toList());
@@ -459,17 +473,17 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> getVoltageLevelList(Network network, AbstractFilter filter) {
-        if (filter instanceof AutomaticFilter) {
-            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
-            VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) automaticFilter.getEquipmentFilterForm();
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getVoltageLevelStream()
                 .filter(voltageLevel -> equipmentIdFilter(voltageLevel, voltageLevelFilter.getEquipmentID()))
                 .filter(voltageLevel -> equipmentNameFilter(voltageLevel, voltageLevelFilter.getEquipmentName()))
                 .filter(voltageLevel -> filterByVoltage(voltageLevel, voltageLevelFilter.getNominalVoltage()))
                 .filter(voltageLevel -> countryFilter(voltageLevel, voltageLevelFilter.getCountries()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof ManualFilter) {
-            List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+        } else if (filter instanceof IdentifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return network.getVoltageLevelStream()
                 .filter(voltageLevel -> equipmentIds.contains(voltageLevel.getId()))
                 .collect(Collectors.toList());
@@ -479,16 +493,16 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> getSubstationList(Network network, AbstractFilter filter) {
-        if (filter instanceof AutomaticFilter) {
-            AutomaticFilter automaticFilter = (AutomaticFilter) filter;
-            SubstationFilter substationFilter = (SubstationFilter) automaticFilter.getEquipmentFilterForm();
+        if (filter instanceof CriteriaFilter) {
+            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+            SubstationFilter substationFilter = (SubstationFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getSubstationStream()
                 .filter(substation -> equipmentIdFilter(substation, substationFilter.getEquipmentID()))
                 .filter(substation -> equipmentNameFilter(substation, substationFilter.getEquipmentName()))
                 .filter(substation -> countryFilter(substation, substationFilter.getCountries()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof ManualFilter) {
-            List<String> equipmentIds = getManuelFilterEquipmentIds((ManualFilter) filter);
+        } else if (filter instanceof IdentifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return network.getSubstationStream()
                 .filter(substation -> equipmentIds.contains(substation.getId()))
                 .collect(Collectors.toList());
@@ -497,10 +511,10 @@ public class FilterService {
         }
     }
 
-    private List<String> getManuelFilterEquipmentIds(ManualFilter manualFilter) {
-        return manualFilter.getFilterEquipmentsAttributes()
+    private List<String> getIdentifierListFilterEquipmentIds(IdentifierListFilter identifierListFilter) {
+        return identifierListFilter.getFilterEquipmentsAttributes()
             .stream()
-            .map(ManualFilterEquipmentAttributes::getEquipmentID)
+            .map(IdentifierListFilterEquipmentAttributes::getEquipmentID)
             .collect(Collectors.toList());
     }
 
@@ -575,7 +589,7 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
-        if (filter.getType() == FilterType.AUTOMATIC || filter.getType() == FilterType.MANUAL) {
+        if (filter.getType() == FilterType.CRITERIA || filter.getType() == FilterType.IDENTIFIER_LIST) {
             Network network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
 
             if (network == null) {
@@ -593,15 +607,15 @@ public class FilterService {
     }
 
     private List<IdentifiableAttributes> getIdentifiableAttributes(AbstractFilter filter, UUID networkUuid, String variantId) {
-        if (filter instanceof ManualFilter &&
+        if (filter instanceof IdentifierListFilter &&
             (filter.getEquipmentType() == EquipmentType.GENERATOR ||
              filter.getEquipmentType() == EquipmentType.LOAD)) {
-            ManualFilter manualFilter = (ManualFilter) filter;
+            IdentifierListFilter identifierListFilter = (IdentifierListFilter) filter;
             return toIdentifiableFilter(filter, networkUuid, variantId)
                     .stream()
                     .map(identifiable -> new IdentifiableAttributes(identifiable.getId(),
                             identifiable.getType(),
-                            manualFilter.getDistributionKey(identifiable.getId())))
+                            identifierListFilter.getDistributionKey(identifiable.getId())))
                     .collect(Collectors.toList());
         } else {
             return toIdentifiableFilter(filter, networkUuid, variantId).stream()

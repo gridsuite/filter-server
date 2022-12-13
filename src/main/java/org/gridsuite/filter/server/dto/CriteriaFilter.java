@@ -27,11 +27,11 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
-public class AutomaticFilter extends AbstractFilter {
+public class CriteriaFilter extends AbstractFilter {
 
     private AbstractEquipmentFilterForm equipmentFilterForm;
 
-    public AutomaticFilter(UUID id, Date modificationDate, AbstractEquipmentFilterForm equipmentFilterForm) {
+    public CriteriaFilter(UUID id, Date modificationDate, AbstractEquipmentFilterForm equipmentFilterForm) {
         super(id, modificationDate, equipmentFilterForm.getEquipmentType());
         this.equipmentFilterForm = equipmentFilterForm;
     }
@@ -39,7 +39,7 @@ public class AutomaticFilter extends AbstractFilter {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public FilterType getType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

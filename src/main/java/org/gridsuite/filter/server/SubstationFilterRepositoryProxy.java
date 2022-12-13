@@ -9,7 +9,7 @@ package org.gridsuite.filter.server;
 
 import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.AutomaticFilter;
+import org.gridsuite.filter.server.dto.CriteriaFilter;
 import org.gridsuite.filter.server.dto.SubstationFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.SubstationFilterEntity;
@@ -31,7 +31,7 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override
@@ -61,11 +61,11 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
 
     @Override
     public SubstationFilterEntity fromDto(AbstractFilter dto) {
-        AutomaticFilter automaticFilter = toFormFilter(dto, SubstationFilter.class);
-        SubstationFilter substationFilter = (SubstationFilter) automaticFilter.getEquipmentFilterForm();
+        CriteriaFilter criteriaFilter = toFormFilter(dto, SubstationFilter.class);
+        SubstationFilter substationFilter = (SubstationFilter) criteriaFilter.getEquipmentFilterForm();
         var substationFilterEntityBuilder =  SubstationFilterEntity.builder()
             .countries(substationFilter.getCountries());
-        buildGenericFilter(substationFilterEntityBuilder, automaticFilter);
+        buildGenericFilter(substationFilterEntityBuilder, criteriaFilter);
         return substationFilterEntityBuilder.build();
     }
 }

@@ -28,7 +28,7 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override
@@ -62,15 +62,15 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
 
     @Override
     public ThreeWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
-        AutomaticFilter automaticFilter = toFormFilter(dto, ThreeWindingsTransformerFilter.class);
-        ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
+        CriteriaFilter criteriaFilter = toFormFilter(dto, ThreeWindingsTransformerFilter.class);
+        ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
         var threeWindingsTransformerFilterEntityBuilder =   ThreeWindingsTransformerFilterEntity.builder()
             .countries(threeWindingsTransformerFilter.getCountries())
             .substationName(threeWindingsTransformerFilter.getSubstationName())
             .nominalVoltage1(convert(threeWindingsTransformerFilter.getNominalVoltage1()))
             .nominalVoltage2(convert(threeWindingsTransformerFilter.getNominalVoltage2()))
             .nominalVoltage3(convert(threeWindingsTransformerFilter.getNominalVoltage3()));
-        buildGenericFilter(threeWindingsTransformerFilterEntityBuilder, automaticFilter);
+        buildGenericFilter(threeWindingsTransformerFilterEntityBuilder, criteriaFilter);
         return threeWindingsTransformerFilterEntityBuilder.build();
     }
 }

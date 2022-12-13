@@ -29,7 +29,7 @@ public class VscConverterStationFilterRepositoryProxy extends AbstractFilterRepo
 
     @Override
     public FilterType getFilterType() {
-        return FilterType.AUTOMATIC;
+        return FilterType.CRITERIA;
     }
 
     @Override

@@ -30,6 +30,7 @@ public class FiltersToGroovyScript {
     private static final String NO_EMPTY_FILTER = "noEmptyFilter";
     private static final String EQUIPMENT_ID = "equipmentId";
     private static final String EQUIPMENT_NAME = "equipmentName";
+    private static final String ENERGY_SOURCE = "energySource";
     private static final String COUNTRIES = "countries";
     private static final String SUBSTATION_NAME = "substationName";
 
@@ -40,6 +41,7 @@ public class FiltersToGroovyScript {
     private final String hvdcLineTemplate;
     private final String voltageLevelTemplate;
     private final String substationTemplate;
+    private final String generatorTemplate;
 
     private static final String NOMINAL_V = "nominalV";
 
@@ -52,8 +54,32 @@ public class FiltersToGroovyScript {
             hvdcLineTemplate = IOUtils.toString(new ClassPathResource("hvdcLine.st").getInputStream(), Charset.defaultCharset());
             voltageLevelTemplate = IOUtils.toString(new ClassPathResource("voltageLevel.st").getInputStream(), Charset.defaultCharset());
             substationTemplate = IOUtils.toString(new ClassPathResource("substation.st").getInputStream(), Charset.defaultCharset());
+            generatorTemplate = IOUtils.toString(new ClassPathResource("generator.st").getInputStream(), Charset.defaultCharset());
         } catch (IOException e) {
             throw new PowsyblException("Unable to load templates for groovy script generation !!");
+        }
+    }
+
+    private void addInjectionFilter(ST template,  AbstractEquipmentFilterForm filterForm) {
+        AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) filterForm;
+        template.add(COLLECTION_NAME, filterForm.getEquipmentType().getCollectionName());
+        if (!injectionFilter.isEmpty()) {
+            template.add(NO_EMPTY_FILTER, "true");
+        }
+        if (injectionFilter.getEquipmentID() != null) {
+            template.add(EQUIPMENT_ID, injectionFilter.getEquipmentID());
+        }
+        if (injectionFilter.getEquipmentName() != null) {
+            template.add(EQUIPMENT_NAME, injectionFilter.getEquipmentName());
+        }
+        if (!CollectionUtils.isEmpty(injectionFilter.getCountries())) {
+            template.add(COUNTRIES, injectionFilter.getCountries().stream().collect(joining("','", "['", "']")));
+        }
+        if (injectionFilter.getNominalVoltage() != null) {
+            addFilterNominalVoltage(template, injectionFilter.getNominalVoltage(), null);
+        }
+        if (!StringUtils.isEmpty(injectionFilter.getSubstationName())) {
+            template.add(SUBSTATION_NAME, injectionFilter.getSubstationName());
         }
     }
 
@@ -73,14 +99,14 @@ public class FiltersToGroovyScript {
     public String generateGroovyScriptFromFilters(AbstractFilter filter) {
         String script = "";
 
-        if (!(filter instanceof AutomaticFilter)) {
+        if (!(filter instanceof CriteriaFilter)) {
             throw new PowsyblException(AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE);
         }
 
-        AutomaticFilter automaticFilter = (AutomaticFilter) filter;
-        String equipmentsCollection = automaticFilter.getEquipmentFilterForm().getEquipmentType().getCollectionName();
+        CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+        String equipmentsCollection = criteriaFilter.getEquipmentFilterForm().getEquipmentType().getCollectionName();
 
-        switch (automaticFilter.getEquipmentFilterForm().getEquipmentType()) {
+        switch (criteriaFilter.getEquipmentFilterForm().getEquipmentType()) {
             case LINE:
                 script += lineTemplate;
                 break;
@@ -90,7 +116,6 @@ public class FiltersToGroovyScript {
             case THREE_WINDINGS_TRANSFORMER:
                 script += threeWindingsTransformerTemplate;
                 break;
-            case GENERATOR:
             case LOAD:
             case BATTERY:
             case DANGLING_LINE:
@@ -114,15 +139,19 @@ public class FiltersToGroovyScript {
                 script += substationTemplate;
                 break;
 
+            case GENERATOR:
+                script += generatorTemplate;
+                break;
+
             default:
                 throw new PowsyblException("Filter type not allowed");
         }
 
         ST template = new ST(script);
 
-        switch (automaticFilter.getEquipmentFilterForm().getEquipmentType()) {
+        switch (criteriaFilter.getEquipmentFilterForm().getEquipmentType()) {
             case LINE:
-                LineFilter lineFilter = (LineFilter) automaticFilter.getEquipmentFilterForm();
+                LineFilter lineFilter = (LineFilter) criteriaFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!lineFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -154,7 +183,7 @@ public class FiltersToGroovyScript {
                 break;
 
             case TWO_WINDINGS_TRANSFORMER:
-                TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
+                TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!twoWindingsTransformerFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -180,7 +209,7 @@ public class FiltersToGroovyScript {
                 break;
 
             case THREE_WINDINGS_TRANSFORMER:
-                ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) automaticFilter.getEquipmentFilterForm();
+                ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!threeWindingsTransformerFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -208,7 +237,6 @@ public class FiltersToGroovyScript {
                 }
                 break;
 
-            case GENERATOR:
             case LOAD:
             case BATTERY:
             case DANGLING_LINE:
@@ -217,30 +245,19 @@ public class FiltersToGroovyScript {
             case STATIC_VAR_COMPENSATOR:
             case LCC_CONVERTER_STATION:
             case VSC_CONVERTER_STATION:
-                AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) automaticFilter.getEquipmentFilterForm();
-                template.add(COLLECTION_NAME, equipmentsCollection);
-                if (!injectionFilter.isEmpty()) {
-                    template.add(NO_EMPTY_FILTER, "true");
-                }
-                if (injectionFilter.getEquipmentID() != null) {
-                    template.add(EQUIPMENT_ID, injectionFilter.getEquipmentID());
-                }
-                if (injectionFilter.getEquipmentName() != null) {
-                    template.add(EQUIPMENT_NAME, injectionFilter.getEquipmentName());
-                }
-                if (!CollectionUtils.isEmpty(injectionFilter.getCountries())) {
-                    template.add(COUNTRIES, injectionFilter.getCountries().stream().collect(joining("','", "['", "']")));
-                }
-                if (injectionFilter.getNominalVoltage() != null) {
-                    addFilterNominalVoltage(template, injectionFilter.getNominalVoltage(), null);
-                }
-                if (!StringUtils.isEmpty(injectionFilter.getSubstationName())) {
-                    template.add(SUBSTATION_NAME, injectionFilter.getSubstationName());
+                addInjectionFilter(template, criteriaFilter.getEquipmentFilterForm());
+                break;
+
+            case GENERATOR:
+                addInjectionFilter(template, criteriaFilter.getEquipmentFilterForm());
+                GeneratorFilter generatorFilter = (GeneratorFilter) criteriaFilter.getEquipmentFilterForm();
+                if (generatorFilter.getEnergySource() != null) {
+                    template.add(ENERGY_SOURCE, generatorFilter.getEnergySource());
                 }
                 break;
 
             case HVDC_LINE:
-                HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) automaticFilter.getEquipmentFilterForm();
+                HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) criteriaFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!hvdcLineFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -269,7 +286,7 @@ public class FiltersToGroovyScript {
                 break;
 
             case VOLTAGE_LEVEL:
-                VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) automaticFilter.getEquipmentFilterForm();
+                VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) criteriaFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!voltageLevelFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");
@@ -289,7 +306,7 @@ public class FiltersToGroovyScript {
                 break;
 
             case SUBSTATION:
-                SubstationFilter substationFilter = (SubstationFilter) automaticFilter.getEquipmentFilterForm();
+                SubstationFilter substationFilter = (SubstationFilter) criteriaFilter.getEquipmentFilterForm();
                 template.add(COLLECTION_NAME, equipmentsCollection);
                 if (!substationFilter.isEmpty()) {
                     template.add(NO_EMPTY_FILTER, "true");

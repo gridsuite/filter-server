@@ -6,12 +6,12 @@
  */
 package org.gridsuite.filter.server.dto;
 
+import com.powsybl.iidm.network.EnergySource;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -22,8 +22,18 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 @ToString(callSuper = true)
 @Schema(description = "Generator Filters", allOf = AbstractInjectionFilter.class)
 public class GeneratorFilter extends AbstractInjectionFilter {
-    public GeneratorFilter(InjectionFilterAttributes injectionFilterAttributes) {
-        super(injectionFilterAttributes);
+
+    @Schema(description = "Energy source")
+    EnergySource energySource;
+
+    public GeneratorFilter(String equipmentID, String equipmentName, String substationName, SortedSet<String> countries, NumericalFilter nominalVoltage, EnergySource energySource) {
+        super(new InjectionFilterAttributes(equipmentID, equipmentName, substationName, countries, nominalVoltage));
+        this.energySource = energySource;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty() && energySource == null;
     }
 
     @Override
