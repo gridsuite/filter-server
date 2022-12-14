@@ -45,6 +45,8 @@ public class FilterService {
 
     private final NetworkStoreService networkStoreService;
 
+    private final NotificationService notificationService;
+
     public FilterService(FiltersToGroovyScript filtersToScript,
                          final ScriptFilterRepository scriptFiltersRepository,
                          final LineFilterRepository lineFilterRepository,
@@ -63,7 +65,8 @@ public class FilterService {
                          final VoltageLevelFilterRepository voltageLevelFilterRepository,
                          final SubstationFilterRepository substationFilterRepository,
                          final IdentifierListFilterRepository identifierListFilterRepository,
-                         NetworkStoreService networkStoreService) {
+                         NetworkStoreService networkStoreService,
+                         NotificationService notificationService) {
         this.filtersToScript = filtersToScript;
 
         filterRepositories.put(EquipmentType.LINE.name(), new LineFilterRepositoryProxy(lineFilterRepository));
@@ -87,6 +90,7 @@ public class FilterService {
         filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
         this.networkStoreService = networkStoreService;
+        this.notificationService = notificationService;
     }
 
     public List<IFilterAttributes> getFilters() {
@@ -136,7 +140,7 @@ public class FilterService {
     }
 
     @Transactional
-    public <F extends AbstractFilter> void changeFilter(UUID id, F newFilter) {
+    public <F extends AbstractFilter> void changeFilter(UUID id, F newFilter, String userId) {
         Optional<AbstractFilter> f = getFilter(id);
         if (f.isPresent()) {
             if (getRepository(f.get()) == getRepository(newFilter)) { // filter type has not changed
@@ -153,6 +157,7 @@ public class FilterService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
+        notificationService.emitElementUpdated(id, userId);
     }
 
     public void deleteFilter(UUID id) {
@@ -171,8 +176,9 @@ public class FilterService {
     }
 
     @Transactional
-    public AbstractFilter replaceFilterWithScript(UUID id) {
+    public AbstractFilter replaceFilterWithScript(UUID id, String userId) {
         Objects.requireNonNull(id);
+        AbstractFilter result;
         Optional<AbstractFilter> filter = getFilter(id);
         if (filter.isPresent()) {
             if (filter.get().getType() == FilterType.SCRIPT) {
@@ -180,11 +186,13 @@ public class FilterService {
             } else {
                 String script = generateGroovyScriptFromFilter(filter.get());
                 getRepository(filter.get()).deleteById(filter.get().getId());
-                return getRepository(new ScriptFilter()).insert(ScriptFilter.builder().id(filter.get().getId()).script(script).build());
+                result = getRepository(new ScriptFilter()).insert(ScriptFilter.builder().id(filter.get().getId()).script(script).build());
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
+        notificationService.emitElementUpdated(id, userId);
+        return result;
     }
 
     @Transactional
