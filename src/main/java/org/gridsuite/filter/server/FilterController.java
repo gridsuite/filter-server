@@ -55,6 +55,14 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping(value = "/filters/data", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get filters by ids")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "List of filters"),
+        @ApiResponse(responseCode = "404", description = "Filters do not exist")})
+    public ResponseEntity<List<AbstractFilter>> getFilters(@RequestParam("ids") List<UUID> ids) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
+    }
+
     @PostMapping(value = "/filters", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created")})

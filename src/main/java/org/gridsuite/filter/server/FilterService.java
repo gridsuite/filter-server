@@ -116,6 +116,19 @@ public class FilterService {
         return Optional.empty();
     }
 
+    public List<AbstractFilter> getFilters(List<UUID> ids) {
+        Objects.requireNonNull(ids);
+        List<AbstractFilter> result = new ArrayList<>();
+        if (ids.size() > 0) {
+            for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
+                result.addAll(repository.getFilters(ids));
+            }
+            return result;
+        } else {
+            return List.of();
+        }
+    }
+
     @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
         return getRepository(filter).insert(filter);
