@@ -641,4 +641,10 @@ public class FilterService {
         Objects.requireNonNull(id);
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
+
+    public Map<UUID, List<IdentifiableAttributes>> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
+        return getFilters(ids)
+                .stream()
+                .collect(Collectors.toMap(AbstractFilter::getId,val -> exportFilter(val.getId(), networkUuid, variantId).orElseGet(List::of)));
+    }
 }

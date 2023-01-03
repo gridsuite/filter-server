@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -142,5 +143,16 @@ public class FilterController {
             .contentType(MediaType.APPLICATION_JSON)
             .body(identifiables))
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Export a filter to JSON format")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter on JSON format")})
+    public ResponseEntity<Map<UUID, List<IdentifiableAttributes>>> exportFilters(@RequestParam("ids") List<UUID> ids,
+                                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                                 @RequestParam(value = "variantId", required = false) String variantId) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(service.exportFilters(ids, networkUuid, variantId));
     }
 }
