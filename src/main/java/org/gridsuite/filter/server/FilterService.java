@@ -22,7 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -99,11 +107,12 @@ public class FilterService {
                 .collect(Collectors.toList());
     }
 
-    public List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
-        return filterRepositories.entrySet().stream()
-                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
-                .collect(Collectors.toList());
-    }
+    /* #TODO check before merge
+    *    public List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
+    *    return filterRepositories.entrySet().stream()
+    *            .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
+    *           .collect(Collectors.toList());
+    }*/
 
     public Optional<AbstractFilter> getFilter(UUID id) {
         Objects.requireNonNull(id);
@@ -119,7 +128,7 @@ public class FilterService {
     public List<AbstractFilter> getFilters(List<UUID> ids) {
         Objects.requireNonNull(ids);
         List<AbstractFilter> result = new ArrayList<>();
-        if (ids.size() > 0) {
+        if (!ids.isEmpty()) {
             for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
                 result.addAll(repository.getFilters(ids));
             }

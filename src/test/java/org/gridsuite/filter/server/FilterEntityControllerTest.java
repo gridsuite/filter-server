@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -28,7 +29,6 @@ import com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
-
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
@@ -50,9 +50,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.NestedServletException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -97,6 +100,7 @@ public class FilterEntityControllerTest {
     private Network network;
     private Network network2;
     private Network network6;
+    private ObjectWriter objectWriter;
 
     @Autowired
     private FilterService filterService;
@@ -130,6 +134,7 @@ public class FilterEntityControllerTest {
         Configuration.defaultConfiguration();
         MockitoAnnotations.initMocks(this);
         final ObjectMapper objectMapper = new ObjectMapper();
+        objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
         objectMapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
         objectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
         objectMapper.disable(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE);
@@ -831,6 +836,98 @@ public class FilterEntityControllerTest {
         insertFilter(substationFilterId, sIdentifierListFilter);
         checkIdentifierListFilter(substationFilterId, sIdentifierListFilter);
         checkIdentifierListFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
+    }
+
+    @Test
+    public void testGetFiltersByIds() throws Exception {
+        UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
+        UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
+
+        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
+                filterId3,
+                new Date(),
+                lineFilter
+        );
+        insertFilter(filterId3, lineCriteriaFilter);
+        checkFormFilter(filterId3, lineCriteriaFilter);
+
+        LineFilter lineFilter2 = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+
+        CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
+                filterId4,
+                new Date(),
+                lineFilter2
+        );
+
+        insertFilter(filterId4, lineCriteriaFilter2);
+        checkFormFilter(filterId4, lineCriteriaFilter2);
+
+        List<String> values = Arrays.asList(filterId3.toString(), filterId4.toString());
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.addAll("ids", values);
+
+        List<AbstractFilter> filterAttributes = objectMapper.readValue(
+                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").params(params)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        Date dateModification = filterAttributes.get(0).getModificationDate();
+        Date dateModification2 = filterAttributes.get(1).getModificationDate();
+
+        var expected = "[ {\n" +
+                "  \"id\" : \"42b70a4d-e0c4-413a-8e3e-78e9027d300c\",\n" +
+                "  \"modificationDate\" : " + dateModification.getTime() + ",\n" +
+                "  \"equipmentType\" : \"LINE\",\n" +
+                "  \"equipmentFilterForm\" : {\n" +
+                "    \"equipmentID\" : \"NHV1_NHV2_1\",\n" +
+                "    \"equipmentName\" : null,\n" +
+                "    \"substationName1\" : \"P1\",\n" +
+                "    \"substationName2\" : \"P2\",\n" +
+                "    \"countries1\" : [ \"FR\" ],\n" +
+                "    \"countries2\" : [ \"FR\" ],\n" +
+                "    \"nominalVoltage1\" : {\n" +
+                "      \"type\" : \"RANGE\",\n" +
+                "      \"value1\" : 360.0,\n" +
+                "      \"value2\" : 400.0\n" +
+                "    },\n" +
+                "    \"nominalVoltage2\" : {\n" +
+                "      \"type\" : \"RANGE\",\n" +
+                "      \"value1\" : 356.25,\n" +
+                "      \"value2\" : 393.75\n" +
+                "    },\n" +
+                "    \"equipmentType\" : \"LINE\"\n" +
+                "  },\n" +
+                "  \"type\" : \"CRITERIA\"\n" +
+                "}, {\n" +
+                "  \"id\" : \"42b70a4d-e0c4-413a-8e3e-78e9027d300d\",\n" +
+                "  \"modificationDate\" : " + dateModification2.getTime() + ",\n" +
+                "  \"equipmentType\" : \"LINE\",\n" +
+                "  \"equipmentFilterForm\" : {\n" +
+                "    \"equipmentID\" : \"NHV1_NHV2_1\",\n" +
+                "    \"equipmentName\" : null,\n" +
+                "    \"substationName1\" : \"P1\",\n" +
+                "    \"substationName2\" : \"P2\",\n" +
+                "    \"countries1\" : [ \"FR\" ],\n" +
+                "    \"countries2\" : [ \"FR\" ],\n" +
+                "    \"nominalVoltage1\" : {\n" +
+                "      \"type\" : \"RANGE\",\n" +
+                "      \"value1\" : 360.0,\n" +
+                "      \"value2\" : 400.0\n" +
+                "    },\n" +
+                "    \"nominalVoltage2\" : {\n" +
+                "      \"type\" : \"RANGE\",\n" +
+                "      \"value1\" : 356.25,\n" +
+                "      \"value2\" : 393.75\n" +
+                "    },\n" +
+                "    \"equipmentType\" : \"LINE\"\n" +
+                "  },\n" +
+                "  \"type\" : \"CRITERIA\"\n" +
+                "} ]";
+
+        assertEquals(expected, objectWriter.writeValueAsString(filterAttributes));
     }
 
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
