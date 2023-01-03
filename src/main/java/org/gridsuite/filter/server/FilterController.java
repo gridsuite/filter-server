@@ -146,8 +146,8 @@ public class FilterController {
     }
 
     @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Export a filter to JSON format")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter on JSON format")})
+    @Operation(summary = "Export list of filters to JSON format")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filters on JSON format")})
     public ResponseEntity<Map<UUID, List<IdentifiableAttributes>>> exportFilters(@RequestParam("ids") List<UUID> ids,
                                                                                  @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                                  @RequestParam(value = "variantId", required = false) String variantId) {
