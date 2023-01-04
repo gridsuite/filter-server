@@ -930,6 +930,66 @@ public class FilterEntityControllerTest {
         assertEquals(expected, objectWriter.writeValueAsString(filterAttributes));
     }
 
+    @Test
+    public void testExportFilters() throws Exception {
+        UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
+        UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
+
+        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
+                filterId3,
+                new Date(),
+                lineFilter
+        );
+        insertFilter(filterId3, lineCriteriaFilter);
+        checkFormFilter(filterId3, lineCriteriaFilter);
+
+        LineFilter lineFilter2 = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+
+        CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
+                filterId4,
+                new Date(),
+                lineFilter2
+        );
+
+        insertFilter(filterId4, lineCriteriaFilter2);
+        checkFormFilter(filterId4, lineCriteriaFilter2);
+
+        List<String> values = Arrays.asList(filterId3.toString(), filterId4.toString());
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.addAll("ids", values);
+        params.add("networkUuid", NETWORK_UUID.toString());
+        params.add("variantId", VARIANT_ID_1);
+
+        List<FilterEquipments> filterEquipments = objectMapper.readValue(
+                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/export").params(params)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        var expected = "[ {\n" +
+                "  \"filterId\" : \"42b70a4d-e0c4-413a-8e3e-78e9027d300c\",\n" +
+                "  \"identifiableAttributes\" : [ {\n" +
+                "    \"id\" : \"NHV1_NHV2_1\",\n" +
+                "    \"type\" : \"LINE\",\n" +
+                "    \"distributionKey\" : null\n" +
+                "  } ],\n" +
+                "  \"notFoundEquipments\" : null\n" +
+                "}, {\n" +
+                "  \"filterId\" : \"42b70a4d-e0c4-413a-8e3e-78e9027d300d\",\n" +
+                "  \"identifiableAttributes\" : [ {\n" +
+                "    \"id\" : \"NHV1_NHV2_1\",\n" +
+                "    \"type\" : \"LINE\",\n" +
+                "    \"distributionKey\" : null\n" +
+                "  } ],\n" +
+                "  \"notFoundEquipments\" : null\n" +
+                "} ]";
+
+        assertEquals(expected, objectWriter.writeValueAsString(filterEquipments));
+    }
+
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
         mvc.perform(get(URL_TEMPLATE + filterId + "/export?networkUuid=" + NETWORK_UUID)
                         .contentType(APPLICATION_JSON))

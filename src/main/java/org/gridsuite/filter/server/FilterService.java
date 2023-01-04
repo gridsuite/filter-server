@@ -652,22 +652,6 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
-    /*public Map<UUID, List<IdentifiableAttributes>> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
-        List<AbstractFilter> filters = getFilters(ids);
-        List<IdentifierListFilter> identifierListFilters = filters.stream()
-                .filter(f -> f instanceof IdentifierListFilter)
-                .map(f -> (IdentifierListFilter) f)
-                .collect(Collectors.toList());
-        Map<UUID, List<IdentifiableAttributes>> filtersMap = filters.stream()
-                .collect(Collectors.toMap(AbstractFilter::getId, val -> getIdentifiableAttributes(val, networkUuid, variantId)));
-        identifierListFilters.forEach(identifierListFilter -> {
-            if (identifierListFilter.getFilterEquipmentsAttributes().size() == filtersMap.get(identifierListFilter.getId()).size()) {
-
-            }
-        });
-        return filtersMap;
-    }*/
-
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
         return getFilters(ids).stream()
                 .map(filter -> getFilterEquipments(filter, getIdentifiableAttributes(filter, networkUuid, variantId)))
