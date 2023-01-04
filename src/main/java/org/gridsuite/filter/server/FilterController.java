@@ -10,7 +10,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.FilterEquipments;
+import org.gridsuite.filter.server.dto.IFilterAttributes;
+import org.gridsuite.filter.server.dto.IdentifiableAttributes;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -140,9 +142,9 @@ public class FilterController {
     @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Export list of filters to JSON format")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filters on JSON format")})
-    public ResponseEntity<Map<UUID, List<IdentifiableAttributes>>> exportFilters(@RequestParam("ids") List<UUID> ids,
-                                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
-                                                                                 @RequestParam(value = "variantId", required = false) String variantId) {
+    public ResponseEntity<List<FilterEquipments>> exportFilters(@RequestParam("ids") List<UUID> ids,
+                                                                @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                @RequestParam(value = "variantId", required = false) String variantId) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.exportFilters(ids, networkUuid, variantId));
