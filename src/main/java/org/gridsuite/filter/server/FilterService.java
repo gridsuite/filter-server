@@ -107,13 +107,6 @@ public class FilterService {
                 .collect(Collectors.toList());
     }
 
-    /* #TODO check before merge
-    *    public List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
-    *    return filterRepositories.entrySet().stream()
-    *            .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
-    *           .collect(Collectors.toList());
-    }*/
-
     public Optional<AbstractFilter> getFilter(UUID id) {
         Objects.requireNonNull(id);
         for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
@@ -299,8 +292,7 @@ public class FilterService {
                     .filter(injection -> substationNameFilter(injection.getTerminal(), injectionFilter.getSubstationName()));
         } else if (filter instanceof IdentifierListFilter) {
             List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
-            Stream<Injection<I>> injectionStream = stream.filter(injection -> equipmentIds.contains(injection.getId()));
-            return injectionStream;
+            return stream.filter(injection -> equipmentIds.contains(injection.getId()));
         } else {
             return Stream.empty();
         }
