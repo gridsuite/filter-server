@@ -146,13 +146,13 @@ public class FilterEntityControllerTest {
         Network network4 = ShuntTestCaseFactory.create(new NetworkFactoryImpl());
         Network network5 = ThreeWindingsTransformerNetworkFactory.create(new NetworkFactoryImpl());
         network6 = EurostagTutorialExample1Factory.createWithFixedCurrentLimits(new NetworkFactoryImpl());
-        given(networkStoreService.getNetwork(NETWORK_UUID, PreloadingStrategy.COLLECTION)).willReturn(network);
-        given(networkStoreService.getNetwork(NETWORK_UUID_2, PreloadingStrategy.COLLECTION)).willReturn(network2);
-        given(networkStoreService.getNetwork(NETWORK_UUID_3, PreloadingStrategy.COLLECTION)).willReturn(network3);
-        given(networkStoreService.getNetwork(NETWORK_UUID_4, PreloadingStrategy.COLLECTION)).willReturn(network4);
-        given(networkStoreService.getNetwork(NETWORK_UUID_5, PreloadingStrategy.COLLECTION)).willReturn(network5);
-        given(networkStoreService.getNetwork(NETWORK_UUID_6, PreloadingStrategy.COLLECTION)).willReturn(network6);
-        given(networkStoreService.getNetwork(NETWORK_NOT_FOUND_UUID, PreloadingStrategy.COLLECTION)).willReturn(null);
+        given(networkStoreService.getNetwork(NETWORK_UUID)).willReturn(network);
+        given(networkStoreService.getNetwork(NETWORK_UUID_2)).willReturn(network2);
+        given(networkStoreService.getNetwork(NETWORK_UUID_3)).willReturn(network3);
+        given(networkStoreService.getNetwork(NETWORK_UUID_4)).willReturn(network4);
+        given(networkStoreService.getNetwork(NETWORK_UUID_5)).willReturn(network5);
+        given(networkStoreService.getNetwork(NETWORK_UUID_6)).willReturn(network6);
+        given(networkStoreService.getNetwork(NETWORK_NOT_FOUND_UUID)).willReturn(null);
 
         Configuration.setDefaults(new Configuration.Defaults() {
 
