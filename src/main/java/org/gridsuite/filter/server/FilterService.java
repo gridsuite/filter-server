@@ -9,7 +9,6 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.network.store.client.NetworkStoreService;
-import com.powsybl.network.store.client.PreloadingStrategy;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
@@ -590,7 +589,7 @@ public class FilterService {
 
     private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
         if (filter.getType() == FilterType.CRITERIA || filter.getType() == FilterType.IDENTIFIER_LIST) {
-            Network network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
+            Network network = networkStoreService.getNetwork(networkUuid);
 
             if (network == null) {
                 throw new PowsyblException("Network '" + networkUuid + "' not found");
