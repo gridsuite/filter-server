@@ -26,7 +26,6 @@ import com.powsybl.iidm.network.test.ShuntTestCaseFactory;
 import com.powsybl.iidm.network.test.SvcTestCaseFactory;
 import com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory;
 import com.powsybl.network.store.client.NetworkStoreService;
-import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 
 import org.gridsuite.filter.server.dto.*;
