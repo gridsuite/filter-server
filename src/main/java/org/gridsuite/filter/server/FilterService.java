@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,15 +119,11 @@ public class FilterService {
 
     public List<AbstractFilter> getFilters(List<UUID> ids) {
         Objects.requireNonNull(ids);
-        List<AbstractFilter> result = new ArrayList<>();
-        if (!ids.isEmpty()) {
-            for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
-                result.addAll(repository.getFilters(ids));
-            }
-            return result;
-        } else {
-            return List.of();
-        }
+        return filterRepositories.values()
+                .stream()
+                .flatMap(repository -> repository.getFilters(ids)
+                        .stream())
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -651,7 +646,7 @@ public class FilterService {
     }
 
     private FilterEquipments getFilterEquipments(AbstractFilter filter, List<IdentifiableAttributes> identifiableAttributes) {
-        if (filter instanceof IdentifierListFilter) {
+        if (filter.getType() == FilterType.IDENTIFIER_LIST) {
             List<IdentifierListFilterEquipmentAttributes> equipmentAttributes = ((IdentifierListFilter) filter).getFilterEquipmentsAttributes();
             if (equipmentAttributes.size() != identifiableAttributes.size()) {
                 List<String> equipmentIds = identifiableAttributes.stream().map(IdentifiableAttributes::getId).collect(Collectors.toList());
@@ -662,6 +657,7 @@ public class FilterService {
 
                 return FilterEquipments.builder()
                         .filterId(filter.getId())
+                        .filterName(((Identifiable<?>) filter).getNameOrId())
                         .identifiableAttributes(identifiableAttributes)
                         .notFoundEquipments(notFoundEquipments)
                         .build();
