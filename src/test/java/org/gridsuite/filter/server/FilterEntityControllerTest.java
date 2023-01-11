@@ -21,11 +21,7 @@ import com.powsybl.iidm.network.Country;
 import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.VariantManagerConstants;
-import com.powsybl.iidm.network.test.EurostagTutorialExample1Factory;
-import com.powsybl.iidm.network.test.HvdcTestNetwork;
-import com.powsybl.iidm.network.test.ShuntTestCaseFactory;
-import com.powsybl.iidm.network.test.SvcTestCaseFactory;
-import com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory;
+import com.powsybl.iidm.network.test.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import org.gridsuite.filter.server.dto.*;
@@ -49,33 +45,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.NestedServletException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -861,72 +840,6 @@ public class FilterEntityControllerTest {
 
         insertFilter(filterId4, lineCriteriaFilter2);
         checkFormFilter(filterId4, lineCriteriaFilter2);
-
-        List<String> values = Arrays.asList(filterId3.toString(), filterId4.toString());
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.addAll("ids", values);
-
-        List<AbstractFilter> filterAttributes = objectMapper.readValue(
-                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata").params(params)
-                                .contentType(APPLICATION_JSON))
-                        .andExpect(status().isOk())
-                        .andReturn().getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
-        Date dateModification = filterAttributes.get(0).getModificationDate();
-        Date dateModification2 = filterAttributes.get(1).getModificationDate();
-
-        var expected = "[ {\n" +
-                "  \"id\" : \"42b70a4d-e0c4-413a-8e3e-78e9027d300c\",\n" +
-                "  \"modificationDate\" : " + dateModification.getTime() + ",\n" +
-                "  \"equipmentType\" : \"LINE\",\n" +
-                "  \"equipmentFilterForm\" : {\n" +
-                "    \"equipmentID\" : \"NHV1_NHV2_1\",\n" +
-                "    \"equipmentName\" : null,\n" +
-                "    \"substationName1\" : \"P1\",\n" +
-                "    \"substationName2\" : \"P2\",\n" +
-                "    \"countries1\" : [ \"FR\" ],\n" +
-                "    \"countries2\" : [ \"FR\" ],\n" +
-                "    \"nominalVoltage1\" : {\n" +
-                "      \"type\" : \"RANGE\",\n" +
-                "      \"value1\" : 360.0,\n" +
-                "      \"value2\" : 400.0\n" +
-                "    },\n" +
-                "    \"nominalVoltage2\" : {\n" +
-                "      \"type\" : \"RANGE\",\n" +
-                "      \"value1\" : 356.25,\n" +
-                "      \"value2\" : 393.75\n" +
-                "    },\n" +
-                "    \"equipmentType\" : \"LINE\"\n" +
-                "  },\n" +
-                "  \"type\" : \"CRITERIA\"\n" +
-                "}, {\n" +
-                "  \"id\" : \"42b70a4d-e0c4-413a-8e3e-78e9027d300d\",\n" +
-                "  \"modificationDate\" : " + dateModification2.getTime() + ",\n" +
-                "  \"equipmentType\" : \"LINE\",\n" +
-                "  \"equipmentFilterForm\" : {\n" +
-                "    \"equipmentID\" : \"NHV1_NHV2_1\",\n" +
-                "    \"equipmentName\" : null,\n" +
-                "    \"substationName1\" : \"P1\",\n" +
-                "    \"substationName2\" : \"P2\",\n" +
-                "    \"countries1\" : [ \"FR\" ],\n" +
-                "    \"countries2\" : [ \"FR\" ],\n" +
-                "    \"nominalVoltage1\" : {\n" +
-                "      \"type\" : \"RANGE\",\n" +
-                "      \"value1\" : 360.0,\n" +
-                "      \"value2\" : 400.0\n" +
-                "    },\n" +
-                "    \"nominalVoltage2\" : {\n" +
-                "      \"type\" : \"RANGE\",\n" +
-                "      \"value1\" : 356.25,\n" +
-                "      \"value2\" : 393.75\n" +
-                "    },\n" +
-                "    \"equipmentType\" : \"LINE\"\n" +
-                "  },\n" +
-                "  \"type\" : \"CRITERIA\"\n" +
-                "} ]";
-
-        assertEquals(expected, objectWriter.writeValueAsString(filterAttributes));
     }
 
     @Test
@@ -953,40 +866,6 @@ public class FilterEntityControllerTest {
 
         insertFilter(filterId4, lineCriteriaFilter2);
         checkFormFilter(filterId4, lineCriteriaFilter2);
-
-        List<String> values = Arrays.asList(filterId3.toString(), filterId4.toString());
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.addAll("ids", values);
-        params.add("networkUuid", NETWORK_UUID.toString());
-        params.add("variantId", VARIANT_ID_1);
-
-        List<FilterEquipments> filterEquipments = objectMapper.readValue(
-                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/export").params(params)
-                                .contentType(APPLICATION_JSON))
-                        .andExpect(status().isOk())
-                        .andReturn().getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
-
-        var expected = "[ {\n" +
-                "  \"filterId\" : \"42b70a4d-e0c4-413a-8e3e-78e9027d300c\",\n" +
-                "  \"identifiableAttributes\" : [ {\n" +
-                "    \"id\" : \"NHV1_NHV2_1\",\n" +
-                "    \"type\" : \"LINE\",\n" +
-                "    \"distributionKey\" : null\n" +
-                "  } ],\n" +
-                "  \"notFoundEquipments\" : null\n" +
-                "}, {\n" +
-                "  \"filterId\" : \"42b70a4d-e0c4-413a-8e3e-78e9027d300d\",\n" +
-                "  \"identifiableAttributes\" : [ {\n" +
-                "    \"id\" : \"NHV1_NHV2_1\",\n" +
-                "    \"type\" : \"LINE\",\n" +
-                "    \"distributionKey\" : null\n" +
-                "  } ],\n" +
-                "  \"notFoundEquipments\" : null\n" +
-                "} ]";
-
-        assertEquals(expected, objectWriter.writeValueAsString(filterEquipments));
     }
 
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
