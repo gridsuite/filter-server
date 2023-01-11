@@ -17,10 +17,7 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.powsybl.commons.PowsyblException;
-import com.powsybl.iidm.network.Country;
-import com.powsybl.iidm.network.EnergySource;
-import com.powsybl.iidm.network.Network;
-import com.powsybl.iidm.network.VariantManagerConstants;
+import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.test.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
@@ -45,6 +42,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.NestedServletException;
 
 import java.util.*;
@@ -844,28 +844,116 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testExportFilters() throws Exception {
-        UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
-        UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
+        UUID filterId = UUID.randomUUID();
+        UUID filterId2 = UUID.randomUUID();
+        UUID filterId3 = UUID.randomUUID();
 
         LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+        Date date = new Date();
         CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
-                filterId3,
-                new Date(),
+                filterId2,
+                date,
                 lineFilter
         );
-        insertFilter(filterId3, lineCriteriaFilter);
-        checkFormFilter(filterId3, lineCriteriaFilter);
+        insertFilter(filterId2, lineCriteriaFilter);
+        checkFormFilter(filterId2, lineCriteriaFilter);
 
         LineFilter lineFilter2 = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
 
         CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
-                filterId4,
-                new Date(),
+                filterId3,
+                date,
                 lineFilter2
         );
 
-        insertFilter(filterId4, lineCriteriaFilter2);
-        checkFormFilter(filterId4, lineCriteriaFilter2);
+        insertFilter(filterId3, lineCriteriaFilter2);
+        checkFormFilter(filterId3, lineCriteriaFilter2);
+
+        IdentifierListFilterEquipmentAttributes attribute1 = new IdentifierListFilterEquipmentAttributes("GEN", 1.0);
+        IdentifierListFilterEquipmentAttributes attribute2 = new IdentifierListFilterEquipmentAttributes("wrongId", 2.0);
+        IdentifierListFilterEquipmentAttributes attribute3 = new IdentifierListFilterEquipmentAttributes("wrongId2", 3.0);
+
+        IdentifierListFilter identifierListFilter = new IdentifierListFilter(filterId,
+                date,
+                EquipmentType.GENERATOR,
+                List.of(attribute1, attribute2, attribute3));
+        insertFilter(filterId, identifierListFilter);
+        checkIdentifierListFilter(filterId, identifierListFilter);
+
+        List<String> values = Arrays.asList(filterId.toString(), filterId2.toString(), filterId3.toString());
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.addAll("ids", values);
+        params.add("networkUuid", NETWORK_UUID.toString());
+        params.add("variantId", VARIANT_ID_1);
+
+        List<FilterEquipments> filterEquipments = objectMapper.readValue(
+                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/export").params(params)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        IdentifiableAttributes identifiableAttributes = new IdentifiableAttributes("GEN", IdentifiableType.GENERATOR, 1.0);
+        IdentifiableAttributes identifiableAttributes2 = new IdentifiableAttributes("wrongId", IdentifiableType.GENERATOR, 2.0);
+        IdentifiableAttributes identifiableAttributes3 = new IdentifiableAttributes("wrongId2", IdentifiableType.GENERATOR, 3.0);
+        IdentifiableAttributes identifiableAttributes4 = new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null);
+
+        FilterEquipments filterEquipment1 = FilterEquipments.builder()
+                .filterId(filterId)
+                .identifiableAttributes(List.of(identifiableAttributes))
+                .notFoundEquipments(List.of("wrongId", "wrongId2"))
+                .build();
+
+        FilterEquipments filterEquipment2 = FilterEquipments.builder()
+                .filterId(filterId2)
+                .identifiableAttributes(List.of(identifiableAttributes4))
+                .build();
+
+        FilterEquipments filterEquipment3 = FilterEquipments.builder()
+                .filterId(filterId3)
+                .identifiableAttributes(List.of(identifiableAttributes4))
+                .build();
+
+        assertEquals(3, filterEquipments.size());
+        List<FilterEquipments> expected = new ArrayList<>(List.of(filterEquipment1, filterEquipment2, filterEquipment3));
+        checkFilterEquipments(expected, filterEquipments);
+
+    }
+
+    private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
+        assertEquals(CollectionUtils.isEmpty(filterEquipments1), CollectionUtils.isEmpty(filterEquipments2));
+        assertEquals(filterEquipments1.size(), filterEquipments2.size());
+
+        filterEquipments1.sort(Comparator.comparing(filterEquipments -> filterEquipments.getFilterId().toString()));
+        filterEquipments2.sort(Comparator.comparing(filterEquipments -> filterEquipments.getFilterId().toString()));
+
+        for (int index = 0; index < filterEquipments1.size(); index++) {
+            FilterEquipments filterEquipment1 = filterEquipments1.get(index);
+            FilterEquipments filterEquipment2 = filterEquipments2.get(index);
+            assertEquals(filterEquipment1.getFilterId(), filterEquipment2.getFilterId());
+            assertEquals(filterEquipment1.getFilterName(), filterEquipment2.getFilterName());
+            assertEquals(CollectionUtils.isEmpty(filterEquipment1.getNotFoundEquipments()), CollectionUtils.isEmpty(filterEquipment2.getNotFoundEquipments()));
+            if (filterEquipment1.getNotFoundEquipments() != null) {
+                assertTrue(filterEquipment1.getNotFoundEquipments().containsAll(filterEquipment2.getNotFoundEquipments()));
+            }
+            checkIdentifiableAttributes(new ArrayList<>(filterEquipment1.getIdentifiableAttributes()), new ArrayList<>(filterEquipment2.getIdentifiableAttributes()));
+        }
+    }
+
+    private void checkIdentifiableAttributes(List<IdentifiableAttributes> identifiableAttributes1, List<IdentifiableAttributes> identifiableAttributes2) {
+        assertEquals(CollectionUtils.isEmpty(identifiableAttributes1), CollectionUtils.isEmpty(identifiableAttributes2));
+        assertEquals(identifiableAttributes1.size(), identifiableAttributes2.size());
+
+        identifiableAttributes1.sort(Comparator.comparing(IdentifiableAttributes::getId));
+        identifiableAttributes2.sort(Comparator.comparing(IdentifiableAttributes::getId));
+
+        for (int index = 0; index < identifiableAttributes1.size(); index++) {
+            IdentifiableAttributes identifiableAttribute1 = identifiableAttributes1.get(index);
+            IdentifiableAttributes identifiableAttribute2 = identifiableAttributes2.get(index);
+            assertEquals(identifiableAttribute1.getId(), identifiableAttribute2.getId());
+            assertEquals(identifiableAttribute1.getType(), identifiableAttribute2.getType());
+            assertEquals(identifiableAttribute1.getDistributionKey(), identifiableAttribute2.getDistributionKey());
+        }
     }
 
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {

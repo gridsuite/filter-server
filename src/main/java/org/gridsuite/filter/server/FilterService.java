@@ -656,7 +656,6 @@ public class FilterService {
 
                 return FilterEquipments.builder()
                         .filterId(filter.getId())
-                        .filterName(((Identifiable<?>) filter).getNameOrId())
                         .identifiableAttributes(identifiableAttributes)
                         .notFoundEquipments(notFoundEquipments)
                         .build();
