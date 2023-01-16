@@ -18,6 +18,7 @@ import org.gridsuite.filter.server.utils.FilterType;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 /**
@@ -52,5 +53,23 @@ public class IdentifierListFilter extends AbstractFilter {
                 .findFirst()
                 .map(IdentifierListFilterEquipmentAttributes::getDistributionKey)
                 .orElse(null);
+    }
+
+    @Override
+    public FilterEquipments getFilterEquipments(List<IdentifiableAttributes> identifiableAttributes) {
+        if (filterEquipmentsAttributes.size() != identifiableAttributes.size()) {
+            List<String> equipmentIds = identifiableAttributes.stream().map(IdentifiableAttributes::getId).collect(Collectors.toList());
+            List<String> notFoundEquipments = filterEquipmentsAttributes.stream()
+                    .map(IdentifierListFilterEquipmentAttributes::getEquipmentID)
+                    .filter(equipment -> !equipmentIds.contains(equipment))
+                    .collect(Collectors.toList());
+
+            return FilterEquipments.builder()
+                    .filterId(getId())
+                    .identifiableAttributes(identifiableAttributes)
+                    .notFoundEquipments(notFoundEquipments)
+                    .build();
+        }
+        return super.getFilterEquipments(identifiableAttributes);
     }
 }

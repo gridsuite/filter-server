@@ -640,30 +640,7 @@ public class FilterService {
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
         return getFilters(ids).stream()
-                .map(filter -> getFilterEquipments(filter, getIdentifiableAttributes(filter, networkUuid, variantId)))
+                .map(filter -> filter.getFilterEquipments(getIdentifiableAttributes(filter, networkUuid, variantId)))
                 .collect(Collectors.toList());
-    }
-
-    private FilterEquipments getFilterEquipments(AbstractFilter filter, List<IdentifiableAttributes> identifiableAttributes) {
-        if (filter.getType() == FilterType.IDENTIFIER_LIST) {
-            List<IdentifierListFilterEquipmentAttributes> equipmentAttributes = ((IdentifierListFilter) filter).getFilterEquipmentsAttributes();
-            if (equipmentAttributes.size() != identifiableAttributes.size()) {
-                List<String> equipmentIds = identifiableAttributes.stream().map(IdentifiableAttributes::getId).collect(Collectors.toList());
-                List<String> notFoundEquipments = equipmentAttributes.stream()
-                        .map(IdentifierListFilterEquipmentAttributes::getEquipmentID)
-                        .filter(equipment -> !equipmentIds.contains(equipment))
-                        .collect(Collectors.toList());
-
-                return FilterEquipments.builder()
-                        .filterId(filter.getId())
-                        .identifiableAttributes(identifiableAttributes)
-                        .notFoundEquipments(notFoundEquipments)
-                        .build();
-            }
-        }
-        return FilterEquipments.builder()
-                .filterId(filter.getId())
-                .identifiableAttributes(identifiableAttributes)
-                .build();
     }
 }
