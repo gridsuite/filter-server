@@ -11,6 +11,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -30,6 +32,9 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
     @Schema(description = "Countries")
     private SortedSet<String> countries;
 
+    @Schema(description = "Free properties")
+    private Map<String, Set<String>> freeProperties;
+
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
@@ -37,6 +42,7 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
         super(injectionFilterAttributes.getEquipmentID(), injectionFilterAttributes.getEquipmentName());
         this.substationName = injectionFilterAttributes.getSubstationName();
         this.countries = injectionFilterAttributes.getCountries();
+        this.freeProperties = injectionFilterAttributes.getFreeProperties();
         this.nominalVoltage = injectionFilterAttributes.getNominalVoltage();
     }
 
@@ -45,6 +51,7 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
         return super.isEmpty()
             && substationName == null
             && CollectionUtils.isEmpty(countries)
-            && nominalVoltage == null;
+            && nominalVoltage == null
+            && CollectionUtils.isEmpty(freeProperties);
     }
 }

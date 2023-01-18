@@ -15,6 +15,8 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -35,12 +37,18 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "Countries")
     private SortedSet<String> countries;
 
-    @Schema(description = "Nominal voltage")
-    private NumericalFilter nominalVoltage;
+    @Schema(description = "Free properties")
+    private Map<String, Set<String>> freeProperties;
 
-    public VoltageLevelFilter(String equipmentID, String equipmentName, SortedSet<String> countries, NumericalFilter nominalVoltage) {
+    @Schema(description = "Nominal voltage")
+    private NumericalFilter          nominalVoltage;
+
+    public VoltageLevelFilter(String equipmentID, String equipmentName,
+        SortedSet<String> countries, Map<String, Set<String>> freeProperties,
+        NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName);
         this.countries = countries;
+        this.freeProperties = freeProperties;
         this.nominalVoltage =  nominalVoltage;
     }
 
@@ -48,6 +56,7 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
     public boolean isEmpty() {
         return super.isEmpty()
             && CollectionUtils.isEmpty(countries)
+            && CollectionUtils.isEmpty(freeProperties)
             && nominalVoltage == null;
     }
 }

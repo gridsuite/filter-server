@@ -15,6 +15,8 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -38,16 +40,22 @@ public class TwoWindingsTransformerFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "Countries")
     private SortedSet<String> countries;
 
+    @Schema(description = "Free properties")
+    private Map<String, Set<String>> freeProperties;
+
     @Schema(description = "Nominal voltage 1")
     private NumericalFilter nominalVoltage1;
 
     @Schema(description = "Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
 
-    public TwoWindingsTransformerFilter(String equipmentID, String equipmentName, String substationName, SortedSet<String> countries, NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
+    public TwoWindingsTransformerFilter(String equipmentID, String equipmentName, String substationName,
+        SortedSet<String> countries, Map<String, Set<String>> freeProperties,
+        NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
         super(equipmentID, equipmentName);
         this.substationName =  substationName;
         this.countries = countries;
+        this.freeProperties = freeProperties;
         this.nominalVoltage1 =  nominalVoltage1;
         this.nominalVoltage2 =  nominalVoltage2;
     }
@@ -58,6 +66,8 @@ public class TwoWindingsTransformerFilter extends AbstractEquipmentFilterForm {
             && substationName == null
             && CollectionUtils.isEmpty(countries)
             && nominalVoltage1 == null
-            && nominalVoltage2 == null;
+            && nominalVoltage2 == null
+            && freeProperties == null
+            && CollectionUtils.isEmpty(freeProperties);
     }
 }

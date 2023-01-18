@@ -43,10 +43,32 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return CollectionUtils.isEmpty(set) ? null : new TreeSet<>(set);
     }
 
+    static Map<String, Set<String>> convert(FreePropertiesFilterEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        Map<String, Set<String>> ret = entity.getFreePropertyFilterEntities().stream()
+            .collect(Collectors.toMap(FreePropertyFilterEntity::getPropName, FreePropertyFilterEntity::getPropValues));
+
+        return ret;
+    }
+
     static NumericFilterEntity convert(NumericalFilter numericalFilter) {
         return numericalFilter != null ?
                 new NumericFilterEntity(null, numericalFilter.getType(), numericalFilter.getValue1(), numericalFilter.getValue2())
                 : null;
+    }
+
+    static FreePropertiesFilterEntity convert(Map<String, Set<String>> dto) {
+        if (dto == null)  {
+            return null;
+        }
+
+        Set<FreePropertyFilterEntity> innerEntities = dto.entrySet().stream()
+            .map(p -> FreePropertyFilterEntity.builder()
+                .propName(p.getKey()).propValues(p.getValue()).build()).collect(Collectors.toSet());
+        return FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
     }
 
     abstract R getRepository();
@@ -148,6 +170,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             entity.getEquipmentName(),
             entity.getSubstationName(),
             setToSorterSet(entity.getCountries()),
+            convert(entity.getSubstationFreeProperties()),
             convert(entity.getNominalVoltage())
         );
     }

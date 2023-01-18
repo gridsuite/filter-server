@@ -1,0 +1,19 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="garnierlar (generated)" id="1673958168661-1">
+        <addColumn tableName="substation_filter">
+            <column name="substation_free_properties" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1673958168661-2">
+        <addColumn tableName="voltage_level_filter">
+            <column name="substation_free_properties" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1673958168661-3">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties" baseTableName="voltage_level_filter" constraintName="FK9uhkoqswu11cofjrod43lap5a" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1673958168661-4">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties" baseTableName="substation_filter" constraintName="FKk0xisx59n8befqchlluexa41u" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

@@ -58,4 +58,10 @@ public class TwoWindingsTransformerFilterEntity extends AbstractGenericFilterEnt
             name = "twoWindingsTransformer_numericFilterId_id_fk2"
         ), nullable = true)
     NumericFilterEntity nominalVoltage2;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "substationFreeProperties",
+        referencedColumnName = "id",
+        foreignKey = @ForeignKey)
+    FreePropertiesFilterEntity substationFreeProperties;
 }

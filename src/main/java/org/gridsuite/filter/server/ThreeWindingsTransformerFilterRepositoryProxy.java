@@ -54,6 +54,7 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
             threeWindingsTransformerFilterEntity.getEquipmentName(),
             threeWindingsTransformerFilterEntity.getSubstationName(),
             setToSorterSet(threeWindingsTransformerFilterEntity.getCountries()),
+            convert(threeWindingsTransformerFilterEntity.getSubstationFreeProperties()),
             convert(threeWindingsTransformerFilterEntity.getNominalVoltage1()),
             convert(threeWindingsTransformerFilterEntity.getNominalVoltage2()),
             convert(threeWindingsTransformerFilterEntity.getNominalVoltage3())
@@ -69,7 +70,8 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
             .substationName(threeWindingsTransformerFilter.getSubstationName())
             .nominalVoltage1(convert(threeWindingsTransformerFilter.getNominalVoltage1()))
             .nominalVoltage2(convert(threeWindingsTransformerFilter.getNominalVoltage2()))
-            .nominalVoltage3(convert(threeWindingsTransformerFilter.getNominalVoltage3()));
+            .nominalVoltage3(convert(threeWindingsTransformerFilter.getNominalVoltage3()))
+            .substationFreeProperties(convert(threeWindingsTransformerFilter.getFreeProperties()));
         buildGenericFilter(threeWindingsTransformerFilterEntityBuilder, criteriaFilter);
         return threeWindingsTransformerFilterEntityBuilder.build();
     }

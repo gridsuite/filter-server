@@ -55,7 +55,8 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
         return new SubstationFilter(
             substationFilterEntity.getEquipmentId(),
             substationFilterEntity.getEquipmentName(),
-            setToSorterSet(substationFilterEntity.getCountries())
+            setToSorterSet(substationFilterEntity.getCountries()),
+            convert(substationFilterEntity.getSubstationFreeProperties())
         );
     }
 

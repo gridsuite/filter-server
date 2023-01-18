@@ -49,15 +49,17 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
     @Override
     public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         HvdcLineFilterEntity hvdcLineFilterEntity = (HvdcLineFilterEntity) entity;
-        return new HvdcLineFilter(
-                hvdcLineFilterEntity.getEquipmentId(),
-                hvdcLineFilterEntity.getEquipmentName(),
-                hvdcLineFilterEntity.getSubstationName1(),
-                hvdcLineFilterEntity.getSubstationName2(),
-                setToSorterSet(hvdcLineFilterEntity.getCountries1()),
-                setToSorterSet(hvdcLineFilterEntity.getCountries2()),
-                convert(hvdcLineFilterEntity.getNominalVoltage())
-        );
+        return HvdcLineFilter.builder()
+            .equipmentID(hvdcLineFilterEntity.getEquipmentId())
+            .equipmentName(hvdcLineFilterEntity.getEquipmentName())
+            .substationName1(hvdcLineFilterEntity.getSubstationName1())
+            .substationName2(hvdcLineFilterEntity.getSubstationName2())
+            .countries1(setToSorterSet(hvdcLineFilterEntity.getCountries1()))
+            .countries2(setToSorterSet(hvdcLineFilterEntity.getCountries2()))
+            .nominalVoltage(convert(hvdcLineFilterEntity.getNominalVoltage()))
+            .freeProperties1(convert(hvdcLineFilterEntity.getSubstationFreeProperties1()))
+            .freeProperties2(convert(hvdcLineFilterEntity.getSubstationFreeProperties2()))
+            .build();
     }
 
     @Override
@@ -69,7 +71,9 @@ public class HvdcLineFilterRepositoryProxy extends AbstractFilterRepositoryProxy
             .countries2(hvdcLineFilter.getCountries2())
             .nominalVoltage(convert(hvdcLineFilter.getNominalVoltage()))
             .substationName1(hvdcLineFilter.getSubstationName1())
-            .substationName2(hvdcLineFilter.getSubstationName2());
+            .substationName2(hvdcLineFilter.getSubstationName2())
+            .substationFreeProperties1(convert(hvdcLineFilter.getFreeProperties1()))
+            .substationFreeProperties2(convert(hvdcLineFilter.getFreeProperties2()));
         buildGenericFilter(hvdcLineFilterEntityBuilder, criteriaFilter);
         return hvdcLineFilterEntityBuilder.build();
     }

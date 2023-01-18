@@ -15,6 +15,8 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -35,14 +37,19 @@ public class SubstationFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "Countries")
     private SortedSet<String> countries;
 
-    public SubstationFilter(String equipmentID, String equipmentName, SortedSet<String> countries) {
+    public SubstationFilter(String equipmentID, String equipmentName,
+        SortedSet<String> countries, Map<String, Set<String>> freeProperties) {
         super(equipmentID, equipmentName);
         this.countries = countries;
+        this.freeProperties = freeProperties;
     }
+
+    @Schema(description = "Free properties")
+    private Map<String, Set<String>> freeProperties;
 
     @Override
     public boolean isEmpty() {
         return super.isEmpty()
-            && CollectionUtils.isEmpty(countries);
+            && CollectionUtils.isEmpty(countries) && CollectionUtils.isEmpty(freeProperties);
     }
 }
