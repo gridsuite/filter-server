@@ -92,8 +92,10 @@ public class FilterEntityControllerTest {
     @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public static final SortedSet COUNTRIES1 = new TreeSet(Collections.singleton("France"));
-    public static final SortedSet COUNTRIES2 = new TreeSet(Collections.singleton("Germany"));
+    public static final SortedSet<String> COUNTRIES1 = new TreeSet<>(Collections.singleton("France"));
+    public static final SortedSet<String> COUNTRIES2 = new TreeSet<>(Collections.singleton("Germany"));
+
+    public static final Map<String, Set<String>> FREE_PROPS = Map.of("region", Set.of("north"));
 
     private static final UUID NETWORK_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
     private static final UUID NETWORK_UUID_2 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e5");
@@ -118,6 +120,8 @@ public class FilterEntityControllerTest {
         objectMapper.disable(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE);
 
         network = EurostagTutorialExample1Factory.createWithMoreGenerators(new NetworkFactoryImpl());
+        network.getSubstation("P1").setProperty("region", "north");
+        network.getSubstation("P2").setProperty("region", "south");
         network.getVariantManager().cloneVariant(VariantManagerConstants.INITIAL_VARIANT_ID, VARIANT_ID_1);
         network.getVariantManager().setWorkingVariant(VARIANT_ID_1);
         // remove generator 'GEN2' from network in variant VARIANT_ID_1
@@ -193,7 +197,14 @@ public class FilterEntityControllerTest {
         UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
         Date modificationDate = new Date();
 
-        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+        LineFilter lineFilter = LineFilter.builder().equipmentID("NHV1_NHV2_1")
+            .substationName1("P1")
+            .substationName2("P2")
+            .countries1(new TreeSet<>(Set.of("FR")))
+            .countries2(new TreeSet<>(Set.of("FR")))
+            .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.))
+            .nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75))
+            .build();
         CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
@@ -269,7 +280,7 @@ public class FilterEntityControllerTest {
         AbstractFilter generatorFormFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
-                new GeneratorFilter("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null), null)
+                new GeneratorFilter("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), null, new NumericalFilter(RangeType.RANGE, 50., null), null)
         );
 
         modifyFormFilter(filterId1, generatorFormFilter, userId);
@@ -288,7 +299,7 @@ public class FilterEntityControllerTest {
         AbstractFilter generatorFormFilter2 = new CriteriaFilter(
                 filterId1,
                 modificationDate,
-                new GeneratorFilter("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), new NumericalFilter(RangeType.RANGE, 50., null), null)
+                new GeneratorFilter("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), null, new NumericalFilter(RangeType.RANGE, 50., null), null)
         );
         modifyFormFilter(filterId1, generatorFormFilter2, userId);
 
@@ -688,7 +699,13 @@ public class FilterEntityControllerTest {
         UUID filterId3 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
         Date modificationDate = new Date();
 
-        LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
+        LineFilter lineFilter = LineFilter.builder()
+            .equipmentID("equipmentID").equipmentName("equipmentName")
+            .substationName1("substationName1").substationName2("substationName2")
+            .countries1(COUNTRIES1).countries2(COUNTRIES2)
+            .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 5., 8.))
+            .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 6., null))
+            .build();
 
         CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
@@ -735,7 +752,12 @@ public class FilterEntityControllerTest {
     public void testDuplicateFilter() throws Exception {
         UUID filterId1 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
         Date modificationDate = new Date();
-        LineFilter lineFilter = new LineFilter("equipmentID", "equipmentName", "substationName1", "substationName2", COUNTRIES1, COUNTRIES2, new NumericalFilter(RangeType.RANGE, 5., 8.), new NumericalFilter(RangeType.EQUALITY, 6., null));
+        LineFilter lineFilter = LineFilter.builder().equipmentID("equipmentID").equipmentName("equipmentName")
+            .substationName1("substationName1")
+            .substationName2("substationName2").countries1(COUNTRIES1).countries2(COUNTRIES2)
+            .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 5., 8.))
+            .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 6., null))
+            .build();
         CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
@@ -1013,8 +1035,9 @@ public class FilterEntityControllerTest {
         NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
         AbstractInjectionFilter abstractInjectionFilter;
         Date modificationDate = new Date();
-        SortedSet sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        InjectionFilterAttributes injectionFilterAttributes =  new InjectionFilterAttributes(equipmentID, equipmentName, substationName, sortedCountries, numericalFilter);
+        SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
+        InjectionFilterAttributes injectionFilterAttributes =  new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
+            sortedCountries, FREE_PROPS, numericalFilter);
         switch (equipmentType) {
             case BATTERY:
                 abstractInjectionFilter = new BatteryFilter(injectionFilterAttributes);
@@ -1030,6 +1053,7 @@ public class FilterEntityControllerTest {
                         injectionFilterAttributes.getEquipmentName(),
                         injectionFilterAttributes.getSubstationName(),
                         injectionFilterAttributes.getCountries(),
+                        injectionFilterAttributes.getFreeProperties(),
                         injectionFilterAttributes.getNominalVoltage(),
                         energySource);
                 break;
@@ -1061,6 +1085,7 @@ public class FilterEntityControllerTest {
         insertFilter(id, injectionFilter);
         AbstractInjectionFilter injectionEquipment = (AbstractInjectionFilter) injectionFilter.getEquipmentFilterForm();
         injectionEquipment.setCountries(AbstractFilterRepositoryProxy.setToSorterSet(countries));
+        injectionEquipment.setFreeProperties(FREE_PROPS);
         checkFormFilter(id, injectionFilter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
@@ -1093,10 +1118,19 @@ public class FilterEntityControllerTest {
         NumericalFilter numericalFilter2 = new NumericalFilter(rangeTypes.get(1), values1.get(1), values2.get(1));
         AbstractEquipmentFilterForm equipmentFilterForm;
         if (equipmentType == EquipmentType.TWO_WINDINGS_TRANSFORMER) {
-            equipmentFilterForm = new TwoWindingsTransformerFilter(equipmentID, equipmentName, substationName, AbstractFilterRepositoryProxy.setToSorterSet(countries), numericalFilter1, numericalFilter2);
+            equipmentFilterForm = TwoWindingsTransformerFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName).substationName(substationName)
+                .countries(AbstractFilterRepositoryProxy.setToSorterSet(countries))
+                .nominalVoltage1(numericalFilter1)
+                .nominalVoltage2(numericalFilter2)
+                .build();
         } else if (equipmentType == EquipmentType.THREE_WINDINGS_TRANSFORMER) {
             NumericalFilter numericalFilter3 = new NumericalFilter(rangeTypes.get(2), values1.get(2), values2.get(2));
-            equipmentFilterForm = new ThreeWindingsTransformerFilter(equipmentID, equipmentName, substationName, AbstractFilterRepositoryProxy.setToSorterSet(countries), numericalFilter1, numericalFilter2, numericalFilter3);
+            equipmentFilterForm = ThreeWindingsTransformerFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName).substationName(substationName)
+                .countries(AbstractFilterRepositoryProxy.setToSorterSet(countries))
+                .nominalVoltage1(numericalFilter1)
+                .nominalVoltage2(numericalFilter2)
+                .nominalVoltage3(numericalFilter3)
+                .build();
         } else {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
@@ -1141,17 +1175,12 @@ public class FilterEntityControllerTest {
         Date modificationDate = new Date();
         CriteriaFilter hvdcLineFilter = new CriteriaFilter(
                 id,
-
                 modificationDate,
-                new HvdcLineFilter(
-                        equipmentID,
-                        equipmentName,
-                        substationName1,
-                        substationName2,
-                        countries1,
-                        countries2,
-                        new NumericalFilter(rangeType, value1, value2)
-                )
+                HvdcLineFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName)
+                    .substationName1(substationName1).substationName2(substationName2)
+                    .countries1(countries1).countries2(countries2)
+                    .nominalVoltage(new NumericalFilter(rangeType, value1, value2))
+                    .build()
         );
 
         insertFilter(id, hvdcLineFilter);
@@ -1209,7 +1238,13 @@ public class FilterEntityControllerTest {
         if (rangeTypes.size() == 2) {
             numericalFilter2 = new NumericalFilter(rangeTypes.get(1), values1.get(1), values2.get(1));
         }
-        AbstractEquipmentFilterForm equipmentFilterForm = new LineFilter(equipmentID, equipmentName, null, substationName, AbstractFilterRepositoryProxy.setToSorterSet(countries1), AbstractFilterRepositoryProxy.setToSorterSet(countries2), numericalFilter1, numericalFilter2);
+        AbstractEquipmentFilterForm equipmentFilterForm = LineFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName)
+            .substationName1(substationName)
+            .countries1(AbstractFilterRepositoryProxy.setToSorterSet(countries1))
+            .countries2(AbstractFilterRepositoryProxy.setToSorterSet(countries2))
+            .nominalVoltage1(numericalFilter1)
+            .nominalVoltage2(numericalFilter2)
+            .build();
         Date modificationDate = new Date();
         CriteriaFilter filter = new CriteriaFilter(
                 id,
@@ -1247,8 +1282,9 @@ public class FilterEntityControllerTest {
                                           RangeType rangeType, Double value1, Double value2,
                                           UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
         NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
-        SortedSet sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        VoltageLevelFilter voltageLevelFilter = new VoltageLevelFilter(equipmentID, equipmentName, sortedCountries, numericalFilter);
+        SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
+        VoltageLevelFilter voltageLevelFilter = new VoltageLevelFilter(equipmentID, equipmentName,
+            sortedCountries, null, numericalFilter);
         Date modificationDate = new Date();
 
         CriteriaFilter filter = new CriteriaFilter(
@@ -1284,8 +1320,8 @@ public class FilterEntityControllerTest {
 
     private void insertSubstationFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
                                         UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
-        SortedSet sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        SubstationFilter substationFilter = new SubstationFilter(equipmentID, equipmentName, sortedCountries);
+        SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
+        SubstationFilter substationFilter = new SubstationFilter(equipmentID, equipmentName, sortedCountries, null);
         Date modificationDate = new Date();
 
         CriteriaFilter filter = new CriteriaFilter(

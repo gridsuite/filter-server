@@ -68,7 +68,9 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         Set<FreePropertyFilterEntity> innerEntities = dto.entrySet().stream()
             .map(p -> FreePropertyFilterEntity.builder()
                 .propName(p.getKey()).propValues(p.getValue()).build()).collect(Collectors.toSet());
-        return FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
+        FreePropertiesFilterEntity mapEntities = FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
+        innerEntities.forEach(s -> s.setFreePropertiesFilterEntity(mapEntities));
+        return mapEntities;
     }
 
     abstract R getRepository();
@@ -143,6 +145,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) dto.getEquipmentFilterForm();
         builder.substationName(injectionFilter.getSubstationName())
             .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
+            .substationFreeProperties(convert(injectionFilter.getFreeProperties()))
             .nominalVoltage(AbstractFilterRepositoryProxy.convert(injectionFilter.getNominalVoltage()));
     }
 
