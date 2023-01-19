@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -43,4 +44,11 @@ public abstract class AbstractFilter implements IFilterAttributes {
     Date modificationDate;
 
     EquipmentType equipmentType;
+
+    public FilterEquipments getFilterEquipments(List<IdentifiableAttributes> identifiableAttributes) {
+        return FilterEquipments.builder()
+                .filterId(id)
+                .identifiableAttributes(identifiableAttributes)
+                .build();
+    }
 }

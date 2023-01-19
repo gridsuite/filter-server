@@ -17,6 +17,7 @@ import org.gridsuite.filter.server.utils.FilterType;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -68,6 +69,13 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             return element.map(this::toDto);
         }
         return Optional.empty();
+    }
+
+    List<AbstractFilter> getFilters(List<UUID> ids) {
+        return getRepository().findAllById(ids)
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     Stream<FilterAttributes> getFiltersAttributes() {

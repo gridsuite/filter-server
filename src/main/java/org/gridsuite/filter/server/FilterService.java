@@ -21,7 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -98,12 +105,6 @@ public class FilterService {
                 .collect(Collectors.toList());
     }
 
-    public List<FilterAttributes> getFiltersMetadata(List<UUID> ids) {
-        return filterRepositories.entrySet().stream()
-                .flatMap(entry -> entry.getValue().getFiltersAttributes(ids))
-                .collect(Collectors.toList());
-    }
-
     public Optional<AbstractFilter> getFilter(UUID id) {
         Objects.requireNonNull(id);
         for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
@@ -113,6 +114,15 @@ public class FilterService {
             }
         }
         return Optional.empty();
+    }
+
+    public List<AbstractFilter> getFilters(List<UUID> ids) {
+        Objects.requireNonNull(ids);
+        return filterRepositories.values()
+                .stream()
+                .flatMap(repository -> repository.getFilters(ids)
+                        .stream())
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -626,5 +636,11 @@ public class FilterService {
     public Optional<List<IdentifiableAttributes>> exportFilter(UUID id, UUID networkUuid, String variantId) {
         Objects.requireNonNull(id);
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
+    }
+
+    public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
+        return getFilters(ids).stream()
+                .map(filter -> filter.getFilterEquipments(getIdentifiableAttributes(filter, networkUuid, variantId)))
+                .collect(Collectors.toList());
     }
 }
