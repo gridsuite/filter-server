@@ -64,7 +64,7 @@ public class IdentifierListFilter extends AbstractFilter {
                         .orElseGet(() -> {
                             notFound.add(f.getEquipmentID());
                             return null;
-                }))
+                        }))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
