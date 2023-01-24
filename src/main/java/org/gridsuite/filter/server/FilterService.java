@@ -639,7 +639,11 @@ public class FilterService {
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
-        return getFilters(ids).stream()
+
+        // we stream on the ids so that we can keep the same order of ids sent
+        return ids.stream()
+                .map(id -> getFilter(id).orElse(null))
+                .filter(Objects::nonNull)
                 .map(filter -> filter.getFilterEquipments(getIdentifiableAttributes(filter, networkUuid, variantId)))
                 .collect(Collectors.toList());
     }
