@@ -69,7 +69,6 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             .map(p -> FreePropertyFilterEntity.builder()
                 .propName(p.getKey()).propValues(p.getValue()).build()).collect(Collectors.toSet());
         FreePropertiesFilterEntity mapEntities = FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
-        innerEntities.forEach(s -> s.setFreePropertiesFilterEntity(mapEntities));
         return mapEntities;
     }
 

@@ -23,6 +23,7 @@ import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
+import org.gridsuite.filter.server.utils.FieldsMatcher;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.RangeType;
@@ -51,6 +52,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -95,7 +97,7 @@ public class FilterEntityControllerTest {
     public static final SortedSet<String> COUNTRIES1 = new TreeSet<>(Collections.singleton("France"));
     public static final SortedSet<String> COUNTRIES2 = new TreeSet<>(Collections.singleton("Germany"));
 
-    public static final Map<String, Set<String>> FREE_PROPS = Map.of("region", Set.of("north"));
+    public static final Map<String, Set<String>> FREE_PROPS = Map.of("region", new TreeSet<>(Set.of("north", "south")));
 
     private static final UUID NETWORK_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
     private static final UUID NETWORK_UUID_2 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e5");
@@ -1036,8 +1038,11 @@ public class FilterEntityControllerTest {
         AbstractInjectionFilter abstractInjectionFilter;
         Date modificationDate = new Date();
         SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
+        // compensators or on powsybl networks without substation, so filtering on substation free props would prevent match.
+        Map<String, Set<String>> workAroundProps =
+            Set.of(EquipmentType.SHUNT_COMPENSATOR, EquipmentType.STATIC_VAR_COMPENSATOR).contains(equipmentType) ? null : FREE_PROPS;
         InjectionFilterAttributes injectionFilterAttributes =  new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
-            sortedCountries, FREE_PROPS, numericalFilter);
+            sortedCountries, workAroundProps, numericalFilter);
         switch (equipmentType) {
             case BATTERY:
                 abstractInjectionFilter = new BatteryFilter(injectionFilterAttributes);
@@ -1085,7 +1090,7 @@ public class FilterEntityControllerTest {
         insertFilter(id, injectionFilter);
         AbstractInjectionFilter injectionEquipment = (AbstractInjectionFilter) injectionFilter.getEquipmentFilterForm();
         injectionEquipment.setCountries(AbstractFilterRepositoryProxy.setToSorterSet(countries));
-        injectionEquipment.setFreeProperties(FREE_PROPS);
+        injectionEquipment.setFreeProperties(workAroundProps);
         checkFormFilter(id, injectionFilter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
@@ -1393,7 +1398,7 @@ public class FilterEntityControllerTest {
     }
 
     private void matchEquipmentFormFilter(AbstractEquipmentFilterForm equipmentFilterForm1, AbstractEquipmentFilterForm equipmentFilterForm2) {
-        org.hamcrest.MatcherAssert.assertThat(equipmentFilterForm1, new MatcherJson<>(objectMapper, equipmentFilterForm2));
+        assertThat(equipmentFilterForm1, new FieldsMatcher<>(equipmentFilterForm2));
     }
 
     private void matchScriptFilterInfos(ScriptFilter scriptFilter1, ScriptFilter scriptFilter2) {

@@ -1,0 +1,34 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="garnierlar (generated)" id="1674472065046-1">
+        <createTable tableName="free_properties_free_property_filter_entities">
+            <column name="free_properties_filter_entity_id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="free_property_filter_entities_id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1674472065046-2">
+        <addUniqueConstraint columnNames="free_property_filter_entities_id" constraintName="UK_d1cf8ek5m0ldv6x9fu1s2g59t" tableName="free_properties_free_property_filter_entities"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1674472065046-3">
+        <addForeignKeyConstraint baseColumnNames="free_properties_filter_entity_id" baseTableName="free_properties_free_property_filter_entities" constraintName="FKd3qj1o28yllso1chamanx5wpl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1674472065046-4">
+        <addForeignKeyConstraint baseColumnNames="free_property_filter_entities_id" baseTableName="free_properties_free_property_filter_entities" constraintName="FKd99imh5kio4ej2qfx875yyrx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_property" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1674472065046-5">
+        <dropForeignKeyConstraint baseTableName="PROP_VALUE" constraintName="FKIN0G9OM02EUI3TDWF8AQKBYCW"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1674472065046-6">
+        <dropForeignKeyConstraint baseTableName="FREE_PROPERTY" constraintName="FKIP9P8XPLCV3V1UPAY5YOSIPYV"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1674472065046-7">
+        <dropColumn columnName="PROPERTIES_SET_ID" tableName="FREE_PROPERTY"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1674472065046-8">
+        <dropColumn columnName="SET_ID" tableName="PROP_VALUE"/>
+    </changeSet>
+</databaseChangeLog>

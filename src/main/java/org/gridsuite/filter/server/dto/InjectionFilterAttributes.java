@@ -13,7 +13,6 @@ import lombok.Getter;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 @AllArgsConstructor
 @Getter
@@ -28,7 +27,7 @@ public class InjectionFilterAttributes {
     String substationName;
 
     @Schema(description = "Countries")
-    private SortedSet<String> countries;
+    private Set<String> countries;
 
     @Schema(description = "Free properties")
     private Map<String, Set<String>> freeProperties;
