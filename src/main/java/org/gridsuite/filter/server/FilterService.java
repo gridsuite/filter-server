@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -341,7 +340,7 @@ public class FilterService {
         return getInjectionList(network.getShuntCompensatorStream().map(sc -> sc), filter).collect(Collectors.toList());
     }
 
-    private boolean filterByCountries(Terminal terminal1, Terminal terminal2, SortedSet<String> filter1, SortedSet<String> filter2) {
+    private boolean filterByCountries(Terminal terminal1, Terminal terminal2, Set<String> filter1, Set<String> filter2) {
         return
             // terminal 1 matches filter 1 and terminal 2 matches filter 2
             countryFilter(terminal1, filter1) &&

@@ -845,7 +845,9 @@ public class FilterEntityControllerTest {
         UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
         UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
 
-        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+        LineFilter lineFilter = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+            .countries1(Set.of("FR")).countries2(Set.of("FR"))
+            .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
         CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId3,
                 new Date(),
@@ -854,7 +856,9 @@ public class FilterEntityControllerTest {
         insertFilter(filterId3, lineCriteriaFilter);
         checkFormFilter(filterId3, lineCriteriaFilter);
 
-        LineFilter lineFilter2 = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+        LineFilter lineFilter2 = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+            .countries1(Set.of("FR")).countries2(Set.of("FR"))
+            .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
 
         CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
                 filterId4,
@@ -872,7 +876,9 @@ public class FilterEntityControllerTest {
         UUID filterId2 = UUID.randomUUID();
         UUID filterId3 = UUID.randomUUID();
 
-        LineFilter lineFilter = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+        LineFilter lineFilter = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+            .countries1(Set.of("FR")).countries2(Set.of("FR"))
+            .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
         Date date = new Date();
         CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
                 filterId2,
@@ -882,7 +888,9 @@ public class FilterEntityControllerTest {
         insertFilter(filterId2, lineCriteriaFilter);
         checkFormFilter(filterId2, lineCriteriaFilter);
 
-        LineFilter lineFilter2 = new LineFilter("NHV1_NHV2_1", null, "P1", "P2", new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new NumericalFilter(RangeType.RANGE, 360., 400.), new NumericalFilter(RangeType.RANGE, 356.25, 393.75));
+        LineFilter lineFilter2 = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+            .countries1(Set.of("FR")).countries2(Set.of("FR"))
+            .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
 
         CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
                 filterId3,

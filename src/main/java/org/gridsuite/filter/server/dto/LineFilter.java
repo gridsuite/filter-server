@@ -14,7 +14,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
@@ -38,10 +37,10 @@ public class LineFilter extends AbstractEquipmentFilterForm {
     String substationName2;
 
     @Schema(description = "Countries1")
-    private SortedSet<String> countries1;
+    private Set<String> countries1;
 
     @Schema(description = "Countries2")
-    private SortedSet<String> countries2;
+    private Set<String> countries2;
 
     @Schema(description = "Free properties 1")
     private Map<String, Set<String>> freeProperties1;
@@ -54,16 +53,6 @@ public class LineFilter extends AbstractEquipmentFilterForm {
 
     @Schema(description = "Nominal voltage 2")
     private NumericalFilter nominalVoltage2;
-
-    //public LineFilter(String equipmentID, String equipmentName, String substationName1, String substationName2, SortedSet<String> countries1, SortedSet<String> countries2, NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
-    //    super(equipmentID, equipmentName);
-    //    this.substationName1 =  substationName1;
-    //    this.substationName2 =  substationName2;
-    //    this.countries1 =  countries1;
-    //    this.countries2 =  countries2;
-    //    this.nominalVoltage1 =  nominalVoltage1;
-    //    this.nominalVoltage2 =  nominalVoltage2;
-    //}
 
     @Override
     public boolean isEmpty() {
