@@ -19,12 +19,6 @@
     <changeSet author="garnierlar (generated)" id="1674472065046-4">
         <addForeignKeyConstraint baseColumnNames="free_property_filter_entities_id" baseTableName="free_properties_free_property_filter_entities" constraintName="FKd99imh5kio4ej2qfx875yyrx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_property" validate="true"/>
     </changeSet>
-    <changeSet author="garnierlar (generated)" id="1674472065046-5">
-        <dropForeignKeyConstraint baseTableName="PROP_VALUE" constraintName="FKIN0G9OM02EUI3TDWF8AQKBYCW"/>
-    </changeSet>
-    <changeSet author="garnierlar (generated)" id="1674472065046-6">
-        <dropForeignKeyConstraint baseTableName="FREE_PROPERTY" constraintName="FKIP9P8XPLCV3V1UPAY5YOSIPYV"/>
-    </changeSet>
     <changeSet author="garnierlar (generated)" id="1674472065046-7">
         <dropColumn columnName="PROPERTIES_SET_ID" tableName="FREE_PROPERTY"/>
     </changeSet>

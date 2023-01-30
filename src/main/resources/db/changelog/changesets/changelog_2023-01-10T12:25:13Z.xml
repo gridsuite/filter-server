@@ -95,9 +95,6 @@
     <changeSet author="garnierlar (generated)" id="1673353528544-20">
         <addForeignKeyConstraint baseColumnNames="substation_free_properties" baseTableName="dangling_line_filter" constraintName="FKgvvikiwoon6y54hv83a7ybc1n" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
     </changeSet>
-    <changeSet author="garnierlar (generated)" id="1673353528544-21">
-        <addForeignKeyConstraint baseColumnNames="properties_set_id" baseTableName="free_property" constraintName="FKip9p8xplcv3v1upay5yosipyv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
-    </changeSet>
     <changeSet author="garnierlar (generated)" id="1673353528544-22">
         <addForeignKeyConstraint baseColumnNames="substation_free_properties" baseTableName="busbar_section_filter" constraintName="FKkfcblmbbquukilow38rh99rc6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
     </changeSet>
