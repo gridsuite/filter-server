@@ -131,6 +131,7 @@ public class FilterEntityControllerTest {
         network.getVariantManager().setWorkingVariant(VariantManagerConstants.INITIAL_VARIANT_ID);
 
         network2 = HvdcTestNetwork.createVsc(new NetworkFactoryImpl());
+        network2.getSubstation("S2").setProperty("region", "north");
         Network network3 = SvcTestCaseFactory.createWithMoreSVCs(new NetworkFactoryImpl());
         Network network4 = ShuntTestCaseFactory.create(new NetworkFactoryImpl());
         Network network5 = ThreeWindingsTransformerNetworkFactory.create(new NetworkFactoryImpl());
@@ -204,6 +205,8 @@ public class FilterEntityControllerTest {
             .substationName2("P2")
             .countries1(new TreeSet<>(Set.of("FR")))
             .countries2(new TreeSet<>(Set.of("FR")))
+            .freeProperties2(Map.of("region", new LinkedHashSet<>(List.of("north"))))
+            .freeProperties1(Map.of("region", new LinkedHashSet<>(List.of("south"))))
             .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.))
             .nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75))
             .build();
@@ -1046,7 +1049,7 @@ public class FilterEntityControllerTest {
         AbstractInjectionFilter abstractInjectionFilter;
         Date modificationDate = new Date();
         SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        // compensators or on powsybl networks without substation, so filtering on substation free props would prevent match.
+        // compensators are on powsybl networks without substation, so filtering on substation free props would prevent match.
         Map<String, Set<String>> workAroundProps =
             Set.of(EquipmentType.SHUNT_COMPENSATOR, EquipmentType.STATIC_VAR_COMPENSATOR).contains(equipmentType) ? null : FREE_PROPS;
         InjectionFilterAttributes injectionFilterAttributes =  new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
@@ -1192,6 +1195,7 @@ public class FilterEntityControllerTest {
                 HvdcLineFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName)
                     .substationName1(substationName1).substationName2(substationName2)
                     .countries1(countries1).countries2(countries2)
+                    .freeProperties2(Map.of("region", new LinkedHashSet<>(List.of("north"))))
                     .nominalVoltage(new NumericalFilter(rangeType, value1, value2))
                     .build()
         );

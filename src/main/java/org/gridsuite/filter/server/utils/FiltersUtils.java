@@ -7,11 +7,14 @@
 package org.gridsuite.filter.server.utils;
 
 import com.powsybl.iidm.network.*;
+
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -45,6 +48,29 @@ public final class FiltersUtils {
     public static boolean isLocatedIn(List<String> filterCountries, Substation substation) {
         Optional<Country> country = substation.getCountry();
         return filterCountries.isEmpty() || country.map(c -> filterCountries.contains(c.name())).orElse(false);
+    }
+
+    public static boolean matchesFreeProps(Map<String, Set<String>> freeProperties, Terminal terminal) {
+        return matchesFreeProps(freeProperties, terminal.getVoltageLevel());
+    }
+
+    public static boolean matchesFreeProps(Map<String, Set<String>> freeProperties, VoltageLevel voltageLevel) {
+        var optSubstation = voltageLevel.getSubstation();
+        return optSubstation.map(substation -> matchesFreeProps(freeProperties, substation))
+            .orElseGet(() -> matchesFreeProps(freeProperties, (Substation) null));
+    }
+
+    public static boolean matchesFreeProps(Map<String, Set<String>> freeProperties, Substation substation) {
+        if (substation == null) {
+            return freeProperties == null || freeProperties.isEmpty();
+        }
+        if (freeProperties == null) {
+            return true;
+        }
+        if (freeProperties.isEmpty()) {
+            return substation.getPropertyNames().isEmpty();
+        }
+        return freeProperties.entrySet().stream().allMatch(p -> p.getValue().contains(substation.getProperty(p.getKey())));
     }
 
     public static boolean isEqualityNominalVoltage(Terminal terminal, Double value) {

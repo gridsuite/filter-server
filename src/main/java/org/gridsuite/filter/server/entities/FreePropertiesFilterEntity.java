@@ -37,7 +37,6 @@ public class FreePropertiesFilterEntity {
     @Column(name = "id")
     UUID id;
 
-    //@OneToMany(fetch = FetchType.LAZY, mappedBy = "freePropertiesFilterEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     Set<FreePropertyFilterEntity> freePropertyFilterEntities;
 }

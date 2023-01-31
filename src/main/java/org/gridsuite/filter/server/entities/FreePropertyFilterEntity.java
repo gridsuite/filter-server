@@ -42,12 +42,6 @@ public class FreePropertyFilterEntity {
 
     @Column(name = "prop_values")
     @ElementCollection
-    //@CollectionTable(foreignKey = @ForeignKey(), name = "prop_value", joinColumns = @JoinColumn(name = "set_id"))
     @CollectionTable(name = "prop_value")
     Set<String> propValues;
-
-    //@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    //@JoinColumn(name = "properties_set_id")
-    //@Setter
-    //FreePropertiesFilterEntity freePropertiesFilterEntity;
 }

@@ -14,6 +14,7 @@ import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -241,16 +242,7 @@ public class FilterService {
     }
 
     private boolean freePropertiesFilter(Substation substation, Map<String, Set<String>> propertiesWithValues) {
-        if (substation == null) {
-            return false;
-        }
-        if (CollectionUtils.isEmpty(propertiesWithValues)) {
-            return true;
-        }
-        Optional<Map.Entry<String, Set<String>>> optMismatch = propertiesWithValues.entrySet().stream()
-            .filter(p -> !CollectionUtils.isEmpty(p.getValue()) && !p.getValue().contains(substation.getProperty(p.getKey())))
-            .findAny();
-        return optMismatch.isEmpty();
+        return FiltersUtils.matchesFreeProps(propertiesWithValues, substation);
     }
 
     private boolean equipmentIdFilter(Identifiable<?> identifiable, String equipmentId) {

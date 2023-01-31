@@ -74,8 +74,8 @@ public class HvdcLineFilter extends AbstractEquipmentFilterForm {
             && substationName2 == null
             && CollectionUtils.isEmpty(countries1)
             && CollectionUtils.isEmpty(countries2)
-            && nominalVoltage == null
-            && freeProperties1 == null
-            && freeProperties2 == null;
+            && CollectionUtils.isEmpty(freeProperties1)
+            && CollectionUtils.isEmpty(freeProperties2)
+            && nominalVoltage == null;
     }
 }
