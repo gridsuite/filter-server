@@ -15,9 +15,7 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -57,19 +55,23 @@ public class IdentifierListFilter extends AbstractFilter {
 
     @Override
     public FilterEquipments getFilterEquipments(List<IdentifiableAttributes> identifiableAttributes) {
-        if (filterEquipmentsAttributes.size() != identifiableAttributes.size()) {
-            List<String> equipmentIds = identifiableAttributes.stream().map(IdentifiableAttributes::getId).collect(Collectors.toList());
-            List<String> notFoundEquipments = filterEquipmentsAttributes.stream()
-                    .map(IdentifierListFilterEquipmentAttributes::getEquipmentID)
-                    .filter(equipment -> !equipmentIds.contains(equipment))
-                    .collect(Collectors.toList());
+        // we keep the same order of the equipments in the filter
+        List<String> notFound = new ArrayList<>();
+        List<IdentifiableAttributes> orderedIdentifiableAttributes = filterEquipmentsAttributes.stream()
+                .map(f -> identifiableAttributes.stream()
+                        .filter(attribute -> Objects.equals(attribute.getId(), f.getEquipmentID()))
+                        .findFirst()
+                        .orElseGet(() -> {
+                            notFound.add(f.getEquipmentID());
+                            return null;
+                        }))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-            return FilterEquipments.builder()
-                    .filterId(getId())
-                    .identifiableAttributes(identifiableAttributes)
-                    .notFoundEquipments(notFoundEquipments)
-                    .build();
-        }
-        return super.getFilterEquipments(identifiableAttributes);
+        return FilterEquipments.builder()
+                .filterId(getId())
+                .identifiableAttributes(orderedIdentifiableAttributes)
+                .notFoundEquipments(notFound)
+                .build();
     }
 }
