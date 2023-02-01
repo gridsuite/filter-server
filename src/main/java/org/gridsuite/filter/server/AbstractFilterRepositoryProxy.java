@@ -48,10 +48,8 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             return null;
         }
 
-        Map<String, Set<String>> ret = entity.getFreePropertyFilterEntities().stream()
+        return entity.getFreePropertyFilterEntities().stream()
             .collect(Collectors.toMap(FreePropertyFilterEntity::getPropName, FreePropertyFilterEntity::getPropValues));
-
-        return ret;
     }
 
     static NumericFilterEntity convert(NumericalFilter numericalFilter) {
@@ -68,8 +66,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         Set<FreePropertyFilterEntity> innerEntities = dto.entrySet().stream()
             .map(p -> FreePropertyFilterEntity.builder()
                 .propName(p.getKey()).propValues(p.getValue()).build()).collect(Collectors.toSet());
-        FreePropertiesFilterEntity mapEntities = FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
-        return mapEntities;
+        return FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
     }
 
     abstract R getRepository();
@@ -103,10 +100,6 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     Stream<FilterAttributes> getFiltersAttributes() {
         return getRepository().getFiltersMetadata().stream().map(this::metadataToAttribute);
-    }
-
-    Stream<FilterAttributes> getFiltersAttributes(List<UUID> ids) {
-        return getRepository().findFiltersMetaDataById(ids).stream().map(this::metadataToAttribute);
     }
 
     FilterAttributes metadataToAttribute(FilterMetadata f) {
@@ -151,10 +144,6 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.id(dto.getId());
-    }
-
-    public static Date getDateOrCreate(Date dt) {
-        return dt == null ? new Date() : dt;
     }
 
     public AbstractFilter toFormFilterDto(AbstractGenericFilterEntity entity) {
