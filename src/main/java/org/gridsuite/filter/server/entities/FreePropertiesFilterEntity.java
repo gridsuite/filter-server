@@ -33,7 +33,7 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "free_properties")
 public class FreePropertiesFilterEntity {
     @Id
-    @GeneratedValue(strategy  =  GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     UUID id;
 

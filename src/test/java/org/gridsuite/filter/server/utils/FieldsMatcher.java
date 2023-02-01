@@ -49,7 +49,7 @@ class EqualDiagnosingMatcher<U> extends TypeSafeDiagnosingMatcher<U> {
     }
 
     public void describeTo(Description description) {
-
+        description.appendText("Objects.equals");
     }
 }
 
@@ -431,6 +431,6 @@ public class FieldsMatcher<T> extends TypeSafeDiagnosingMatcher<T> {
     }
 
     public void describeTo(Description description) {
-        // not yet
+        description.appendText("acyclic fields matcher");
     }
 }

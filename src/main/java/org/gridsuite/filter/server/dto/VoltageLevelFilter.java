@@ -41,7 +41,7 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
     private Map<String, Set<String>> freeProperties;
 
     @Schema(description = "Nominal voltage")
-    private NumericalFilter          nominalVoltage;
+    private NumericalFilter nominalVoltage;
 
     public VoltageLevelFilter(String equipmentID, String equipmentName,
         SortedSet<String> countries, Map<String, Set<String>> freeProperties,
