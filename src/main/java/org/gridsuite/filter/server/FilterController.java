@@ -23,6 +23,8 @@ import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
@@ -135,6 +137,8 @@ public class FilterController {
                                                                      @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                      @RequestParam(value = "variantId", required = false) String variantId) {
         Optional<List<IdentifiableAttributes>> identifiableAttributes = service.exportFilter(id, networkUuid, variantId);
+        Logger.getLogger("export").info(String.format("simple net:%s, variant:%s, id:%s, res:%s",
+            networkUuid, variantId, id, identifiableAttributes.map(List::size)).replace('$', '_'));
         return identifiableAttributes.map(identifiables -> ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
             .body(identifiables))
@@ -148,6 +152,9 @@ public class FilterController {
                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                 @RequestParam(value = "variantId", required = false) String variantId) {
         List<FilterEquipments> ret = service.exportFilters(ids, networkUuid, variantId);
+        Logger.getLogger("export").info(String.format("multiple net:%s, variant:%s, ids:%s,\ngot:%s",
+            networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), ret)
+            .replace('$', '_'));
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ret);
