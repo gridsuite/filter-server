@@ -52,18 +52,6 @@ public class ThreeWindingsTransformerFilter extends AbstractEquipmentFilterForm 
     @Schema(description = "Nominal voltage 3")
     private NumericalFilter nominalVoltage3;
 
-    public ThreeWindingsTransformerFilter(String equipmentID, String equipmentName, String substationName,
-        SortedSet<String> countries, Map<String, Set<String>> freeProperties,
-        NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2, NumericalFilter nominalVoltage3) {
-        super(equipmentID, equipmentName);
-        this.substationName =  substationName;
-        this.countries =  countries;
-        this.freeProperties = freeProperties;
-        this.nominalVoltage1 =  nominalVoltage1;
-        this.nominalVoltage2 =  nominalVoltage2;
-        this.nominalVoltage3 =  nominalVoltage3;
-    }
-
     @Override
     public boolean isEmpty() {
         return super.isEmpty()

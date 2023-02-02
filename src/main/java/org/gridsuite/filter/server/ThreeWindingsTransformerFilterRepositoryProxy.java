@@ -49,16 +49,15 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
     @Override
     public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         ThreeWindingsTransformerFilterEntity threeWindingsTransformerFilterEntity = (ThreeWindingsTransformerFilterEntity) entity;
-        return new ThreeWindingsTransformerFilter(
-            threeWindingsTransformerFilterEntity.getEquipmentId(),
-            threeWindingsTransformerFilterEntity.getEquipmentName(),
-            threeWindingsTransformerFilterEntity.getSubstationName(),
-            setToSorterSet(threeWindingsTransformerFilterEntity.getCountries()),
-            convert(threeWindingsTransformerFilterEntity.getSubstationFreeProperties()),
-            convert(threeWindingsTransformerFilterEntity.getNominalVoltage1()),
-            convert(threeWindingsTransformerFilterEntity.getNominalVoltage2()),
-            convert(threeWindingsTransformerFilterEntity.getNominalVoltage3())
-        );
+        return ThreeWindingsTransformerFilter.builder()
+            .equipmentID(threeWindingsTransformerFilterEntity.getEquipmentId())
+            .equipmentName(threeWindingsTransformerFilterEntity.getEquipmentName())
+            .substationName(threeWindingsTransformerFilterEntity.getSubstationName())
+            .countries(setToSorterSet(threeWindingsTransformerFilterEntity.getCountries()))
+            .freeProperties(convert(threeWindingsTransformerFilterEntity.getSubstationFreeProperties()))
+            .nominalVoltage1(convert(threeWindingsTransformerFilterEntity.getNominalVoltage1()))
+            .nominalVoltage2(convert(threeWindingsTransformerFilterEntity.getNominalVoltage2()))
+            .nominalVoltage3(convert(threeWindingsTransformerFilterEntity.getNominalVoltage3())).build();
     }
 
     @Override

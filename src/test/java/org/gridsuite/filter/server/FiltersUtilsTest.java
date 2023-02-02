@@ -63,14 +63,7 @@ public class FiltersUtilsTest {
         assertFalse(FiltersUtils.isLocatedIn(List.of("PT", "IT"), t1));
         assertFalse(FiltersUtils.isLocatedIn(List.of("PT", "IT"), t2));
 
-        assertTrue(FiltersUtils.matchesFreeProps(null, t1));
-        assertFalse(FiltersUtils.matchesFreeProps(Map.of(), t1));
-        assertTrue(FiltersUtils.matchesFreeProps(null, t2));
-        assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t2));
-        assertTrue(FiltersUtils.matchesFreeProps(null, t3));
-        assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t3));
-        assertTrue(FiltersUtils.matchesFreeProps(Map.of("region", new LinkedHashSet<>(List.of("north"))), t1));
-        assertFalse(FiltersUtils.matchesFreeProps(Map.of("region", new LinkedHashSet<>(List.of("south"))), t1));
+        freePropsMatching(t1, t2, t3);
 
         assertTrue(FiltersUtils.isEqualityNominalVoltage(t1, 225.));
         assertFalse(FiltersUtils.isEqualityNominalVoltage(t1, 380.));
@@ -92,5 +85,16 @@ public class FiltersUtilsTest {
 
         assertFalse(FiltersUtils.isEnergySource(g, "WIND"));
         assertTrue(FiltersUtils.isEnergySource(g, "NUCLEAR"));
+    }
+
+    private static void freePropsMatching(Terminal t1, Terminal t2, Terminal t3) {
+        assertTrue(FiltersUtils.matchesFreeProps(null, t1));
+        assertFalse(FiltersUtils.matchesFreeProps(Map.of(), t1));
+        assertTrue(FiltersUtils.matchesFreeProps(null, t2));
+        assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t2));
+        assertTrue(FiltersUtils.matchesFreeProps(null, t3));
+        assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t3));
+        assertTrue(FiltersUtils.matchesFreeProps(Map.of("region", new LinkedHashSet<>(List.of("north"))), t1));
+        assertFalse(FiltersUtils.matchesFreeProps(Map.of("region", new LinkedHashSet<>(List.of("south"))), t1));
     }
 }
