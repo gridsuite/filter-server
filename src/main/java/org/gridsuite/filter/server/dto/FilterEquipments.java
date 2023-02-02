@@ -11,6 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class FilterEquipments {
     @Schema(description = "filter id")
     private UUID filterId;

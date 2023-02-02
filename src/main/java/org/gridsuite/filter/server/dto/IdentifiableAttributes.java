@@ -10,6 +10,7 @@ import com.powsybl.iidm.network.IdentifiableType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -17,6 +18,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@ToString
 @Schema(description = "Identifiable attributes")
 public class IdentifiableAttributes {
 
