@@ -137,7 +137,7 @@ public class FilterController {
                                                                      @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                      @RequestParam(value = "variantId", required = false) String variantId) {
         Optional<List<IdentifiableAttributes>> identifiableAttributes = service.exportFilter(id, networkUuid, variantId);
-        Logger.getLogger("export").info(String.format("simple net:%s, variant:%s, id:%s, res:%s",
+        Logger.getLogger("export").info(() -> String.format("simple net:%s, variant:%s, id:%s, res:%s",
             networkUuid, variantId, id, identifiableAttributes.map(List::size)).replaceAll("[$\n\r\t]", "_"));
         return identifiableAttributes.map(identifiables -> ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
@@ -152,7 +152,7 @@ public class FilterController {
                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                 @RequestParam(value = "variantId", required = false) String variantId) {
         List<FilterEquipments> ret = service.exportFilters(ids, networkUuid, variantId);
-        Logger.getLogger("export").info(String.format("multiple net:%s, variant:%s, ids:%s,\ngot:%s",
+        Logger.getLogger("export").info(() -> String.format("multiple net:%s, variant:%s, ids:%s,%ngot:%s",
             networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), ret).replaceAll("[$\r]", "_"));
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
