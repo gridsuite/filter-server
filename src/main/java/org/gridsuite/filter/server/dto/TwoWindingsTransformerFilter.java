@@ -67,7 +67,6 @@ public class TwoWindingsTransformerFilter extends AbstractEquipmentFilterForm {
             && CollectionUtils.isEmpty(countries)
             && nominalVoltage1 == null
             && nominalVoltage2 == null
-            && freeProperties == null
             && CollectionUtils.isEmpty(freeProperties);
     }
 }

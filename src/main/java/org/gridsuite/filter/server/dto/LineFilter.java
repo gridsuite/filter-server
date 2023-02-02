@@ -14,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
@@ -37,10 +38,10 @@ public class LineFilter extends AbstractEquipmentFilterForm {
     String substationName2;
 
     @Schema(description = "Countries1")
-    private Set<String> countries1;
+    private SortedSet<String> countries1;
 
     @Schema(description = "Countries2")
-    private Set<String> countries2;
+    private SortedSet<String> countries2;
 
     @Schema(description = "Free properties 1")
     private Map<String, Set<String>> freeProperties1;

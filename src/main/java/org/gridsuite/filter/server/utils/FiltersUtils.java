@@ -9,6 +9,7 @@ package org.gridsuite.filter.server.utils;
 import com.powsybl.iidm.network.*;
 
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 
 import java.util.List;
@@ -62,7 +63,7 @@ public final class FiltersUtils {
 
     public static boolean matchesFreeProps(Map<String, Set<String>> freeProperties, Substation substation) {
         if (substation == null) {
-            return freeProperties == null || freeProperties.isEmpty();
+            return CollectionUtils.isEmpty(freeProperties);
         }
         if (freeProperties == null) {
             return true;

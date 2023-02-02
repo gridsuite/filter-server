@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2021, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package org.gridsuite.filter.server.utils;
 
 import java.util.ArrayList;
@@ -31,6 +37,10 @@ import org.hamcrest.collection.IsIterableContainingInOrder;
 
 import static java.lang.String.format;
 import lombok.SneakyThrows;
+
+/**
+ * @author Laurent Garnier <laurent.garnier at rte-france.com>
+ */
 
 class EqualDiagnosingMatcher<U> extends TypeSafeDiagnosingMatcher<U> {
 
