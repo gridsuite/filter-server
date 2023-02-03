@@ -48,7 +48,12 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             return null;
         }
 
-        return entity.getFreePropertyFilterEntities().stream()
+        Set<FreePropertyFilterEntity> freePropertyFilterEntities = entity.getFreePropertyFilterEntities();
+        if (freePropertyFilterEntities == null) {
+            return null;
+        }
+
+        return freePropertyFilterEntities.stream()
             .collect(Collectors.toMap(FreePropertyFilterEntity::getPropName, FreePropertyFilterEntity::getPropValues));
     }
 
