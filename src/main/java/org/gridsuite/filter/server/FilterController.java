@@ -152,8 +152,8 @@ public class FilterController {
                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                 @RequestParam(value = "variantId", required = false) String variantId) {
         List<FilterEquipments> ret = service.exportFilters(ids, networkUuid, variantId);
-        Logger.getLogger("export").info(() -> String.format("multiple net:%s, variant:%s, ids:%s,%ngot:%s",
-            networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), ret).replaceAll("[$\r]", "_"));
+        Logger.getLogger("export").info(() -> String.format("multiple net:%s, variant:%s, ids:%s,%ngot:%d",
+            networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), ret.size()).replaceAll("[$\r]", "_"));
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ret);

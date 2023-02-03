@@ -13,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -29,7 +30,7 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
     String substationName;
 
     @Schema(description = "Countries")
-    private Set<String> countries;
+    private SortedSet<String> countries;
 
     @Schema(description = "Free properties")
     private Map<String, Set<String>> freeProperties;

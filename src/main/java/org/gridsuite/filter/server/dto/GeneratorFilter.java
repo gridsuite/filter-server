@@ -14,6 +14,7 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -29,7 +30,7 @@ public class GeneratorFilter extends AbstractInjectionFilter {
     EnergySource energySource;
 
     public GeneratorFilter(String equipmentID, String equipmentName, String substationName,
-        Set<String> countries, Map<String, Set<String>> freeProperties,
+        SortedSet<String> countries, Map<String, Set<String>> freeProperties,
         NumericalFilter nominalVoltage, EnergySource energySource) {
         super(new InjectionFilterAttributes(equipmentID, equipmentName, substationName, countries, freeProperties, nominalVoltage));
         this.energySource = energySource;

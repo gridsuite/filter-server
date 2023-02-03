@@ -54,7 +54,7 @@ public abstract class AbstractInjectionFilterEntity extends AbstractGenericFilte
     NumericFilterEntity nominalVoltage;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "substationFreeProperties",
+    @JoinColumn(name = "substationFreeProperties_id",
         referencedColumnName = "id",
         foreignKey = @ForeignKey)
     FreePropertiesFilterEntity substationFreeProperties;

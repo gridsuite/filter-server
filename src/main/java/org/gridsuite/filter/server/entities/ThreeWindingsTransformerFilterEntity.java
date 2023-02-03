@@ -68,7 +68,7 @@ public class ThreeWindingsTransformerFilterEntity extends AbstractGenericFilterE
     NumericFilterEntity nominalVoltage3;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "substationFreeProperties",
+    @JoinColumn(name = "substationFreeProperties_id",
         referencedColumnName = "id",
         foreignKey = @ForeignKey)
     FreePropertiesFilterEntity substationFreeProperties;
