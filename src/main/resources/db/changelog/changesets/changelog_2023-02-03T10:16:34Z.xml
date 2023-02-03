@@ -1,0 +1,186 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="garnierlar (generated)" id="1675419406522-1">
+        <createTable tableName="free_properties">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="free_propertiesPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-2">
+        <createTable tableName="free_properties_free_property_filter_entities">
+            <column name="free_properties_filter_entity_id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="free_property_filter_entities_id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-3">
+        <createTable tableName="free_property">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="free_propertyPK"/>
+            </column>
+            <column name="prop_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-4">
+        <createTable tableName="prop_value">
+            <column name="free_property_filter_entity_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prop_values" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-5">
+        <addColumn tableName="hvdc_line_filter">
+            <column name="substation_free_properties1_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-6">
+        <addColumn tableName="line_filter">
+            <column name="substation_free_properties1_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-7">
+        <addColumn tableName="hvdc_line_filter">
+            <column name="substation_free_properties2_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-8">
+        <addColumn tableName="line_filter">
+            <column name="substation_free_properties2_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-9">
+        <addColumn tableName="battery_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-10">
+        <addColumn tableName="busbar_section_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-11">
+        <addColumn tableName="dangling_line_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-12">
+        <addColumn tableName="generator_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-13">
+        <addColumn tableName="lcc_converter_station_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-14">
+        <addColumn tableName="load_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-15">
+        <addColumn tableName="shunt_compensator_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-16">
+        <addColumn tableName="static_var_compensator_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-17">
+        <addColumn tableName="substation_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-18">
+        <addColumn tableName="three_windings_transformer_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-19">
+        <addColumn tableName="two_windings_transformer_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-20">
+        <addColumn tableName="voltage_level_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-21">
+        <addColumn tableName="vsc_converter_station_filter">
+            <column name="substation_free_properties_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-22">
+        <addUniqueConstraint columnNames="free_property_filter_entities_id" constraintName="UK_d1cf8ek5m0ldv6x9fu1s2g59t" tableName="free_properties_free_property_filter_entities"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-23">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties2_id" baseTableName="line_filter" constraintName="FK4wgf4jnma3vr7t53m1e0t6npu" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-24">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties2_id" baseTableName="hvdc_line_filter" constraintName="FK50fcqhx2cmt363x52l29v7vuv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-25">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="lcc_converter_station_filter" constraintName="FK5ftbfb4he1763my21kxy971hp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-26">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="substation_filter" constraintName="FK96eoino5pg4ekke0ngq0j2i4h" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-27">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="dangling_line_filter" constraintName="FK9pyilsvdl7c6oubxcgrmh7q1x" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-28">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="static_var_compensator_filter" constraintName="FKaokxjvmk4oq15sm3etfh0v79e" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-29">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="three_windings_transformer_filter" constraintName="FKci0co25ns5vij0q1ft8hnnd4x" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-30">
+        <addForeignKeyConstraint baseColumnNames="free_properties_filter_entity_id" baseTableName="free_properties_free_property_filter_entities" constraintName="FKd3qj1o28yllso1chamanx5wpl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-31">
+        <addForeignKeyConstraint baseColumnNames="free_property_filter_entities_id" baseTableName="free_properties_free_property_filter_entities" constraintName="FKd99imh5kio4ej2qfx875yyrx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_property" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-32">
+        <addForeignKeyConstraint baseColumnNames="free_property_filter_entity_id" baseTableName="prop_value" constraintName="FKdfa6r0uayx9ts3bllhmpig13v" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_property" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-33">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="vsc_converter_station_filter" constraintName="FKe46qri280m8cb9n03pou8y110" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-34">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="battery_filter" constraintName="FKebd6xea5b7kujhyyg7wtjf6ok" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-35">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="busbar_section_filter" constraintName="FKebn1u542nqlc0s2ovpxddjy4k" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-36">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="voltage_level_filter" constraintName="FKekt0gacugvt5ck91y0baubxee" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-37">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="generator_filter" constraintName="FKg1u13bdomduodlhdvq4xxghah" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-38">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="shunt_compensator_filter" constraintName="FKlfugmxfto4djohxypwt75qkrx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-39">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="load_filter" constraintName="FKpj00nlom4mstk77ybdivtcppw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-40">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties1_id" baseTableName="line_filter" constraintName="FKq2gys3upyl14567a8sgpmkpse" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-41">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties1_id" baseTableName="hvdc_line_filter" constraintName="FKrp2wq7nw2xcx66u24gn86advk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="garnierlar (generated)" id="1675419406522-42">
+        <addForeignKeyConstraint baseColumnNames="substation_free_properties_id" baseTableName="two_windings_transformer_filter" constraintName="FKt2iyme3ll8ctu0yesp7x59a6q" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
