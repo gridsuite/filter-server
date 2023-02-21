@@ -7,7 +7,7 @@
 
 package org.gridsuite.filter.server.entities;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.CollectionTable;
@@ -18,6 +18,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import lombok.Getter;
@@ -44,5 +45,6 @@ public class FreePropertyFilterEntity {
     @Column(name = "prop_values")
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "prop_value")
-    Set<String> propValues;
+    @OrderColumn(name = "pos")
+    List<String> propValues;
 }

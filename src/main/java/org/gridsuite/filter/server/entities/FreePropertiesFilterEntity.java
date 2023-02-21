@@ -6,7 +6,7 @@
  */
 package org.gridsuite.filter.server.entities;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -17,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import lombok.Getter;
@@ -38,5 +39,6 @@ public class FreePropertiesFilterEntity {
     UUID id;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    Set<FreePropertyFilterEntity> freePropertyFilterEntities;
+    @OrderColumn(name = "pos")
+    List<FreePropertyFilterEntity> freePropertyFilterEntities;
 }

@@ -138,6 +138,14 @@ public class FieldsMatcherMetaTest {
     }
 
     @Test
+    public void shallowOrderedMap() {
+        testBasics(TOP_0, TOP_0.withFamousNumbers(Map.of("e", Math.E, "pi", Math.PI)), null);
+        testBasics(TOP_0, TOP_0.withFamousNumbers(Map.of("one", 1.0, "ZERO", 0.0)),
+            "/famousNumbers/ unfullfilled<.*> unexpected<.*>");
+
+    }
+
+    @Test
     public void shallowSet() {
         testBasics(TOP_0.withLoto(Set.of(7, 8)), TOP_0.withLoto(Set.of(7, 8)), null);
         testBasics(TOP_0, TOP_0.withLoto(Set.of(7, 8)), "/loto/ \\* unfulfilled<.*> unexpected<.*>");

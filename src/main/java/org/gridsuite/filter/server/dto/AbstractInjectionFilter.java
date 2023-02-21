@@ -6,13 +6,16 @@
  */
 package org.gridsuite.filter.server.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
 import org.springframework.util.CollectionUtils;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -33,7 +36,9 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
     private SortedSet<String> countries;
 
     @Schema(description = "Free properties")
-    private Map<String, Set<String>> freeProperties;
+    // LinkedHashMap to keep order too
+    @JsonDeserialize(as = LinkedHashMap.class)
+    private Map<String, List<String>> freeProperties;
 
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;

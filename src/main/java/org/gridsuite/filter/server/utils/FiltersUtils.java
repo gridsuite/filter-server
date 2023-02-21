@@ -15,7 +15,6 @@ import org.springframework.util.PathMatcher;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -51,17 +50,17 @@ public final class FiltersUtils {
         return filterCountries.isEmpty() || country.map(c -> filterCountries.contains(c.name())).orElse(false);
     }
 
-    public static boolean matchesFreeProps(Map<String, Set<String>> freeProperties, Terminal terminal) {
+    public static boolean matchesFreeProps(Map<String, List<String>> freeProperties, Terminal terminal) {
         return matchesFreeProps(freeProperties, terminal.getVoltageLevel());
     }
 
-    public static boolean matchesFreeProps(Map<String, Set<String>> freeProperties, VoltageLevel voltageLevel) {
+    public static boolean matchesFreeProps(Map<String, List<String>> freeProperties, VoltageLevel voltageLevel) {
         var optSubstation = voltageLevel.getSubstation();
         return optSubstation.map(substation -> matchesFreeProps(freeProperties, substation))
             .orElseGet(() -> matchesFreeProps(freeProperties, (Substation) null));
     }
 
-    public static boolean matchesFreeProps(Map<String, Set<String>> freeProperties, Substation substation) {
+    public static boolean matchesFreeProps(Map<String, List<String>> freeProperties, Substation substation) {
         if (substation == null) {
             return CollectionUtils.isEmpty(freeProperties);
         }

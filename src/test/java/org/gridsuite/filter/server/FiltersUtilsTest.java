@@ -11,7 +11,6 @@ import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -94,7 +93,7 @@ public class FiltersUtilsTest {
         assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t2));
         assertTrue(FiltersUtils.matchesFreeProps(null, t3));
         assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t3));
-        assertTrue(FiltersUtils.matchesFreeProps(Map.of("region", new LinkedHashSet<>(List.of("north"))), t1));
-        assertFalse(FiltersUtils.matchesFreeProps(Map.of("region", new LinkedHashSet<>(List.of("south"))), t1));
+        assertTrue(FiltersUtils.matchesFreeProps(Map.of("region", List.of("north")), t1));
+        assertFalse(FiltersUtils.matchesFreeProps(Map.of("region", List.of("south")), t1));
     }
 }

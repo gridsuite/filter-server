@@ -21,6 +21,9 @@ import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.test.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
+
+import org.apache.commons.collections4.OrderedMap;
+import org.apache.commons.collections4.map.LinkedMap;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FieldsMatcher;
@@ -53,10 +56,16 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -97,7 +106,8 @@ public class FilterEntityControllerTest {
     public static final SortedSet<String> COUNTRIES1 = new TreeSet<>(Collections.singleton("France"));
     public static final SortedSet<String> COUNTRIES2 = new TreeSet<>(Collections.singleton("Germany"));
 
-    public static final Map<String, Set<String>> FREE_PROPS = Map.of("region", new TreeSet<>(Set.of("north", "south")));
+    public static final OrderedMap<String, List<String>> FREE_PROPS = new LinkedMap<>(
+        Map.of("region", List.of("north", "south")));
 
     private static final UUID NETWORK_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
     private static final UUID NETWORK_UUID_2 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e5");
@@ -205,8 +215,8 @@ public class FilterEntityControllerTest {
             .substationName2("P2")
             .countries1(new TreeSet<>(Set.of("FR")))
             .countries2(new TreeSet<>(Set.of("FR")))
-            .freeProperties2(Map.of("region", new LinkedHashSet<>(List.of("north"))))
-            .freeProperties1(Map.of("region", new LinkedHashSet<>(List.of("south"))))
+            .freeProperties2(Map.of("region", List.of("north")))
+            .freeProperties1(Map.of("region", List.of("south")))
             .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.))
             .nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75))
             .build();
@@ -1050,7 +1060,7 @@ public class FilterEntityControllerTest {
         Date modificationDate = new Date();
         SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
         // compensators are on powsybl networks without substation, so filtering on substation free props would prevent match.
-        Map<String, Set<String>> workAroundProps =
+        OrderedMap<String, List<String>> workAroundProps =
             Set.of(EquipmentType.SHUNT_COMPENSATOR, EquipmentType.STATIC_VAR_COMPENSATOR).contains(equipmentType) ? null : FREE_PROPS;
         InjectionFilterAttributes injectionFilterAttributes =  new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
             sortedCountries, workAroundProps, numericalFilter);
@@ -1195,7 +1205,7 @@ public class FilterEntityControllerTest {
                 HvdcLineFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName)
                     .substationName1(substationName1).substationName2(substationName2)
                     .countries1(countries1).countries2(countries2)
-                    .freeProperties2(Map.of("region", new LinkedHashSet<>(List.of("north"))))
+                    .freeProperties2(Map.of("region", List.of("north")))
                     .nominalVoltage(new NumericalFilter(rangeType, value1, value2))
                     .build()
         );

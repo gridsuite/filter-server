@@ -6,22 +6,33 @@
  */
 package org.gridsuite.filter.server;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.powsybl.commons.PowsyblException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
+import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.AbstractInjectionFilter;
+import org.gridsuite.filter.server.dto.CriteriaFilter;
+import org.gridsuite.filter.server.dto.GeneratorFilter;
+import org.gridsuite.filter.server.dto.HvdcLineFilter;
+import org.gridsuite.filter.server.dto.LineFilter;
+import org.gridsuite.filter.server.dto.NumericalFilter;
+import org.gridsuite.filter.server.dto.SubstationFilter;
+import org.gridsuite.filter.server.dto.ThreeWindingsTransformerFilter;
+import org.gridsuite.filter.server.dto.TwoWindingsTransformerFilter;
+import org.gridsuite.filter.server.dto.VoltageLevelFilter;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.stringtemplate.v4.ST;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-
+import com.powsybl.commons.PowsyblException;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -360,7 +371,7 @@ public class FiltersToGroovyScript {
         return template.render();
     }
 
-    private static String makeFreePropertiesGroovy(Map<String, Set<String>> freeProperties) {
+    private static String makeFreePropertiesGroovy(Map<String, List<String>> freeProperties) {
         return freeProperties.entrySet().stream()
             .map(p -> "'" + p.getKey() + "':" + p.getValue().stream().collect(joining("','", "['", "']")))
             .collect(joining("','", "[", "]"));

@@ -6,13 +6,15 @@
  */
 package org.gridsuite.filter.server.dto;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,10 +50,14 @@ public class HvdcLineFilter extends AbstractEquipmentFilterForm {
     private SortedSet<String> countries2;
 
     @Schema(description = "Free properties 1")
-    private Map<String, Set<String>> freeProperties1;
+    // LinkedHashMap to keep order too
+    @JsonDeserialize(as = LinkedHashMap.class)
+    private Map<String, List<String>> freeProperties1;
 
     @Schema(description = "Free properties 2")
-    private Map<String, Set<String>> freeProperties2;
+    // LinkedHashMap to keep order too
+    @JsonDeserialize(as = LinkedHashMap.class)
+    private Map<String, List<String>> freeProperties2;
 
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;

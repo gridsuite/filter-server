@@ -11,8 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 
 @AllArgsConstructor
@@ -31,7 +31,7 @@ public class InjectionFilterAttributes {
     private SortedSet<String> countries;
 
     @Schema(description = "Free properties")
-    private Map<String, Set<String>> freeProperties;
+    private Map<String, List<String>> freeProperties;
 
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;

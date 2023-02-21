@@ -8,6 +8,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
@@ -43,18 +44,22 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return CollectionUtils.isEmpty(set) ? null : new TreeSet<>(set);
     }
 
-    static Map<String, Set<String>> convert(FreePropertiesFilterEntity entity) {
+    static Map<String, List<String>> convert(FreePropertiesFilterEntity entity) {
         if (entity == null) {
             return null;
         }
 
-        Set<FreePropertyFilterEntity> freePropertyFilterEntities = entity.getFreePropertyFilterEntities();
+        List<FreePropertyFilterEntity> freePropertyFilterEntities = entity.getFreePropertyFilterEntities();
         if (freePropertyFilterEntities == null) {
             return null;
         }
 
-        return freePropertyFilterEntities.stream()
-            .collect(Collectors.toMap(FreePropertyFilterEntity::getPropName, FreePropertyFilterEntity::getPropValues));
+        // LinkedHashMap to keep order too
+        LinkedHashMap<String, List<String>> ret = new LinkedHashMap<>();
+        // can not use stream and Collectors.toMap which would go through an HashMap for the two arguments version
+        // and HashMap does not take care of order
+        freePropertyFilterEntities.forEach(p -> ret.put(p.getPropName(), p.getPropValues()));
+        return ret;
     }
 
     static NumericFilterEntity convert(NumericalFilter numericalFilter) {
@@ -63,14 +68,14 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
                 : null;
     }
 
-    static FreePropertiesFilterEntity convert(Map<String, Set<String>> dto) {
+    static FreePropertiesFilterEntity convert(Map<String, List<String>> dto) {
         if (dto == null)  {
             return null;
         }
 
-        Set<FreePropertyFilterEntity> innerEntities = dto.entrySet().stream()
+        List<FreePropertyFilterEntity> innerEntities = dto.entrySet().stream()
             .map(p -> FreePropertyFilterEntity.builder()
-                .propName(p.getKey()).propValues(p.getValue()).build()).collect(Collectors.toSet());
+                .propName(p.getKey()).propValues(p.getValue()).build()).collect(Collectors.toList());
         return FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
     }
 

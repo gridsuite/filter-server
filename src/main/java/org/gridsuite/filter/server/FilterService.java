@@ -221,7 +221,7 @@ public class FilterService {
         }
     }
 
-    private boolean freePropertiesFilter(Terminal terminal, Map<String, Set<String>> propertiesWithValues) {
+    private boolean freePropertiesFilter(Terminal terminal, Map<String, List<String>> propertiesWithValues) {
         Optional<Substation> optSubstation = terminal.getVoltageLevel().getSubstation();
         return optSubstation.filter(substation -> freePropertiesFilter(substation, propertiesWithValues)).isPresent();
     }
@@ -241,7 +241,7 @@ public class FilterService {
         return CollectionUtils.isEmpty(countries) || country.map(c -> countries.contains(c.name())).orElse(false);
     }
 
-    private boolean freePropertiesFilter(Substation substation, Map<String, Set<String>> propertiesWithValues) {
+    private boolean freePropertiesFilter(Substation substation, Map<String, List<String>> propertiesWithValues) {
         return FiltersUtils.matchesFreeProps(propertiesWithValues, substation);
     }
 
@@ -342,7 +342,8 @@ public class FilterService {
             countryFilter(terminal2, filter1);
     }
 
-    private boolean filterByProperties(Terminal terminal1, Terminal terminal2, Map<String, Set<String>> freeProperties1, Map<String, Set<String>> freeProperties2) {
+    private boolean filterByProperties(Terminal terminal1, Terminal terminal2,
+        Map<String, List<String>> freeProperties1, Map<String, List<String>> freeProperties2) {
         return freePropertiesFilter(terminal1, freeProperties1) &&
             freePropertiesFilter(terminal2, freeProperties2)
             || freePropertiesFilter(terminal1, freeProperties2) &&

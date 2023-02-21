@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,8 +16,9 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.springframework.util.CollectionUtils;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -38,14 +40,16 @@ public class SubstationFilter extends AbstractEquipmentFilterForm {
     private SortedSet<String> countries;
 
     public SubstationFilter(String equipmentID, String equipmentName,
-        SortedSet<String> countries, Map<String, Set<String>> freeProperties) {
+        SortedSet<String> countries, Map<String, List<String>> freeProperties) {
         super(equipmentID, equipmentName);
         this.countries = countries;
         this.freeProperties = freeProperties;
     }
 
     @Schema(description = "Free properties")
-    private Map<String, Set<String>> freeProperties;
+    // LinkedHashMap to keep order too
+    @JsonDeserialize(as = LinkedHashMap.class)
+    private Map<String, List<String>> freeProperties;
 
     @Override
     public boolean isEmpty() {
