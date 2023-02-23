@@ -8,6 +8,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
@@ -43,10 +44,39 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return CollectionUtils.isEmpty(set) ? null : new TreeSet<>(set);
     }
 
+    static Map<String, List<String>> convert(FreePropertiesFilterEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        List<FreePropertyFilterEntity> freePropertyFilterEntities = entity.getFreePropertyFilterEntities();
+        if (freePropertyFilterEntities == null) {
+            return null;
+        }
+
+        // LinkedHashMap to keep order too
+        LinkedHashMap<String, List<String>> ret = new LinkedHashMap<>();
+        // can not use stream and Collectors.toMap which would go through an HashMap for the two arguments version
+        // and HashMap does not take care of order
+        freePropertyFilterEntities.forEach(p -> ret.put(p.getPropName(), p.getPropValues()));
+        return ret;
+    }
+
     static NumericFilterEntity convert(NumericalFilter numericalFilter) {
         return numericalFilter != null ?
                 new NumericFilterEntity(null, numericalFilter.getType(), numericalFilter.getValue1(), numericalFilter.getValue2())
                 : null;
+    }
+
+    static FreePropertiesFilterEntity convert(Map<String, List<String>> dto) {
+        if (dto == null)  {
+            return null;
+        }
+
+        List<FreePropertyFilterEntity> innerEntities = dto.entrySet().stream()
+            .map(p -> FreePropertyFilterEntity.builder()
+                .propName(p.getKey()).propValues(p.getValue()).build()).collect(Collectors.toList());
+        return FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
     }
 
     abstract R getRepository();
@@ -80,10 +110,6 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     Stream<FilterAttributes> getFiltersAttributes() {
         return getRepository().getFiltersMetadata().stream().map(this::metadataToAttribute);
-    }
-
-    Stream<FilterAttributes> getFiltersAttributes(List<UUID> ids) {
-        return getRepository().findFiltersMetaDataById(ids).stream().map(this::metadataToAttribute);
     }
 
     FilterAttributes metadataToAttribute(FilterMetadata f) {
@@ -121,16 +147,13 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) dto.getEquipmentFilterForm();
         builder.substationName(injectionFilter.getSubstationName())
             .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
+            .substationFreeProperties(convert(injectionFilter.getFreeProperties()))
             .nominalVoltage(AbstractFilterRepositoryProxy.convert(injectionFilter.getNominalVoltage()));
     }
 
     void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.id(dto.getId());
-    }
-
-    public static Date getDateOrCreate(Date dt) {
-        return dt == null ? new Date() : dt;
     }
 
     public AbstractFilter toFormFilterDto(AbstractGenericFilterEntity entity) {
@@ -148,6 +171,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             entity.getEquipmentName(),
             entity.getSubstationName(),
             setToSorterSet(entity.getCountries()),
+            convert(entity.getSubstationFreeProperties()),
             convert(entity.getNominalVoltage())
         );
     }

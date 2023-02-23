@@ -6,16 +6,19 @@
  */
 package org.gridsuite.filter.server.dto;
 
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+
+import org.gridsuite.filter.server.utils.EquipmentType;
+import org.springframework.util.CollectionUtils;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.springframework.util.CollectionUtils;
-
-import java.util.SortedSet;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -35,12 +38,18 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "Countries")
     private SortedSet<String> countries;
 
+    @Schema(description = "Free properties")
+    private Map<String, List<String>> freeProperties;
+
     @Schema(description = "Nominal voltage")
     private NumericalFilter nominalVoltage;
 
-    public VoltageLevelFilter(String equipmentID, String equipmentName, SortedSet<String> countries, NumericalFilter nominalVoltage) {
+    public VoltageLevelFilter(String equipmentID, String equipmentName,
+        SortedSet<String> countries, Map<String, List<String>> freeProperties,
+        NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName);
         this.countries = countries;
+        this.freeProperties = freeProperties;
         this.nominalVoltage =  nominalVoltage;
     }
 
@@ -48,6 +57,7 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
     public boolean isEmpty() {
         return super.isEmpty()
             && CollectionUtils.isEmpty(countries)
+            && CollectionUtils.isEmpty(freeProperties)
             && nominalVoltage == null;
     }
 }

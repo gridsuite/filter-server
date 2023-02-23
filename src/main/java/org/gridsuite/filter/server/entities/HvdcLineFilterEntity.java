@@ -58,4 +58,16 @@ public class HvdcLineFilterEntity extends AbstractGenericFilterEntity {
             name = "numericFilterId_id_fk"
         ), nullable = true)
     NumericFilterEntity nominalVoltage;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "substationFreeProperties1_id",
+        referencedColumnName = "id",
+        foreignKey = @ForeignKey)
+    FreePropertiesFilterEntity substationFreeProperties1;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "substationFreeProperties2_id",
+        referencedColumnName = "id",
+        foreignKey = @ForeignKey)
+    FreePropertiesFilterEntity substationFreeProperties2;
 }

@@ -12,12 +12,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.Set;
 
@@ -35,4 +39,10 @@ public class SubstationFilterEntity extends AbstractGenericFilterEntity {
     @ElementCollection
     @CollectionTable(foreignKey = @ForeignKey(name = "substationFilterEntity_countries_fk"), indexes = {@Index(name = "substationFilterEntity_countries_idx", columnList = "substation_filter_entity_id")})
     Set<String> countries;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "substationFreeProperties_id",
+        referencedColumnName = "id",
+        foreignKey = @ForeignKey)
+    FreePropertiesFilterEntity substationFreeProperties;
 }

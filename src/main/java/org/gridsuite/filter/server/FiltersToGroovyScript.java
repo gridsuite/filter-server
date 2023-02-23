@@ -6,19 +6,33 @@
  */
 package org.gridsuite.filter.server;
 
-import com.powsybl.commons.PowsyblException;
+import java.util.List;
+import java.util.Map;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.dto.AbstractEquipmentFilterForm;
+import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.server.dto.AbstractInjectionFilter;
+import org.gridsuite.filter.server.dto.CriteriaFilter;
+import org.gridsuite.filter.server.dto.GeneratorFilter;
+import org.gridsuite.filter.server.dto.HvdcLineFilter;
+import org.gridsuite.filter.server.dto.LineFilter;
+import org.gridsuite.filter.server.dto.NumericalFilter;
+import org.gridsuite.filter.server.dto.SubstationFilter;
+import org.gridsuite.filter.server.dto.ThreeWindingsTransformerFilter;
+import org.gridsuite.filter.server.dto.TwoWindingsTransformerFilter;
+import org.gridsuite.filter.server.dto.VoltageLevelFilter;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.stringtemplate.v4.ST;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-
+import com.powsybl.commons.PowsyblException;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -32,6 +46,7 @@ public class FiltersToGroovyScript {
     private static final String EQUIPMENT_NAME = "equipmentName";
     private static final String ENERGY_SOURCE = "energySource";
     private static final String COUNTRIES = "countries";
+    private static final String FREE_PROPS = "freeProperties";
     private static final String SUBSTATION_NAME = "substationName";
 
     private final String lineTemplate;
@@ -74,6 +89,9 @@ public class FiltersToGroovyScript {
         }
         if (!CollectionUtils.isEmpty(injectionFilter.getCountries())) {
             template.add(COUNTRIES, injectionFilter.getCountries().stream().collect(joining("','", "['", "']")));
+        }
+        if (!CollectionUtils.isEmpty(injectionFilter.getFreeProperties())) {
+            template.add(FREE_PROPS, makeFreePropertiesGroovy(injectionFilter.getFreeProperties()));
         }
         if (injectionFilter.getNominalVoltage() != null) {
             addFilterNominalVoltage(template, injectionFilter.getNominalVoltage(), null);
@@ -168,6 +186,12 @@ public class FiltersToGroovyScript {
                 if (!CollectionUtils.isEmpty(lineFilter.getCountries2())) {
                     template.add(COUNTRIES + "2", lineFilter.getCountries2().stream().collect(joining("','", "['", "']")));
                 }
+                if (!CollectionUtils.isEmpty(lineFilter.getFreeProperties1())) {
+                    template.add(FREE_PROPS + "1", makeFreePropertiesGroovy(lineFilter.getFreeProperties1()));
+                }
+                if (!CollectionUtils.isEmpty(lineFilter.getFreeProperties2())) {
+                    template.add(FREE_PROPS + "2", makeFreePropertiesGroovy(lineFilter.getFreeProperties2()));
+                }
                 if (lineFilter.getNominalVoltage1() != null) {
                     addFilterNominalVoltage(template, lineFilter.getNominalVoltage1(), "1");
                 }
@@ -197,6 +221,9 @@ public class FiltersToGroovyScript {
                 if (!CollectionUtils.isEmpty(twoWindingsTransformerFilter.getCountries())) {
                     template.add(COUNTRIES, twoWindingsTransformerFilter.getCountries().stream().collect(joining("','", "['", "']")));
                 }
+                if (!CollectionUtils.isEmpty(twoWindingsTransformerFilter.getFreeProperties())) {
+                    template.add(FREE_PROPS, makeFreePropertiesGroovy(twoWindingsTransformerFilter.getFreeProperties()));
+                }
                 if (twoWindingsTransformerFilter.getNominalVoltage1() != null) {
                     addFilterNominalVoltage(template, twoWindingsTransformerFilter.getNominalVoltage1(), "1");
                 }
@@ -222,6 +249,9 @@ public class FiltersToGroovyScript {
                 }
                 if (!CollectionUtils.isEmpty(threeWindingsTransformerFilter.getCountries())) {
                     template.add(COUNTRIES, threeWindingsTransformerFilter.getCountries().stream().collect(joining("','", "['", "']")));
+                }
+                if (!CollectionUtils.isEmpty(threeWindingsTransformerFilter.getFreeProperties())) {
+                    template.add(FREE_PROPS, makeFreePropertiesGroovy(threeWindingsTransformerFilter.getFreeProperties()));
                 }
                 if (threeWindingsTransformerFilter.getNominalVoltage1() != null) {
                     addFilterNominalVoltage(template, threeWindingsTransformerFilter.getNominalVoltage1(), "1");
@@ -274,6 +304,12 @@ public class FiltersToGroovyScript {
                 if (!CollectionUtils.isEmpty(hvdcLineFilter.getCountries2())) {
                     template.add(COUNTRIES + "2", hvdcLineFilter.getCountries2().stream().collect(joining("','", "['", "']")));
                 }
+                if (!CollectionUtils.isEmpty(hvdcLineFilter.getFreeProperties1())) {
+                    template.add(FREE_PROPS + "1", makeFreePropertiesGroovy(hvdcLineFilter.getFreeProperties1()));
+                }
+                if (!CollectionUtils.isEmpty(hvdcLineFilter.getFreeProperties2())) {
+                    template.add(FREE_PROPS + "2", makeFreePropertiesGroovy(hvdcLineFilter.getFreeProperties2()));
+                }
                 if (hvdcLineFilter.getNominalVoltage() != null) {
                     addFilterNominalVoltage(template, hvdcLineFilter.getNominalVoltage(), null);
                 }
@@ -300,6 +336,9 @@ public class FiltersToGroovyScript {
                 if (!CollectionUtils.isEmpty(voltageLevelFilter.getCountries())) {
                     template.add(COUNTRIES, voltageLevelFilter.getCountries().stream().collect(joining("','", "['", "']")));
                 }
+                if (!CollectionUtils.isEmpty(voltageLevelFilter.getFreeProperties())) {
+                    template.add(FREE_PROPS, makeFreePropertiesGroovy(voltageLevelFilter.getFreeProperties()));
+                }
                 if (voltageLevelFilter.getNominalVoltage() != null) {
                     addFilterNominalVoltage(template, voltageLevelFilter.getNominalVoltage(), null);
                 }
@@ -320,6 +359,9 @@ public class FiltersToGroovyScript {
                 if (!CollectionUtils.isEmpty(substationFilter.getCountries())) {
                     template.add(COUNTRIES, substationFilter.getCountries().stream().collect(joining("','", "['", "']")));
                 }
+                if (!CollectionUtils.isEmpty(substationFilter.getFreeProperties())) {
+                    template.add(FREE_PROPS, makeFreePropertiesGroovy(substationFilter.getFreeProperties()));
+                }
                 break;
 
             default:
@@ -327,5 +369,11 @@ public class FiltersToGroovyScript {
         }
 
         return template.render();
+    }
+
+    private static String makeFreePropertiesGroovy(Map<String, List<String>> freeProperties) {
+        return freeProperties.entrySet().stream()
+            .map(p -> "'" + p.getKey() + "':" + p.getValue().stream().collect(joining("','", "['", "']")))
+            .collect(joining("','", "[", "]"));
     }
 }

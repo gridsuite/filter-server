@@ -8,7 +8,11 @@ for (equipment in network.<collectionName>) {
       <if(countries1)>FiltersUtils.isLocatedIn(<countries1>, equipment.converterStation1.terminal)<endif>
       <if((equipmentId || equipmentName || countries1) && countries2)>&& <endif><\\>
       <if(countries2)>FiltersUtils.isLocatedIn(<countries2>, equipment.converterStation2.terminal)<endif>
-      <if((equipmentId || equipmentName || countries1 || countries2) && nominalVType)>&& <endif><\\>
+      <if((equipmentId || equipmentName || countries1 || countries2) && freeProperties1)>&& <endif><\\>
+      <if(freeProperties1)>FiltersUtils.matchesFreeProps(<freeProperties1>, equipment.converterStation1.terminal)<endif>
+      <if((equipmentId || equipmentName || countries1 || countries2 || freeProperties1) && freeProperties2)>&& <endif><\\>
+      <if(freeProperties2)>FiltersUtils.matchesFreeProps(<freeProperties2>, equipment.converterStation2.terminal)<endif>
+      <if((equipmentId || equipmentName || countries || freeProperties1 || freeProperties2)  && nominalVType)>&& <endif><\\>
       <if(nominalVEquality)>FiltersUtils.isEqualityNominalVoltage(equipment.nominalVoltage, <nominalV>)<endif><\\>
       <if(nominalVRange)>FiltersUtils.isRangeNominalVoltage(equipment.nominalVoltage, <minNominalV>, <maxNominalV>)<endif>
       <if((equipmentId || equipmentName || countries1 || countries2 || nominalVType) && substationName1)>&& <endif><\\>

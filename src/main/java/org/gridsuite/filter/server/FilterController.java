@@ -21,7 +21,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
@@ -133,7 +136,10 @@ public class FilterController {
     public ResponseEntity<List<IdentifiableAttributes>> exportFilter(@PathVariable("id") UUID id,
                                                                      @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                      @RequestParam(value = "variantId", required = false) String variantId) {
-        return service.exportFilter(id, networkUuid, variantId).map(identifiables -> ResponseEntity.ok()
+        Optional<List<IdentifiableAttributes>> identifiableAttributes = service.exportFilter(id, networkUuid, variantId);
+        Logger.getLogger("export").info(() -> String.format("simple net:%s, variant:%s, id:%s, res:%s",
+            networkUuid, variantId, id, identifiableAttributes.map(List::size)).replaceAll("[$\n\r\t]", "_"));
+        return identifiableAttributes.map(identifiables -> ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
             .body(identifiables))
             .orElse(ResponseEntity.notFound().build());
@@ -145,8 +151,11 @@ public class FilterController {
     public ResponseEntity<List<FilterEquipments>> exportFilters(@RequestParam("ids") List<UUID> ids,
                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                 @RequestParam(value = "variantId", required = false) String variantId) {
+        List<FilterEquipments> ret = service.exportFilters(ids, networkUuid, variantId);
+        Logger.getLogger("export").info(() -> String.format("multiple net:%s, variant:%s, ids:%s,%ngot:%d",
+            networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), ret.size()).replaceAll("[$\r]", "_"));
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(service.exportFilters(ids, networkUuid, variantId));
+                .body(ret);
     }
 }

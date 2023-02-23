@@ -10,7 +10,11 @@ import com.powsybl.iidm.network.EnergySource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
 import org.gridsuite.filter.server.utils.EquipmentType;
+
+import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 
 /**
@@ -26,8 +30,10 @@ public class GeneratorFilter extends AbstractInjectionFilter {
     @Schema(description = "Energy source")
     EnergySource energySource;
 
-    public GeneratorFilter(String equipmentID, String equipmentName, String substationName, SortedSet<String> countries, NumericalFilter nominalVoltage, EnergySource energySource) {
-        super(new InjectionFilterAttributes(equipmentID, equipmentName, substationName, countries, nominalVoltage));
+    public GeneratorFilter(String equipmentID, String equipmentName, String substationName,
+        SortedSet<String> countries, Map<String, List<String>> freeProperties,
+        NumericalFilter nominalVoltage, EnergySource energySource) {
+        super(new InjectionFilterAttributes(equipmentID, equipmentName, substationName, countries, freeProperties, nominalVoltage));
         this.energySource = energySource;
     }
 

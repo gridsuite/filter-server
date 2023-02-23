@@ -12,7 +12,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -36,16 +38,21 @@ public class FiltersUtilsTest {
         Substation s2 = Mockito.mock(Substation.class);
         VoltageLevel vl1 = Mockito.mock(VoltageLevel.class);
         VoltageLevel vl2 = Mockito.mock(VoltageLevel.class);
+        VoltageLevel vl3 = Mockito.mock(VoltageLevel.class);
         Terminal t1 = Mockito.mock(Terminal.class);
         Terminal t2 = Mockito.mock(Terminal.class);
+        Terminal t3 = Mockito.mock(Terminal.class);
         Generator g = Mockito.mock(Generator.class);
 
         Mockito.when(s1.getCountry()).thenReturn(Optional.of(Country.FR));
         Mockito.when(s2.getCountry()).thenReturn(Optional.of(Country.ES));
+        Mockito.when(s1.getPropertyNames()).thenReturn(Set.of("region"));
+        Mockito.when(s1.getProperty("region")).thenReturn("north");
         Mockito.when(vl1.getSubstation()).thenReturn(Optional.of(s1));
         Mockito.when(vl2.getSubstation()).thenReturn(Optional.of(s2));
         Mockito.when(t1.getVoltageLevel()).thenReturn(vl1);
         Mockito.when(t2.getVoltageLevel()).thenReturn(vl2);
+        Mockito.when(t3.getVoltageLevel()).thenReturn(vl3);
         Mockito.when(vl1.getNominalV()).thenReturn(225.);
         Mockito.when(vl2.getNominalV()).thenReturn(380.);
         Mockito.when(g.getEnergySource()).thenReturn(EnergySource.NUCLEAR);
@@ -54,6 +61,8 @@ public class FiltersUtilsTest {
         assertTrue(FiltersUtils.isLocatedIn(List.of("ES", "IT"), t2));
         assertFalse(FiltersUtils.isLocatedIn(List.of("PT", "IT"), t1));
         assertFalse(FiltersUtils.isLocatedIn(List.of("PT", "IT"), t2));
+
+        freePropsMatching(t1, t2, t3);
 
         assertTrue(FiltersUtils.isEqualityNominalVoltage(t1, 225.));
         assertFalse(FiltersUtils.isEqualityNominalVoltage(t1, 380.));
@@ -75,5 +84,16 @@ public class FiltersUtilsTest {
 
         assertFalse(FiltersUtils.isEnergySource(g, "WIND"));
         assertTrue(FiltersUtils.isEnergySource(g, "NUCLEAR"));
+    }
+
+    private static void freePropsMatching(Terminal t1, Terminal t2, Terminal t3) {
+        assertTrue(FiltersUtils.matchesFreeProps(null, t1));
+        assertFalse(FiltersUtils.matchesFreeProps(Map.of(), t1));
+        assertTrue(FiltersUtils.matchesFreeProps(null, t2));
+        assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t2));
+        assertTrue(FiltersUtils.matchesFreeProps(null, t3));
+        assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t3));
+        assertTrue(FiltersUtils.matchesFreeProps(Map.of("region", List.of("north")), t1));
+        assertFalse(FiltersUtils.matchesFreeProps(Map.of("region", List.of("south")), t1));
     }
 }
