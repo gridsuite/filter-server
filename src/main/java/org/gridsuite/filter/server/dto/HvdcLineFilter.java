@@ -66,10 +66,10 @@ public class HvdcLineFilter extends AbstractEquipmentFilterForm {
         SortedSet<String> countries1, SortedSet<String> countries2,
         NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName);
-        this.substationName1 =  substationName1;
-        this.substationName2 =  substationName2;
-        this.countries1 =  countries1;
-        this.countries2 =  countries2;
+        this.substationName1 = substationName1;
+        this.substationName2 = substationName2;
+        this.countries1 = countries1;
+        this.countries2 = countries2;
         this.nominalVoltage = nominalVoltage;
     }
 

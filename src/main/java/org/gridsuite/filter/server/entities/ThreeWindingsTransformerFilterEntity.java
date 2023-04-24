@@ -44,24 +44,24 @@ public class ThreeWindingsTransformerFilterEntity extends AbstractGenericFilterE
     String substationName;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "threeWindingsTransformer_numericFilterId1_id",
-        referencedColumnName  =  "id",
+    @JoinColumn(name = "threeWindingsTransformer_numericFilterId1_id",
+        referencedColumnName = "id",
         foreignKey = @ForeignKey(
             name = "threeWindingsTransformer_numericFilterId_id_fk1"
         ), nullable = true)
     NumericFilterEntity nominalVoltage1;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "threeWindingsTransformer_numericFilterId2_id",
-        referencedColumnName  =  "id",
+    @JoinColumn(name = "threeWindingsTransformer_numericFilterId2_id",
+        referencedColumnName = "id",
         foreignKey = @ForeignKey(
             name = "threeWindingsTransformer_numericFilterId_id_fk2"
         ), nullable = true)
     NumericFilterEntity nominalVoltage2;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "threeWindingsTransformer_numericFilterId3_id",
-        referencedColumnName  =  "id",
+    @JoinColumn(name = "threeWindingsTransformer_numericFilterId3_id",
+        referencedColumnName = "id",
         foreignKey = @ForeignKey(
             name = "threeWindingsTransformer_numericFilterId_id_fk3"
         ), nullable = true)

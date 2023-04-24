@@ -106,7 +106,7 @@ public class FieldsMatcherMetaTest {
     static class Top {
         private String str;
         private int i;
-        private byte[]       bytes;
+        private byte[] bytes;
         private BigInteger bigint;
         private List<String> orderedStrings;
 

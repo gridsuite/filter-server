@@ -47,8 +47,8 @@ public class VoltageLevelFilterEntity extends AbstractGenericFilterEntity {
     FreePropertiesFilterEntity substationFreeProperties;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name  =  "numericFilterId_id",
-        referencedColumnName  =  "id",
+    @JoinColumn(name = "numericFilterId_id",
+        referencedColumnName = "id",
         foreignKey = @ForeignKey(
             name = "voltageLevel_numericFilterId_id_fk"
         ), nullable = true)

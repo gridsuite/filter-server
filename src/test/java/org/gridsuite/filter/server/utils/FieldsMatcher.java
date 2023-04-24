@@ -72,7 +72,7 @@ public class FieldsMatcher<T> extends TypeSafeDiagnosingMatcher<T> {
         Enum.class);
 
     T expected;
-    private Map<String, TypeSafeMatcher<?>>   pathBasedMatchersMap;
+    private Map<String, TypeSafeMatcher<?>> pathBasedMatchersMap;
     private Map<Class<?>, TypeSafeMatcher<?>> classBasedMatcherMap;
 
     public FieldsMatcher(T expected,

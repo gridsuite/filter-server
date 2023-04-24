@@ -25,7 +25,7 @@ import java.util.UUID;
 @Table(name = "numericFilter")
 public class NumericFilterEntity {
     @Id
-    @GeneratedValue(strategy  =  GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private UUID id;
 

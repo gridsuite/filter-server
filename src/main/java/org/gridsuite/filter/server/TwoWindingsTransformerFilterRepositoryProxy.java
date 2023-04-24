@@ -64,7 +64,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
     public TwoWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
         CriteriaFilter criteriaFilter = toFormFilter(dto, TwoWindingsTransformerFilter.class);
         TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
-        var twoWindingsTransformerFilterEntityBuilder =  TwoWindingsTransformerFilterEntity.builder()
+        var twoWindingsTransformerFilterEntityBuilder = TwoWindingsTransformerFilterEntity.builder()
             .countries(twoWindingsTransformerFilter.getCountries())
             .substationName(twoWindingsTransformerFilter.getSubstationName())
             .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))

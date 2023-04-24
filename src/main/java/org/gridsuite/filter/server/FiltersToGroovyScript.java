@@ -75,7 +75,7 @@ public class FiltersToGroovyScript {
         }
     }
 
-    private void addInjectionFilter(ST template,  AbstractEquipmentFilterForm filterForm) {
+    private void addInjectionFilter(ST template, AbstractEquipmentFilterForm filterForm) {
         AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) filterForm;
         template.add(COLLECTION_NAME, filterForm.getEquipmentType().getCollectionName());
         if (!injectionFilter.isEmpty()) {

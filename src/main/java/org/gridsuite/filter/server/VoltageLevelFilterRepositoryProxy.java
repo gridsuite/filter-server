@@ -65,7 +65,7 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
     public VoltageLevelFilterEntity fromDto(AbstractFilter dto) {
         CriteriaFilter criteriaFilter = toFormFilter(dto, VoltageLevelFilter.class);
         VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) criteriaFilter.getEquipmentFilterForm();
-        var voltageLevelFilterEntityBuilder =  VoltageLevelFilterEntity.builder()
+        var voltageLevelFilterEntityBuilder = VoltageLevelFilterEntity.builder()
             .countries(voltageLevelFilter.getCountries())
             .substationFreeProperties(convert(voltageLevelFilter.getFreeProperties()))
             .nominalVoltage(convert(voltageLevelFilter.getNominalVoltage()));

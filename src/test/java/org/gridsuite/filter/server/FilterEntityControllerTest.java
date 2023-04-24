@@ -1054,7 +1054,7 @@ public class FilterEntityControllerTest {
     private void insertInjectionFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                        String substationName, Set<String> countries,
                                        RangeType rangeType, Double value1, Double value2, EnergySource energySource,
-                                       UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
+                                       UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
         NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
         AbstractInjectionFilter abstractInjectionFilter;
         Date modificationDate = new Date();
@@ -1062,7 +1062,7 @@ public class FilterEntityControllerTest {
         // compensators are on powsybl networks without substation, so filtering on substation free props would prevent match.
         OrderedMap<String, List<String>> workAroundProps =
             Set.of(EquipmentType.SHUNT_COMPENSATOR, EquipmentType.STATIC_VAR_COMPENSATOR).contains(equipmentType) ? null : FREE_PROPS;
-        InjectionFilterAttributes injectionFilterAttributes =  new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
+        InjectionFilterAttributes injectionFilterAttributes = new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
             sortedCountries, workAroundProps, numericalFilter);
         switch (equipmentType) {
             case BATTERY:
@@ -1139,7 +1139,7 @@ public class FilterEntityControllerTest {
     private void insertTransformerFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
                                          String substationName, Set<String> countries,
                                          List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
-                                         UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
+                                         UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
         NumericalFilter numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
         NumericalFilter numericalFilter2 = new NumericalFilter(rangeTypes.get(1), values1.get(1), values2.get(1));
         AbstractEquipmentFilterForm equipmentFilterForm;
@@ -1197,7 +1197,7 @@ public class FilterEntityControllerTest {
     private void insertHvdcLineFilter(UUID id, String equipmentID, String equipmentName,
                                       String substationName1, String substationName2, SortedSet<String> countries1,
                                       SortedSet<String> countries2, RangeType rangeType, Double value1, Double value2,
-                                      UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
+                                      UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
         Date modificationDate = new Date();
         CriteriaFilter hvdcLineFilter = new CriteriaFilter(
                 id,
@@ -1256,7 +1256,7 @@ public class FilterEntityControllerTest {
     private CriteriaFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
                                             String substationName, Set<String> countries1, Set<String> countries2,
                                             List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
-                                            UUID networkUuid, String variantId, String expectedJsonExport, boolean delete)  throws Exception {
+                                            UUID networkUuid, String variantId, String expectedJsonExport, boolean delete) throws Exception {
         NumericalFilter numericalFilter1 = null;
         if (rangeTypes.size() >= 1) {
             numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
@@ -1307,7 +1307,7 @@ public class FilterEntityControllerTest {
 
     private void insertVoltageLevelFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
                                           RangeType rangeType, Double value1, Double value2,
-                                          UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
+                                          UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
         NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
         SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
         VoltageLevelFilter voltageLevelFilter = new VoltageLevelFilter(equipmentID, equipmentName,
@@ -1346,7 +1346,7 @@ public class FilterEntityControllerTest {
     }
 
     private void insertSubstationFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
-                                        UUID networkUuid, String variantId, String expectedJsonExport)  throws Exception {
+                                        UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
         SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
         SubstationFilter substationFilter = new SubstationFilter(equipmentID, equipmentName, sortedCountries, null);
         Date modificationDate = new Date();
