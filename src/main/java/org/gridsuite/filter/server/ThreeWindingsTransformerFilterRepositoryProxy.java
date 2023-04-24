@@ -64,7 +64,7 @@ public class ThreeWindingsTransformerFilterRepositoryProxy extends AbstractFilte
     public ThreeWindingsTransformerFilterEntity fromDto(AbstractFilter dto) {
         CriteriaFilter criteriaFilter = toFormFilter(dto, ThreeWindingsTransformerFilter.class);
         ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
-        var threeWindingsTransformerFilterEntityBuilder =   ThreeWindingsTransformerFilterEntity.builder()
+        var threeWindingsTransformerFilterEntityBuilder = ThreeWindingsTransformerFilterEntity.builder()
             .countries(threeWindingsTransformerFilter.getCountries())
             .substationName(threeWindingsTransformerFilter.getSubstationName())
             .nominalVoltage1(convert(threeWindingsTransformerFilter.getNominalVoltage1()))

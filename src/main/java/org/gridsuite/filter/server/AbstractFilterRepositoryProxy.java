@@ -69,7 +69,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
     }
 
     static FreePropertiesFilterEntity convert(Map<String, List<String>> dto) {
-        if (dto == null)  {
+        if (dto == null) {
             return null;
         }
 

@@ -50,7 +50,7 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
         super(equipmentID, equipmentName);
         this.countries = countries;
         this.freeProperties = freeProperties;
-        this.nominalVoltage =  nominalVoltage;
+        this.nominalVoltage = nominalVoltage;
     }
 
     @Override

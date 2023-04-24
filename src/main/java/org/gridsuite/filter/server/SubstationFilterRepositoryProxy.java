@@ -64,7 +64,7 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
     public SubstationFilterEntity fromDto(AbstractFilter dto) {
         CriteriaFilter criteriaFilter = toFormFilter(dto, SubstationFilter.class);
         SubstationFilter substationFilter = (SubstationFilter) criteriaFilter.getEquipmentFilterForm();
-        var substationFilterEntityBuilder =  SubstationFilterEntity.builder()
+        var substationFilterEntityBuilder = SubstationFilterEntity.builder()
             .countries(substationFilter.getCountries())
             .substationFreeProperties(convert(substationFilter.getFreeProperties()));
         buildGenericFilter(substationFilterEntityBuilder, criteriaFilter);

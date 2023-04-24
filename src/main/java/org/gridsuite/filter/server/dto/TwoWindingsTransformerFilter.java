@@ -58,11 +58,11 @@ public class TwoWindingsTransformerFilter extends AbstractEquipmentFilterForm {
         SortedSet<String> countries, Map<String, List<String>> freeProperties,
         NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
         super(equipmentID, equipmentName);
-        this.substationName =  substationName;
+        this.substationName = substationName;
         this.countries = countries;
         this.freeProperties = freeProperties;
-        this.nominalVoltage1 =  nominalVoltage1;
-        this.nominalVoltage2 =  nominalVoltage2;
+        this.nominalVoltage1 = nominalVoltage1;
+        this.nominalVoltage2 = nominalVoltage2;
     }
 
     @Override
