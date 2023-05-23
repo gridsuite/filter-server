@@ -64,11 +64,8 @@ public final class FiltersUtils {
         if (substation == null) {
             return CollectionUtils.isEmpty(freeProperties);
         }
-        if (freeProperties == null) {
+        if (CollectionUtils.isEmpty(freeProperties)) {
             return true;
-        }
-        if (freeProperties.isEmpty()) {
-            return substation.getPropertyNames().isEmpty();
         }
         return freeProperties.entrySet().stream().allMatch(p -> p.getValue().contains(substation.getProperty(p.getKey())));
     }
