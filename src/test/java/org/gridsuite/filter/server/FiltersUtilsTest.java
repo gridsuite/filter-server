@@ -88,7 +88,7 @@ public class FiltersUtilsTest {
 
     private static void freePropsMatching(Terminal t1, Terminal t2, Terminal t3) {
         assertTrue(FiltersUtils.matchesFreeProps(null, t1));
-        assertFalse(FiltersUtils.matchesFreeProps(Map.of(), t1));
+        assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t1));
         assertTrue(FiltersUtils.matchesFreeProps(null, t2));
         assertTrue(FiltersUtils.matchesFreeProps(Map.of(), t2));
         assertTrue(FiltersUtils.matchesFreeProps(null, t3));
