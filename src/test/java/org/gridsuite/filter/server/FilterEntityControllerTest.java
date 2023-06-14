@@ -25,6 +25,7 @@ import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import org.apache.commons.collections4.OrderedMap;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.dto.DanglingLineFilter;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FieldsMatcher;
 import org.gridsuite.filter.server.utils.FilterType;
