@@ -6,7 +6,7 @@ spring:
       bindings:
         publishElementUpdate-out-0:
           destination:  ${powsybl-ws.rabbitmq.destination.prefix:}element.update
-      output-bindings: publishElementUpdate
+      output-bindings: publishElementUpdate-out-0
 
 powsybl:
   services:
