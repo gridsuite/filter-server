@@ -3,7 +3,6 @@
     <changeSet author="hedhiliabd" id="1626975171877-1">
         <modifyDataType columnName="equipment_type"
                         newDataType="tinyint"
-                        schemaName="public"
                         tableName="identifier_list_filter"/>
     </changeSet>
 </databaseChangeLog>
