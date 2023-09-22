@@ -22,6 +22,7 @@ import com.powsybl.iidm.network.test.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 
+import jakarta.servlet.ServletException;
 import org.apache.commons.collections4.OrderedMap;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.gridsuite.filter.server.dto.*;
@@ -50,7 +51,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.NestedServletException;
 
 import java.util.*;
 
@@ -81,7 +81,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {FilterApplication.class, TestChannelBinderConfiguration.class})
 public class FilterEntityControllerTest {
 
-    public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters/";
+    public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters";
     private static final long TIMEOUT = 1000;
 
     @Autowired
@@ -230,10 +230,10 @@ public class FilterEntityControllerTest {
         checkFormFilter(filterId1, lineCriteriaFilter);
 
         // export
-        assertThrows("Network '" + NETWORK_NOT_FOUND_UUID + "' not found", NestedServletException.class, () -> mvc.perform(get(URL_TEMPLATE + filterId1 + "/export?networkUuid=" + NETWORK_NOT_FOUND_UUID)
+        assertThrows("Network '" + NETWORK_NOT_FOUND_UUID + "' not found", ServletException.class, () -> mvc.perform(get(URL_TEMPLATE + "/" + filterId1 + "/export?networkUuid=" + NETWORK_NOT_FOUND_UUID)
             .contentType(APPLICATION_JSON)));
 
-        mvc.perform(get(URL_TEMPLATE + filterId1 + "/export?networkUuid=" + NETWORK_UUID)
+        mvc.perform(get(URL_TEMPLATE + "/" + filterId1 + "/export?networkUuid=" + NETWORK_UUID)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
@@ -320,13 +320,13 @@ public class FilterEntityControllerTest {
         modifyFormFilter(filterId1, generatorFormFilter2, userId);
 
         // delete
-        mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + "/" + filterId2)).andExpect(status().isOk());
 
-        mvc.perform(delete(URL_TEMPLATE + filterId2)).andExpect(status().isNotFound());
+        mvc.perform(delete(URL_TEMPLATE + "/" + filterId2)).andExpect(status().isNotFound());
 
-        mvc.perform(get(URL_TEMPLATE + filterId2)).andExpect(status().isNotFound());
+        mvc.perform(get(URL_TEMPLATE + "/" + filterId2)).andExpect(status().isNotFound());
 
-        mvc.perform(put(URL_TEMPLATE + filterId2).contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(scriptFilter)).header(USER_ID_HEADER, userId)).andExpect(status().isNotFound());
+        mvc.perform(put(URL_TEMPLATE + "/" + filterId2).contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(scriptFilter)).header(USER_ID_HEADER, userId)).andExpect(status().isNotFound());
 
         filterService.deleteAll();
     }
@@ -358,17 +358,17 @@ public class FilterEntityControllerTest {
         ScriptFilter scriptFilter = new ScriptFilter(filterId4, modificationDate, "test");
         insertFilter(filterId4, scriptFilter);
         checkScriptFilter(filterId4, scriptFilter);
-        assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId3)
+        assertThrows(ServletException.class, () -> mvc.perform(put(URL_TEMPLATE + "/" + filterId3)
                 .content(objectMapper.writeValueAsString(scriptFilter))
                 .contentType(APPLICATION_JSON)
                 .header(USER_ID_HEADER, userId)));
-        assertThrows(NestedServletException.class, () -> mvc.perform(put(URL_TEMPLATE + filterId4)
+        assertThrows(ServletException.class, () -> mvc.perform(put(URL_TEMPLATE + "/" + filterId4)
                 .content(objectMapper.writeValueAsString(lineCriteriaFilterBEFR))
                 .contentType(APPLICATION_JSON)
                 .header(USER_ID_HEADER, userId)));
 
-        mvc.perform(delete(URL_TEMPLATE + filterId3)).andExpect(status().isOk());
-        mvc.perform(delete(URL_TEMPLATE + filterId4)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + "/" + filterId3)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + "/" + filterId4)).andExpect(status().isOk());
 
         // more country filters
         rangeTypes.add(RangeType.GREATER_OR_EQUAL);
@@ -733,14 +733,14 @@ public class FilterEntityControllerTest {
         checkFormFilter(filterId1, lineCriteriaFilter);
 
         // new script from filter
-        mvc.perform(post(URL_TEMPLATE + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
+        mvc.perform(post(URL_TEMPLATE + "/" + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andExpect(content().json("[{\"type\":\"CRITERIA\"}, {\"type\":\"SCRIPT\"}]"));
 
         // replace filter with script
-        mvc.perform(put(URL_TEMPLATE + filterId1 + "/replace-with-script").header(USER_ID_HEADER, userId)).andExpect(status().isOk());
+        mvc.perform(put(URL_TEMPLATE + "/" + filterId1 + "/replace-with-script").header(USER_ID_HEADER, userId)).andExpect(status().isOk());
 
         checkElementUpdatedMessageSent(filterId1, userId);
 
@@ -755,12 +755,12 @@ public class FilterEntityControllerTest {
         insertFilter(filterId2, scriptFilter);
         checkScriptFilter(filterId2, new ScriptFilter(filterId2, modificationDate, "test"));
 
-        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(post(URL_TEMPLATE + filterId2 + "/new-script?newId=" + UUID.randomUUID()).header(USER_ID_HEADER, userId)));
-        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + filterId2 + "/replace-with-script").header(USER_ID_HEADER, userId)));
-        mvc.perform(post(URL_TEMPLATE + filterId3 + "/new-script?newId=" + filterId2)).andExpect(status().isNotFound());
-        mvc.perform(put(URL_TEMPLATE + filterId3 + "/replace-with-script").header(USER_ID_HEADER, userId)).andExpect(status().isNotFound());
+        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(post(URL_TEMPLATE + "/" + filterId2 + "/new-script?newId=" + UUID.randomUUID()).header(USER_ID_HEADER, userId)));
+        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + "/" + filterId2 + "/replace-with-script").header(USER_ID_HEADER, userId)));
+        mvc.perform(post(URL_TEMPLATE + "/" + filterId3 + "/new-script?newId=" + filterId2)).andExpect(status().isNotFound());
+        mvc.perform(put(URL_TEMPLATE + "/" + filterId3 + "/replace-with-script").header(USER_ID_HEADER, userId)).andExpect(status().isNotFound());
 
-        assertThrows("Filter implementation not yet supported: ScriptFilter", NestedServletException.class, () -> mvc.perform(get(URL_TEMPLATE + filterId2 + "/export?networkUuid=" + NETWORK_UUID)
+        assertThrows("Filter implementation not yet supported: ScriptFilter", ServletException.class, () -> mvc.perform(get(URL_TEMPLATE + "/" + filterId2 + "/export?networkUuid=" + NETWORK_UUID)
             .contentType(APPLICATION_JSON)));
     }
 
@@ -1003,7 +1003,7 @@ public class FilterEntityControllerTest {
     }
 
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
-        mvc.perform(get(URL_TEMPLATE + filterId + "/export?networkUuid=" + NETWORK_UUID)
+        mvc.perform(get(URL_TEMPLATE + "/" + filterId + "/export?networkUuid=" + NETWORK_UUID)
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
@@ -1032,7 +1032,7 @@ public class FilterEntityControllerTest {
     }
 
     private void modifyFormFilter(UUID filterId, AbstractFilter newFilter, String userId) throws Exception {
-        mvc.perform(put(URL_TEMPLATE + filterId)
+        mvc.perform(put(URL_TEMPLATE + "/" + filterId)
             .content(objectMapper.writeValueAsString(newFilter))
             .contentType(APPLICATION_JSON)
             .header(USER_ID_HEADER, userId))
@@ -1040,14 +1040,14 @@ public class FilterEntityControllerTest {
 
         checkElementUpdatedMessageSent(filterId, userId);
 
-        String modifiedFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andReturn().getResponse().getContentAsString();
+        String modifiedFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andReturn().getResponse().getContentAsString();
         CriteriaFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, CriteriaFilter.class);
         checkFormFilter(filterId, modifiedFilter);
 
         mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
-        MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn();
+        MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn();
         modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), CriteriaFilter.class);
         checkFormFilter(filterId, modifiedFilter);
     }
@@ -1128,13 +1128,13 @@ public class FilterEntityControllerTest {
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
-        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
     }
 
     private void insertTransformerFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
@@ -1186,13 +1186,13 @@ public class FilterEntityControllerTest {
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
-        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
     }
 
     private void insertHvdcLineFilter(UUID id, String equipmentID, String equipmentName,
@@ -1235,13 +1235,13 @@ public class FilterEntityControllerTest {
         assertEquals(1, filterAttributes.size());
         matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
 
-        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
 
         filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
@@ -1295,13 +1295,13 @@ public class FilterEntityControllerTest {
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(EquipmentType.LINE, filterAttributes.get(0).getEquipmentType());
 
-        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(content().json(expectedJsonExport));
         if (delete) {
-            mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+            mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
         }
         return filter;
     }
@@ -1337,13 +1337,13 @@ public class FilterEntityControllerTest {
         assertEquals(id, filterAttributes.get(0).getId());
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
 
-        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
     }
 
     private void insertSubstationFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
@@ -1374,29 +1374,29 @@ public class FilterEntityControllerTest {
         assertEquals(id, filterAttributes.get(0).getId());
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
 
-        mvc.perform(get(URL_TEMPLATE + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
+        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + id)).andExpect(status().isOk());
+        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
     }
 
     private void checkFormFilter(UUID filterId, CriteriaFilter criteriaFilter) throws Exception {
-        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         CriteriaFilter foundFilter = objectMapper.readValue(foundFilterAsString, CriteriaFilter.class);
         matchFormFilterInfos(foundFilter, criteriaFilter);
     }
 
     private void checkScriptFilter(UUID filterId, ScriptFilter scriptFilter) throws Exception {
-        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         ScriptFilter foundFilter = objectMapper.readValue(foundFilterAsString, ScriptFilter.class);
         matchScriptFilterInfos(foundFilter, scriptFilter);
     }
 
     private void checkIdentifierListFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
-        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         IdentifierListFilter foundFilter = objectMapper.readValue(foundFilterAsString, IdentifierListFilter.class);
         matchIdentifierListFilterInfos(foundFilter, identifierListFilter);
     }

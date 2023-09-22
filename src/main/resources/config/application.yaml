@@ -6,7 +6,7 @@ spring:
       bindings:
         publishElementUpdate-out-0:
           destination:  ${powsybl-ws.rabbitmq.destination.prefix:}element.update
-      output-bindings: publishElementUpdate
+      output-bindings: publishElementUpdate-out-0
 
 powsybl:
   services:
@@ -18,4 +18,5 @@ powsybl-ws:
     name: filters
 
 server:
-  max-http-header-size: 64000
+  # TODO in the near future do we need spring 3.2 "server.tomcat.max-http-response-header-size" ?
+  max-http-request-header-size: 64000
