@@ -21,17 +21,13 @@ import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.test.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
-
 import jakarta.servlet.ServletException;
 import org.apache.commons.collections4.OrderedMap;
 import org.apache.commons.collections4.map.LinkedMap;
-import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.dto.DanglingLineFilter;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FieldsMatcher;
-import org.gridsuite.filter.server.utils.FilterType;
-import org.gridsuite.filter.server.utils.MatcherJson;
-import org.gridsuite.filter.server.utils.RangeType;
+import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.dto.expertrule.*;
+import org.gridsuite.filter.server.utils.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,16 +53,10 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -1023,6 +1013,29 @@ public class FilterEntityControllerTest {
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
     }
 
+    private void checkExpertFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
+        mvc.perform(get(URL_TEMPLATE + "/" + filterId + "/export?networkUuid=" + NETWORK_UUID)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJson));
+
+        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertEquals(1, filterAttributes.size());
+        assertEquals(filterId, filterAttributes.get(0).getId());
+        assertEquals(FilterType.EXPERT, filterAttributes.get(0).getType());
+        assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
+
+        mvc.perform(delete(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk());
+    }
+
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
                         .content(objectMapper.writeValueAsString(filter))
@@ -1401,6 +1414,12 @@ public class FilterEntityControllerTest {
         matchIdentifierListFilterInfos(foundFilter, identifierListFilter);
     }
 
+    private void checkExpertFilter(UUID filterId, ExpertFilter expertFilter) throws Exception {
+        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        ExpertFilter foundFilter = objectMapper.readValue(foundFilterAsString, ExpertFilter.class);
+        matchExpertFilterInfos(foundFilter, expertFilter);
+    }
+
     private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
         assertEquals(filter1.getId(), filter2.getId());
         assertEquals(filter1.getType(), filter2.getType());
@@ -1434,9 +1453,86 @@ public class FilterEntityControllerTest {
         assertTrue(new MatcherJson<>(objectMapper, identifierListFilter2.getFilterEquipmentsAttributes()).matchesSafely(identifierListFilter1.getFilterEquipmentsAttributes()));
     }
 
+    private void matchExpertFilterInfos(ExpertFilter expertFilter1, ExpertFilter expertFilter2) {
+        matchFilterInfos(expertFilter1, expertFilter2);
+        assertTrue(new MatcherJson<>(objectMapper, expertFilter2.getRules()).matchesSafely(expertFilter1.getRules()));
+    }
+
     private void checkElementUpdatedMessageSent(UUID elementUuid, String userId) {
         Message<byte[]> message = output.receive(TIMEOUT, elementUpdateDestination);
         assertEquals(elementUuid, message.getHeaders().get(NotificationService.HEADER_ELEMENT_UUID));
         assertEquals(userId, message.getHeaders().get(NotificationService.HEADER_MODIFIED_BY));
+    }
+
+    @Test
+    public void testExpertGeneratorFilter() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        Date modificationDate = new Date();
+
+        // Create OR rules for generators
+        List<AbstractExpertRule> orRules = new ArrayList<>();
+        NumberExpertRule numRule1 = NumberExpertRule.builder().value(20.0)
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.GREATER).build();
+        orRules.add(numRule1);
+        NumberExpertRule numRule2 = NumberExpertRule.builder().value(-9000.0)
+                .field(FieldType.MIN_P).operator(OperatorType.EQUALS).build(); // false
+        orRules.add(numRule2);
+        CombinatorExpertRule orCombination = CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(orRules).build();
+        // Create AND rules for generators
+        List<AbstractExpertRule> andRules = new ArrayList<>();
+        andRules.add(orCombination);
+        NumberExpertRule numRule3 = NumberExpertRule.builder().value(9999.99)
+                .field(FieldType.MAX_P).operator(OperatorType.GREATER_OR_EQUALS).build();
+        andRules.add(numRule3);
+        NumberExpertRule numRule4 = NumberExpertRule.builder().value(24.5)
+                .field(FieldType.TARGET_V).operator(OperatorType.EQUALS).build();
+        andRules.add(numRule4);
+        NumberExpertRule numRule5 = NumberExpertRule.builder().value(400.0)
+                .field(FieldType.TARGET_Q).operator(OperatorType.LOWER_OR_EQUALS).build();
+        andRules.add(numRule5);
+        NumberExpertRule numRule6 = NumberExpertRule.builder().value(500.0)
+                .field(FieldType.TARGET_P).operator(OperatorType.GREATER).build();
+        andRules.add(numRule6);
+        EnumExpertRule enumRule1 = EnumExpertRule.builder().value("OTHER")
+                .field(FieldType.ENERGY_SOURCE).operator(OperatorType.EQUALS).build();
+        andRules.add(enumRule1);
+        EnumExpertRule enumRule2 = EnumExpertRule.builder().value("ES")
+                .field(FieldType.COUNTRY).operator(OperatorType.NOT_EQUALS).build();
+        andRules.add(enumRule2);
+        StringExpertRule stringRule1 = StringExpertRule.builder().value("N")
+                .field(FieldType.ID).operator(OperatorType.ENDS_WITH).build();
+        andRules.add(stringRule1);
+        StringExpertRule stringRule2 = StringExpertRule.builder().value("E")
+                .field(FieldType.NAME).operator(OperatorType.CONTAINS).build();
+        andRules.add(stringRule2);
+        BooleanExpertRule booleanRule1 = BooleanExpertRule.builder().value(false)
+                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.NOT_EQUALS).build();
+        andRules.add(booleanRule1);
+
+        CombinatorExpertRule andCombination = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.GENERATOR, andCombination);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+        checkExpertFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]", EquipmentType.GENERATOR);
+    }
+
+    @Test
+    public void testExpertLoadFilter() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        Date modificationDate = new Date();
+
+        // Create rules for loads
+        List<AbstractExpertRule> rules = new ArrayList<>();
+        StringExpertRule stringRule1 = StringExpertRule.builder().value("LOAD")
+                .field(FieldType.ID).operator(OperatorType.IS).build();
+        rules.add(stringRule1);
+
+        CombinatorExpertRule gen1 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.LOAD, gen1);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+        checkExpertFilterExportAndMetadata(filterId, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]", EquipmentType.LOAD);
     }
 }

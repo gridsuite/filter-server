@@ -1,0 +1,26 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bouhoursant (generated)" id="1697216661755-67">
+        <createTable tableName="expert_filter">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="expert_filterPK"/>
+            </column>
+            <column name="modification_date" type="TIMESTAMP(6)"/>
+            <column name="equipment_type" type="SMALLINT"/>
+            <column name="expert_filter_entity_rule_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="bouhoursant (generated)" id="1697216661755-68">
+        <createTable tableName="expert_rule">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="expert_rulePK"/>
+            </column>
+            <column name="combinator" type="SMALLINT"/>
+            <column name="data_type" type="SMALLINT"/>
+            <column name="field" type="SMALLINT"/>
+            <column name="operator" type="SMALLINT"/>
+            <column name="value_" type="VARCHAR(255)"/>
+            <column name="parent_rule_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

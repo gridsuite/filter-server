@@ -7,12 +7,20 @@
 package org.gridsuite.filter.server.utils;
 
 /**
- * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
- * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
+ * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
-public enum FilterType {
-    SCRIPT,
-    CRITERIA,
-    IDENTIFIER_LIST,
-    EXPERT,
+public enum OperatorType {
+    // Common
+    EQUALS,
+    NOT_EQUALS,
+    // Number
+    LOWER,
+    LOWER_OR_EQUALS,
+    GREATER,
+    GREATER_OR_EQUALS,
+    // String
+    IS,
+    CONTAINS,
+    BEGINS_WITH,
+    ENDS_WITH,
 }

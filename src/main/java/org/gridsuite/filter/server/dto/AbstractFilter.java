@@ -29,7 +29,8 @@ import java.util.UUID;
 @JsonSubTypes({//Below, we define the names and the binding classes.
     @JsonSubTypes.Type(value = ScriptFilter.class, name = "SCRIPT"),
     @JsonSubTypes.Type(value = CriteriaFilter.class, name = "CRITERIA"),
-    @JsonSubTypes.Type(value = IdentifierListFilter.class, name = "IDENTIFIER_LIST")
+    @JsonSubTypes.Type(value = IdentifierListFilter.class, name = "IDENTIFIER_LIST"),
+    @JsonSubTypes.Type(value = ExpertFilter.class, name = "EXPERT")
 })
 @Getter
 @Setter

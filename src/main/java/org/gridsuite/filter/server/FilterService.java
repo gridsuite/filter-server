@@ -13,6 +13,7 @@ import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
+import org.gridsuite.filter.server.utils.ExpertFilterUtils;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.springframework.context.annotation.ComponentScan;
@@ -71,6 +72,7 @@ public class FilterService {
                          final VoltageLevelFilterRepository voltageLevelFilterRepository,
                          final SubstationFilterRepository substationFilterRepository,
                          final IdentifierListFilterRepository identifierListFilterRepository,
+                         final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
                          NotificationService notificationService) {
         this.filtersToScript = filtersToScript;
@@ -95,6 +97,7 @@ public class FilterService {
 
         filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
+        filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
         this.networkStoreService = networkStoreService;
         this.notificationService = notificationService;
     }
@@ -297,6 +300,9 @@ public class FilterService {
         } else if (filter instanceof IdentifierListFilter) {
             List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
+        } else if (filter instanceof ExpertFilter) {
+            var rule = ((ExpertFilter) filter).getRules();
+            return stream.filter(injection -> ExpertFilterUtils.evaluateExpertFilter(rule, injection));
         } else {
             return Stream.empty();
         }
@@ -309,7 +315,7 @@ public class FilterService {
             return getInjectionList(network.getGeneratorStream().map(injection -> injection), filter)
                     .filter(injection -> filterByEnergySource((Generator) injection, generatorFilter.getEnergySource()))
                     .collect(Collectors.toList());
-        } else if (filter instanceof IdentifierListFilter) {
+        } else if (filter instanceof IdentifierListFilter || filter instanceof ExpertFilter) {
             return getInjectionList(network.getGeneratorStream().map(generator -> generator), filter).collect(Collectors.toList());
         } else {
             return List.of();
@@ -634,7 +640,7 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
-        if (filter.getType() == FilterType.CRITERIA || filter.getType() == FilterType.IDENTIFIER_LIST) {
+        if (filter.getType() == FilterType.CRITERIA || filter.getType() == FilterType.IDENTIFIER_LIST || filter.getType() == FilterType.EXPERT) {
             Network network = networkStoreService.getNetwork(networkUuid);
 
             if (network == null) {

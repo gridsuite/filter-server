@@ -7,12 +7,12 @@
 package org.gridsuite.filter.server.utils;
 
 /**
- * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
- * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
+ * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
-public enum FilterType {
-    SCRIPT,
-    CRITERIA,
-    IDENTIFIER_LIST,
-    EXPERT,
+public enum DataType {
+    STRING,
+    NUMBER,
+    ENUM,
+    BOOLEAN,
+    COMBINATOR,
 }
