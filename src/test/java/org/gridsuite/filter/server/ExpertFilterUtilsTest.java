@@ -3,10 +3,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.IdentifiableType;
-import org.gridsuite.filter.server.dto.expertrule.AbstractExpertRule;
-import org.gridsuite.filter.server.dto.expertrule.CombinatorExpertRule;
-import org.gridsuite.filter.server.dto.expertrule.EnumExpertRule;
-import org.gridsuite.filter.server.dto.expertrule.NumberExpertRule;
+import org.gridsuite.filter.server.dto.expertrule.*;
 import org.gridsuite.filter.server.utils.CombinatorType;
 import org.gridsuite.filter.server.utils.ExpertFilterUtils;
 import org.gridsuite.filter.server.utils.FieldType;
@@ -32,7 +29,9 @@ public class ExpertFilterUtilsTest {
         Mockito.when(gen.getMinP()).thenReturn(-500.0);
         Mockito.when(gen.getMaxP()).thenReturn(100.0);
         Mockito.when(gen.getTargetV()).thenReturn(20.0);
+        Mockito.when(gen.getId()).thenReturn("ID_1");
         Mockito.when(gen.getEnergySource()).thenReturn(EnergySource.HYDRO);
+        Mockito.when(gen.isVoltageRegulatorOn()).thenReturn(true);
     }
 
     @Test
@@ -54,6 +53,18 @@ public class ExpertFilterUtilsTest {
         EnumExpertRule enumRule4 = EnumExpertRule.builder().value("HYDRO")
                 .field(FieldType.ENERGY_SOURCE).operator(OperatorType.EQUALS).build();
         andRules2.add(enumRule4);
+        EnumExpertRule enumRule5 = EnumExpertRule.builder().value("OTHER")
+                .field(FieldType.ENERGY_SOURCE).operator(OperatorType.NOT_EQUALS).build();
+        andRules2.add(enumRule5);
+        StringExpertRule stringRule5 = StringExpertRule.builder().value("ID")
+                .field(FieldType.ID).operator(OperatorType.BEGINS_WITH).build();
+        andRules2.add(stringRule5);
+        BooleanExpertRule booleanRule6 = BooleanExpertRule.builder().value(true)
+                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.EQUALS).build();
+        andRules2.add(booleanRule6);
+        BooleanExpertRule booleanRule7 = BooleanExpertRule.builder().value(false)
+                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.NOT_EQUALS).build();
+        andRules2.add(booleanRule7);
 
         CombinatorExpertRule andFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules2).build();
 
@@ -135,6 +146,18 @@ public class ExpertFilterUtilsTest {
         EnumExpertRule enumRule4 = EnumExpertRule.builder().value("OTHER")
                 .field(FieldType.ENERGY_SOURCE).operator(OperatorType.EQUALS).build(); //false
         orRules2.add(enumRule4);
+        EnumExpertRule enumRule5 = EnumExpertRule.builder().value("HYDRO")
+                .field(FieldType.ENERGY_SOURCE).operator(OperatorType.NOT_EQUALS).build();
+        orRules2.add(enumRule5);
+        StringExpertRule stringRule5 = StringExpertRule.builder().value("TEST")
+                .field(FieldType.ID).operator(OperatorType.BEGINS_WITH).build();
+        orRules2.add(stringRule5);
+        BooleanExpertRule booleanRule6 = BooleanExpertRule.builder().value(false)
+                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.EQUALS).build();
+        orRules2.add(booleanRule6);
+        BooleanExpertRule booleanRule7 = BooleanExpertRule.builder().value(true)
+                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.NOT_EQUALS).build();
+        orRules2.add(booleanRule7);
 
         CombinatorExpertRule orFilter = CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(orRules2).build();
 

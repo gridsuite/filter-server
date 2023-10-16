@@ -300,8 +300,8 @@ public class FilterService {
         } else if (filter instanceof IdentifierListFilter) {
             List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
-        } else if (filter instanceof ExpertFilter) {
-            var rule = ((ExpertFilter) filter).getRules();
+        } else if (filter instanceof ExpertFilter expertFilter) {
+            var rule = expertFilter.getRules();
             return stream.filter(injection -> ExpertFilterUtils.evaluateExpertFilter(rule, injection));
         } else {
             return Stream.empty();
