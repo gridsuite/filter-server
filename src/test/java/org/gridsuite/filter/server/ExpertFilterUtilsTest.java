@@ -147,16 +147,16 @@ public class ExpertFilterUtilsTest {
                 .field(FieldType.ENERGY_SOURCE).operator(OperatorType.EQUALS).build(); //false
         orRules2.add(enumRule4);
         EnumExpertRule enumRule5 = EnumExpertRule.builder().value("HYDRO")
-                .field(FieldType.ENERGY_SOURCE).operator(OperatorType.NOT_EQUALS).build();
+                .field(FieldType.ENERGY_SOURCE).operator(OperatorType.NOT_EQUALS).build(); //false
         orRules2.add(enumRule5);
         StringExpertRule stringRule5 = StringExpertRule.builder().value("TEST")
-                .field(FieldType.ID).operator(OperatorType.BEGINS_WITH).build();
+                .field(FieldType.ID).operator(OperatorType.BEGINS_WITH).build(); //false
         orRules2.add(stringRule5);
         BooleanExpertRule booleanRule6 = BooleanExpertRule.builder().value(false)
-                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.EQUALS).build();
+                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.EQUALS).build(); //false
         orRules2.add(booleanRule6);
         BooleanExpertRule booleanRule7 = BooleanExpertRule.builder().value(true)
-                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.NOT_EQUALS).build();
+                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.NOT_EQUALS).build(); //false
         orRules2.add(booleanRule7);
 
         CombinatorExpertRule orFilter = CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(orRules2).build();
