@@ -56,14 +56,14 @@ public final class ExpertFilterUtils {
         return switch (injection.getType()) {
             case GENERATOR -> getGeneratorFieldValue(field, (Generator) injection);
             case LOAD -> getLoadFieldValue(field, (Load) injection);
-            default -> throw new PowsyblException("Not implemented with expert filter");
+            default -> throw new PowsyblException(injection.getType() + " injection type is not implemented with expert filter");
         };
     }
 
     private static String getLoadFieldValue(FieldType field, Load load) {
         return switch (field) {
             case ID -> load.getId();
-            default -> throw new PowsyblException("Not implemented with expert filter");
+            default -> throw new PowsyblException("Field " + field + " with " + load.getType() + " injection type is not implemented with expert filter");
         };
     }
 

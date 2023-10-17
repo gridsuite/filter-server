@@ -46,16 +46,19 @@ public class ExpertFilterUtilsTest {
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.LOWER).build();
         andRules1.add(numRule1);
-        NumberExpertRule numRule2 = NumberExpertRule.builder().value(100.0)
-                .field(FieldType.MAX_P).operator(OperatorType.GREATER_OR_EQUALS).build(); // false
+        NumberExpertRule numRule2 = NumberExpertRule.builder().value(-500.0)
+                .field(FieldType.MIN_P).operator(OperatorType.LOWER_OR_EQUALS).build();
         andRules1.add(numRule2);
+        NumberExpertRule numRule3 = NumberExpertRule.builder().value(100.0)
+                .field(FieldType.MAX_P).operator(OperatorType.GREATER_OR_EQUALS).build();
+        andRules1.add(numRule3);
         CombinatorExpertRule andCombination = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules1).build();
 
         List<AbstractExpertRule> andRules2 = new ArrayList<>();
         andRules2.add(andCombination);
-        NumberExpertRule numRule3 = NumberExpertRule.builder().value(20.0)
+        NumberExpertRule numRule4 = NumberExpertRule.builder().value(20.0)
                 .field(FieldType.TARGET_V).operator(OperatorType.EQUALS).build();
-        andRules2.add(numRule3);
+        andRules2.add(numRule4);
         EnumExpertRule enumRule4 = EnumExpertRule.builder().value("HYDRO")
                 .field(FieldType.ENERGY_SOURCE).operator(OperatorType.EQUALS).build();
         andRules2.add(enumRule4);
@@ -142,13 +145,19 @@ public class ExpertFilterUtilsTest {
         NumberExpertRule numRule2 = NumberExpertRule.builder().value(105.0)
                 .field(FieldType.MAX_P).operator(OperatorType.GREATER_OR_EQUALS).build(); // false
         orRules1.add(numRule2);
+        NumberExpertRule numRule3 = NumberExpertRule.builder().value(-500.0)
+                .field(FieldType.MIN_P).operator(OperatorType.LOWER).build(); // false
+        orRules1.add(numRule3);
+        NumberExpertRule numRule4 = NumberExpertRule.builder().value(-500.5)
+                .field(FieldType.MAX_P).operator(OperatorType.LOWER_OR_EQUALS).build(); // false
+        orRules1.add(numRule4);
         CombinatorExpertRule orCombination = CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(orRules1).build();
 
         List<AbstractExpertRule> orRules2 = new ArrayList<>();
         orRules2.add(orCombination);
-        NumberExpertRule numRule3 = NumberExpertRule.builder().value(25.0) // False
+        NumberExpertRule numRule5 = NumberExpertRule.builder().value(25.0) // False
                 .field(FieldType.TARGET_V).operator(OperatorType.EQUALS).build();
-        orRules2.add(numRule3);
+        orRules2.add(numRule5);
         EnumExpertRule enumRule4 = EnumExpertRule.builder().value("OTHER")
                 .field(FieldType.ENERGY_SOURCE).operator(OperatorType.EQUALS).build(); //false
         orRules2.add(enumRule4);

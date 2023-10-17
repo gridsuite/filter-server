@@ -40,7 +40,7 @@ public class StringExpertRule extends AbstractExpertRule {
             case CONTAINS -> identifiableValue.contains(this.getValue());
             case BEGINS_WITH -> identifiableValue.startsWith(this.getValue());
             case ENDS_WITH -> identifiableValue.endsWith(this.getValue());
-            default -> throw new PowsyblException("Operator not allowed");
+            default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
 

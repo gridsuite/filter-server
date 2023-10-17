@@ -81,7 +81,7 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                         .value(filterEntity.getValue())
                         .build();
             }
-            default -> throw new PowsyblException(WRONG_FILTER_TYPE);
+            default -> throw new PowsyblException("Unknown rule data type: " + filterEntity.getDataType() + ", supported data types are: COMBINATOR, BOOLEAN, NUMBER, STRING, ENUM");
         }
     }
 

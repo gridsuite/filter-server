@@ -47,7 +47,7 @@ public class NumberExpertRule extends AbstractExpertRule {
             case GREATER -> equipmentValue.compareTo(filterValue) > 0;
             case LOWER_OR_EQUALS -> equipmentValue.compareTo(filterValue) <= 0;
             case LOWER -> equipmentValue.compareTo(filterValue) < 0;
-            default -> throw new PowsyblException("Operator not allowed");
+            default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
 

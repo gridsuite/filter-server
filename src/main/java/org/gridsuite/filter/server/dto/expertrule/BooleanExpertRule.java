@@ -49,7 +49,7 @@ public class BooleanExpertRule extends AbstractExpertRule {
         return switch (this.getOperator()) {
             case EQUALS -> equipmentValue == filterValue;
             case NOT_EQUALS -> equipmentValue != filterValue;
-            default -> throw new PowsyblException("Operator not allowed");
+            default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
 }

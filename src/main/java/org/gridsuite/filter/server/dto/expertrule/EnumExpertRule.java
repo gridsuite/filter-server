@@ -43,7 +43,7 @@ public class EnumExpertRule extends AbstractExpertRule {
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue.equals(this.getValue());
             case NOT_EQUALS -> !identifiableValue.equals(this.getValue());
-            default -> throw new PowsyblException("Operator not allowed");
+            default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
 }
