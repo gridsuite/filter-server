@@ -1,0 +1,35 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bouhoursant (generated)" id="1697559491638-69">
+        <createTable tableName="expert_filter">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="expert_filterPK"/>
+            </column>
+            <column name="modification_date" type="TIMESTAMP(6)"/>
+            <column name="equipment_type" type="VARCHAR(255)"/>
+            <column name="expert_filter_entity_rules_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="bouhoursant (generated)" id="1697559491638-70">
+        <createTable tableName="expert_rule">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="expert_rulePK"/>
+            </column>
+            <column name="combinator" type="VARCHAR(255)"/>
+            <column name="data_type" type="VARCHAR(255)"/>
+            <column name="field" type="VARCHAR(255)"/>
+            <column name="operator" type="VARCHAR(255)"/>
+            <column name="value_" type="VARCHAR(255)"/>
+            <column name="expert_rule_entity_parent_rule_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="bouhoursant (generated)" id="1697559491638-80">
+        <addUniqueConstraint columnNames="expert_filter_entity_rules_id" constraintName="UC_EXPERT_FILTEREXPERT_FILTER_ENTITY_RULES_ID_COL" tableName="expert_filter"/>
+    </changeSet>
+    <changeSet author="bouhoursant (generated)" id="1697559491638-109">
+        <addForeignKeyConstraint baseColumnNames="expert_filter_entity_rules_id" baseTableName="expert_filter" constraintName="expertFilterEntity_rules_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="expert_rule" validate="true"/>
+    </changeSet>
+    <changeSet author="bouhoursant (generated)" id="1697559491638-110">
+        <addForeignKeyConstraint baseColumnNames="expert_rule_entity_parent_rule_id" baseTableName="expert_rule" constraintName="expertRuleEntity_parentRule_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="expert_rule" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

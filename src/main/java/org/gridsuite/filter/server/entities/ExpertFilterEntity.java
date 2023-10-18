@@ -25,12 +25,15 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 @Table(name = "expert_filter")
 public class ExpertFilterEntity extends AbstractFilterEntity {
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "equipmentType")
     private EquipmentType equipmentType;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "expertFilterEntity_rule_id",
+    @JoinColumn(name = "expertFilterEntity_rules_id",
             referencedColumnName = "id",
-            foreignKey = @ForeignKey)
+            foreignKey = @ForeignKey(
+                    name = "expertFilterEntity_rules_fk"
+            ))
     private ExpertRuleEntity rules;
 }

@@ -34,18 +34,22 @@ public class ExpertRuleEntity {
     @Column(name = "id")
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "combinator")
     private CombinatorType combinator;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "field")
     private FieldType field;
 
-    @Column(name = "value_")
+    @Column(name = "value_") // "value" is not supported in UT with H2
     private String value;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "operator")
     private OperatorType operator;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "dataType")
     private DataType dataType;
 
@@ -53,6 +57,9 @@ public class ExpertRuleEntity {
     private List<ExpertRuleEntity> rules;
 
     @ManyToOne
-    @JoinColumn(name = "parent_rule_id")
+    @JoinColumn(name = "expertRuleEntity_parentRule_id", referencedColumnName = "id",
+            foreignKey = @ForeignKey(
+                    name = "expertRuleEntity_parentRule_fk"
+            ), nullable = true)
     private ExpertRuleEntity parentRule;
 }
