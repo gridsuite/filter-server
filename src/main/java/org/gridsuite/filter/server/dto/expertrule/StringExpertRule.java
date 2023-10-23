@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.gridsuite.filter.server.utils.DataType;
 
 /**
@@ -36,10 +37,10 @@ public class StringExpertRule extends AbstractExpertRule {
     @Override
     public boolean evaluateRule(String identifiableValue) {
         return switch (this.getOperator()) {
-            case IS -> identifiableValue.equals(this.getValue());
-            case CONTAINS -> identifiableValue.contains(this.getValue());
-            case BEGINS_WITH -> identifiableValue.startsWith(this.getValue());
-            case ENDS_WITH -> identifiableValue.endsWith(this.getValue());
+            case IS -> identifiableValue.equalsIgnoreCase(this.getValue());
+            case CONTAINS -> StringUtils.containsIgnoreCase(identifiableValue, this.getValue());
+            case BEGINS_WITH -> StringUtils.startsWithIgnoreCase(identifiableValue, this.getValue());
+            case ENDS_WITH -> StringUtils.endsWithIgnoreCase(identifiableValue, this.getValue());
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }

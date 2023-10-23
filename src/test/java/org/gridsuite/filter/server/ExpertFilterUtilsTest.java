@@ -36,6 +36,7 @@ public class ExpertFilterUtilsTest {
         Mockito.when(gen.getMaxP()).thenReturn(100.0);
         Mockito.when(gen.getTargetV()).thenReturn(20.0);
         Mockito.when(gen.getId()).thenReturn("ID_1");
+        Mockito.when(gen.getNameOrId()).thenReturn("NAME");
         Mockito.when(gen.getEnergySource()).thenReturn(EnergySource.HYDRO);
         Mockito.when(gen.isVoltageRegulatorOn()).thenReturn(true);
     }
@@ -179,5 +180,39 @@ public class ExpertFilterUtilsTest {
         boolean result = ExpertFilterUtils.evaluateExpertFilter(orFilter, gen);
 
         assertFalse(result);
+    }
+
+    @Test
+    public void testEvaluateExpertFilterIgnoreCase() {
+        List<AbstractExpertRule> andRules1 = new ArrayList<>();
+        StringExpertRule rule1 = StringExpertRule.builder().value("id")
+                .field(FieldType.ID).operator(OperatorType.CONTAINS).build();
+        andRules1.add(rule1);
+        StringExpertRule rule2 = StringExpertRule.builder().value("ID")
+                .field(FieldType.ID).operator(OperatorType.CONTAINS).build();
+        andRules1.add(rule2);
+        StringExpertRule rule3 = StringExpertRule.builder().value("id_1")
+                .field(FieldType.ID).operator(OperatorType.IS).build();
+        andRules1.add(rule3);
+        StringExpertRule rule4 = StringExpertRule.builder().value("ID_1")
+                .field(FieldType.ID).operator(OperatorType.IS).build();
+        andRules1.add(rule4);
+        StringExpertRule rule5 = StringExpertRule.builder().value("id")
+                .field(FieldType.ID).operator(OperatorType.BEGINS_WITH).build();
+        andRules1.add(rule5);
+        StringExpertRule rule6 = StringExpertRule.builder().value("ID")
+                .field(FieldType.ID).operator(OperatorType.BEGINS_WITH).build();
+        andRules1.add(rule6);
+        StringExpertRule rule7 = StringExpertRule.builder().value("me")
+                .field(FieldType.NAME).operator(OperatorType.ENDS_WITH).build();
+        andRules1.add(rule7);
+        StringExpertRule rule8 = StringExpertRule.builder().value("ME")
+                .field(FieldType.NAME).operator(OperatorType.ENDS_WITH).build();
+        andRules1.add(rule8);
+        CombinatorExpertRule andCombination = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules1).build();
+
+        boolean result = ExpertFilterUtils.evaluateExpertFilter(andCombination, gen);
+
+        assertTrue(result);
     }
 }
