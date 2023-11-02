@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server.dto.expertrule;
 
 import com.fasterxml.jackson.annotation.*;
+import com.powsybl.iidm.network.Injection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,7 +50,7 @@ public abstract class AbstractExpertRule {
     @Schema(description = "Rules")
     private List<AbstractExpertRule> rules;
 
-    public abstract boolean evaluateRule(String identifiableValue);
+    public abstract boolean evaluateRule(Injection<?> injection);
 
     public abstract DataType getDataType();
 

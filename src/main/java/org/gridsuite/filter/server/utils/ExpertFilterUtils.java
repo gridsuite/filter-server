@@ -26,7 +26,7 @@ public final class ExpertFilterUtils {
             return evaluateOrCombination(filter, injection);
         } else {
             // Evaluate individual filters
-            return filter.evaluateRule(getFieldValue(filter.getField(), injection));
+            return filter.evaluateRule(injection);
         }
     }
 
@@ -52,7 +52,7 @@ public final class ExpertFilterUtils {
         return true;
     }
 
-    private static <I extends Injection<I>> String getFieldValue(FieldType field, Injection<I> injection) {
+    public static <I extends Injection<I>> String getFieldValue(FieldType field, Injection<I> injection) {
         return switch (injection.getType()) {
             case GENERATOR -> getGeneratorFieldValue(field, (Generator) injection);
             case LOAD -> getLoadFieldValue(field, (Load) injection);

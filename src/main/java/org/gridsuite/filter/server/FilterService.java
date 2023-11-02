@@ -13,7 +13,6 @@ import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
 import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.ExpertFilterUtils;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.springframework.context.annotation.ComponentScan;
@@ -302,7 +301,7 @@ public class FilterService {
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            return stream.filter(injection -> ExpertFilterUtils.evaluateExpertFilter(rule, injection));
+            return stream.filter(injection -> rule.evaluateRule(injection));
         } else {
             return Stream.empty();
         }

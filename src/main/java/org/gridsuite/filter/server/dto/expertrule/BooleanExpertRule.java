@@ -8,12 +8,15 @@ package org.gridsuite.filter.server.dto.expertrule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.Injection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.DataType;
+
+import static org.gridsuite.filter.server.utils.ExpertFilterUtils.getFieldValue;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -43,7 +46,8 @@ public class BooleanExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(String identifiableValue) {
+    public boolean evaluateRule(Injection<?> injection) {
+        String identifiableValue = getFieldValue(this.getField(), injection);
         boolean equipmentValue = getBooleanValue(identifiableValue);
         boolean filterValue = isValue();
         return switch (this.getOperator()) {
