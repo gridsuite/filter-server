@@ -8,12 +8,15 @@ package org.gridsuite.filter.server.dto.expertfilter.expertrule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.Identifiable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
+
+import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -39,7 +42,8 @@ public class EnumExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(String identifiableValue) {
+    public boolean evaluateRule(Identifiable<?> identifiable) {
+        String identifiableValue = getFieldValue(this.getField(), identifiable);
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue.equals(this.getValue());
             case NOT_EQUALS -> !identifiableValue.equals(this.getValue());

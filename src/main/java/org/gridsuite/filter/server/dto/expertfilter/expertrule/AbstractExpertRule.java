@@ -6,7 +6,11 @@
  */
 package org.gridsuite.filter.server.dto.expertfilter.expertrule;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.powsybl.iidm.network.Identifiable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,7 +56,7 @@ public abstract class AbstractExpertRule {
     @Schema(description = "Rules")
     private List<AbstractExpertRule> rules;
 
-    public abstract boolean evaluateRule(String identifiableValue);
+    public abstract boolean evaluateRule(Identifiable<?> identifiable);
 
     public abstract DataType getDataType();
 

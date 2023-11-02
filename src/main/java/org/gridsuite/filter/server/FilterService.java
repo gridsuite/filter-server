@@ -318,7 +318,7 @@ public class FilterService {
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            return stream.filter(injection -> ExpertFilterUtils.evaluateExpertFilter(rule, injection));
+            return stream.filter(rule::evaluateRule);
         } else {
             return Stream.empty();
         }

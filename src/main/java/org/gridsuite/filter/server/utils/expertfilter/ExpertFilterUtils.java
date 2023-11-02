@@ -18,45 +18,11 @@ import java.util.Optional;
 public final class ExpertFilterUtils {
     private ExpertFilterUtils() { }
 
-    public static <I extends Injection<I>> boolean evaluateExpertFilter(AbstractExpertRule filter, Injection<I> injection) {
-        // As long as there are rules, we go down the tree
-        if (CombinatorType.AND == (filter.getCombinator())) {
-            return evaluateAndCombination(filter, injection);
-        } else if (CombinatorType.OR == filter.getCombinator()) {
-            return evaluateOrCombination(filter, injection);
-        } else {
-            // Evaluate individual filters
-            return filter.evaluateRule(getFieldValue(filter.getField(), injection));
-        }
-    }
-
-    private static <I extends Injection<I>> boolean evaluateOrCombination(AbstractExpertRule filter, Injection<I> injection) {
-        for (AbstractExpertRule rule : filter.getRules()) {
-            // Recursively evaluate the rule
-            if (evaluateExpertFilter(rule, injection)) {
-                // If any rule is true, the whole combination is true
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static <I extends Injection<I>> boolean evaluateAndCombination(AbstractExpertRule filter, Injection<I> injection) {
-        for (AbstractExpertRule rule : filter.getRules()) {
-            // Recursively evaluate the rule
-            if (!evaluateExpertFilter(rule, injection)) {
-                // If any rule is false, the whole combination is false
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static <I extends Injection<I>> String getFieldValue(FieldType field, Injection<I> injection) {
-        return switch (injection.getType()) {
-            case GENERATOR -> getGeneratorFieldValue(field, (Generator) injection);
-            case LOAD -> getLoadFieldValue(field, (Load) injection);
-            default -> throw new PowsyblException(injection.getType() + " injection type is not implemented with expert filter");
+    public static <I extends Identifiable<I>> String getFieldValue(FieldType field, Identifiable<I> identifiable) {
+        return switch (identifiable.getType()) {
+            case GENERATOR -> getGeneratorFieldValue(field, (Generator) identifiable);
+            case LOAD -> getLoadFieldValue(field, (Load) identifiable);
+            default -> throw new PowsyblException(identifiable.getType() + " injection type is not implemented with expert filter");
         };
     }
 

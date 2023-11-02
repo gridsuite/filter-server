@@ -8,12 +8,15 @@ package org.gridsuite.filter.server.dto.expertfilter.expertrule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.Identifiable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
+
+import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -43,12 +46,12 @@ public class BooleanExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(String identifiableValue) {
-        boolean equipmentValue = getBooleanValue(identifiableValue);
-        boolean filterValue = isValue();
+    public boolean evaluateRule(Identifiable<?> identifiable) {
+        boolean identifiableValue = getBooleanValue(getFieldValue(this.getField(), identifiable));
+        boolean filterValue = this.isValue();
         return switch (this.getOperator()) {
-            case EQUALS -> equipmentValue == filterValue;
-            case NOT_EQUALS -> equipmentValue != filterValue;
+            case EQUALS -> identifiableValue == filterValue;
+            case NOT_EQUALS -> identifiableValue != filterValue;
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
