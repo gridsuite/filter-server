@@ -1514,7 +1514,9 @@ public class FilterEntityControllerTest {
         ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.GENERATOR, andCombination);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
-        checkExpertFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\"}]", EquipmentType.GENERATOR);
+        checkExpertFilterExportAndMetadata(filterId, """
+                [{"id":"GEN","type":"GENERATOR"}]
+                """, EquipmentType.GENERATOR);
     }
 
     @Test
@@ -1533,6 +1535,8 @@ public class FilterEntityControllerTest {
         ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.LOAD, gen1);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
-        checkExpertFilterExportAndMetadata(filterId, "[{\"id\":\"LOAD\",\"type\":\"LOAD\"}]", EquipmentType.LOAD);
+        checkExpertFilterExportAndMetadata(filterId, """
+                [{"id":"LOAD","type":"LOAD"}]
+                """, EquipmentType.LOAD);
     }
 }
