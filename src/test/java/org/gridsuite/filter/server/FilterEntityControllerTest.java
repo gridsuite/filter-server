@@ -38,7 +38,6 @@ import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepository
 import org.gridsuite.filter.server.utils.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
-import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
