@@ -35,7 +35,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         if (set != null && !set.isEmpty()) {
             return new HashSet<>(set);
         }
-        return Collections.emptySet();
+        return null;
     }
 
     public static NumericalFilter convert(NumericFilterEntity entity) {
@@ -48,12 +48,12 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     public static Map<String, List<String>> convert(FreePropertiesFilterEntity entity) {
         if (entity == null) {
-            return Collections.emptyMap();
+            return null;
         }
 
         List<FreePropertyFilterEntity> freePropertyFilterEntities = entity.getFreePropertyFilterEntities();
         if (freePropertyFilterEntities == null) {
-            return Collections.emptyMap();
+            return null;
         }
 
         // LinkedHashMap to keep order too
