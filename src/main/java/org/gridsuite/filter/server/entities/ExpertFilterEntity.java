@@ -30,10 +30,10 @@ public class ExpertFilterEntity extends AbstractFilterEntity {
     private EquipmentType equipmentType;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "expertFilterEntity_rules_id",
+    @JoinColumn(name = "rules_id",
             referencedColumnName = "id",
             foreignKey = @ForeignKey(
-                    name = "expertFilterEntity_rules_fk"
+                    name = "expertRule_rules_fk"
             ))
     private ExpertRuleEntity rules;
 }
