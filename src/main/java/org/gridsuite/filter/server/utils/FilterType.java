@@ -14,4 +14,5 @@ public enum FilterType {
     SCRIPT,
     CRITERIA,
     IDENTIFIER_LIST,
+    EXPERT,
 }
