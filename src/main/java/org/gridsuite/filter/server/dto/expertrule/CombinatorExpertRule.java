@@ -50,7 +50,7 @@ public class CombinatorExpertRule extends AbstractExpertRule {
             }
             return true;
         } else {
-            throw new PowsyblException("Not support combinator: " + this.getCombinator()) ;
+            throw new PowsyblException("Not support combinator: " + this.getCombinator());
         }
     }
 
