@@ -26,7 +26,7 @@ import org.gridsuite.filter.server.dto.criteriafilter.SubstationFilter;
 import org.gridsuite.filter.server.dto.criteriafilter.ThreeWindingsTransformerFilter;
 import org.gridsuite.filter.server.dto.criteriafilter.TwoWindingsTransformerFilter;
 import org.gridsuite.filter.server.dto.criteriafilter.VoltageLevelFilter;
-import org.gridsuite.filter.server.repositoryproxies.AbstractFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;

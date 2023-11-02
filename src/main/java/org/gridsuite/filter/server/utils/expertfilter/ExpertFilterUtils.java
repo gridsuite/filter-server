@@ -8,7 +8,6 @@ package org.gridsuite.filter.server.utils.expertfilter;
 
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
-import org.gridsuite.filter.server.dto.expertfilter.expertrule.AbstractExpertRule;
 
 import java.util.Optional;
 

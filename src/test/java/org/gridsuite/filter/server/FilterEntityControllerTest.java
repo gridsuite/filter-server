@@ -34,7 +34,7 @@ import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttribut
 import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.gridsuite.filter.server.dto.scriptfilter.ScriptFilter;
-import org.gridsuite.filter.server.repositoryproxies.AbstractFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.utils.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
@@ -62,7 +62,7 @@ import org.springframework.util.MultiValueMap;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.join;
-import static org.gridsuite.filter.server.repositoryproxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
+import static org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;

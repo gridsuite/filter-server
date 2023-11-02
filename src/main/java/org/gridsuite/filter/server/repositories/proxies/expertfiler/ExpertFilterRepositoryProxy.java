@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.gridsuite.filter.server.repositoryproxies.expertfiler;
+package org.gridsuite.filter.server.repositories.proxies.expertfiler;
 
 import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.server.dto.criteriafilter.AbstractEquipmentFilterForm;
@@ -16,7 +16,7 @@ import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleEntity;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
-import org.gridsuite.filter.server.repositoryproxies.AbstractFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
 

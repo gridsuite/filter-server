@@ -5,7 +5,7 @@
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.gridsuite.filter.server.repositoryproxies;
+package org.gridsuite.filter.server.repositories.proxies;
 
 import com.powsybl.commons.PowsyblException;
 
