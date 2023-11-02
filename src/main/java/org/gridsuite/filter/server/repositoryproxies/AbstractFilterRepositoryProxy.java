@@ -35,7 +35,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         if (set != null && !set.isEmpty()) {
             return new HashSet<>(set);
         }
-        return null;
+        return Collections.emptySet();
     }
 
     public static NumericalFilter convert(NumericFilterEntity entity) {
@@ -48,12 +48,12 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     public static Map<String, List<String>> convert(FreePropertiesFilterEntity entity) {
         if (entity == null) {
-            return null;
+            return Collections.emptyMap();
         }
 
         List<FreePropertyFilterEntity> freePropertyFilterEntities = entity.getFreePropertyFilterEntities();
         if (freePropertyFilterEntities == null) {
-            return null;
+            return Collections.emptyMap();
         }
 
         // LinkedHashMap to keep order too
@@ -143,10 +143,9 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     public void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, CriteriaFilter dto) {
         buildGenericFilter(builder, dto);
-        if (!(dto.getEquipmentFilterForm() instanceof AbstractInjectionFilter)) {
+        if (!(dto.getEquipmentFilterForm() instanceof AbstractInjectionFilter injectionFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) dto.getEquipmentFilterForm();
         builder.substationName(injectionFilter.getSubstationName())
             .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
             .substationFreeProperties(convert(injectionFilter.getFreeProperties()))

@@ -53,8 +53,7 @@ public class IdentifierListFilterRepositoryProxy extends AbstractFilterRepositor
 
     @Override
     public IdentifierListFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof IdentifierListFilter) {
-            var filter = (IdentifierListFilter) dto;
+        if (dto instanceof IdentifierListFilter filter) {
             var identifierListFilterEntityBuilder = IdentifierListFilterEntity.builder()
                     .equipmentType(filter.getEquipmentType())
                     .filterEquipmentEntityList(filter.getFilterEquipmentsAttributes()

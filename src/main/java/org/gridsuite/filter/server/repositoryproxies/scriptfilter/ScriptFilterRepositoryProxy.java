@@ -55,8 +55,7 @@ public class ScriptFilterRepositoryProxy extends AbstractFilterRepositoryProxy<S
 
     @Override
     public ScriptFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof ScriptFilter) {
-            var filter = (ScriptFilter) dto;
+        if (dto instanceof ScriptFilter filter) {
             var scriptBuilderEntity = ScriptFilterEntity.builder()
                 .script(filter.getScript());
             buildAbstractFilter(scriptBuilderEntity, filter);
