@@ -6,13 +6,20 @@
  */
 package org.gridsuite.filter.server.dto.expertrule;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.powsybl.iidm.network.Identifiable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.*;
+import org.gridsuite.filter.server.utils.CombinatorType;
+import org.gridsuite.filter.server.utils.DataType;
+import org.gridsuite.filter.server.utils.FieldType;
+import org.gridsuite.filter.server.utils.OperatorType;
 
 import java.util.List;
 
@@ -49,7 +56,7 @@ public abstract class AbstractExpertRule {
     @Schema(description = "Rules")
     private List<AbstractExpertRule> rules;
 
-    public abstract boolean evaluateRule(String identifiableValue);
+    public abstract boolean evaluateRule(Identifiable<?> identifiable);
 
     public abstract DataType getDataType();
 

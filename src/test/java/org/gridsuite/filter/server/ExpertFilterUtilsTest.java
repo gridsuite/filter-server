@@ -11,7 +11,6 @@ import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.IdentifiableType;
 import org.gridsuite.filter.server.dto.expertrule.*;
 import org.gridsuite.filter.server.utils.CombinatorType;
-import org.gridsuite.filter.server.utils.ExpertFilterUtils;
 import org.gridsuite.filter.server.utils.FieldType;
 import org.gridsuite.filter.server.utils.OperatorType;
 import org.junit.Before;
@@ -78,7 +77,7 @@ public class ExpertFilterUtilsTest {
 
         CombinatorExpertRule andFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules2).build();
 
-        boolean result = ExpertFilterUtils.evaluateExpertFilter(andFilter, gen);
+        boolean result = andFilter.evaluateRule(gen);
 
         assertTrue(result);
     }
@@ -105,7 +104,7 @@ public class ExpertFilterUtilsTest {
 
         CombinatorExpertRule andFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules2).build();
 
-        boolean result = ExpertFilterUtils.evaluateExpertFilter(andFilter, gen);
+        boolean result = andFilter.evaluateRule(gen);
 
         assertFalse(result);
     }
@@ -132,7 +131,7 @@ public class ExpertFilterUtilsTest {
 
         CombinatorExpertRule orFilter = CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(orRules2).build();
 
-        boolean result = ExpertFilterUtils.evaluateExpertFilter(orFilter, gen);
+        boolean result = orFilter.evaluateRule(gen);
 
         assertTrue(result);
     }
@@ -177,7 +176,7 @@ public class ExpertFilterUtilsTest {
 
         CombinatorExpertRule orFilter = CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(orRules2).build();
 
-        boolean result = ExpertFilterUtils.evaluateExpertFilter(orFilter, gen);
+        boolean result = orFilter.evaluateRule(gen);
 
         assertFalse(result);
     }
@@ -211,7 +210,7 @@ public class ExpertFilterUtilsTest {
         andRules1.add(rule8);
         CombinatorExpertRule andCombination = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules1).build();
 
-        boolean result = ExpertFilterUtils.evaluateExpertFilter(andCombination, gen);
+        boolean result = andCombination.evaluateRule(gen);
 
         assertTrue(result);
     }

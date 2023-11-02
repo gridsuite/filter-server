@@ -7,9 +7,12 @@
 package org.gridsuite.filter.server.dto.expertrule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.Identifiable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.utils.CombinatorType;
 import org.gridsuite.filter.server.utils.DataType;
 
 /**
@@ -27,8 +30,29 @@ public class CombinatorExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(String identifiableValue) {
-        return false;
+    public boolean evaluateRule(Identifiable<?> identifiable) {
+        // As long as there are rules, we go down the tree
+        if (CombinatorType.AND == this.getCombinator()) {
+            for (AbstractExpertRule rule : this.getRules()) {
+                // Recursively evaluate the rule
+                if (!rule.evaluateRule(identifiable)) {
+                    // If any rule is false, the whole combination is false
+                    return false;
+                }
+            }
+            return true;
+        } else if (CombinatorType.OR == this.getCombinator()) {
+            for (AbstractExpertRule rule : this.getRules()) {
+                // Recursively evaluate the rule
+                if (rule.evaluateRule(identifiable)) {
+                    // If any rule is true, the whole combination is true
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            throw new PowsyblException(this.getCombinator() + " combinator type is not implemented with expert filter");
+        }
     }
 
     @Override

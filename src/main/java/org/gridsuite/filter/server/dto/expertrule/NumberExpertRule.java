@@ -8,12 +8,15 @@ package org.gridsuite.filter.server.dto.expertrule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.Identifiable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.DataType;
+
+import static org.gridsuite.filter.server.utils.ExpertFilterUtils.getFieldValue;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -38,21 +41,21 @@ public class NumberExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(String identifiableValue) {
-        Double equipmentValue = getNumberValue(identifiableValue);
-        Double filterValue = getValue();
+    public boolean evaluateRule(Identifiable<?> identifiable) {
+        Double identifiableValue = getNumberValue(getFieldValue(this.getField(), identifiable));
+        Double filterValue = this.getValue();
         return switch (this.getOperator()) {
-            case EQUALS -> equipmentValue.equals(filterValue);
-            case GREATER_OR_EQUALS -> equipmentValue.compareTo(filterValue) >= 0;
-            case GREATER -> equipmentValue.compareTo(filterValue) > 0;
-            case LOWER_OR_EQUALS -> equipmentValue.compareTo(filterValue) <= 0;
-            case LOWER -> equipmentValue.compareTo(filterValue) < 0;
+            case EQUALS -> identifiableValue.equals(filterValue);
+            case GREATER_OR_EQUALS -> identifiableValue.compareTo(filterValue) >= 0;
+            case GREATER -> identifiableValue.compareTo(filterValue) > 0;
+            case LOWER_OR_EQUALS -> identifiableValue.compareTo(filterValue) <= 0;
+            case LOWER -> identifiableValue.compareTo(filterValue) < 0;
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
 
     @Override
     public String getStringValue() {
-        return String.valueOf(getValue());
+        return String.valueOf(this.getValue());
     }
 }
