@@ -46,16 +46,16 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                 .id(filterEntity.getId())
                 .modificationDate(filterEntity.getModificationDate())
                 .equipmentType(filterEntity.getEquipmentType())
-                .rules(mapEntityToRule(filterEntity.getRules()))
+                .rules(entityToDto(filterEntity.getRules()))
                 .build();
     }
 
-    public static AbstractExpertRule mapEntityToRule(ExpertRuleEntity filterEntity) {
+    public static AbstractExpertRule entityToDto(ExpertRuleEntity filterEntity) {
         switch (filterEntity.getDataType()) {
             case COMBINATOR -> {
                 return CombinatorExpertRule.builder()
                         .combinator(filterEntity.getCombinator())
-                        .rules(mapEntitiesToRules(filterEntity.getRules()))
+                        .rules(entitiesToDto(filterEntity.getRules()))
                         .build();
             }
             case BOOLEAN -> {
@@ -90,13 +90,13 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
         }
     }
 
-    private static List<AbstractExpertRule> mapEntitiesToRules(List<ExpertRuleEntity> entities) {
+    private static List<AbstractExpertRule> entitiesToDto(List<ExpertRuleEntity> entities) {
         if (entities == null) {
             return Collections.emptyList();
         }
 
         return entities.stream()
-                .map(ExpertFilterRepositoryProxy::mapEntityToRule)
+                .map(ExpertFilterRepositoryProxy::entityToDto)
                 .collect(Collectors.toList());
     }
 
@@ -106,14 +106,14 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             var expertFilterEntityBuilder = ExpertFilterEntity.builder()
                     .modificationDate(filter.getModificationDate())
                     .equipmentType(filter.getEquipmentType())
-                    .rules(mapRuleToEntity(filter.getRules()));
+                    .rules(dtoToEntity(filter.getRules()));
             buildAbstractFilter(expertFilterEntityBuilder, filter);
             return expertFilterEntityBuilder.build();
         }
         throw new PowsyblException(WRONG_FILTER_TYPE);
     }
 
-    public static ExpertRuleEntity mapRuleToEntity(AbstractExpertRule filter) {
+    public static ExpertRuleEntity dtoToEntity(AbstractExpertRule filter) {
         var expertFilterEntityBuilder = ExpertRuleEntity.builder()
                 .id(UUID.randomUUID())
                 .combinator(filter.getCombinator())
@@ -121,11 +121,11 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                 .dataType(filter.getDataType())
                 .field(filter.getField())
                 .value(filter.getStringValue());
-        expertFilterEntityBuilder.rules(mapRulesToEntities(filter.getRules(), expertFilterEntityBuilder.build()));
+        expertFilterEntityBuilder.rules(dtoToEntities(filter.getRules(), expertFilterEntityBuilder.build()));
         return expertFilterEntityBuilder.build();
     }
 
-    private static List<ExpertRuleEntity> mapRulesToEntities(List<AbstractExpertRule> ruleFromDto, ExpertRuleEntity parentRuleEntity) {
+    private static List<ExpertRuleEntity> dtoToEntities(List<AbstractExpertRule> ruleFromDto, ExpertRuleEntity parentRuleEntity) {
         if (ruleFromDto == null) {
             return Collections.emptyList();
         }
@@ -141,7 +141,7 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                             .value(rule.getStringValue())
                             .parentRule(parentRuleEntity);
 
-                    List<ExpertRuleEntity> rules = mapRulesToEntities(rule.getRules(), expertRuleEntityBuilder.build());
+                    List<ExpertRuleEntity> rules = dtoToEntities(rule.getRules(), expertRuleEntityBuilder.build());
                     expertRuleEntityBuilder.rules(rules);
 
                     return expertRuleEntityBuilder.build();

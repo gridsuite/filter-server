@@ -57,9 +57,9 @@ public class ExpertRuleEntity {
     private List<ExpertRuleEntity> rules;
 
     @ManyToOne
-    @JoinColumn(name = "expertRuleEntity_parentRule_id", referencedColumnName = "id",
+    @JoinColumn(name = "parentRule_id", referencedColumnName = "id",
             foreignKey = @ForeignKey(
-                    name = "expertRuleEntity_parentRule_fk"
+                    name = "expertRule_parentRule_fk"
             ), nullable = true)
     private ExpertRuleEntity parentRule;
 }
