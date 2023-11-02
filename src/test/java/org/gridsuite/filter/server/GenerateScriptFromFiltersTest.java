@@ -9,7 +9,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.iidm.network.EnergySource;
 
 import org.apache.commons.collections4.map.LinkedMap;
-import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.dto.criteriafilter.*;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.Test;
 

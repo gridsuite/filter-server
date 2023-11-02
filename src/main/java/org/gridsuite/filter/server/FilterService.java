@@ -10,10 +10,26 @@ import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.server.dto.criteriafilter.*;
+import org.gridsuite.filter.server.dto.expertfilter.ExpertFilter;
+import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilter;
+import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
+import org.gridsuite.filter.server.dto.scriptfilter.ScriptFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.*;
+import org.gridsuite.filter.server.repositories.criteriafilter.*;
+import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
+import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
+import org.gridsuite.filter.server.repositories.scriptfilter.ScriptFilterRepository;
+import org.gridsuite.filter.server.repositoryproxies.*;
+import org.gridsuite.filter.server.repositoryproxies.criteriafilter.*;
+import org.gridsuite.filter.server.repositoryproxies.expertfiler.ExpertFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositoryproxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositoryproxies.scriptfilter.ScriptFilterRepositoryProxy;
 import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.ExpertFilterUtils;
+import org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils;
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.springframework.context.annotation.ComponentScan;
@@ -33,7 +49,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.gridsuite.filter.server.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
+import static org.gridsuite.filter.server.repositoryproxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>

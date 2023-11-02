@@ -10,6 +10,12 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.dto.criteriafilter.CriteriaFilter;
+import org.gridsuite.filter.server.dto.expertfilter.ExpertFilter;
+import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilter;
+import org.gridsuite.filter.server.dto.scriptfilter.ScriptFilter;
 import org.gridsuite.filter.server.utils.EquipmentType;
 
 import java.util.Date;
