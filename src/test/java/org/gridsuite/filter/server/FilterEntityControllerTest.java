@@ -1539,4 +1539,38 @@ public class FilterEntityControllerTest {
                 [{"id":"LOAD","type":"LOAD"}]
                 """, EquipmentType.LOAD);
     }
+
+    @Test
+    public void lineFilterIsEmpty() throws Exception {
+        HvdcLineFilter hvdcFilter = new HvdcLineFilter(
+                "equipmentID",
+                "equipmentName",
+                "substationName1",
+                "substationName2",
+                COUNTRIES1,
+                COUNTRIES2,
+                new NumericalFilter(RangeType.RANGE, 50., null)
+        );
+        assertFalse(hvdcFilter.isEmpty());
+    }
+
+    @Test
+    public void transformerFilterIsEmpty() throws Exception {
+        LinkedHashSet<String> countries = new LinkedHashSet<>();
+        countries.add("FR");
+        countries.add("IT");
+
+        TwoWindingsTransformerFilter transformerFilter =
+                TwoWindingsTransformerFilter.builder()
+                        .equipmentID("2wtId1")
+                        .equipmentName("2wtName1")
+                        .substationName("s2")
+                        .countries(new TreeSet<>(countries))
+                        .freeProperties(Map.of("region", List.of("north")))
+                        .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
+                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
+                        .build();
+
+        assertFalse(transformerFilter.isEmpty());
+    }
 }
