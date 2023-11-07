@@ -40,8 +40,8 @@ public class TwoWindingsTransformerFilter extends AbstractTransformerFilter {
     private NumericalFilter nominalVoltage2;
 
     public TwoWindingsTransformerFilter(String equipmentID, String equipmentName, String substationName,
-        SortedSet<String> countries, Map<String, List<String>> freeProperties,
-        NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
+                                        SortedSet<String> countries, Map<String, List<String>> freeProperties,
+                                        NumericalFilter nominalVoltage1, NumericalFilter nominalVoltage2) {
         super(equipmentID, equipmentName, substationName, countries, freeProperties);
         this.nominalVoltage1 = nominalVoltage1;
         this.nominalVoltage2 = nominalVoltage2;
@@ -50,7 +50,7 @@ public class TwoWindingsTransformerFilter extends AbstractTransformerFilter {
     @Override
     public boolean isEmpty() {
         return super.isEmpty()
-            && nominalVoltage1 == null
-            && nominalVoltage2 == null;
+                && nominalVoltage1 == null
+                && nominalVoltage2 == null;
     }
 }

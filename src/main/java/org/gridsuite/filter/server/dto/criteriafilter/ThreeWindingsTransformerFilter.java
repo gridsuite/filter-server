@@ -41,8 +41,8 @@ public class ThreeWindingsTransformerFilter extends AbstractTransformerFilter {
     @Override
     public boolean isEmpty() {
         return super.isEmpty()
-            && nominalVoltage1 == null
-            && nominalVoltage2 == null
-            && nominalVoltage3 == null;
+                && nominalVoltage1 == null
+                && nominalVoltage2 == null
+                && nominalVoltage3 == null;
     }
 }

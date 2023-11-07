@@ -35,8 +35,8 @@ public class HvdcLineFilter extends AbstractLineFilter {
     private NumericalFilter nominalVoltage;
 
     public HvdcLineFilter(String equipmentID, String equipmentName, String substationName1, String substationName2,
-        SortedSet<String> countries1, SortedSet<String> countries2,
-        NumericalFilter nominalVoltage) {
+                          SortedSet<String> countries1, SortedSet<String> countries2,
+                          NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName, substationName1, substationName2, countries1, countries2);
         this.nominalVoltage = nominalVoltage;
     }
@@ -44,6 +44,6 @@ public class HvdcLineFilter extends AbstractLineFilter {
     @Override
     public boolean isEmpty() {
         return super.isEmpty()
-            && nominalVoltage == null;
+                && nominalVoltage == null;
     }
 }

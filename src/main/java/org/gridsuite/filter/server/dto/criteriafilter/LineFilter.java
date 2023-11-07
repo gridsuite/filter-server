@@ -36,7 +36,7 @@ public class LineFilter extends AbstractLineFilter {
     @Override
     public boolean isEmpty() {
         return super.isEmpty()
-            && nominalVoltage1 == null
-            && nominalVoltage2 == null;
+                && nominalVoltage1 == null
+                && nominalVoltage2 == null;
     }
 }
