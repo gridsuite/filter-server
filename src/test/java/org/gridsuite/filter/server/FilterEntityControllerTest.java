@@ -1552,4 +1552,34 @@ public class FilterEntityControllerTest {
                 [{"id":"LOAD","type":"LOAD"}]
                 """, EquipmentType.LOAD);
     }
+
+    @Test
+    public void lineFilterIsEmpty() {
+        HvdcLineFilter hvdcFilter = new HvdcLineFilter(
+                null,
+                null,
+                null,
+                null,
+                new TreeSet<>(),
+                new TreeSet<>(),
+                new NumericalFilter(RangeType.RANGE, 50., null)
+        );
+        assertFalse(hvdcFilter.isEmpty());
+    }
+
+    @Test
+    public void transformerFilterIsEmpty() {
+        TwoWindingsTransformerFilter transformerFilter =
+                TwoWindingsTransformerFilter.builder()
+                        .equipmentID(null)
+                        .equipmentName(null)
+                        .substationName(null)
+                        .countries(new TreeSet<>())
+                        .freeProperties(Map.of("region", List.of("north")))
+                        .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
+                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
+                        .build();
+
+        assertFalse(transformerFilter.isEmpty());
+    }
 }
