@@ -1543,10 +1543,10 @@ public class FilterEntityControllerTest {
     @Test
     public void lineFilterIsEmpty() {
         HvdcLineFilter hvdcFilter = new HvdcLineFilter(
-                "equipmentID",
-                "equipmentName",
-                "substationName1",
-                "substationName2",
+                null,
+                null,
+                null,
+                null,
                 new TreeSet<>(),
                 new TreeSet<>(),
                 new NumericalFilter(RangeType.RANGE, 50., null)
@@ -1558,9 +1558,9 @@ public class FilterEntityControllerTest {
     public void transformerFilterIsEmpty() {
         TwoWindingsTransformerFilter transformerFilter =
                 TwoWindingsTransformerFilter.builder()
-                        .equipmentID("2wtId1")
-                        .equipmentName("2wtName1")
-                        .substationName("s2")
+                        .equipmentID(null)
+                        .equipmentName(null)
+                        .substationName(null)
                         .countries(new TreeSet<>())
                         .freeProperties(Map.of("region", List.of("north")))
                         .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
