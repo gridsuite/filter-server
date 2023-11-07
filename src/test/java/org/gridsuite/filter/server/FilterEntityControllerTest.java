@@ -1541,31 +1541,27 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void lineFilterIsEmpty() throws Exception {
+    public void lineFilterIsEmpty() {
         HvdcLineFilter hvdcFilter = new HvdcLineFilter(
                 "equipmentID",
                 "equipmentName",
                 "substationName1",
                 "substationName2",
-                COUNTRIES1,
-                COUNTRIES2,
+                new TreeSet<>(),
+                new TreeSet<>(),
                 new NumericalFilter(RangeType.RANGE, 50., null)
         );
         assertFalse(hvdcFilter.isEmpty());
     }
 
     @Test
-    public void transformerFilterIsEmpty() throws Exception {
-        LinkedHashSet<String> countries = new LinkedHashSet<>();
-        countries.add("FR");
-        countries.add("IT");
-
+    public void transformerFilterIsEmpty() {
         TwoWindingsTransformerFilter transformerFilter =
                 TwoWindingsTransformerFilter.builder()
                         .equipmentID("2wtId1")
                         .equipmentName("2wtName1")
                         .substationName("s2")
-                        .countries(new TreeSet<>(countries))
+                        .countries(new TreeSet<>())
                         .freeProperties(Map.of("region", List.of("north")))
                         .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
                         .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
