@@ -22,6 +22,7 @@ import org.gridsuite.filter.server.utils.EquipmentType;
 @ToString(callSuper = true)
 @Schema(description = "Line Filters", allOf = AbstractLineFilter.class)
 public class LineFilter extends AbstractLineFilter {
+    @Override
     public EquipmentType getEquipmentType() {
         return EquipmentType.LINE;
     }
