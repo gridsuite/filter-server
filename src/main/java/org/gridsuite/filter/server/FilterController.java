@@ -164,8 +164,8 @@ public class FilterController {
     @PostMapping(value = "/filters/evaluate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Export matched elements to JSON format")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The list of matched elements"),
-            @ApiResponse(responseCode = "204", description = "No matched element found")
+        @ApiResponse(responseCode = "200", description = "The list of matched elements"),
+        @ApiResponse(responseCode = "204", description = "No matched element found")
     })
     public ResponseEntity<List<IdentifiableAttributes>> evaluateFilter(@RequestParam(value = "networkUuid") UUID networkUuid,
                                                                        @RequestParam(value = "variantId", required = false) String variantId,
