@@ -17,9 +17,11 @@ import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttribut
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.persistence.EntityNotFoundException;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -157,5 +159,21 @@ public class FilterController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ret);
+    }
+
+    @PostMapping(value = "/filters/evaluate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Export matched elements to JSON format")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The list of matched elements"),
+            @ApiResponse(responseCode = "204", description = "No matched element found")
+    })
+    public ResponseEntity<List<IdentifiableAttributes>> evaluateFilter(@RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                       @RequestParam(value = "variantId", required = false) String variantId,
+                                                                       @RequestBody AbstractFilter filter) {
+        List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilter(filter, networkUuid, variantId);
+        return CollectionUtils.isEmpty(identifiableAttributes) ? ResponseEntity.noContent().build() :
+                ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(identifiableAttributes);
     }
 }
