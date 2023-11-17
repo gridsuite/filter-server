@@ -1049,6 +1049,15 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk());
     }
 
+    private void checkFilterEvaluating(AbstractFilter filter, String expectedJson) throws Exception {
+        mvc.perform(post(URL_TEMPLATE + "/evaluate?networkUuid=" + NETWORK_UUID)
+                        .content(objectMapper.writeValueAsString(filter))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJson));
+    }
+
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
                         .content(objectMapper.writeValueAsString(filter))
@@ -1527,9 +1536,13 @@ public class FilterEntityControllerTest {
         ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.GENERATOR, andCombination);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
-        checkExpertFilterExportAndMetadata(filterId, """
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
                 [{"id":"GEN","type":"GENERATOR"}]
-                """, EquipmentType.GENERATOR);
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+        checkFilterEvaluating(expertFilter, expectedResultJson);
     }
 
     @Test
@@ -1548,9 +1561,13 @@ public class FilterEntityControllerTest {
         ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.LOAD, gen1);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
-        checkExpertFilterExportAndMetadata(filterId, """
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
                 [{"id":"LOAD","type":"LOAD"}]
-                """, EquipmentType.LOAD);
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
+        checkFilterEvaluating(expertFilter, expectedResultJson);
     }
 
     @Test
