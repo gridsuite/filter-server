@@ -17,7 +17,6 @@ import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttribut
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.persistence.EntityNotFoundException;
