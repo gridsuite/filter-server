@@ -164,16 +164,12 @@ public class FilterController {
     @PostMapping(value = "/filters/evaluate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Export matched elements to JSON format")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "The list of matched elements"),
-        @ApiResponse(responseCode = "204", description = "No matched element found")
+        @ApiResponse(responseCode = "200", description = "The list of matched elements")
     })
     public ResponseEntity<List<IdentifiableAttributes>> evaluateFilter(@RequestParam(value = "networkUuid") UUID networkUuid,
                                                                        @RequestParam(value = "variantId", required = false) String variantId,
                                                                        @RequestBody AbstractFilter filter) {
         List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilter(filter, networkUuid, variantId);
-        return CollectionUtils.isEmpty(identifiableAttributes) ? ResponseEntity.noContent().build() :
-                ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(identifiableAttributes);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
 }
