@@ -20,5 +20,6 @@ public enum FieldType {
     TARGET_Q,
     ENERGY_SOURCE,
     COUNTRY,
-    VOLTAGE_REGULATOR_ON
+    VOLTAGE_REGULATOR_ON,
+    VOLTAGE_LEVEL_ID
 }

@@ -6,9 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
-import com.powsybl.iidm.network.EnergySource;
-import com.powsybl.iidm.network.Generator;
-import com.powsybl.iidm.network.IdentifiableType;
+import com.powsybl.iidm.network.*;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
@@ -29,6 +27,12 @@ public class ExpertFilterUtilsTest {
 
     @Before
     public void setUp() {
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getId()).thenReturn("GEN_01");
+
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+
         gen = Mockito.mock(Generator.class);
         Mockito.when(gen.getType()).thenReturn(IdentifiableType.GENERATOR);
         Mockito.when(gen.getMinP()).thenReturn(-500.0);
@@ -38,6 +42,7 @@ public class ExpertFilterUtilsTest {
         Mockito.when(gen.getNameOrId()).thenReturn("NAME");
         Mockito.when(gen.getEnergySource()).thenReturn(EnergySource.HYDRO);
         Mockito.when(gen.isVoltageRegulatorOn()).thenReturn(true);
+        Mockito.when(gen.getTerminal()).thenReturn(terminal);
     }
 
     @Test
@@ -74,6 +79,9 @@ public class ExpertFilterUtilsTest {
         BooleanExpertRule booleanRule7 = BooleanExpertRule.builder().value(false)
                 .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.NOT_EQUALS).build();
         andRules2.add(booleanRule7);
+        StringExpertRule stringRule8 = StringExpertRule.builder().value("GEN_01")
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IS).build();
+        andRules2.add(stringRule8);
 
         CombinatorExpertRule andFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules2).build();
 
