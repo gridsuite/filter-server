@@ -6,7 +6,6 @@
  */
 package org.gridsuite.filter.server;
 
-import com.powsybl.ws.commons.Utils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -21,7 +20,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class FilterApplication {
 
     public static void main(String[] args) {
-        Utils.initProperties();
         SpringApplication.run(FilterApplication.class, args);
     }
 
