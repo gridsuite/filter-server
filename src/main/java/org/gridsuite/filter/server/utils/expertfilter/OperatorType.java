@@ -13,6 +13,8 @@ public enum OperatorType {
     // Common
     EQUALS,
     NOT_EQUALS,
+    IN,
+    NOT_IN,
     // Number
     LOWER,
     LOWER_OR_EQUALS,
@@ -23,6 +25,4 @@ public enum OperatorType {
     CONTAINS,
     BEGINS_WITH,
     ENDS_WITH,
-    IN,
-    NOT_IN
 }
