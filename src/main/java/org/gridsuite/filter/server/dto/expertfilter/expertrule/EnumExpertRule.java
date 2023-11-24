@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server.dto.expertfilter.expertrule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Identifiable;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,9 +17,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
 
@@ -34,17 +34,9 @@ public class EnumExpertRule extends AbstractExpertRule {
     @Schema(description = "Value")
     private String value;
 
-    // a derived set of values in case multiple
+    @Schema(description = "Values")
+    @JsonDeserialize(as = HashSet.class)
     private Set<String> values;
-
-    private Set<String> getValues() {
-        // lazy initialization
-        if (values == null) {
-            values = Stream.of(this.value.trim().split(","))
-                    .collect(Collectors.toSet());
-        }
-        return values;
-    }
 
     @Override
     public String getStringValue() {
