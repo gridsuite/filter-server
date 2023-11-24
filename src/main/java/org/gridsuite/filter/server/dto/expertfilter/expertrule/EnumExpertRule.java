@@ -16,6 +16,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
 
 /**
@@ -29,6 +33,18 @@ public class EnumExpertRule extends AbstractExpertRule {
 
     @Schema(description = "Value")
     private String value;
+
+    // a derived set of values in case multiple
+    private Set<String> values;
+
+    private Set<String> getValues() {
+        // lazy initialization
+        if (values == null) {
+            values = Stream.of(this.value.trim().split(","))
+                    .collect(Collectors.toSet());
+        }
+        return values;
+    }
 
     @Override
     public String getStringValue() {
@@ -47,6 +63,8 @@ public class EnumExpertRule extends AbstractExpertRule {
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue.equals(this.getValue());
             case NOT_EQUALS -> !identifiableValue.equals(this.getValue());
+            case IN -> this.getValues().contains(identifiableValue);
+            case NOT_IN -> !this.getValues().contains(identifiableValue);
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }

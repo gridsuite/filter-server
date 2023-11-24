@@ -23,4 +23,6 @@ public enum OperatorType {
     CONTAINS,
     BEGINS_WITH,
     ENDS_WITH,
+    IN,
+    NOT_IN
 }
