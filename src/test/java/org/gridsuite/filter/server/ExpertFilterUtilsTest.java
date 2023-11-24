@@ -214,4 +214,29 @@ public class ExpertFilterUtilsTest {
 
         assertTrue(result);
     }
+
+    @Test
+    public void testEvaluateExpertFilterExists() {
+        List<AbstractExpertRule> numRules = new ArrayList<>();
+        numRules.add(NumberExpertRule.builder().field(FieldType.TARGET_V).operator(OperatorType.EXISTS).build());
+        CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
+
+        List<AbstractExpertRule> stringRules = new ArrayList<>();
+        stringRules.add(StringExpertRule.builder().field(FieldType.NAME).operator(OperatorType.EXISTS).build());
+        CombinatorExpertRule stringFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(stringRules).build();
+
+        // Test when value exists
+        assertTrue(numFilter.evaluateRule(gen));
+        assertTrue(stringFilter.evaluateRule(gen));
+
+        // Test when value does not exist
+        Mockito.when(gen.getTargetV()).thenReturn(Double.NaN);
+        assertFalse(numFilter.evaluateRule(gen));
+
+        Mockito.when(gen.getNameOrId()).thenReturn(null);
+        assertFalse(stringFilter.evaluateRule(gen));
+
+        Mockito.when(gen.getNameOrId()).thenReturn("");
+        assertFalse(stringFilter.evaluateRule(gen));
+    }
 }
