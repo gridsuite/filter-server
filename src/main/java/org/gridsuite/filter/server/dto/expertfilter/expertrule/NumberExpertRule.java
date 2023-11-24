@@ -19,6 +19,7 @@ import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
 
@@ -66,6 +67,8 @@ public class NumberExpertRule extends AbstractExpertRule {
 
     @Override
     public String getStringValue() {
-        return String.valueOf(this.getValue());
+        return this.getValue() != null ?
+            String.valueOf(this.getValue()) :
+            values.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 }

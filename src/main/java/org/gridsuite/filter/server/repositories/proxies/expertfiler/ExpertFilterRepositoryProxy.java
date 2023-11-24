@@ -19,11 +19,13 @@ import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterReposit
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.utils.EquipmentType;
 import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -66,25 +68,46 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                         .build();
             }
             case NUMBER -> {
-                return NumberExpertRule.builder()
+                NumberExpertRule.NumberExpertRuleBuilder<?, ?> ruleBuilder = NumberExpertRule.builder()
                         .field(filterEntity.getField())
-                        .operator(filterEntity.getOperator())
-                        .value(Double.valueOf(filterEntity.getValue()))
-                        .build();
+                        .operator(filterEntity.getOperator());
+                if(filterEntity.getOperator() == OperatorType.IN ||
+                   filterEntity.getOperator() == OperatorType.NOT_IN)
+                {
+                    ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).map(Double::valueOf).collect(Collectors.toSet()));
+                }
+                else {
+                    ruleBuilder.value(Double.valueOf(filterEntity.getValue()));
+                }
+                return ruleBuilder.build();
             }
             case STRING -> {
-                return StringExpertRule.builder()
+                StringExpertRule.StringExpertRuleBuilder<?, ?> ruleBuilder = StringExpertRule.builder()
                         .field(filterEntity.getField())
-                        .operator(filterEntity.getOperator())
-                        .value(filterEntity.getValue())
-                        .build();
+                        .operator(filterEntity.getOperator());
+                if(filterEntity.getOperator() == OperatorType.IN ||
+                   filterEntity.getOperator() == OperatorType.NOT_IN)
+                {
+                    ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                }
+                else {
+                    ruleBuilder.value(filterEntity.getValue());
+                }
+                return ruleBuilder.build();
             }
             case ENUM -> {
-                return EnumExpertRule.builder()
+                EnumExpertRule.EnumExpertRuleBuilder<?, ?> ruleBuilder = EnumExpertRule.builder()
                         .field(filterEntity.getField())
-                        .operator(filterEntity.getOperator())
-                        .value(filterEntity.getValue())
-                        .build();
+                        .operator(filterEntity.getOperator());
+                if(filterEntity.getOperator() == OperatorType.IN ||
+                   filterEntity.getOperator() == OperatorType.NOT_IN)
+                {
+                    ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                }
+                else {
+                    ruleBuilder.value(filterEntity.getValue());
+                }
+                return ruleBuilder.build();
             }
             default -> throw new PowsyblException("Unknown rule data type: " + filterEntity.getDataType() + ", supported data types are: COMBINATOR, BOOLEAN, NUMBER, STRING, ENUM");
         }

@@ -61,6 +61,6 @@ public class StringExpertRule extends AbstractExpertRule {
 
     @Override
     public String getStringValue() {
-        return getValue();
+        return getValue() != null ? getValue() : String.join(",", getValues());
     }
 }
