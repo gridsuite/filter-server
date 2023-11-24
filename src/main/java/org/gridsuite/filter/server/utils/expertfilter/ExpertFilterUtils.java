@@ -8,6 +8,7 @@ package org.gridsuite.filter.server.utils.expertfilter;
 
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.extensions.GeneratorStartup;
 
 import java.util.Optional;
 
@@ -48,6 +49,13 @@ public final class ExpertFilterUtils {
             case TARGET_P -> String.valueOf(generator.getTargetP());
             case TARGET_Q -> String.valueOf(generator.getTargetQ());
             case VOLTAGE_REGULATOR_ON -> String.valueOf(generator.isVoltageRegulatorOn());
+            case PLANNED_ACTIVE_POWER_SET_POINT -> {
+                GeneratorStartup generatorStartup = generator.getExtension(GeneratorStartup.class);
+                if (generatorStartup != null) {
+                    yield String.valueOf(generatorStartup.getPlannedActivePowerSetpoint());
+                }
+                yield String.valueOf(Double.NaN);
+            }
         };
     }
 }

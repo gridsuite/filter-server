@@ -43,6 +43,9 @@ public class NumberExpertRule extends AbstractExpertRule {
     @Override
     public boolean evaluateRule(Identifiable<?> identifiable) {
         Double identifiableValue = getNumberValue(getFieldValue(this.getField(), identifiable));
+        if (Double.isNaN(identifiableValue)) {
+            return false;
+        }
         Double filterValue = this.getValue();
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue.equals(filterValue);
@@ -50,6 +53,7 @@ public class NumberExpertRule extends AbstractExpertRule {
             case GREATER -> identifiableValue.compareTo(filterValue) > 0;
             case LOWER_OR_EQUALS -> identifiableValue.compareTo(filterValue) <= 0;
             case LOWER -> identifiableValue.compareTo(filterValue) < 0;
+            case EXISTS -> true; // We return true here because we already test above if identifiableValue is NaN.
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }

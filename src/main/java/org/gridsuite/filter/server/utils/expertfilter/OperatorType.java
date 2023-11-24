@@ -13,6 +13,8 @@ public enum OperatorType {
     // Common
     EQUALS,
     NOT_EQUALS,
+    // Number and String
+    EXISTS,
     // Number
     LOWER,
     LOWER_OR_EQUALS,
