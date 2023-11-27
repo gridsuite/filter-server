@@ -8,6 +8,7 @@
 package org.gridsuite.filter.server.repositories.proxies.expertfiler;
 
 import com.powsybl.commons.PowsyblException;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.gridsuite.filter.server.dto.criteriafilter.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.expertfilter.ExpertFilter;
@@ -66,10 +67,16 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                         .build();
             }
             case NUMBER -> {
+                Double newValue;
+                if (NumberUtils.isCreatable(filterEntity.getValue())) {
+                    newValue = NumberUtils.createDouble(filterEntity.getValue());
+                } else {
+                    newValue = Double.NaN;
+                }
                 return NumberExpertRule.builder()
                         .field(filterEntity.getField())
                         .operator(filterEntity.getOperator())
-                        .value(Double.valueOf(filterEntity.getValue()))
+                        .value(newValue)
                         .build();
             }
             case STRING -> {
