@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.IdentifiableType;
+import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 
 public class ExpertFilterUtilsTest {
 
@@ -238,5 +240,21 @@ public class ExpertFilterUtilsTest {
 
         Mockito.when(gen.getNameOrId()).thenReturn("");
         assertFalse(stringFilter.evaluateRule(gen));
+    }
+
+    @Test
+    public void testEvaluateExpertFilterExtension() {
+        List<AbstractExpertRule> numRules = new ArrayList<>();
+        numRules.add(NumberExpertRule.builder().field(FieldType.PLANNED_ACTIVE_POWER_SET_POINT).operator(OperatorType.EXISTS).build());
+        CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
+
+        // Test when extension does not exist
+        assertFalse(numFilter.evaluateRule(gen));
+
+        // Test with extension
+        GeneratorStartup genStart = Mockito.mock(GeneratorStartup.class);
+        Mockito.when(genStart.getPlannedActivePowerSetpoint()).thenReturn(50.0);
+        Mockito.when(gen.getExtension(any())).thenReturn(genStart);
+        assertTrue(numFilter.evaluateRule(gen));
     }
 }
