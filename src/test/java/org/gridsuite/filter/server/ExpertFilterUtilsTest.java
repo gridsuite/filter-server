@@ -230,8 +230,8 @@ public class ExpertFilterUtilsTest {
         VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
         Mockito.when(voltageLevel1.getId()).thenReturn("VL1");
         Mockito.when(voltageLevel1.getNominalV()).thenReturn(13.0);
-        Mockito.when(voltageLevel1.getSubstation()).thenReturn(Optional.of(substation1));
 
+        Mockito.when(voltageLevel1.getSubstation()).thenReturn(Optional.of(substation1));
 
         Terminal terminal1 = Mockito.mock(Terminal.class);
         Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
