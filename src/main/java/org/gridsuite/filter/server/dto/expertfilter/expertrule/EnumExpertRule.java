@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
+import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.isMultipleCriteriaOperator;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -40,7 +41,11 @@ public class EnumExpertRule extends AbstractExpertRule {
 
     @Override
     public String getStringValue() {
-        return getValue() != null ? getValue() : String.join(",", getValues());
+        if (isMultipleCriteriaOperator(this.getOperator())) { // multiple values
+            return String.join(",", this.getValues());
+        } else { // single value or absence
+            return this.getValue();
+        }
     }
 
     @Override

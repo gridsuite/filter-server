@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
+import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.isMultipleCriteriaOperator;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -67,8 +68,10 @@ public class NumberExpertRule extends AbstractExpertRule {
 
     @Override
     public String getStringValue() {
-        return this.getValue() != null ?
-            String.valueOf(this.getValue()) :
-            values.stream().map(String::valueOf).collect(Collectors.joining(","));
+        if (isMultipleCriteriaOperator(this.getOperator())) { // multiple values
+            return this.getValues().stream().map(String::valueOf).collect(Collectors.joining(","));
+        } else { // single value or absence
+            return this.getValue() != null ? String.valueOf(this.getValue()) : null;
+        }
     }
 }

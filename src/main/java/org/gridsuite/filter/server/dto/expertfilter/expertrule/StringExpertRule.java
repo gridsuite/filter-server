@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
+import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.isMultipleCriteriaOperator;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -38,6 +39,15 @@ public class StringExpertRule extends AbstractExpertRule {
     @Schema(description = "Values")
     @JsonDeserialize(as = HashSet.class)
     private Set<String> values;
+
+    @Override
+    public String getStringValue() {
+        if (isMultipleCriteriaOperator(this.getOperator())) { // multiple values
+            return String.join(",", this.getValues());
+        } else { // single value or absence
+            return this.getValue();
+        }
+    }
 
     @Override
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -57,10 +67,5 @@ public class StringExpertRule extends AbstractExpertRule {
             case NOT_IN -> !this.getValues().contains(identifiableValue);
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
-    }
-
-    @Override
-    public String getStringValue() {
-        return getValue() != null ? getValue() : String.join(",", getValues());
     }
 }
