@@ -1571,6 +1571,54 @@ public class FilterEntityControllerTest {
     }
 
     @Test
+    public void testExpertFilterGeneratorWithInAndNotInOperator() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLGEN2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [
+                    {"id":"GEN","type":"GENERATOR"},
+                    {"id":"GEN2","type":"GENERATOR"}
+                ]
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+
+        // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
+        NumberExpertRule numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(24.0)))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+
+
+        // Build a filter AND with only an IN operator for COUNTRY
+        EnumExpertRule enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
+                .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+    }
+
+    @Test
     public void lineFilterIsEmpty() {
         HvdcLineFilter hvdcFilter = new HvdcLineFilter(
                 null,
