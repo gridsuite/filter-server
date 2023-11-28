@@ -1604,7 +1604,6 @@ public class FilterEntityControllerTest {
         // check result when evaluating a filter on a network
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
 
-
         // Build a filter AND with only an IN operator for COUNTRY
         EnumExpertRule enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
                 .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
