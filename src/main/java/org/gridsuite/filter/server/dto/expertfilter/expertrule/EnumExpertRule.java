@@ -7,46 +7,20 @@
 package org.gridsuite.filter.server.dto.expertfilter.expertrule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Identifiable;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
-import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.isMultipleCriteriaOperator;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
 @AllArgsConstructor
-@NoArgsConstructor
-@Getter
 @SuperBuilder
-public class EnumExpertRule extends AbstractExpertRule {
-
-    @Schema(description = "Value")
-    private String value;
-
-    @Schema(description = "Values")
-    @JsonDeserialize(as = HashSet.class)
-    private Set<String> values;
-
-    @Override
-    public String getStringValue() {
-        if (isMultipleCriteriaOperator(this.getOperator())) { // multiple values
-            return String.join(",", this.getValues());
-        } else { // single value or absence
-            return this.getValue();
-        }
-    }
+public class EnumExpertRule extends StringExpertRule {
 
     @Override
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
