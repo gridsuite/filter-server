@@ -63,6 +63,7 @@ public class StringExpertRule extends AbstractExpertRule {
             case CONTAINS -> StringUtils.containsIgnoreCase(identifiableValue, this.getValue());
             case BEGINS_WITH -> StringUtils.startsWithIgnoreCase(identifiableValue, this.getValue());
             case ENDS_WITH -> StringUtils.endsWithIgnoreCase(identifiableValue, this.getValue());
+            case EXISTS -> !StringUtils.isEmpty(identifiableValue);
             case IN -> this.getValues().contains(identifiableValue);
             case NOT_IN -> !this.getValues().contains(identifiableValue);
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");

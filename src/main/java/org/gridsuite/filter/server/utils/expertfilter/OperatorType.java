@@ -15,6 +15,8 @@ public enum OperatorType {
     NOT_EQUALS,
     IN,
     NOT_IN,
+    // Number and String
+    EXISTS,
     // Number
     LOWER,
     LOWER_OR_EQUALS,
@@ -29,5 +31,4 @@ public enum OperatorType {
     public static boolean isMultipleCriteriaOperator(OperatorType operator) {
         return operator == IN || operator == NOT_IN;
     }
-
 }
