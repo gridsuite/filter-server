@@ -1049,6 +1049,15 @@ public class FilterEntityControllerTest {
         mvc.perform(delete(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk());
     }
 
+    private void checkFilterEvaluating(AbstractFilter filter, String expectedJson) throws Exception {
+        mvc.perform(post(URL_TEMPLATE + "/evaluate?networkUuid=" + NETWORK_UUID)
+                        .content(objectMapper.writeValueAsString(filter))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJson));
+    }
+
     private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
                         .content(objectMapper.writeValueAsString(filter))
@@ -1527,9 +1536,13 @@ public class FilterEntityControllerTest {
         ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.GENERATOR, andCombination);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
-        checkExpertFilterExportAndMetadata(filterId, """
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
                 [{"id":"GEN","type":"GENERATOR"}]
-                """, EquipmentType.GENERATOR);
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+        checkFilterEvaluating(expertFilter, expectedResultJson);
     }
 
     @Test
@@ -1548,9 +1561,96 @@ public class FilterEntityControllerTest {
         ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.LOAD, gen1);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
-        checkExpertFilterExportAndMetadata(filterId, """
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
                 [{"id":"LOAD","type":"LOAD"}]
-                """, EquipmentType.LOAD);
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
+        checkFilterEvaluating(expertFilter, expectedResultJson);
+    }
+
+    @Test
+    public void testExpertFilterGeneratorWithInAndNotInOperator() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLGEN2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [
+                    {"id":"GEN","type":"GENERATOR"},
+                    {"id":"GEN2","type":"GENERATOR"}
+                ]
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+
+        // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
+        stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+
+        // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
+        NumberExpertRule numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(24.0)))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+
+        // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
+        numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(12.0)))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+
+        // Build a filter AND with only an IN operator for COUNTRY
+        EnumExpertRule enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
+                .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+
+        // Build a filter AND with only a NOT_IN operator for COUNTRY
+        enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
+                .field(FieldType.COUNTRY).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
     }
 
     @Test

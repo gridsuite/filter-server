@@ -9,10 +9,7 @@ package org.gridsuite.filter.server.dto.expertfilter.expertrule;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Identifiable;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
@@ -22,18 +19,8 @@ import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.g
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
 @AllArgsConstructor
-@NoArgsConstructor
-@Getter
 @SuperBuilder
-public class EnumExpertRule extends AbstractExpertRule {
-
-    @Schema(description = "Value")
-    private String value;
-
-    @Override
-    public String getStringValue() {
-        return getValue();
-    }
+public class EnumExpertRule extends StringExpertRule {
 
     @Override
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -47,6 +34,8 @@ public class EnumExpertRule extends AbstractExpertRule {
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue.equals(this.getValue());
             case NOT_EQUALS -> !identifiableValue.equals(this.getValue());
+            case IN -> this.getValues().contains(identifiableValue);
+            case NOT_IN -> !this.getValues().contains(identifiableValue);
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
