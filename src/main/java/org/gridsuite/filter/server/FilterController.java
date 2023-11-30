@@ -145,6 +145,18 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping(value = "/filters/complexity", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Calculate filters complexity by given ids")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The complexity")})
+    public ResponseEntity<Integer> exportFilter(@RequestParam("ids") List<UUID> ids,
+                                                @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                @RequestParam(value = "variantId", required = false) String variantId) {
+        Integer count = service.countComplexity(ids, networkUuid, variantId);
+        return ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(count);
+    }
+
     @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Export list of filters to JSON format")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filters on JSON format")})

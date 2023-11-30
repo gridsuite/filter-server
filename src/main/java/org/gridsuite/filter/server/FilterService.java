@@ -690,6 +690,15 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
+    public Integer countComplexity(List<UUID> filterIds, UUID networkUuid, String variantId) {
+        Objects.requireNonNull(filterIds);
+        int count = 0;
+        for (final var filterId: filterIds) {
+            count = Math.toIntExact(getFilter(filterId).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId)).stream().count());
+        }
+        return count;
+    }
+
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
 
         // we stream on the ids so that we can keep the same order of ids sent
