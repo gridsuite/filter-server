@@ -28,6 +28,7 @@ public final class ExpertFilterUtils {
             case ID -> identifiable.getId();
             case NAME -> identifiable.getNameOrId();
             default -> switch (identifiable.getType()) {
+                case VOLTAGE_LEVEL -> getVoltageLevelFieldValue(field, (VoltageLevel) identifiable);
                 case GENERATOR -> getGeneratorFieldValue(field, (Generator) identifiable);
                 case LOAD -> getLoadFieldValue(field, (Load) identifiable);
                 case BUS -> getBusFieldValue(field, (Bus) identifiable);
