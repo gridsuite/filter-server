@@ -474,7 +474,13 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterBusAndBusBarSectionWithException() {
+    public void testEvaluateExpertFilterWithException() {
+
+        Network network = Mockito.mock(Network.class);
+        Mockito.when(network.getType()).thenReturn(IdentifiableType.NETWORK);
+
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getType()).thenReturn(IdentifiableType.VOLTAGE_LEVEL);
 
         Load load = Mockito.mock(Load.class);
         Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
@@ -494,6 +500,13 @@ public class ExpertFilterUtilsTest {
         EnumExpertRule enumNotInRule = EnumExpertRule.builder().values(Set.of(Country.FR.name(), Country.GB.name()))
                 .field(FieldType.UNKNOWN).operator(OperatorType.NOT_IN).build();
         CombinatorExpertRule notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(enumNotInRule)).build();
+
+        // type not supported
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(network));
+
+        // field not supported
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(voltageLevel));
 
         assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(load));
 
