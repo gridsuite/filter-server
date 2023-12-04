@@ -22,6 +22,8 @@ public final class ExpertFilterUtils {
         return switch (identifiable.getType()) {
             case GENERATOR -> getGeneratorFieldValue(field, (Generator) identifiable);
             case LOAD -> getLoadFieldValue(field, (Load) identifiable);
+            case BUS -> getBusFieldValue(field, (Bus) identifiable);
+            case BUSBAR_SECTION -> getBusBarSectionFieldValue(field, (BusbarSection) identifiable);
             default -> throw new PowsyblException(identifiable.getType() + " injection type is not implemented with expert filter");
         };
     }
@@ -63,6 +65,26 @@ public final class ExpertFilterUtils {
                 yield String.valueOf(Double.NaN);
             }
             default -> getInjectionFieldValue(field, generator);
+        };
+    }
+
+    private static String getBusFieldValue(FieldType field, Bus bus) {
+        return switch (field) {
+            case ID -> bus.getId();
+            case NAME -> bus.getNameOrId();
+            case COUNTRY -> {
+                Optional<Country> country = bus.getVoltageLevel().getSubstation().flatMap(Substation::getCountry);
+                yield country.isPresent() ? String.valueOf(country.get()) : "";
+            }
+            case NOMINAL_VOLTAGE -> String.valueOf(bus.getVoltageLevel().getNominalV());
+            case VOLTAGE_LEVEL_ID -> bus.getVoltageLevel().getId();
+            default -> throw new PowsyblException("Field " + field + " with " + bus.getType() + " type is not implemented with expert filter");
+        };
+    }
+
+    private static String getBusBarSectionFieldValue(FieldType field, BusbarSection busbarSection) {
+        return switch (field) {
+            default -> getInjectionFieldValue(field, busbarSection);
         };
     }
 }
