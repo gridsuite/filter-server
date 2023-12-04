@@ -40,7 +40,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -691,27 +690,38 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
-    public Integer countComplexity(Map<Integer, Map<String, List<UUID>>> filtersIdsMap, UUID networkUuid, String variantId) {
+    public Integer countComplexity(Map<Integer, List<Map<String, List<UUID>>>> filtersIdsMap, UUID networkUuid, String variantId) {
         Objects.requireNonNull(filtersIdsMap);
-        AtomicInteger count = new AtomicInteger(0);
-        final var injectionsList = filtersIdsMap.get(0).get("injections").size();
-        filtersIdsMap.get(0).remove("injections");
-        filtersIdsMap.values().forEach(stringListMap -> {
-            AtomicInteger tabFiltersComplexityCount = new AtomicInteger(1);
-            final var tabsize = stringListMap.values().size();
-            if (tabsize == 2) {
-                tabFiltersComplexityCount.updateAndGet(v -> v * injectionsList);
+        int globalCount = 0;
+        globalCount = getInjectionSetCount(filtersIdsMap, networkUuid, variantId, globalCount);
+        for (List<Map<String, List<UUID>>> setInjMaps : filtersIdsMap.values()) {
+            for (Map<String, List<UUID>> setInjMap : setInjMaps) {
+                globalCount += getReduced(setInjMap, networkUuid, variantId);
             }
-            stringListMap.values().forEach(uuids -> {
-                AtomicInteger containerFiltersComplexityCount = new AtomicInteger(1);
-                uuids.forEach(uuid -> {
-                    final var filterAttributes = getFilter(uuid).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
-                    AtomicInteger attCount = filterAttributes.isPresent() ? new AtomicInteger(filterAttributes.get().size()) : new AtomicInteger(0);
-                    containerFiltersComplexityCount.updateAndGet(v -> v + attCount.get()); });
-                tabFiltersComplexityCount.updateAndGet(v -> v * containerFiltersComplexityCount.get()); });
-            count.updateAndGet(v -> v + tabFiltersComplexityCount.get()); });
-        return count.get();
+        }
+        return globalCount;
+    }
 
+    private int getInjectionSetCount(Map<Integer, List<Map<String, List<UUID>>>> filtersIdsMap, UUID networkUuid, String variantId, final int globalCount) {
+        int localCount = globalCount;
+        List<Map<String, List<UUID>>> setInjListMap = filtersIdsMap.get(0);
+        for (Map<String, List<UUID>> setInjMap : setInjListMap) {
+            int perActiveParamCount = 1;
+            perActiveParamCount *= setInjMap.get("injections").size();
+            setInjMap.remove("injections");
+            perActiveParamCount *= getReduced(setInjMap, networkUuid, variantId);
+            localCount += perActiveParamCount;
+        }
+        filtersIdsMap.remove(0);
+        return localCount;
+    }
+
+    private int getReduced(Map<String, List<UUID>> setInjMap, UUID networkUuid, String variantId) {
+        return setInjMap.values().stream()
+                .mapToInt(uuids -> uuids.stream().map(this::getFilter)
+                        .mapToInt(filter -> filter.map(f -> getIdentifiableAttributes(f, networkUuid, variantId).size())
+                                .orElse(1)).sum())
+                .reduce(1, (a, b) -> a * b);
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {

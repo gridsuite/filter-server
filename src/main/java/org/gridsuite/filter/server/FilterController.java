@@ -149,7 +149,7 @@ public class FilterController {
     @PostMapping(value = "/filters/complexity", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Calculate filters complexity by given ids")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The complexity")})
-    public ResponseEntity<Integer> exportFilter(@RequestBody Map<Integer, Map<String, List<UUID>>> containerIdsMap,
+    public ResponseEntity<Integer> exportFilter(@RequestBody Map<Integer, List<Map<String, List<UUID>>>> containerIdsMap,
                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                 @RequestParam(value = "variantId", required = false) String variantId) {
         Integer count = service.countComplexity(containerIdsMap, networkUuid, variantId);
