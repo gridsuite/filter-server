@@ -40,6 +40,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -690,13 +691,27 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
-    public Integer countComplexity(List<UUID> filterIds, UUID networkUuid, String variantId) {
-        Objects.requireNonNull(filterIds);
-        int count = 0;
-        for (final var filterId: filterIds) {
-            count = Math.toIntExact(getFilter(filterId).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId)).stream().count());
-        }
-        return count;
+    public Integer countComplexity(Map<Integer, Map<String, List<UUID>>> filtersIdsMap, UUID networkUuid, String variantId) {
+        Objects.requireNonNull(filtersIdsMap);
+        AtomicInteger count = new AtomicInteger(0);
+        final var injectionsList = filtersIdsMap.get(0).get("injections").size();
+        filtersIdsMap.get(0).remove("injections");
+        filtersIdsMap.values().forEach(stringListMap -> {
+            AtomicInteger tabFiltersComplexityCount = new AtomicInteger(1);
+            final var tabsize = stringListMap.values().size();
+            if (tabsize == 2) {
+                tabFiltersComplexityCount.updateAndGet(v -> v * injectionsList);
+            }
+            stringListMap.values().forEach(uuids -> {
+                AtomicInteger containerFiltersComplexityCount = new AtomicInteger(1);
+                uuids.forEach(uuid -> {
+                    final var filterAttributes = getFilter(uuid).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
+                    AtomicInteger attCount = filterAttributes.isPresent() ? new AtomicInteger(filterAttributes.get().size()) : new AtomicInteger(0);
+                    containerFiltersComplexityCount.updateAndGet(v -> v + attCount.get()); });
+                tabFiltersComplexityCount.updateAndGet(v -> v * containerFiltersComplexityCount.get()); });
+            count.updateAndGet(v -> v + tabFiltersComplexityCount.get()); });
+        return count.get();
+
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {

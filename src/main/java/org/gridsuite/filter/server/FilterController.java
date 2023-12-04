@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -145,13 +146,13 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping(value = "/filters/complexity", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/filters/complexity", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Calculate filters complexity by given ids")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The complexity")})
-    public ResponseEntity<Integer> exportFilter(@RequestParam("ids") List<UUID> ids,
+    public ResponseEntity<Integer> exportFilter(@RequestBody Map<Integer, Map<String, List<UUID>>> containerIdsMap,
                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                 @RequestParam(value = "variantId", required = false) String variantId) {
-        Integer count = service.countComplexity(ids, networkUuid, variantId);
+        Integer count = service.countComplexity(containerIdsMap, networkUuid, variantId);
         return ResponseEntity.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(count);
