@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
+import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.IdentifiableType;
@@ -24,8 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 
 public class ExpertFilterUtilsTest {
@@ -470,5 +470,38 @@ public class ExpertFilterUtilsTest {
         assertTrue(notInFilter.evaluateRule(bus2));
         // Check busBarSection2 must be not in the list
         assertTrue(notInFilter.evaluateRule(busBarSection2));
+
     }
+
+    @Test
+    public void testEvaluateExpertFilterBusAndBusBarSectionWithException() {
+
+        Load load = Mockito.mock(Load.class);
+        Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
+
+        Generator generator = Mockito.mock(Generator.class);
+        Mockito.when(generator.getType()).thenReturn(IdentifiableType.GENERATOR);
+
+        Bus bus = Mockito.mock(Bus.class);
+        Mockito.when(bus.getType()).thenReturn(IdentifiableType.BUS);
+
+        BusbarSection busbarSection = Mockito.mock(BusbarSection.class);
+        Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
+
+        // --- Test with whatever operator with exception --- //
+
+        // Build a filter AND with only a NOT_IN operator for UNKNOWN
+        EnumExpertRule enumNotInRule = EnumExpertRule.builder().values(Set.of(Country.FR.name(), Country.GB.name()))
+                .field(FieldType.UNKNOWN).operator(OperatorType.NOT_IN).build();
+        CombinatorExpertRule notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(enumNotInRule)).build();
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(load));
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(generator));
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(bus));
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(busbarSection));
+    }
+
 }
