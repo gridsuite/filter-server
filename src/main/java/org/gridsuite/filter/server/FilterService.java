@@ -591,6 +591,19 @@ public class FilterService {
         return getInjectionList(network.getVscConverterStationStream().map(vsc -> vsc), filter).collect(Collectors.toList());
     }
 
+    private List<Identifiable<?>> getBusList(Network network, AbstractFilter filter) {
+        if (filter instanceof ExpertFilter expertFilter) {
+            var rule = expertFilter.getRules();
+            Stream<Identifiable<?>> stream = network.getVoltageLevelStream()
+                    .filter(elem -> elem.getTopologyKind() == TopologyKind.BUS_BREAKER) // get only bus for BUS_BREAKER voltage level
+                    .map(VoltageLevel::getBusBreakerView)
+                    .flatMap(VoltageLevel.BusBreakerView::getBusStream).map(bus -> bus);
+            return stream.filter(rule::evaluateRule).toList();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
     private List<Identifiable<?>> getBusbarSectionList(Network network, AbstractFilter filter) {
         return getInjectionList(network.getBusbarSectionStream().map(bbs -> bbs), filter).collect(Collectors.toList());
     }
@@ -633,6 +646,9 @@ public class FilterService {
                 break;
             case THREE_WINDINGS_TRANSFORMER:
                 identifiables = get3WTransformerList(network, filter);
+                break;
+            case BUS:
+                identifiables = getBusList(network, filter);
                 break;
             case BUSBAR_SECTION:
                 identifiables = getBusbarSectionList(network, filter);

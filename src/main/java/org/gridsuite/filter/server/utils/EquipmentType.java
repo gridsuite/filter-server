@@ -16,6 +16,7 @@ public enum EquipmentType {
     SHUNT_COMPENSATOR("shuntCompensators"),
     STATIC_VAR_COMPENSATOR("staticVarCompensators"),
     BATTERY("batteries"),
+    BUS("buses"),
     BUSBAR_SECTION("busbarSections"),
     DANGLING_LINE("danglingLines"),
     LCC_CONVERTER_STATION("lccConverterStations"),
