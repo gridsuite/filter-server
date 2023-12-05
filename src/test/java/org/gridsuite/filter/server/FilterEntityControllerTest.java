@@ -969,6 +969,25 @@ public class FilterEntityControllerTest {
 
     }
 
+    @Test
+    public void testComputeFiltersComplexity() throws Exception {
+        final var json = "{\"3\":[{\"injections\":[\"cf399ef3-7f14-4884-8c82-1c90300da321\"],\"contingencies\":[\"cf399ef3-7f14-4884-8c82-1c90300da323\"],\"monitoredBranchs\":[\"cf399ef3-7f14-4884-8c82-1c90300da322\"]}],\"2\":[{\"injections\":[\"cf399ef3-7f14-4884-8c82-1c90300da322\"],\"contingencies\":[\"cf399ef3-7f14-4884-8c82-1c90300da323\"],\"monitoredBranchs\":[\"cf399ef3-7f14-4884-8c82-1c90300da321\"]}],\"1\":[{\"injections\":[\"cf399ef3-7f14-4884-8c82-1c90300da322\"],\"contingencies\":[\"cf399ef3-7f14-4884-8c82-1c90300da323\"],\"monitoredBranchs\":[\"cf399ef3-7f14-4884-8c82-1c90300da321\"]}],\"0\":[{\"injections\":[\"cf399ef3-7f14-4884-8c82-1c90300da321\"],\"contingencies\":[\"cf399ef3-7f14-4884-8c82-1c90300da323\"],\"monitoredBranchs\":[\"cf399ef3-7f14-4884-8c82-1c90300da322\"]}]}";
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("networkUuid", NETWORK_UUID.toString());
+        params.add("variantId", VARIANT_ID_1);
+
+        Integer filtersComplexityCount = objectMapper.readValue(
+                mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/complexity")
+                                .params(params)
+                                .content(json)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        assertEquals(Optional.of(4), Optional.ofNullable(filtersComplexityCount));
+    }
+
     private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
         assertEquals(CollectionUtils.isEmpty(filterEquipments1), CollectionUtils.isEmpty(filterEquipments2));
         assertEquals(filterEquipments1.size(), filterEquipments2.size());
