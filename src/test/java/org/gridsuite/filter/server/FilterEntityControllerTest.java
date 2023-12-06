@@ -1487,7 +1487,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertGeneratorFilter() throws Exception {
+    public void testExpertFilterGenerator() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
@@ -1546,7 +1546,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertLoadFilter() throws Exception {
+    public void testExpertFilterLoad() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
@@ -1651,6 +1651,179 @@ public class FilterEntityControllerTest {
 
         // check result when evaluating a filter on a network
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
+    }
+
+    @Test
+    public void testExpertFilterLoadWithInAndNotInOperator() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLLOAD", "VLLOAD2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [
+                    {"id":"LOAD","type":"LOAD"}
+                ]
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
+
+        // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
+        stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLLOAD2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
+
+        // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
+        NumberExpertRule numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(150.0)))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
+
+        // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
+        numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(12.0)))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
+
+        // Build a filter AND with only an IN operator for COUNTRY
+        EnumExpertRule enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
+                .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
+
+        // Build a filter AND with only a NOT_IN operator for COUNTRY
+        enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
+                .field(FieldType.COUNTRY).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
+    }
+
+    @Test
+    public void testExpertFilterBusWithInAndNotInOperator() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLGEN2", "VLLOAD", "VLLOAD2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [
+                    {"id":"NGEN","type":"BUS"},
+                    {"id":"NLOAD","type":"BUS"}
+                ]
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
+
+        // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
+        stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLHV1", "VLHV2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
+
+        // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
+        NumberExpertRule numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(24.0, 150.0)))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
+
+        // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
+        numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(380.0)))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
+
+        // Build a filter AND with only an IN operator for COUNTRY
+        EnumExpertRule enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
+                .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        expectedResultJson = """
+                [
+                    {"id":"NGEN","type":"BUS"},
+                    {"id":"NHV1","type":"BUS"},
+                    {"id":"NHV2","type":"BUS"},
+                    {"id":"NLOAD","type":"BUS"}               
+                ]
+            """;
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
+
+        // Build a filter AND with only a NOT_IN operator for COUNTRY
+        enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
+                .field(FieldType.COUNTRY).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
     }
 
     @Test
