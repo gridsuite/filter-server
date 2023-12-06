@@ -1745,6 +1745,8 @@ public class FilterEntityControllerTest {
         CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
         ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        expertFilter.setTopologyKind(TopologyKind.BUS_BREAKER); // set optional info
+
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 

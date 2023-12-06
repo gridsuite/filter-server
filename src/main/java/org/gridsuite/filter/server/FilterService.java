@@ -607,7 +607,7 @@ public class FilterService {
             var rule = expertFilter.getRules();
             return stream.filter(rule::evaluateRule).toList();
         } else {
-            return Collections.emptyList();
+            return List.of();
         }
     }
 
