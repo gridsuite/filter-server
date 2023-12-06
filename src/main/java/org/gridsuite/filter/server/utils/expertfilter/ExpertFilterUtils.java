@@ -26,22 +26,28 @@ public final class ExpertFilterUtils {
         };
     }
 
+    private static String getInjectionFieldValue(FieldType field, Injection<?> injection) {
+        return switch (field) {
+            case ID -> injection.getId();
+            case NAME -> injection.getNameOrId();
+            case COUNTRY -> {
+                Optional<Country> country = injection.getTerminal().getVoltageLevel().getSubstation().flatMap(Substation::getCountry);
+                yield country.isPresent() ? String.valueOf(country.get()) : "";
+            }
+            case NOMINAL_VOLTAGE -> String.valueOf(injection.getTerminal().getVoltageLevel().getNominalV());
+            case VOLTAGE_LEVEL_ID -> injection.getTerminal().getVoltageLevel().getId();
+            default -> throw new PowsyblException("Field " + field + " with " + injection.getType() + " injection type is not implemented with expert filter");
+        };
+    }
+
     private static String getLoadFieldValue(FieldType field, Load load) {
         return switch (field) {
-            case ID -> load.getId();
-            default -> throw new PowsyblException("Field " + field + " with " + load.getType() + " injection type is not implemented with expert filter");
+            default -> getInjectionFieldValue(field, load);
         };
     }
 
     private static String getGeneratorFieldValue(FieldType field, Generator generator) {
         return switch (field) {
-            case ID -> generator.getId();
-            case NAME -> generator.getNameOrId();
-            case NOMINAL_VOLTAGE -> String.valueOf(generator.getTerminal().getVoltageLevel().getNominalV());
-            case COUNTRY -> {
-                Optional<Country> country = generator.getTerminal().getVoltageLevel().getSubstation().flatMap(Substation::getCountry);
-                yield country.isPresent() ? String.valueOf(country.get()) : "";
-            }
             case ENERGY_SOURCE -> String.valueOf(generator.getEnergySource());
             case MIN_P -> String.valueOf(generator.getMinP());
             case MAX_P -> String.valueOf(generator.getMaxP());
@@ -56,6 +62,7 @@ public final class ExpertFilterUtils {
                 }
                 yield String.valueOf(Double.NaN);
             }
+            default -> getInjectionFieldValue(field, generator);
         };
     }
 }

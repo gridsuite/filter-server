@@ -10,6 +10,7 @@ import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.IdentifiableType;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
+import com.powsybl.iidm.network.*;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
@@ -20,6 +21,8 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -256,5 +259,94 @@ public class ExpertFilterUtilsTest {
         Mockito.when(genStart.getPlannedActivePowerSetpoint()).thenReturn(50.0);
         Mockito.when(gen.getExtension(any())).thenReturn(genStart);
         assertTrue(numFilter.evaluateRule(gen));
+    }
+
+    @Test
+    public void testEvaluateExpertFilterInAndNotInOperators() {
+
+        // --- Test IN Operator --- //
+
+        // Mock for 1st generator
+        Generator gen1 = Mockito.mock(Generator.class);
+        Mockito.when(gen1.getType()).thenReturn(IdentifiableType.GENERATOR);
+
+        Substation substation1 = Mockito.mock(Substation.class);
+        Mockito.when(substation1.getCountry()).thenReturn(Optional.of(Country.FR));
+
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel1.getId()).thenReturn("VL1");
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(13.0);
+
+        Mockito.when(voltageLevel1.getSubstation()).thenReturn(Optional.of(substation1));
+
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(gen1.getTerminal()).thenReturn(terminal1);
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(Set.of("VL1", "VL3"))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(stringInRule)).build();
+
+        // Check gen1 must be in the list
+        assertTrue(inFilter.evaluateRule(gen1));
+
+        // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
+        NumberExpertRule numberInRule = NumberExpertRule.builder().values(Set.of(13.0, 17.0))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(numberInRule)).build();
+
+        // Check gen1 must be in the list
+        assertTrue(inFilter.evaluateRule(gen1));
+
+        // Build a filter AND with only an IN operator for COUNTRY
+        EnumExpertRule enumInRule = EnumExpertRule.builder().values(Set.of(Country.FR.name(), Country.GB.name()))
+                .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(enumInRule)).build();
+
+        // Check gen1 must be in the list
+        assertTrue(inFilter.evaluateRule(gen1));
+
+        // --- Test NOT_IN Operator --- //
+
+        // Mock for 2nd generator
+        Generator gen2 = Mockito.mock(Generator.class);
+        Mockito.when(gen2.getType()).thenReturn(IdentifiableType.GENERATOR);
+
+        Substation substation2 = Mockito.mock(Substation.class);
+        Mockito.when(substation2.getCountry()).thenReturn(Optional.of(Country.GE));
+
+        VoltageLevel voltageLevel2 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel2.getId()).thenReturn("VL2");
+        Mockito.when(voltageLevel2.getNominalV()).thenReturn(15.0);
+        Mockito.when(voltageLevel2.getSubstation()).thenReturn(Optional.of(substation2));
+
+        Terminal terminal2 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal2.getVoltageLevel()).thenReturn(voltageLevel2);
+        Mockito.when(gen2.getTerminal()).thenReturn(terminal2);
+
+        // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringNotInRule = StringExpertRule.builder().values(Set.of("VL1", "VL3"))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.NOT_IN).build();
+        CombinatorExpertRule notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(stringNotInRule)).build();
+
+        // Check gen2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(gen2));
+
+        // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
+        NumberExpertRule numberNotInRule = NumberExpertRule.builder().values(Set.of(13.0, 17.0))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
+        notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(numberNotInRule)).build();
+
+        // Check gen2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(gen2));
+
+        // Build a filter AND with only a NOT_IN operator for COUNTRY
+        EnumExpertRule enumNotInRule = EnumExpertRule.builder().values(Set.of(Country.FR.name(), Country.GB.name()))
+                .field(FieldType.COUNTRY).operator(OperatorType.NOT_IN).build();
+        notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(enumNotInRule)).build();
+
+        // Check gen2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(gen2));
     }
 }

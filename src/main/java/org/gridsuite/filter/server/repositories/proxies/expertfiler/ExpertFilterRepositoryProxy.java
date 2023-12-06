@@ -8,7 +8,6 @@
 package org.gridsuite.filter.server.repositories.proxies.expertfiler;
 
 import com.powsybl.commons.PowsyblException;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.gridsuite.filter.server.dto.criteriafilter.AbstractEquipmentFilterForm;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.expertfilter.ExpertFilter;
@@ -25,6 +24,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.isMultipleCriteriaOperator;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -67,31 +69,43 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                         .build();
             }
             case NUMBER -> {
-                Double newValue;
-                if (NumberUtils.isCreatable(filterEntity.getValue())) {
-                    newValue = NumberUtils.createDouble(filterEntity.getValue());
-                } else {
-                    newValue = Double.NaN;
-                }
-                return NumberExpertRule.builder()
+                NumberExpertRule.NumberExpertRuleBuilder<?, ?> ruleBuilder = NumberExpertRule.builder()
                         .field(filterEntity.getField())
-                        .operator(filterEntity.getOperator())
-                        .value(newValue)
-                        .build();
+                        .operator(filterEntity.getOperator());
+                if (filterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).map(Double::valueOf).collect(Collectors.toSet()));
+                    } else { // for single value
+                        ruleBuilder.value(Double.valueOf(filterEntity.getValue()));
+                    }
+                }
+                return ruleBuilder.build();
             }
             case STRING -> {
-                return StringExpertRule.builder()
+                StringExpertRule.StringExpertRuleBuilder<?, ?> ruleBuilder = StringExpertRule.builder()
                         .field(filterEntity.getField())
-                        .operator(filterEntity.getOperator())
-                        .value(filterEntity.getValue())
-                        .build();
+                        .operator(filterEntity.getOperator());
+                if (filterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                    } else { // for single value
+                        ruleBuilder.value(filterEntity.getValue());
+                    }
+                }
+                return ruleBuilder.build();
             }
             case ENUM -> {
-                return EnumExpertRule.builder()
+                EnumExpertRule.EnumExpertRuleBuilder<?, ?> ruleBuilder = EnumExpertRule.builder()
                         .field(filterEntity.getField())
-                        .operator(filterEntity.getOperator())
-                        .value(filterEntity.getValue())
-                        .build();
+                        .operator(filterEntity.getOperator());
+                if (filterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                    } else { // for single value
+                        ruleBuilder.value(filterEntity.getValue());
+                    }
+                }
+                return ruleBuilder.build();
             }
             default -> throw new PowsyblException("Unknown rule data type: " + filterEntity.getDataType() + ", supported data types are: COMBINATOR, BOOLEAN, NUMBER, STRING, ENUM");
         }

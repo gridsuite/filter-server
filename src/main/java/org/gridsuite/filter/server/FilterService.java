@@ -685,6 +685,11 @@ public class FilterService {
         }
     }
 
+    public List<IdentifiableAttributes> evaluateFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
+        Objects.requireNonNull(filter);
+        return getIdentifiableAttributes(filter, networkUuid, variantId);
+    }
+
     public Optional<List<IdentifiableAttributes>> exportFilter(UUID id, UUID networkUuid, String variantId) {
         Objects.requireNonNull(id);
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
