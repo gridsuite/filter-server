@@ -1807,7 +1807,7 @@ public class FilterEntityControllerTest {
                     {"id":"NGEN","type":"BUS"},
                     {"id":"NHV1","type":"BUS"},
                     {"id":"NHV2","type":"BUS"},
-                    {"id":"NLOAD","type":"BUS"}               
+                    {"id":"NLOAD","type":"BUS"}
                 ]
             """;
         // check result when evaluating a filter on a network
