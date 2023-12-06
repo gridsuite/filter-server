@@ -597,7 +597,7 @@ public class FilterService {
             // topologyKind is an optional info attached into expert filter when filtering bus for optimizing the perf
             // note that with voltage levels of kind TopologyKind.NODE_BREAKER, buses are computed on-the-fly => expensive
             var topologyKind = expertFilter.getTopologyKind();
-            Predicate<VoltageLevel> voltageLevelFilter = (vl -> topologyKind == null || vl.getTopologyKind() == topologyKind);
+            Predicate<VoltageLevel> voltageLevelFilter = vl -> topologyKind == null || vl.getTopologyKind() == topologyKind;
 
             Stream<Identifiable<?>> stream = network.getVoltageLevelStream()
                     .filter(voltageLevelFilter)
