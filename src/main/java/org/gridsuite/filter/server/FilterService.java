@@ -40,6 +40,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -593,11 +594,17 @@ public class FilterService {
 
     private List<Identifiable<?>> getBusList(Network network, AbstractFilter filter) {
         if (filter instanceof ExpertFilter expertFilter) {
-            var rule = expertFilter.getRules();
+            // topologyKind is an optional info attached into expert filter when filtering bus for optimizing the perf
+            // note that with voltage levels of kind TopologyKind.NODE_BREAKER, buses are computed on-the-fly => expensive
+            var topologyKind = expertFilter.getTopologyKind();
+            Predicate<VoltageLevel> voltageLevelFilter = (vl -> topologyKind == null || vl.getTopologyKind() == topologyKind);
+
             Stream<Identifiable<?>> stream = network.getVoltageLevelStream()
-                    .filter(elem -> elem.getTopologyKind() == TopologyKind.BUS_BREAKER) // get only bus for BUS_BREAKER voltage level
+                    .filter(voltageLevelFilter)
                     .map(VoltageLevel::getBusBreakerView)
                     .flatMap(VoltageLevel.BusBreakerView::getBusStream).map(bus -> bus);
+
+            var rule = expertFilter.getRules();
             return stream.filter(rule::evaluateRule).toList();
         } else {
             return Collections.emptyList();
