@@ -693,7 +693,7 @@ public class FilterService {
     public Map<String, List<Integer>> containersListCount(Map<String, List<UUID>> filtersIdsMap, UUID networkUuid, String variantId) {
         Objects.requireNonNull(filtersIdsMap);
         Map<String, List<Integer>> resultMap = new HashMap<>();
-        for( String key : filtersIdsMap.keySet()) {
+        for (String key : filtersIdsMap.keySet()) {
             List<UUID> uuids = filtersIdsMap.get(key);
             List<FilterEquipments> filtersEquipments = exportFilters(uuids, networkUuid, variantId);
             resultMap.put(key, filtersEquipments.stream().map(filterEquipments -> filterEquipments.getIdentifiableAttributes().size()).toList());
