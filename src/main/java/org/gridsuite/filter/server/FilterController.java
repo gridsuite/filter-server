@@ -146,16 +146,16 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "/filters/complexity", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/filters/count", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Calculate filters complexity by given ids")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The complexity")})
-    public ResponseEntity<Integer> computeFiltersComplexity(@RequestBody Map<Integer, List<Map<String, List<UUID>>>> containerIdsMap,
+    public ResponseEntity<Map<String, List<Integer>>> containersListCount(@RequestBody Map<String, List<UUID>> containerIdsMap,
                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                 @RequestParam(value = "variantId", required = false) String variantId) {
-        Integer count = service.countComplexity(containerIdsMap, networkUuid, variantId);
         return ResponseEntity.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(count);
+                        .body(service.containersListCount(containerIdsMap, networkUuid, variantId));
+
     }
 
     @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)

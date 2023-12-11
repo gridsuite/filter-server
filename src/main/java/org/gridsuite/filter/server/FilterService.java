@@ -690,38 +690,15 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
-    public Integer countComplexity(Map<Integer, List<Map<String, List<UUID>>>> filtersIdsMap, UUID networkUuid, String variantId) {
+    public Map<String, List<Integer>> containersListCount(Map<String, List<UUID>> filtersIdsMap, UUID networkUuid, String variantId) {
         Objects.requireNonNull(filtersIdsMap);
-        int globalCount = 0;
-        globalCount = getInjectionSetCount(filtersIdsMap, networkUuid, variantId, globalCount);
-        for (List<Map<String, List<UUID>>> setInjMaps : filtersIdsMap.values()) {
-            for (Map<String, List<UUID>> setInjMap : setInjMaps) {
-                globalCount += getReduced(setInjMap, networkUuid, variantId);
-            }
+        Map<String, List<Integer>> resultMap = new HashMap<>();
+        for( String key : filtersIdsMap.keySet()) {
+            List<UUID> uuids = filtersIdsMap.get(key);
+            List<FilterEquipments> filtersEquipments = exportFilters(uuids, networkUuid, variantId);
+            resultMap.put(key, filtersEquipments.stream().map(filterEquipments -> filterEquipments.getIdentifiableAttributes().size()).toList());
         }
-        return globalCount;
-    }
-
-    private int getInjectionSetCount(Map<Integer, List<Map<String, List<UUID>>>> filtersIdsMap, UUID networkUuid, String variantId, final int globalCount) {
-        int localCount = globalCount;
-        List<Map<String, List<UUID>>> setInjListMap = filtersIdsMap.get(0);
-        for (Map<String, List<UUID>> setInjMap : setInjListMap) {
-            int perActiveParamCount = 1;
-            perActiveParamCount *= setInjMap.get("injections").size();
-            setInjMap.remove("injections");
-            perActiveParamCount *= getReduced(setInjMap, networkUuid, variantId);
-            localCount += perActiveParamCount;
-        }
-        filtersIdsMap.remove(0);
-        return localCount;
-    }
-
-    private int getReduced(Map<String, List<UUID>> setInjMap, UUID networkUuid, String variantId) {
-        return setInjMap.values().stream()
-                .mapToInt(uuids -> uuids.stream().map(this::getFilter)
-                        .mapToInt(filter -> filter.map(f -> getIdentifiableAttributes(f, networkUuid, variantId).size())
-                                .orElse(1)).sum())
-                .reduce(1, (a, b) -> a * b);
+        return resultMap;
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
