@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.persistence.EntityNotFoundException;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -170,5 +171,17 @@ public class FilterController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ret);
+    }
+
+    @PostMapping(value = "/filters/evaluate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Export matched elements to JSON format")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "The list of matched elements")
+    })
+    public ResponseEntity<List<IdentifiableAttributes>> evaluateFilter(@RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                       @RequestParam(value = "variantId", required = false) String variantId,
+                                                                       @RequestBody AbstractFilter filter) {
+        List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilter(filter, networkUuid, variantId);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
 }

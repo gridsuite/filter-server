@@ -13,6 +13,8 @@ public enum OperatorType {
     // Common
     EQUALS,
     NOT_EQUALS,
+    IN,
+    NOT_IN,
     // Number and String
     EXISTS,
     // Number
@@ -24,5 +26,9 @@ public enum OperatorType {
     IS,
     CONTAINS,
     BEGINS_WITH,
-    ENDS_WITH,
+    ENDS_WITH;
+
+    public static boolean isMultipleCriteriaOperator(OperatorType operator) {
+        return operator == IN || operator == NOT_IN;
+    }
 }
