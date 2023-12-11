@@ -970,14 +970,51 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testComputeFiltersComplexity() throws Exception {
+    public void testGetIdentifiablesCount() throws Exception {
+        UUID filterId1 = UUID.fromString("c88c9510-15b4-468d-89c3-c1c6277966c3");
+        UUID filterId2 = UUID.fromString("1110b06b-9b81-4d31-ac21-450628cd34ff");
+        UUID filterId3 = UUID.fromString("f631034b-ba7c-4bb8-9d61-258a871e9265");
+
+        LineFilter lineFilter1 = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+                .countries1(new TreeSet<>(Set.of("FR"))).countries2(new TreeSet<>(Set.of("FR")))
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
+        CriteriaFilter lineCriteriaFilter1 = new CriteriaFilter(
+                filterId1,
+                new Date(),
+                lineFilter1
+        );
+        insertFilter(filterId1, lineCriteriaFilter1);
+        checkFormFilter(filterId1, lineCriteriaFilter1);
+
+        LineFilter lineFilter2 = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+                .countries1(new TreeSet<>(Set.of("FR"))).countries2(new TreeSet<>(Set.of("FR")))
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
+        CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
+                filterId2,
+                new Date(),
+                lineFilter2
+        );
+        insertFilter(filterId2, lineCriteriaFilter2);
+        checkFormFilter(filterId2, lineCriteriaFilter2);
+
+        LineFilter lineFilter3 = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+                .countries1(new TreeSet<>(Set.of("FR"))).countries2(new TreeSet<>(Set.of("FR")))
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
+        CriteriaFilter lineCriteriaFilter3 = new CriteriaFilter(
+                filterId3,
+                new Date(),
+                lineFilter3
+        );
+        insertFilter(filterId3, lineCriteriaFilter3);
+        checkFormFilter(filterId3, lineCriteriaFilter3);
+
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("networkUuid", NETWORK_UUID.toString());
         params.add("variantId", VARIANT_ID_1);
-        final var json = "{\"monitoredBranches\":[\"c88c9510-15b4-468d-89c3-c1c6277966c3\"],\"injections\":[\"1110b06b-9b81-4d31-ac21-450628cd34ff\"],\"contingencies\":[\"f631034b-ba7c-4bb8-9d61-258a871e9265\"]}]";
+        final var json = "{\"0\":[\"c88c9510-15b4-468d-89c3-c1c6277966c3\"],\"1\":[\"1110b06b-9b81-4d31-ac21-450628cd34ff\"],\"2\":[\"f631034b-ba7c-4bb8-9d61-258a871e9265\"]}]";
 
         Map<String, List<Integer>> filtersComplexityCount = objectMapper.readValue(
-                mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/count")
+                mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/identifiables-count")
                                 .params(params)
                                 .content(json)
                                 .contentType(APPLICATION_JSON))
@@ -985,6 +1022,10 @@ public class FilterEntityControllerTest {
                         .andReturn().getResponse().getContentAsString(),
                 new TypeReference<>() {
                 });
+        assertEquals(1, filtersComplexityCount.get("0").size());
+        assertEquals(1, filtersComplexityCount.get("1").size());
+        assertEquals(1, filtersComplexityCount.get("2").size());
+
         assertEquals(3, filtersComplexityCount.size());
     }
 

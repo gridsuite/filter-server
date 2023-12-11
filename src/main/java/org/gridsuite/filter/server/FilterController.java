@@ -147,15 +147,15 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "/filters/count", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Calculate filters complexity by given ids")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The complexity")})
-    public ResponseEntity<Map<String, List<Integer>>> containersListCount(@RequestBody Map<String, List<UUID>> containerIdsMap,
-                                                @RequestParam(value = "networkUuid") UUID networkUuid,
-                                                @RequestParam(value = "variantId", required = false) String variantId) {
+    @PostMapping(value = "/filters/identifiables-count", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Calculate the total of identifiables for a list of filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Identifiables count")})
+    public ResponseEntity<Map<String, List<Integer>>> getIdentifiablesCount(@RequestBody Map<String, List<UUID>> ids,
+                                                                            @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                            @RequestParam(value = "variantId", required = false) String variantId) {
         return ResponseEntity.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(service.containersListCount(containerIdsMap, networkUuid, variantId));
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(service.getIdentifiablesCount(ids, networkUuid, variantId));
 
     }
 

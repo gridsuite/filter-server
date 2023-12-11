@@ -695,15 +695,11 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
-    public Map<String, List<Integer>> containersListCount(Map<String, List<UUID>> filtersIdsMap, UUID networkUuid, String variantId) {
-        Objects.requireNonNull(filtersIdsMap);
-        Map<String, List<Integer>> resultMap = new HashMap<>();
-        for (String key : filtersIdsMap.keySet()) {
-            List<UUID> uuids = filtersIdsMap.get(key);
-            List<FilterEquipments> filtersEquipments = exportFilters(uuids, networkUuid, variantId);
-            resultMap.put(key, filtersEquipments.stream().map(filterEquipments -> filterEquipments.getIdentifiableAttributes().size()).toList());
-        }
-        return resultMap;
+    public Map<String, List<Integer>> getIdentifiablesCount(Map<String, List<UUID>> ids, UUID networkUuid, String variantId) {
+        Objects.requireNonNull(ids);
+        return ids.entrySet().stream()
+                .map(entry -> Map.entry(entry.getKey(), getFilters(entry.getValue()).stream().map(f -> getIdentifiableAttributes(f, networkUuid, variantId).size()).toList()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
