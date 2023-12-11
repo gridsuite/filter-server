@@ -971,13 +971,13 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testComputeFiltersComplexity() throws Exception {
-        final var json = "{\"3\":[{\"injections\":[\"cf399ef3-7f14-4884-8c82-1c90300da321\"],\"contingencies\":[\"cf399ef3-7f14-4884-8c82-1c90300da323\"],\"monitoredBranchs\":[\"cf399ef3-7f14-4884-8c82-1c90300da322\"]}],\"2\":[{\"injections\":[\"cf399ef3-7f14-4884-8c82-1c90300da322\"],\"contingencies\":[\"cf399ef3-7f14-4884-8c82-1c90300da323\"],\"monitoredBranchs\":[\"cf399ef3-7f14-4884-8c82-1c90300da321\"]}],\"1\":[{\"injections\":[\"cf399ef3-7f14-4884-8c82-1c90300da322\"],\"contingencies\":[\"cf399ef3-7f14-4884-8c82-1c90300da323\"],\"monitoredBranchs\":[\"cf399ef3-7f14-4884-8c82-1c90300da321\"]}],\"0\":[{\"injections\":[\"cf399ef3-7f14-4884-8c82-1c90300da321\"],\"contingencies\":[\"cf399ef3-7f14-4884-8c82-1c90300da323\"],\"monitoredBranchs\":[\"cf399ef3-7f14-4884-8c82-1c90300da322\"]}]}";
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("networkUuid", NETWORK_UUID.toString());
         params.add("variantId", VARIANT_ID_1);
+        final var json = "{\"monitoredBranches\":[\"c88c9510-15b4-468d-89c3-c1c6277966c3\"],\"injections\":[\"1110b06b-9b81-4d31-ac21-450628cd34ff\"],\"contingencies\":[\"f631034b-ba7c-4bb8-9d61-258a871e9265\"]}]";
 
-        Integer filtersComplexityCount = objectMapper.readValue(
-                mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/complexity")
+        Map<String, List<Integer>> filtersComplexityCount = objectMapper.readValue(
+                mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/count")
                                 .params(params)
                                 .content(json)
                                 .contentType(APPLICATION_JSON))
@@ -985,7 +985,7 @@ public class FilterEntityControllerTest {
                         .andReturn().getResponse().getContentAsString(),
                 new TypeReference<>() {
                 });
-        assertEquals(Optional.of(4), Optional.ofNullable(filtersComplexityCount));
+        assertEquals(3, filtersComplexityCount.size());
     }
 
     private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
