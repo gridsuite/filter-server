@@ -1021,8 +1021,7 @@ public class FilterEntityControllerTest {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("networkUuid", NETWORK_UUID.toString());
         params.add("variantId", VARIANT_ID_1);
-        final var json = "{\"0\":[\"c88c9510-15b4-468d-89c3-c1c6277966c3\"],\"1\":[\"1110b06b-9b81-4d31-ac21-450628cd34ff\"],\"2\":[\"f631034b-ba7c-4bb8-9d61-258a871e9265\"], \"3\": [\"77614d91-c168-4f89-8fb9-77a23729e88e\"] }]";
-
+        final var json = TestUtils.resourceToString("/json/identifiables.json");
         Map<String, List<Integer>> filtersComplexityCount = objectMapper.readValue(
                 mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/identifiables-count")
                                 .params(params)
