@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -144,6 +145,18 @@ public class FilterController {
             .contentType(MediaType.APPLICATION_JSON)
             .body(identifiables))
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping(value = "/filters/identifiables-count", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Calculate the total of identifiables for a list of filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Identifiables count")})
+    public ResponseEntity<Map<String, List<Long>>> getIdentifiablesCount(@RequestBody Map<String, List<UUID>> ids,
+                                                                            @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                            @RequestParam(value = "variantId", required = false) String variantId) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(service.getIdentifiablesCount(ids, networkUuid, variantId));
+
     }
 
     @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -969,6 +969,76 @@ public class FilterEntityControllerTest {
 
     }
 
+    @Test
+    public void testGetIdentifiablesCount() throws Exception {
+        UUID filterId1 = UUID.fromString("c88c9510-15b4-468d-89c3-c1c6277966c3");
+        UUID filterId2 = UUID.fromString("1110b06b-9b81-4d31-ac21-450628cd34ff");
+        UUID filterId3 = UUID.fromString("f631034b-ba7c-4bb8-9d61-258a871e9265");
+        UUID filterId4 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        LineFilter lineFilter1 = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+                .countries1(new TreeSet<>(Set.of("FR"))).countries2(new TreeSet<>(Set.of("FR")))
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
+        CriteriaFilter lineCriteriaFilter1 = new CriteriaFilter(
+                filterId1,
+                new Date(),
+                lineFilter1
+        );
+        insertFilter(filterId1, lineCriteriaFilter1);
+        checkFormFilter(filterId1, lineCriteriaFilter1);
+
+        LineFilter lineFilter2 = LineFilter.builder().equipmentID("NHV1_NHV2_2").substationName1("P1").substationName2("P2")
+                .countries1(new TreeSet<>(Set.of("FR"))).countries2(new TreeSet<>(Set.of("FR")))
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
+        CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
+                filterId2,
+                new Date(),
+                lineFilter2
+        );
+        insertFilter(filterId2, lineCriteriaFilter2);
+        checkFormFilter(filterId2, lineCriteriaFilter2);
+
+        Date modificationDate = new Date();
+        CriteriaFilter hvdcLineFilter = new CriteriaFilter(
+                filterId3,
+                modificationDate,
+                HvdcLineFilter.builder().equipmentID("NHV1_NHV2_3").equipmentName("equipmentName_3")
+                        .substationName1("substationName1").substationName2("substationName2")
+                        .countries1(new TreeSet<>(Set.of("FR", "BE"))).countries2(new TreeSet<>(Set.of("FR", "IT")))
+                        .freeProperties2(Map.of("region", List.of("north")))
+                        .nominalVoltage(new NumericalFilter(RangeType.RANGE, 380., 420.))
+                        .build()
+        );
+        insertFilter(filterId3, hvdcLineFilter);
+        checkFormFilter(filterId3, hvdcLineFilter);
+
+        CriteriaFilter substationFilter = new CriteriaFilter(
+                filterId4,
+                new Date(),
+                new SubstationFilter("NHV1_NHV2_4", "equipmentName_4", new TreeSet<>(Set.of("FR", "BE")), null)
+        );
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("networkUuid", NETWORK_UUID.toString());
+        params.add("variantId", VARIANT_ID_1);
+        final var json = TestUtils.resourceToString("/json/identifiables.json");
+        Map<String, List<Integer>> filtersComplexityCount = objectMapper.readValue(
+                mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/identifiables-count")
+                                .params(params)
+                                .content(json)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        assertEquals(1, filtersComplexityCount.get("0").size());
+        assertEquals(1, filtersComplexityCount.get("1").size());
+        assertEquals(1, filtersComplexityCount.get("2").size());
+        assertEquals(0, filtersComplexityCount.get("3").size());
+
+        assertEquals(4, filtersComplexityCount.size());
+    }
+
     private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
         assertEquals(CollectionUtils.isEmpty(filterEquipments1), CollectionUtils.isEmpty(filterEquipments2));
         assertEquals(filterEquipments1.size(), filterEquipments2.size());
