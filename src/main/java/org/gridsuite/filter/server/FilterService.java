@@ -695,6 +695,13 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
+    public Map<String, List<Long>> getIdentifiablesCount(Map<String, List<UUID>> ids, UUID networkUuid, String variantId) {
+        Objects.requireNonNull(ids);
+        return ids.entrySet().stream()
+                .map(entry -> Map.entry(entry.getKey(), getFilters(entry.getValue()).stream().map(f -> (long) getIdentifiableAttributes(f, networkUuid, variantId).size()).toList()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
 
         // we stream on the ids so that we can keep the same order of ids sent
