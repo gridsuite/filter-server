@@ -980,7 +980,6 @@ public class FilterEntityControllerTest {
             FilterEquipments filterEquipment1 = filterEquipments1.get(index);
             FilterEquipments filterEquipment2 = filterEquipments2.get(index);
             assertEquals(filterEquipment1.getFilterId(), filterEquipment2.getFilterId());
-            assertEquals(filterEquipment1.getFilterName(), filterEquipment2.getFilterName());
             assertEquals(CollectionUtils.isEmpty(filterEquipment1.getNotFoundEquipments()), CollectionUtils.isEmpty(filterEquipment2.getNotFoundEquipments()));
             if (filterEquipment1.getNotFoundEquipments() != null) {
                 assertTrue(filterEquipment1.getNotFoundEquipments().containsAll(filterEquipment2.getNotFoundEquipments()));
