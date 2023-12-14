@@ -695,10 +695,10 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
-    public Map<String, List<Integer>> getIdentifiablesCount(Map<String, List<UUID>> ids, UUID networkUuid, String variantId) {
+    public Map<String, List<Long>> getIdentifiablesCount(Map<String, List<UUID>> ids, UUID networkUuid, String variantId) {
         Objects.requireNonNull(ids);
         return ids.entrySet().stream()
-                .map(entry -> Map.entry(entry.getKey(), getFilters(entry.getValue()).stream().map(f -> getIdentifiableAttributes(f, networkUuid, variantId).size()).toList()))
+                .map(entry -> Map.entry(entry.getKey(), getFilters(entry.getValue()).stream().map(f -> (long) getIdentifiableAttributes(f, networkUuid, variantId).size()).toList()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

@@ -150,7 +150,7 @@ public class FilterController {
     @PostMapping(value = "/filters/identifiables-count", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Calculate the total of identifiables for a list of filters")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Identifiables count")})
-    public ResponseEntity<Map<String, List<Integer>>> getIdentifiablesCount(@RequestBody Map<String, List<UUID>> ids,
+    public ResponseEntity<Map<String, List<Long>>> getIdentifiablesCount(@RequestBody Map<String, List<UUID>> ids,
                                                                             @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                             @RequestParam(value = "variantId", required = false) String variantId) {
         return ResponseEntity.ok()
