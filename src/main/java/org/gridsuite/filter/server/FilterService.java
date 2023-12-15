@@ -11,6 +11,7 @@ import com.powsybl.iidm.network.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import org.gridsuite.filter.server.dto.AbstractFilter;
 import org.gridsuite.filter.server.dto.IFilterAttributes;
+import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.dto.criteriafilter.*;
 import org.gridsuite.filter.server.dto.expertfilter.ExpertFilter;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
@@ -695,10 +696,10 @@ public class FilterService {
         return getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId));
     }
 
-    public Map<String, List<Long>> getIdentifiablesCount(Map<String, List<UUID>> ids, UUID networkUuid, String variantId) {
-        Objects.requireNonNull(ids);
-        return ids.entrySet().stream()
-                .map(entry -> Map.entry(entry.getKey(), getFilters(entry.getValue()).stream().map(f -> (long) getIdentifiableAttributes(f, networkUuid, variantId).size()).toList()))
+    public Map<String, Long> getIdentifiablesCountByGroup(IdsByGroup idsByGroup, UUID networkUuid, String variantId) {
+        Objects.requireNonNull(idsByGroup);
+        return idsByGroup.getIds().entrySet().stream()
+                .map(entry -> Map.entry(entry.getKey(), getFilters(entry.getValue()).stream().map(f -> (long) getIdentifiableAttributes(f, networkUuid, variantId).size()).mapToLong(Long::longValue).sum()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
