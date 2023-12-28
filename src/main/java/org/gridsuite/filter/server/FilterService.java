@@ -699,8 +699,13 @@ public class FilterService {
     public Map<String, Long> getIdentifiablesCountByGroup(IdsByGroup idsByGroup, UUID networkUuid, String variantId) {
         Objects.requireNonNull(idsByGroup);
         return idsByGroup.getIds().entrySet().stream()
-                .map(entry -> Map.entry(entry.getKey(), getFilters(entry.getValue()).stream().map(f -> (long) getIdentifiableAttributes(f, networkUuid, variantId).size()).mapToLong(Long::longValue).sum()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> getFilters(entry.getValue()).stream()
+                                .mapToLong(f -> getIdentifiableAttributes(f, networkUuid, variantId).size())
+                                .sum()
+                        )
+                );
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
