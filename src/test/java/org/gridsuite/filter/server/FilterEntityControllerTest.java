@@ -830,8 +830,6 @@ public class FilterEntityControllerTest {
 
         // Create identifier list filter for hvdc
         UUID hvdcFilterId = UUID.randomUUID();
-        IdentifierListFilterEquipmentAttributes hvdc1 = new IdentifierListFilterEquipmentAttributes("threeWT1", null);
-        IdentifierListFilterEquipmentAttributes hvdc2 = new IdentifierListFilterEquipmentAttributes("threeWT2", null);
         IdentifierListFilter hvdcIdentifierListFilter = new IdentifierListFilter(hvdcFilterId, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
         insertFilter(hvdcFilterId, hvdcIdentifierListFilter);
         checkIdentifierListFilter(hvdcFilterId, hvdcIdentifierListFilter);
@@ -943,8 +941,6 @@ public class FilterEntityControllerTest {
                 new TypeReference<>() {
                 });
         IdentifiableAttributes identifiableAttributes = new IdentifiableAttributes("GEN", IdentifiableType.GENERATOR, 1.0);
-        IdentifiableAttributes identifiableAttributes2 = new IdentifiableAttributes("wrongId", IdentifiableType.GENERATOR, 2.0);
-        IdentifiableAttributes identifiableAttributes3 = new IdentifiableAttributes("wrongId2", IdentifiableType.GENERATOR, 3.0);
         IdentifiableAttributes identifiableAttributes4 = new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null);
 
         FilterEquipments filterEquipment1 = FilterEquipments.builder()
@@ -971,10 +967,9 @@ public class FilterEntityControllerTest {
 
     @Test
     public void testGetIdentifiablesCount() throws Exception {
-        UUID filterId1 = UUID.fromString("c88c9510-15b4-468d-89c3-c1c6277966c3");
-        UUID filterId2 = UUID.fromString("1110b06b-9b81-4d31-ac21-450628cd34ff");
-        UUID filterId3 = UUID.fromString("f631034b-ba7c-4bb8-9d61-258a871e9265");
-        UUID filterId4 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        UUID filterId1 = UUID.randomUUID();
+        UUID filterId2 = UUID.randomUUID();
+        UUID filterId3 = UUID.randomUUID();
 
         LineFilter lineFilter1 = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
                 .countries1(new TreeSet<>(Set.of("FR"))).countries2(new TreeSet<>(Set.of("FR")))
@@ -1012,31 +1007,28 @@ public class FilterEntityControllerTest {
         insertFilter(filterId3, hvdcLineFilter);
         checkFormFilter(filterId3, hvdcLineFilter);
 
-        CriteriaFilter substationFilter = new CriteriaFilter(
-                filterId4,
-                new Date(),
-                new SubstationFilter("NHV1_NHV2_4", "equipmentName_4", new TreeSet<>(Set.of("FR", "BE")), null)
-        );
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("networkUuid", NETWORK_UUID.toString());
-        params.add("variantId", VARIANT_ID_1);
-        final var json = TestUtils.resourceToString("/json/identifiables.json");
-        Map<String, List<Integer>> filtersComplexityCount = objectMapper.readValue(
-                mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/identifiables-count")
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>(Map.of(
+                "networkUuid", List.of(NETWORK_UUID.toString()),
+                "variantId", List.of(VARIANT_ID_1),
+                "ids[g1]", List.of(filterId1.toString()),
+                "ids[g2]", List.of(filterId2.toString()),
+                "ids[g3]", List.of(filterId3.toString()),
+                "ids[g4]", List.of(UUID.randomUUID().toString())
+        ));
+        Map<String, Long> identifiablesCount = objectMapper.readValue(
+                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/identifiables-count")
                                 .params(params)
-                                .content(json)
                                 .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString(),
                 new TypeReference<>() {
                 });
-        assertEquals(1, filtersComplexityCount.get("0").size());
-        assertEquals(1, filtersComplexityCount.get("1").size());
-        assertEquals(1, filtersComplexityCount.get("2").size());
-        assertEquals(0, filtersComplexityCount.get("3").size());
+        assertEquals(1, identifiablesCount.get("g1").longValue());
+        assertEquals(1, identifiablesCount.get("g2").longValue());
+        assertEquals(0, identifiablesCount.get("g3").longValue());
+        assertEquals(0, identifiablesCount.get("g4").longValue());
 
-        assertEquals(4, filtersComplexityCount.size());
+        assertEquals(4, identifiablesCount.size());
     }
 
     private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
