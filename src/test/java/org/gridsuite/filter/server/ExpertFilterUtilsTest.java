@@ -6,11 +6,8 @@
  */
 package org.gridsuite.filter.server;
 
-import com.powsybl.iidm.network.EnergySource;
-import com.powsybl.iidm.network.Generator;
-import com.powsybl.iidm.network.IdentifiableType;
-import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
@@ -292,7 +289,7 @@ public class ExpertFilterUtilsTest {
         assertTrue(inFilter.evaluateRule(gen1));
 
         // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
-        NumberExpertRule numberInRule = NumberExpertRule.builder().values(Set.of(13.0, 17.0))
+        NumberExpertRule numberInRule = NumberExpertRule.builder().values(List.of(13.0, 17.0))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
         inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(numberInRule)).build();
 
@@ -334,7 +331,7 @@ public class ExpertFilterUtilsTest {
         assertTrue(notInFilter.evaluateRule(gen2));
 
         // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
-        NumberExpertRule numberNotInRule = NumberExpertRule.builder().values(Set.of(13.0, 17.0))
+        NumberExpertRule numberNotInRule = NumberExpertRule.builder().values(List.of(13.0, 17.0))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
         notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(numberNotInRule)).build();
 
@@ -348,5 +345,19 @@ public class ExpertFilterUtilsTest {
 
         // Check gen2 must be not in the list
         assertTrue(notInFilter.evaluateRule(gen2));
+    }
+
+    @Test
+    public void testEvaluateExpertFilterBetweenOperator() {
+        List<AbstractExpertRule> numRules = new ArrayList<>();
+        numRules.add(NumberExpertRule.builder().values(List.of(50.0, 150.0)).field(FieldType.MAX_P).operator(OperatorType.BETWEEN).build());
+        CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
+
+        // Test OK
+        assertTrue(numFilter.evaluateRule(gen));
+
+        // Test not OK
+        Mockito.when(gen.getMaxP()).thenReturn(200.0);
+        assertFalse(numFilter.evaluateRule(gen));
     }
 }

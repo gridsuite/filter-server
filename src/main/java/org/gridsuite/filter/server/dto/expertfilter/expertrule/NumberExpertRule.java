@@ -16,9 +16,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
+import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
@@ -37,8 +38,8 @@ public class NumberExpertRule extends AbstractExpertRule {
     private Double value;
 
     @Schema(description = "Values")
-    @JsonDeserialize(as = HashSet.class)
-    private Set<Double> values;
+    @JsonDeserialize(as = ArrayList.class)
+    private List<Double> values;
 
     public static Double getNumberValue(String value) {
         return Double.parseDouble(value);
@@ -57,15 +58,22 @@ public class NumberExpertRule extends AbstractExpertRule {
             return false;
         }
         Double filterValue = this.getValue();
+        List<Double> filterValues = this.getValues();
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue.equals(filterValue);
             case GREATER_OR_EQUALS -> identifiableValue.compareTo(filterValue) >= 0;
             case GREATER -> identifiableValue.compareTo(filterValue) > 0;
             case LOWER_OR_EQUALS -> identifiableValue.compareTo(filterValue) <= 0;
+            case BETWEEN -> {
+                if (filterValues.size() != 2) {
+                    throw new PowsyblException(OperatorType.BETWEEN + " operator only accept 2 values, actual array contains " + filterValues);
+                }
+                yield identifiableValue.compareTo(filterValues.get(0)) >= 0 && identifiableValue.compareTo(filterValues.get(1)) <= 0;
+            }
             case LOWER -> identifiableValue.compareTo(filterValue) < 0;
             case EXISTS -> true; // We return true here because we already test above if identifiableValue is NaN.
-            case IN -> this.getValues().contains(identifiableValue);
-            case NOT_IN -> !this.getValues().contains(identifiableValue);
+            case IN -> filterValues.contains(identifiableValue);
+            case NOT_IN -> !filterValues.contains(identifiableValue);
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }

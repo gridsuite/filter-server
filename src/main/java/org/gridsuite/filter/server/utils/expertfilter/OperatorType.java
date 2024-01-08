@@ -22,6 +22,7 @@ public enum OperatorType {
     LOWER_OR_EQUALS,
     GREATER,
     GREATER_OR_EQUALS,
+    BETWEEN,
     // String
     IS,
     CONTAINS,
@@ -29,6 +30,6 @@ public enum OperatorType {
     ENDS_WITH;
 
     public static boolean isMultipleCriteriaOperator(OperatorType operator) {
-        return operator == IN || operator == NOT_IN;
+        return operator == IN || operator == NOT_IN || operator == BETWEEN;
     }
 }
