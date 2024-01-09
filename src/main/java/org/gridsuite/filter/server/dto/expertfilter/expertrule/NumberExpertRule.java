@@ -16,9 +16,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
-import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
@@ -72,7 +73,8 @@ public class NumberExpertRule extends AbstractExpertRule {
             case EXISTS -> true; // We return true here because we already test above if identifiableValue is NaN.
             case IN -> filterValues.contains(identifiableValue);
             case NOT_IN -> !filterValues.contains(identifiableValue);
-            default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
+            default ->
+                throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
 
