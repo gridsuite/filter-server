@@ -30,7 +30,7 @@ public class ExpertFilterUtilsTest {
     private Generator gen;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         gen = Mockito.mock(Generator.class);
         Mockito.when(gen.getType()).thenReturn(IdentifiableType.GENERATOR);
         Mockito.when(gen.getMinP()).thenReturn(-500.0);
@@ -43,7 +43,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithANDCombination() {
+    void testEvaluateExpertFilterWithANDCombination() {
         List<AbstractExpertRule> andRules1 = new ArrayList<>();
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.LOWER).build();
@@ -85,7 +85,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithFalseANDCombination() {
+    void testEvaluateExpertFilterWithFalseANDCombination() {
         List<AbstractExpertRule> andRules1 = new ArrayList<>();
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.LOWER).build();
@@ -112,7 +112,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithORCombination() {
+    void testEvaluateExpertFilterWithORCombination() {
         List<AbstractExpertRule> orRules1 = new ArrayList<>();
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.LOWER).build();
@@ -139,7 +139,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithFalseORCombination() {
+    void testEvaluateExpertFilterWithFalseORCombination() {
         List<AbstractExpertRule> orRules1 = new ArrayList<>();
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.GREATER).build(); // false
@@ -184,7 +184,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterIgnoreCase() {
+    void testEvaluateExpertFilterIgnoreCase() {
         List<AbstractExpertRule> andRules1 = new ArrayList<>();
         StringExpertRule rule1 = StringExpertRule.builder().value("id")
                 .field(FieldType.ID).operator(OperatorType.CONTAINS).build();
@@ -218,7 +218,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterExists() {
+    void testEvaluateExpertFilterExists() {
         List<AbstractExpertRule> numRules = new ArrayList<>();
         numRules.add(NumberExpertRule.builder().field(FieldType.TARGET_V).operator(OperatorType.EXISTS).build());
         CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
@@ -243,7 +243,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterExtension() {
+    void testEvaluateExpertFilterExtension() {
         List<AbstractExpertRule> numRules = new ArrayList<>();
         numRules.add(NumberExpertRule.builder().field(FieldType.PLANNED_ACTIVE_POWER_SET_POINT).operator(OperatorType.EXISTS).build());
         CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
@@ -259,7 +259,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterInAndNotInOperators() {
+    void testEvaluateExpertFilterInAndNotInOperators() {
 
         // --- Test IN Operator --- //
 
@@ -348,7 +348,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterBetweenOperator() {
+    void testEvaluateExpertFilterBetweenOperator() {
         List<AbstractExpertRule> numRules = List.of(NumberExpertRule.builder().values(List.of(50.0, 150.0)).field(FieldType.MAX_P).operator(OperatorType.BETWEEN).build());
         CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
 
