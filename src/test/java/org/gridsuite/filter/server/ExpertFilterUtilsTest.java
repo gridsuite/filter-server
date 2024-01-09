@@ -6,14 +6,15 @@
  */
 package org.gridsuite.filter.server;
 
+import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
 import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -21,15 +22,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 public class ExpertFilterUtilsTest {
 
     private Generator gen;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         gen = Mockito.mock(Generator.class);
         Mockito.when(gen.getType()).thenReturn(IdentifiableType.GENERATOR);
@@ -349,8 +349,7 @@ public class ExpertFilterUtilsTest {
 
     @Test
     public void testEvaluateExpertFilterBetweenOperator() {
-        List<AbstractExpertRule> numRules = new ArrayList<>();
-        numRules.add(NumberExpertRule.builder().values(List.of(50.0, 150.0)).field(FieldType.MAX_P).operator(OperatorType.BETWEEN).build());
+        List<AbstractExpertRule> numRules = List.of(NumberExpertRule.builder().values(List.of(50.0, 150.0)).field(FieldType.MAX_P).operator(OperatorType.BETWEEN).build());
         CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
 
         // Test OK
@@ -359,5 +358,13 @@ public class ExpertFilterUtilsTest {
         // Test not OK
         Mockito.when(gen.getMaxP()).thenReturn(200.0);
         assertFalse(numFilter.evaluateRule(gen));
+
+        Mockito.when(gen.getMaxP()).thenReturn(20.0);
+        assertFalse(numFilter.evaluateRule(gen));
+
+        List<Double> filterValues = List.of(50.0, 150.0, 250.0);
+        numRules = List.of(NumberExpertRule.builder().values(filterValues).field(FieldType.MAX_P).operator(OperatorType.BETWEEN).build());
+        CombinatorExpertRule numFilterError = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
+        assertThrows(PowsyblException.class, () -> numFilterError.evaluateRule(gen), OperatorType.BETWEEN + " operator only accept 2 values, actual array contains " + filterValues);
     }
 }
