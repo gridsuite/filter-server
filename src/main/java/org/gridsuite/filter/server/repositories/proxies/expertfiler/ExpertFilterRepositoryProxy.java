@@ -74,7 +74,7 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                         .operator(filterEntity.getOperator());
                 if (filterEntity.getValue() != null) {
                     if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
-                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).map(Double::valueOf).toList());
+                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).map(Double::valueOf).collect(Collectors.toSet()));
                     } else { // for single value
                         ruleBuilder.value(Double.valueOf(filterEntity.getValue()));
                     }
