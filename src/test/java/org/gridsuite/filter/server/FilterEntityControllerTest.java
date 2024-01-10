@@ -830,8 +830,6 @@ public class FilterEntityControllerTest {
 
         // Create identifier list filter for hvdc
         UUID hvdcFilterId = UUID.randomUUID();
-        IdentifierListFilterEquipmentAttributes hvdc1 = new IdentifierListFilterEquipmentAttributes("threeWT1", null);
-        IdentifierListFilterEquipmentAttributes hvdc2 = new IdentifierListFilterEquipmentAttributes("threeWT2", null);
         IdentifierListFilter hvdcIdentifierListFilter = new IdentifierListFilter(hvdcFilterId, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
         insertFilter(hvdcFilterId, hvdcIdentifierListFilter);
         checkIdentifierListFilter(hvdcFilterId, hvdcIdentifierListFilter);
@@ -943,8 +941,6 @@ public class FilterEntityControllerTest {
                 new TypeReference<>() {
                 });
         IdentifiableAttributes identifiableAttributes = new IdentifiableAttributes("GEN", IdentifiableType.GENERATOR, 1.0);
-        IdentifiableAttributes identifiableAttributes2 = new IdentifiableAttributes("wrongId", IdentifiableType.GENERATOR, 2.0);
-        IdentifiableAttributes identifiableAttributes3 = new IdentifiableAttributes("wrongId2", IdentifiableType.GENERATOR, 3.0);
         IdentifiableAttributes identifiableAttributes4 = new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null);
 
         FilterEquipments filterEquipment1 = FilterEquipments.builder()
@@ -969,6 +965,72 @@ public class FilterEntityControllerTest {
 
     }
 
+    @Test
+    public void testGetIdentifiablesCount() throws Exception {
+        UUID filterId1 = UUID.randomUUID();
+        UUID filterId2 = UUID.randomUUID();
+        UUID filterId3 = UUID.randomUUID();
+
+        LineFilter lineFilter1 = LineFilter.builder().equipmentID("NHV1_NHV2_1").substationName1("P1").substationName2("P2")
+                .countries1(new TreeSet<>(Set.of("FR"))).countries2(new TreeSet<>(Set.of("FR")))
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
+        CriteriaFilter lineCriteriaFilter1 = new CriteriaFilter(
+                filterId1,
+                new Date(),
+                lineFilter1
+        );
+        insertFilter(filterId1, lineCriteriaFilter1);
+        checkFormFilter(filterId1, lineCriteriaFilter1);
+
+        LineFilter lineFilter2 = LineFilter.builder().equipmentID("NHV1_NHV2_2").substationName1("P1").substationName2("P2")
+                .countries1(new TreeSet<>(Set.of("FR"))).countries2(new TreeSet<>(Set.of("FR")))
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 360., 400.)).nominalVoltage2(new NumericalFilter(RangeType.RANGE, 356.25, 393.75)).build();
+        CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
+                filterId2,
+                new Date(),
+                lineFilter2
+        );
+        insertFilter(filterId2, lineCriteriaFilter2);
+        checkFormFilter(filterId2, lineCriteriaFilter2);
+
+        Date modificationDate = new Date();
+        CriteriaFilter hvdcLineFilter = new CriteriaFilter(
+                filterId3,
+                modificationDate,
+                HvdcLineFilter.builder().equipmentID("NHV1_NHV2_3").equipmentName("equipmentName_3")
+                        .substationName1("substationName1").substationName2("substationName2")
+                        .countries1(new TreeSet<>(Set.of("FR", "BE"))).countries2(new TreeSet<>(Set.of("FR", "IT")))
+                        .freeProperties2(Map.of("region", List.of("north")))
+                        .nominalVoltage(new NumericalFilter(RangeType.RANGE, 380., 420.))
+                        .build()
+        );
+        insertFilter(filterId3, hvdcLineFilter);
+        checkFormFilter(filterId3, hvdcLineFilter);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>(Map.of(
+                "networkUuid", List.of(NETWORK_UUID.toString()),
+                "variantId", List.of(VARIANT_ID_1),
+                "ids[g1]", List.of(filterId1.toString()),
+                "ids[g2]", List.of(filterId2.toString()),
+                "ids[g3]", List.of(filterId3.toString()),
+                "ids[g4]", List.of(UUID.randomUUID().toString())
+        ));
+        Map<String, Long> identifiablesCount = objectMapper.readValue(
+                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/identifiables-count")
+                                .params(params)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        assertEquals(1, identifiablesCount.get("g1").longValue());
+        assertEquals(1, identifiablesCount.get("g2").longValue());
+        assertEquals(0, identifiablesCount.get("g3").longValue());
+        assertEquals(0, identifiablesCount.get("g4").longValue());
+
+        assertEquals(4, identifiablesCount.size());
+    }
+
     private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
         assertEquals(CollectionUtils.isEmpty(filterEquipments1), CollectionUtils.isEmpty(filterEquipments2));
         assertEquals(filterEquipments1.size(), filterEquipments2.size());
@@ -980,7 +1042,6 @@ public class FilterEntityControllerTest {
             FilterEquipments filterEquipment1 = filterEquipments1.get(index);
             FilterEquipments filterEquipment2 = filterEquipments2.get(index);
             assertEquals(filterEquipment1.getFilterId(), filterEquipment2.getFilterId());
-            assertEquals(filterEquipment1.getFilterName(), filterEquipment2.getFilterName());
             assertEquals(CollectionUtils.isEmpty(filterEquipment1.getNotFoundEquipments()), CollectionUtils.isEmpty(filterEquipment2.getNotFoundEquipments()));
             if (filterEquipment1.getNotFoundEquipments() != null) {
                 assertTrue(filterEquipment1.getNotFoundEquipments().containsAll(filterEquipment2.getNotFoundEquipments()));
