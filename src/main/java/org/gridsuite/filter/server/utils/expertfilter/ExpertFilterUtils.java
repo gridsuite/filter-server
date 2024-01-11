@@ -17,9 +17,9 @@ import java.util.Optional;
  */
 public final class ExpertFilterUtils {
 
-    public static final String FIELD_AND_TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER = "Field and type are not implemented with expert filter";
+    public static final String FIELD_AND_TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER = "These field and type are not implemented with expert filter";
 
-    public static final String TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER = "Type is not implemented with expert filter";
+    public static final String TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER = "This type is not implemented with expert filter";
 
     private ExpertFilterUtils() { }
 
