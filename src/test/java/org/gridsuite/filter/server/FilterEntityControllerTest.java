@@ -1666,7 +1666,7 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
 
         // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
-        NumberExpertRule numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(24.0)))
+        NumberExpertRule numberInRule = NumberExpertRule.builder().values(Set.of(24.0))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
         inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
 
@@ -1678,7 +1678,7 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
 
         // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
-        numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(12.0)))
+        numberInRule = NumberExpertRule.builder().values(Set.of(12.0))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
         inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
 
