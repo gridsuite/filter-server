@@ -6,17 +6,14 @@
  */
 package org.gridsuite.filter.server;
 
-import com.powsybl.iidm.network.EnergySource;
-import com.powsybl.iidm.network.Generator;
-import com.powsybl.iidm.network.IdentifiableType;
-import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
 import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -24,16 +21,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 public class ExpertFilterUtilsTest {
 
     private Generator gen;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         gen = Mockito.mock(Generator.class);
         Mockito.when(gen.getType()).thenReturn(IdentifiableType.GENERATOR);
         Mockito.when(gen.getMinP()).thenReturn(-500.0);
@@ -46,7 +43,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithANDCombination() {
+    void testEvaluateExpertFilterWithANDCombination() {
         List<AbstractExpertRule> andRules1 = new ArrayList<>();
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.LOWER).build();
@@ -88,7 +85,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithFalseANDCombination() {
+    void testEvaluateExpertFilterWithFalseANDCombination() {
         List<AbstractExpertRule> andRules1 = new ArrayList<>();
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.LOWER).build();
@@ -115,7 +112,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithORCombination() {
+    void testEvaluateExpertFilterWithORCombination() {
         List<AbstractExpertRule> orRules1 = new ArrayList<>();
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.LOWER).build();
@@ -142,7 +139,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithFalseORCombination() {
+    void testEvaluateExpertFilterWithFalseORCombination() {
         List<AbstractExpertRule> orRules1 = new ArrayList<>();
         NumberExpertRule numRule1 = NumberExpertRule.builder().value(0.0)
                 .field(FieldType.MIN_P).operator(OperatorType.GREATER).build(); // false
@@ -187,7 +184,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterIgnoreCase() {
+    void testEvaluateExpertFilterIgnoreCase() {
         List<AbstractExpertRule> andRules1 = new ArrayList<>();
         StringExpertRule rule1 = StringExpertRule.builder().value("id")
                 .field(FieldType.ID).operator(OperatorType.CONTAINS).build();
@@ -221,7 +218,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterExists() {
+    void testEvaluateExpertFilterExists() {
         List<AbstractExpertRule> numRules = new ArrayList<>();
         numRules.add(NumberExpertRule.builder().field(FieldType.TARGET_V).operator(OperatorType.EXISTS).build());
         CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
@@ -246,7 +243,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterExtension() {
+    void testEvaluateExpertFilterExtension() {
         List<AbstractExpertRule> numRules = new ArrayList<>();
         numRules.add(NumberExpertRule.builder().field(FieldType.PLANNED_ACTIVE_POWER_SET_POINT).operator(OperatorType.EXISTS).build());
         CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
@@ -262,7 +259,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterInAndNotInOperators() {
+    void testEvaluateExpertFilterInAndNotInOperators() {
 
         // --- Test IN Operator --- //
 
@@ -348,5 +345,21 @@ public class ExpertFilterUtilsTest {
 
         // Check gen2 must be not in the list
         assertTrue(notInFilter.evaluateRule(gen2));
+    }
+
+    @Test
+    void testEvaluateExpertFilterBetweenOperator() {
+        List<AbstractExpertRule> numRules = List.of(NumberExpertRule.builder().values(Set.of(50.0, 150.0)).field(FieldType.MAX_P).operator(OperatorType.BETWEEN).build());
+        CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
+
+        // Test OK
+        assertTrue(numFilter.evaluateRule(gen));
+
+        // Test not OK
+        Mockito.when(gen.getMaxP()).thenReturn(200.0);
+        assertFalse(numFilter.evaluateRule(gen));
+
+        Mockito.when(gen.getMaxP()).thenReturn(20.0);
+        assertFalse(numFilter.evaluateRule(gen));
     }
 }

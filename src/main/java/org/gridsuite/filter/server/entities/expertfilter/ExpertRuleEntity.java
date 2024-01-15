@@ -42,6 +42,7 @@ public class ExpertRuleEntity {
     @Column(name = "field")
     private FieldType field;
 
+    // TODO FM this string can store an array too (',' separated), we should store an array because right now it's limited to 255 char
     @Column(name = "value_") // "value" is not supported in UT with H2
     private String value;
 

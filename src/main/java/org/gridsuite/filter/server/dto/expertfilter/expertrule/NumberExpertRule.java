@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,16 +58,23 @@ public class NumberExpertRule extends AbstractExpertRule {
             return false;
         }
         Double filterValue = this.getValue();
+        Set<Double> filterValues = this.getValues();
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue.equals(filterValue);
             case GREATER_OR_EQUALS -> identifiableValue.compareTo(filterValue) >= 0;
             case GREATER -> identifiableValue.compareTo(filterValue) > 0;
             case LOWER_OR_EQUALS -> identifiableValue.compareTo(filterValue) <= 0;
+            case BETWEEN -> {
+                Double lowerLimit = Collections.min(filterValues);
+                Double upperLimit = Collections.max(filterValues);
+                yield identifiableValue.compareTo(lowerLimit) >= 0 && identifiableValue.compareTo(upperLimit) <= 0;
+            }
             case LOWER -> identifiableValue.compareTo(filterValue) < 0;
             case EXISTS -> true; // We return true here because we already test above if identifiableValue is NaN.
-            case IN -> this.getValues().contains(identifiableValue);
-            case NOT_IN -> !this.getValues().contains(identifiableValue);
-            default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
+            case IN -> filterValues.contains(identifiableValue);
+            case NOT_IN -> !filterValues.contains(identifiableValue);
+            default ->
+                throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }
 
