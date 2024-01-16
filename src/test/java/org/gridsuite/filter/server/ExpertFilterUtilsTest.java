@@ -25,7 +25,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
-public class ExpertFilterUtilsTest {
+class ExpertFilterUtilsTest {
 
     private Generator gen;
 
@@ -364,7 +364,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterBusAndBusBarSectionWithInAndNotIn() {
+    void testEvaluateExpertFilterBusAndBusBarSectionWithInAndNotIn() {
 
         // --- Test IN Operator --- //
 
@@ -487,7 +487,7 @@ public class ExpertFilterUtilsTest {
     }
 
     @Test
-    public void testEvaluateExpertFilterWithException() {
+    void testEvaluateExpertFilterWithException() {
 
         Network network = Mockito.mock(Network.class);
         Mockito.when(network.getType()).thenReturn(IdentifiableType.NETWORK);
