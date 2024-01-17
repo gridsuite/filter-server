@@ -603,7 +603,7 @@ public class FilterService {
             Stream<Identifiable<?>> stream = network.getVoltageLevelStream()
                     .filter(voltageLevelFilter)
                     .map(VoltageLevel::getBusBreakerView)
-                    .flatMap(VoltageLevel.BusBreakerView::getBusStream).map(bus -> bus);
+                    .flatMap(VoltageLevel.BusBreakerView::getBusStream);
 
             var rule = expertFilter.getRules();
             return stream.filter(rule::evaluateRule).toList();

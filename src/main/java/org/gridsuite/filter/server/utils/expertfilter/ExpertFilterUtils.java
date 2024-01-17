@@ -17,9 +17,9 @@ import java.util.Optional;
  */
 public final class ExpertFilterUtils {
 
-    public static final String FIELD_AND_TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER = "These field and type are not implemented with expert filter";
+    public static final String FIELD_AND_TYPE_NOT_IMPLEMENTED = "These field and type are not implemented with expert filter";
 
-    public static final String TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER = "This type is not implemented with expert filter";
+    public static final String TYPE_NOT_IMPLEMENTED = "This type is not implemented with expert filter";
 
     private ExpertFilterUtils() { }
 
@@ -33,7 +33,7 @@ public final class ExpertFilterUtils {
                 case LOAD -> getLoadFieldValue(field, (Load) identifiable);
                 case BUS -> getBusFieldValue(field, (Bus) identifiable);
                 case BUSBAR_SECTION -> getBusBarSectionFieldValue(field, (BusbarSection) identifiable);
-                default -> throw new PowsyblException(TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER + " [" + identifiable.getType() + "]");
+                default -> throw new PowsyblException(TYPE_NOT_IMPLEMENTED + " [" + identifiable.getType() + "]");
             };
         };
     }
@@ -46,7 +46,7 @@ public final class ExpertFilterUtils {
             }
             case NOMINAL_VOLTAGE -> String.valueOf(voltageLevel.getNominalV());
             case VOLTAGE_LEVEL_ID -> voltageLevel.getId();
-            default -> throw new PowsyblException(FIELD_AND_TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER + " [" + field + "," + voltageLevel.getType() + "]");
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + voltageLevel.getType() + "]");
         };
     }
 
@@ -55,7 +55,7 @@ public final class ExpertFilterUtils {
             case COUNTRY,
                 NOMINAL_VOLTAGE,
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, load.getTerminal().getVoltageLevel());
-            default -> throw new PowsyblException(FIELD_AND_TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER + " [" + field + "," + load.getType() + "]");
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + load.getType() + "]");
 
         };
     }
@@ -79,7 +79,7 @@ public final class ExpertFilterUtils {
             case COUNTRY,
                 NOMINAL_VOLTAGE,
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, generator.getTerminal().getVoltageLevel());
-            default -> throw new PowsyblException(FIELD_AND_TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER + " [" + field + "," + generator.getType() + "]");
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + generator.getType() + "]");
         };
     }
 
@@ -88,7 +88,7 @@ public final class ExpertFilterUtils {
             case COUNTRY,
                 NOMINAL_VOLTAGE,
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, bus.getVoltageLevel());
-            default -> throw new PowsyblException(FIELD_AND_TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER + " [" + field + "," + bus.getType() + "]");
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + bus.getType() + "]");
         };
     }
 
@@ -97,7 +97,7 @@ public final class ExpertFilterUtils {
             case COUNTRY,
                 NOMINAL_VOLTAGE,
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, busbarSection.getTerminal().getVoltageLevel());
-            default -> throw new PowsyblException(FIELD_AND_TYPE_IS_NOT_IMPLEMENTED_WITH_EXPERT_FILTER + " [" + field + "," + busbarSection.getType() + "]");
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + busbarSection.getType() + "]");
         };
     }
 }
