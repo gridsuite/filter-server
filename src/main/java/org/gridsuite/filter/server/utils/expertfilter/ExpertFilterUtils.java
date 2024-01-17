@@ -9,6 +9,7 @@ package org.gridsuite.filter.server.utils.expertfilter;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -36,6 +37,7 @@ public final class ExpertFilterUtils {
             }
             case NOMINAL_VOLTAGE -> String.valueOf(injection.getTerminal().getVoltageLevel().getNominalV());
             case VOLTAGE_LEVEL_ID -> injection.getTerminal().getVoltageLevel().getId();
+            case CONNECTED -> String.valueOf(injection.getTerminal().isConnected());
             default -> throw new PowsyblException("Field " + field + " with " + injection.getType() + " injection type is not implemented with expert filter");
         };
     }
@@ -55,14 +57,29 @@ public final class ExpertFilterUtils {
             case TARGET_P -> String.valueOf(generator.getTargetP());
             case TARGET_Q -> String.valueOf(generator.getTargetQ());
             case VOLTAGE_REGULATOR_ON -> String.valueOf(generator.isVoltageRegulatorOn());
-            case PLANNED_ACTIVE_POWER_SET_POINT -> {
-                GeneratorStartup generatorStartup = generator.getExtension(GeneratorStartup.class);
-                if (generatorStartup != null) {
-                    yield String.valueOf(generatorStartup.getPlannedActivePowerSetpoint());
-                }
-                yield String.valueOf(Double.NaN);
-            }
+            case PLANNED_ACTIVE_POWER_SET_POINT,
+                MARGINAL_COST,
+                PLANNED_OUTAGE_RATE,
+                FORCED_OUTAGE_RATE ->
+                getGeneratorStartupField(generator, field);
+            case RATED_S -> String.valueOf(generator.getRatedS());
             default -> getInjectionFieldValue(field, generator);
         };
+    }
+
+    @NotNull
+    private static String getGeneratorStartupField(Generator generator, FieldType fieldType) {
+        GeneratorStartup generatorStartup = generator.getExtension(GeneratorStartup.class);
+        if (generatorStartup != null) {
+            return String.valueOf(switch (fieldType) {
+                case PLANNED_ACTIVE_POWER_SET_POINT -> generatorStartup.getPlannedActivePowerSetpoint();
+                case MARGINAL_COST -> generatorStartup.getMarginalCost();
+                case PLANNED_OUTAGE_RATE -> generatorStartup.getPlannedOutageRate();
+                case FORCED_OUTAGE_RATE -> generatorStartup.getForcedOutageRate();
+                default -> String.valueOf(Double.NaN);
+            });
+        } else {
+            return String.valueOf(Double.NaN);
+        }
     }
 }

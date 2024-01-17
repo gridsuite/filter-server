@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
-public class ExpertFilterUtilsTest {
+class ExpertFilterUtilsTest {
 
     private Generator gen;
 
@@ -246,6 +246,9 @@ public class ExpertFilterUtilsTest {
     void testEvaluateExpertFilterExtension() {
         List<AbstractExpertRule> numRules = new ArrayList<>();
         numRules.add(NumberExpertRule.builder().field(FieldType.PLANNED_ACTIVE_POWER_SET_POINT).operator(OperatorType.EXISTS).build());
+        numRules.add(NumberExpertRule.builder().field(FieldType.MARGINAL_COST).value(50.0).operator(OperatorType.EQUALS).build());
+        numRules.add(NumberExpertRule.builder().field(FieldType.PLANNED_OUTAGE_RATE).value(50.0).operator(OperatorType.EQUALS).build());
+        numRules.add(NumberExpertRule.builder().field(FieldType.FORCED_OUTAGE_RATE).value(50.0).operator(OperatorType.EQUALS).build());
         CombinatorExpertRule numFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(numRules).build();
 
         // Test when extension does not exist
@@ -254,6 +257,9 @@ public class ExpertFilterUtilsTest {
         // Test with extension
         GeneratorStartup genStart = Mockito.mock(GeneratorStartup.class);
         Mockito.when(genStart.getPlannedActivePowerSetpoint()).thenReturn(50.0);
+        Mockito.when(genStart.getMarginalCost()).thenReturn(50.0);
+        Mockito.when(genStart.getPlannedOutageRate()).thenReturn(50.0);
+        Mockito.when(genStart.getForcedOutageRate()).thenReturn(50.0);
         Mockito.when(gen.getExtension(any())).thenReturn(genStart);
         assertTrue(numFilter.evaluateRule(gen));
     }
