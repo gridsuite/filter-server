@@ -71,13 +71,14 @@ public final class ExpertFilterUtils {
     private static String getGeneratorStartupField(Generator generator, FieldType fieldType) {
         GeneratorStartup generatorStartup = generator.getExtension(GeneratorStartup.class);
         if (generatorStartup != null) {
-            return String.valueOf(switch (fieldType) {
-                case PLANNED_ACTIVE_POWER_SET_POINT -> generatorStartup.getPlannedActivePowerSetpoint();
-                case MARGINAL_COST -> generatorStartup.getMarginalCost();
-                case PLANNED_OUTAGE_RATE -> generatorStartup.getPlannedOutageRate();
-                case FORCED_OUTAGE_RATE -> generatorStartup.getForcedOutageRate();
-                default -> String.valueOf(Double.NaN);
-            });
+            return String.valueOf(
+                switch (fieldType) {
+                    case PLANNED_ACTIVE_POWER_SET_POINT -> generatorStartup.getPlannedActivePowerSetpoint();
+                    case MARGINAL_COST -> generatorStartup.getMarginalCost();
+                    case PLANNED_OUTAGE_RATE -> generatorStartup.getPlannedOutageRate();
+                    case FORCED_OUTAGE_RATE -> generatorStartup.getForcedOutageRate();
+                    default -> String.valueOf(Double.NaN);
+                });
         } else {
             return String.valueOf(Double.NaN);
         }
