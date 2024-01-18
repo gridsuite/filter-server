@@ -40,6 +40,7 @@ class ExpertFilterUtilsTest {
         Mockito.when(gen.getNameOrId()).thenReturn("NAME");
         Mockito.when(gen.getEnergySource()).thenReturn(EnergySource.HYDRO);
         Mockito.when(gen.isVoltageRegulatorOn()).thenReturn(true);
+        Mockito.when(gen.getRatedS()).thenReturn(60.0);
     }
 
     @Test
@@ -54,6 +55,9 @@ class ExpertFilterUtilsTest {
         NumberExpertRule numRule3 = NumberExpertRule.builder().value(100.0)
                 .field(FieldType.MAX_P).operator(OperatorType.GREATER_OR_EQUALS).build();
         andRules1.add(numRule3);
+        NumberExpertRule numRule31 = NumberExpertRule.builder().value(40.0)
+            .field(FieldType.RATED_S).operator(OperatorType.GREATER).build();
+        andRules1.add(numRule31);
         CombinatorExpertRule andCombination = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules1).build();
 
         List<AbstractExpertRule> andRules2 = new ArrayList<>();
@@ -367,5 +371,22 @@ class ExpertFilterUtilsTest {
 
         Mockito.when(gen.getMaxP()).thenReturn(20.0);
         assertFalse(numFilter.evaluateRule(gen));
+    }
+
+    @Test
+    void testConnectedField() {
+        List<AbstractExpertRule> boolRule = List.of(BooleanExpertRule.builder().value(true).field(FieldType.CONNECTED).operator(OperatorType.EQUALS).build());
+        CombinatorExpertRule boolFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(boolRule).build();
+
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(gen.getTerminal()).thenReturn(terminal);
+
+        // Test OK
+        Mockito.when(terminal.isConnected()).thenReturn(true);
+        assertTrue(boolFilter.evaluateRule(gen));
+
+        // Test not OK
+        Mockito.when(terminal.isConnected()).thenReturn(false);
+        assertFalse(boolFilter.evaluateRule(gen));
     }
 }
