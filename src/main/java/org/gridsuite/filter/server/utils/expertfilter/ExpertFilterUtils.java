@@ -16,33 +16,47 @@ import java.util.Optional;
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
 public final class ExpertFilterUtils {
+
+    public static final String FIELD_AND_TYPE_NOT_IMPLEMENTED = "This field and equipment type combination is not implemented with expert filter";
+
+    public static final String TYPE_NOT_IMPLEMENTED = "This equipment type is not implemented with expert filter";
+
     private ExpertFilterUtils() { }
 
     public static <I extends Identifiable<I>> String getFieldValue(FieldType field, Identifiable<I> identifiable) {
-        return switch (identifiable.getType()) {
-            case GENERATOR -> getGeneratorFieldValue(field, (Generator) identifiable);
-            case LOAD -> getLoadFieldValue(field, (Load) identifiable);
-            default -> throw new PowsyblException(identifiable.getType() + " injection type is not implemented with expert filter");
+        return switch (field) {
+            case ID -> identifiable.getId();
+            case NAME -> identifiable.getNameOrId();
+            default -> switch (identifiable.getType()) {
+                case VOLTAGE_LEVEL -> getVoltageLevelFieldValue(field, (VoltageLevel) identifiable);
+                case GENERATOR -> getGeneratorFieldValue(field, (Generator) identifiable);
+                case LOAD -> getLoadFieldValue(field, (Load) identifiable);
+                case BUS -> getBusFieldValue(field, (Bus) identifiable);
+                case BUSBAR_SECTION -> getBusBarSectionFieldValue(field, (BusbarSection) identifiable);
+                default -> throw new PowsyblException(TYPE_NOT_IMPLEMENTED + " [" + identifiable.getType() + "]");
+            };
         };
     }
 
-    private static String getInjectionFieldValue(FieldType field, Injection<?> injection) {
+    private static String getVoltageLevelFieldValue(FieldType field, VoltageLevel voltageLevel) {
         return switch (field) {
-            case ID -> injection.getId();
-            case NAME -> injection.getNameOrId();
             case COUNTRY -> {
-                Optional<Country> country = injection.getTerminal().getVoltageLevel().getSubstation().flatMap(Substation::getCountry);
+                Optional<Country> country = voltageLevel.getSubstation().flatMap(Substation::getCountry);
                 yield country.isPresent() ? String.valueOf(country.get()) : "";
             }
-            case NOMINAL_VOLTAGE -> String.valueOf(injection.getTerminal().getVoltageLevel().getNominalV());
-            case VOLTAGE_LEVEL_ID -> injection.getTerminal().getVoltageLevel().getId();
-            default -> throw new PowsyblException("Field " + field + " with " + injection.getType() + " injection type is not implemented with expert filter");
+            case NOMINAL_VOLTAGE -> String.valueOf(voltageLevel.getNominalV());
+            case VOLTAGE_LEVEL_ID -> voltageLevel.getId();
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + voltageLevel.getType() + "]");
         };
     }
 
     private static String getLoadFieldValue(FieldType field, Load load) {
         return switch (field) {
-            default -> getInjectionFieldValue(field, load);
+            case COUNTRY,
+                NOMINAL_VOLTAGE,
+                VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, load.getTerminal().getVoltageLevel());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + load.getType() + "]");
+
         };
     }
 
@@ -62,7 +76,28 @@ public final class ExpertFilterUtils {
                 }
                 yield String.valueOf(Double.NaN);
             }
-            default -> getInjectionFieldValue(field, generator);
+            case COUNTRY,
+                NOMINAL_VOLTAGE,
+                VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, generator.getTerminal().getVoltageLevel());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + generator.getType() + "]");
+        };
+    }
+
+    private static String getBusFieldValue(FieldType field, Bus bus) {
+        return switch (field) {
+            case COUNTRY,
+                NOMINAL_VOLTAGE,
+                VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, bus.getVoltageLevel());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + bus.getType() + "]");
+        };
+    }
+
+    private static String getBusBarSectionFieldValue(FieldType field, BusbarSection busbarSection) {
+        return switch (field) {
+            case COUNTRY,
+                NOMINAL_VOLTAGE,
+                VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, busbarSection.getTerminal().getVoltageLevel());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + busbarSection.getType() + "]");
         };
     }
 }
