@@ -29,4 +29,6 @@ public enum FieldType {
     MARGINAL_COST,
     PLANNED_OUTAGE_RATE,
     FORCED_OUTAGE_RATE,
+    P0,
+    Q0
 }

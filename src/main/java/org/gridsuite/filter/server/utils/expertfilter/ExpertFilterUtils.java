@@ -56,6 +56,8 @@ public final class ExpertFilterUtils {
             case COUNTRY,
                 NOMINAL_VOLTAGE,
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, load.getTerminal().getVoltageLevel());
+            case P0 -> String.valueOf(load.getP0());
+            case Q0 -> String.valueOf(load.getQ0());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + load.getType() + "]");
 
         };
