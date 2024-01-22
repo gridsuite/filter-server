@@ -38,7 +38,6 @@ class BooleanExpertRuleTest {
         Mockito.when(terminal.isConnected()).thenReturn(true);
         Mockito.when(gen.getTerminal()).thenReturn(terminal);
 
-
         return Stream.of(
                 // --- EQUALS--- //
                 //Generator fields

@@ -51,7 +51,6 @@ class NumberExpertRuleTest {
         Mockito.when(gen.getTerminal()).thenReturn(terminal);
         Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
 
-
         return Stream.of(
                 // --- EQUALS --- //
                 // Generator fields

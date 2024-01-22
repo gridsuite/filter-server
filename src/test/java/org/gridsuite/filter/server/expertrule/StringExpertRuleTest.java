@@ -39,7 +39,6 @@ class StringExpertRuleTest {
         Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
         Mockito.when(gen.getTerminal()).thenReturn(terminal);
 
-
         return Stream.of(
                 // --- IS --- //
                 // Common fields
