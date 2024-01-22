@@ -70,12 +70,12 @@ public final class ExpertFilterUtils {
             case TARGET_P -> String.valueOf(generator.getTargetP());
             case TARGET_Q -> String.valueOf(generator.getTargetQ());
             case VOLTAGE_REGULATOR_ON -> String.valueOf(generator.isVoltageRegulatorOn());
+            case RATED_S -> String.valueOf(generator.getRatedS());
             case PLANNED_ACTIVE_POWER_SET_POINT,
                 MARGINAL_COST,
                 PLANNED_OUTAGE_RATE,
                 FORCED_OUTAGE_RATE ->
                 getGeneratorStartupField(generator, field);
-            case RATED_S -> String.valueOf(generator.getRatedS());
             case COUNTRY,
                 NOMINAL_VOLTAGE,
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, generator.getTerminal().getVoltageLevel());
