@@ -19,10 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class EnumExpertRuleTest {
 
     @ParameterizedTest
-    @MethodSource({"provideArgumentsForGeneratorTest",
-            "provideArgumentsForLoadTest",
-            "provideArgumentsForBusTest",
-            "provideArgumentsForBusBarSectionTest"})
+    @MethodSource({
+        "provideArgumentsForGeneratorTest",
+        "provideArgumentsForLoadTest",
+        "provideArgumentsForBusTest",
+        "provideArgumentsForBusBarSectionTest"})
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         EnumExpertRule rule = EnumExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
         assertEquals(expected, rule.evaluateRule(equipment));

@@ -20,10 +20,11 @@ import static org.mockito.ArgumentMatchers.any;
 class NumberExpertRuleTest {
 
     @ParameterizedTest
-    @MethodSource({"provideArgumentsForGeneratorTest",
-            "provideArgumentsForLoadTest",
-            "provideArgumentsForBusTest",
-            "provideArgumentsForBusBarSectionTest"
+    @MethodSource({
+        "provideArgumentsForGeneratorTest",
+        "provideArgumentsForLoadTest",
+        "provideArgumentsForBusTest",
+        "provideArgumentsForBusBarSectionTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
