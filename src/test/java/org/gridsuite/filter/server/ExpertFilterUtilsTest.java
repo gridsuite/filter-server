@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
+import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
@@ -21,8 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 class ExpertFilterUtilsTest {
@@ -269,7 +269,7 @@ class ExpertFilterUtilsTest {
     }
 
     @Test
-    void testEvaluateExpertFilterInAndNotInOperators() {
+    void testEvaluateExpertFilterGeneratorWithInAndNotIn() {
 
         // --- Test IN Operator --- //
 
@@ -389,4 +389,172 @@ class ExpertFilterUtilsTest {
         Mockito.when(terminal.isConnected()).thenReturn(false);
         assertFalse(boolFilter.evaluateRule(gen));
     }
+
+    @Test
+    void testEvaluateExpertFilterBusAndBusBarSectionWithInAndNotIn() {
+
+        // --- Test IN Operator --- //
+
+        // Mock for 1st bus
+        Bus bus1 = Mockito.mock(Bus.class);
+        Mockito.when(bus1.getType()).thenReturn(IdentifiableType.BUS);
+        Mockito.when(bus1.getId()).thenReturn("BUS_ID_1");
+        Mockito.when(bus1.getNameOrId()).thenReturn("BUS_NAME_1");
+
+        Substation substation1 = Mockito.mock(Substation.class);
+        Mockito.when(substation1.getCountry()).thenReturn(Optional.of(Country.FR));
+
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel1.getId()).thenReturn("VL1");
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(13.0);
+
+        Mockito.when(voltageLevel1.getSubstation()).thenReturn(Optional.of(substation1));
+
+        Mockito.when(bus1.getVoltageLevel()).thenReturn(voltageLevel1);
+
+        // Mock for 1st busBarSection
+        BusbarSection busBarSection1 = Mockito.mock(BusbarSection.class);
+        Mockito.when(busBarSection1.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
+        Mockito.when(busBarSection1.getId()).thenReturn("BUS_BAR_SECTION_ID_1");
+        Mockito.when(busBarSection1.getNameOrId()).thenReturn("BUS_BAR_SECTION_NAME_1");
+
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(busBarSection1.getTerminal()).thenReturn(terminal1);
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(Set.of("VL1", "VL3"))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(stringInRule)).build();
+
+        // Check bus1 must be in the list
+        assertTrue(inFilter.evaluateRule(bus1));
+        // Check busBarSection1 must be in the list
+        assertTrue(inFilter.evaluateRule(busBarSection1));
+
+        // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
+        NumberExpertRule numberInRule = NumberExpertRule.builder().values(Set.of(13.0, 17.0))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(numberInRule)).build();
+
+        // Check bus1 must be in the list
+        assertTrue(inFilter.evaluateRule(bus1));
+        // Check busBarSection1 must be in the list
+        assertTrue(inFilter.evaluateRule(busBarSection1));
+
+        // Build a filter AND with only an IN operator for COUNTRY
+        EnumExpertRule enumInRule = EnumExpertRule.builder().values(Set.of(Country.FR.name(), Country.GB.name()))
+                .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(enumInRule)).build();
+
+        // Check bus1 must be in the list
+        assertTrue(inFilter.evaluateRule(bus1));
+        // Check busBarSection1 must be in the list
+        assertTrue(inFilter.evaluateRule(busBarSection1));
+
+        // --- Test NOT_IN Operator --- //
+
+        // Mock for 2nd bus
+        Bus bus2 = Mockito.mock(Bus.class);
+        Mockito.when(bus2.getType()).thenReturn(IdentifiableType.BUS);
+        Mockito.when(bus2.getId()).thenReturn("BUS_ID_2");
+        Mockito.when(bus2.getNameOrId()).thenReturn("BUS_NAME_2");
+
+        Substation substation2 = Mockito.mock(Substation.class);
+        Mockito.when(substation2.getCountry()).thenReturn(Optional.of(Country.GE));
+
+        VoltageLevel voltageLevel2 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel2.getId()).thenReturn("VL2");
+        Mockito.when(voltageLevel2.getNominalV()).thenReturn(15.0);
+
+        Mockito.when(voltageLevel2.getSubstation()).thenReturn(Optional.of(substation2));
+
+        Mockito.when(bus2.getVoltageLevel()).thenReturn(voltageLevel2);
+
+        // Mock for 2nd busBarSection
+        BusbarSection busBarSection2 = Mockito.mock(BusbarSection.class);
+        Mockito.when(busBarSection2.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
+        Mockito.when(busBarSection2.getId()).thenReturn("BUS_BAR_SECTION_ID_2");
+        Mockito.when(busBarSection2.getNameOrId()).thenReturn("BUS_BAR_SECTION_NAME_2");
+
+        Terminal terminal2 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal2.getVoltageLevel()).thenReturn(voltageLevel2);
+        Mockito.when(busBarSection2.getTerminal()).thenReturn(terminal2);
+
+        // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringNotInRule = StringExpertRule.builder().values(Set.of("VL1", "VL3"))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.NOT_IN).build();
+        CombinatorExpertRule notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(stringNotInRule)).build();
+
+        // Check bus2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(bus2));
+        // Check busBarSection2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(busBarSection2));
+
+        // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
+        NumberExpertRule numberNotInRule = NumberExpertRule.builder().values(Set.of(13.0, 17.0))
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
+        notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(numberNotInRule)).build();
+
+        // Check bus2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(bus2));
+        // Check busBarSection2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(busBarSection2));
+
+        // Build a filter AND with only a NOT_IN operator for COUNTRY
+        EnumExpertRule enumNotInRule = EnumExpertRule.builder().values(Set.of(Country.FR.name(), Country.GB.name()))
+                .field(FieldType.COUNTRY).operator(OperatorType.NOT_IN).build();
+        notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(enumNotInRule)).build();
+
+        // Check bus2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(bus2));
+        // Check busBarSection2 must be not in the list
+        assertTrue(notInFilter.evaluateRule(busBarSection2));
+
+    }
+
+    @Test
+    void testEvaluateExpertFilterWithException() {
+
+        Network network = Mockito.mock(Network.class);
+        Mockito.when(network.getType()).thenReturn(IdentifiableType.NETWORK);
+
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getType()).thenReturn(IdentifiableType.VOLTAGE_LEVEL);
+
+        Load load = Mockito.mock(Load.class);
+        Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
+
+        Generator generator = Mockito.mock(Generator.class);
+        Mockito.when(generator.getType()).thenReturn(IdentifiableType.GENERATOR);
+
+        Bus bus = Mockito.mock(Bus.class);
+        Mockito.when(bus.getType()).thenReturn(IdentifiableType.BUS);
+
+        BusbarSection busbarSection = Mockito.mock(BusbarSection.class);
+        Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
+
+        // --- Test with whatever operator with exception --- //
+
+        // Build a filter AND with only a NOT_IN operator for UNKNOWN
+        EnumExpertRule enumNotInRule = EnumExpertRule.builder().values(Set.of(Country.FR.name(), Country.GB.name()))
+                .field(FieldType.UNKNOWN).operator(OperatorType.NOT_IN).build();
+        CombinatorExpertRule notInFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(enumNotInRule)).build();
+
+        // type not supported
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(network));
+
+        // field not supported
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(voltageLevel));
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(load));
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(generator));
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(bus));
+
+        assertThrows(PowsyblException.class, () -> notInFilter.evaluateRule(busbarSection));
+    }
+
 }

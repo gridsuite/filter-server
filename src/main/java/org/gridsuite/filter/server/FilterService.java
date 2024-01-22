@@ -41,6 +41,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -592,6 +593,25 @@ public class FilterService {
         return getInjectionList(network.getVscConverterStationStream().map(vsc -> vsc), filter).collect(Collectors.toList());
     }
 
+    private List<Identifiable<?>> getBusList(Network network, AbstractFilter filter) {
+        if (filter instanceof ExpertFilter expertFilter) {
+            // topologyKind is an optional info attached into expert filter when filtering bus for optimizing the perf
+            // note that with voltage levels of kind TopologyKind.NODE_BREAKER, buses are computed on-the-fly => expensive
+            var topologyKind = expertFilter.getTopologyKind();
+            Predicate<VoltageLevel> voltageLevelFilter = vl -> topologyKind == null || vl.getTopologyKind() == topologyKind;
+
+            Stream<Identifiable<?>> stream = network.getVoltageLevelStream()
+                    .filter(voltageLevelFilter)
+                    .map(VoltageLevel::getBusBreakerView)
+                    .flatMap(VoltageLevel.BusBreakerView::getBusStream);
+
+            var rule = expertFilter.getRules();
+            return stream.filter(rule::evaluateRule).toList();
+        } else {
+            return List.of();
+        }
+    }
+
     private List<Identifiable<?>> getBusbarSectionList(Network network, AbstractFilter filter) {
         return getInjectionList(network.getBusbarSectionStream().map(bbs -> bbs), filter).collect(Collectors.toList());
     }
@@ -634,6 +654,9 @@ public class FilterService {
                 break;
             case THREE_WINDINGS_TRANSFORMER:
                 identifiables = get3WTransformerList(network, filter);
+                break;
+            case BUS:
+                identifiables = getBusList(network, filter);
                 break;
             case BUSBAR_SECTION:
                 identifiables = getBusbarSectionList(network, filter);
