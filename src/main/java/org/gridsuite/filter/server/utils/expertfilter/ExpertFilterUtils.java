@@ -34,6 +34,7 @@ public final class ExpertFilterUtils {
                 case LOAD -> getLoadFieldValue(field, (Load) identifiable);
                 case BUS -> getBusFieldValue(field, (Bus) identifiable);
                 case BUSBAR_SECTION -> getBusBarSectionFieldValue(field, (BusbarSection) identifiable);
+                case SUBSTATION -> getSubstationFieldValue(field, (Substation) identifiable);
                 default -> throw new PowsyblException(TYPE_NOT_IMPLEMENTED + " [" + identifiable.getType() + "]");
             };
         };
@@ -47,6 +48,8 @@ public final class ExpertFilterUtils {
             }
             case NOMINAL_VOLTAGE -> String.valueOf(voltageLevel.getNominalV());
             case VOLTAGE_LEVEL_ID -> voltageLevel.getId();
+            case LOW_VOLTAGE_LIMIT -> String.valueOf(voltageLevel.getLowVoltageLimit());
+            case HIGH_VOLTAGE_LIMIT -> String.valueOf(voltageLevel.getHighVoltageLimit());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + voltageLevel.getType() + "]");
         };
     }
@@ -123,6 +126,14 @@ public final class ExpertFilterUtils {
         return switch (field) {
             case CONNECTED -> String.valueOf(terminal.isConnected());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + ",terminal]");
+        };
+    }
+
+    private static String getSubstationFieldValue(FieldType field, Substation substation) {
+        return switch (field) {
+            case COUNTRY -> String.valueOf(substation.getCountry());
+            default ->
+                throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + substation.getType() + "]");
         };
     }
 }
