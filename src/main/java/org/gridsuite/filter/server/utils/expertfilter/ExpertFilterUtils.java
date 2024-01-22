@@ -28,6 +28,7 @@ public final class ExpertFilterUtils {
         return switch (field) {
             case ID -> identifiable.getId();
             case NAME -> identifiable.getNameOrId();
+            case CONNECTED -> String.valueOf(((Injection<?>) identifiable).getTerminal().isConnected());
             default -> switch (identifiable.getType()) {
                 case VOLTAGE_LEVEL -> getVoltageLevelFieldValue(field, (VoltageLevel) identifiable);
                 case GENERATOR -> getGeneratorFieldValue(field, (Generator) identifiable);
@@ -47,7 +48,6 @@ public final class ExpertFilterUtils {
             }
             case NOMINAL_VOLTAGE -> String.valueOf(voltageLevel.getNominalV());
             case VOLTAGE_LEVEL_ID -> voltageLevel.getId();
-            case CONNECTED -> String.valueOf(injection.getTerminal().isConnected());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + voltageLevel.getType() + "]");
         };
     }
