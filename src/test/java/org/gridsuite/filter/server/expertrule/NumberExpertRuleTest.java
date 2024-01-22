@@ -20,7 +20,11 @@ import static org.mockito.ArgumentMatchers.any;
 class NumberExpertRuleTest {
 
     @ParameterizedTest
-    @MethodSource({"provideArgumentsForGeneratorTest"})
+    @MethodSource({"provideArgumentsForGeneratorTest",
+            "provideArgumentsForLoadTest",
+            "provideArgumentsForBusTest",
+            "provideArgumentsForBusBarSectionTest"
+    })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
         assertEquals(expected, rule.evaluateRule(equipment));
@@ -195,6 +199,154 @@ class NumberExpertRuleTest {
                 Arguments.of(NOT_IN, FieldType.FORCED_OUTAGE_RATE, null, Set.of(40.0, 60.0), gen, true),
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), gen, true)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForLoadTest() {
+
+        Load load = Mockito.mock(Load.class);
+        Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(load.getTerminal()).thenReturn(terminal);
+        Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, true),
+
+                // --- GREATER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, true),
+
+                // --- GREATER --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, true),
+
+                // --- LOWER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, true),
+
+                // --- LOWER --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, true),
+
+                // --- BETWEEN --- //
+                // VoltageLevel fields
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, true),
+
+                // --- EXISTS --- //
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, load, true),
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), load, true),
+
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, true)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForBusTest() {
+
+        Bus bus = Mockito.mock(Bus.class);
+        Mockito.when(bus.getType()).thenReturn(IdentifiableType.BUS);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(bus.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, bus, true),
+
+                // --- GREATER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, bus, true),
+
+                // --- GREATER --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, bus, true),
+
+                // --- LOWER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, bus, true),
+
+                // --- LOWER --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, bus, true),
+
+                // --- BETWEEN --- //
+                // VoltageLevel fields
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), bus, true),
+
+                // --- EXISTS --- //
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, bus, true),
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), bus, true),
+
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), bus, true)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForBusBarSectionTest() {
+
+        BusbarSection busbarSection = Mockito.mock(BusbarSection.class);
+        Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(busbarSection.getTerminal()).thenReturn(terminal);
+        Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, busbarSection, true),
+
+                // --- GREATER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, busbarSection, true),
+
+                // --- GREATER --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, busbarSection, true),
+
+                // --- LOWER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, busbarSection, true),
+
+                // --- LOWER --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, busbarSection, true),
+
+                // --- BETWEEN --- //
+                // VoltageLevel fields
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), busbarSection, true),
+
+                // --- EXISTS --- //
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, busbarSection, true),
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), busbarSection, true),
+
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), busbarSection, true)
         );
     }
 }
