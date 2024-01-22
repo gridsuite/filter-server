@@ -64,12 +64,12 @@ public class NumberExpertRule extends AbstractExpertRule {
             case GREATER_OR_EQUALS -> identifiableValue.compareTo(filterValue) >= 0;
             case GREATER -> identifiableValue.compareTo(filterValue) > 0;
             case LOWER_OR_EQUALS -> identifiableValue.compareTo(filterValue) <= 0;
-            case LOWER -> identifiableValue.compareTo(filterValue) < 0;
             case BETWEEN -> {
                 Double lowerLimit = Collections.min(filterValues);
                 Double upperLimit = Collections.max(filterValues);
                 yield identifiableValue.compareTo(lowerLimit) >= 0 && identifiableValue.compareTo(upperLimit) <= 0;
             }
+            case LOWER -> identifiableValue.compareTo(filterValue) < 0;
             case EXISTS -> true; // We return true here because we already test above if identifiableValue is NaN.
             case IN -> filterValues.contains(identifiableValue);
             case NOT_IN -> !filterValues.contains(identifiableValue);
