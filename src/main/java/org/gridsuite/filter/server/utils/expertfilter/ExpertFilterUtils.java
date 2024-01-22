@@ -28,7 +28,6 @@ public final class ExpertFilterUtils {
         return switch (field) {
             case ID -> identifiable.getId();
             case NAME -> identifiable.getNameOrId();
-            case CONNECTED -> String.valueOf(((Injection<?>) identifiable).getTerminal().isConnected());
             default -> switch (identifiable.getType()) {
                 case VOLTAGE_LEVEL -> getVoltageLevelFieldValue(field, (VoltageLevel) identifiable);
                 case GENERATOR -> getGeneratorFieldValue(field, (Generator) identifiable);
@@ -80,6 +79,7 @@ public final class ExpertFilterUtils {
             case COUNTRY,
                 NOMINAL_VOLTAGE,
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, generator.getTerminal().getVoltageLevel());
+            case CONNECTED -> getTerminalFieldValue(field, generator.getTerminal());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + generator.getType() + "]");
         };
     }
@@ -116,6 +116,13 @@ public final class ExpertFilterUtils {
                 NOMINAL_VOLTAGE,
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, busbarSection.getTerminal().getVoltageLevel());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + busbarSection.getType() + "]");
+        };
+    }
+
+    private static String getTerminalFieldValue(FieldType field, Terminal terminal) {
+        return switch (field) {
+            case CONNECTED -> String.valueOf(terminal.isConnected());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + ",terminal]");
         };
     }
 }
