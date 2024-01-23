@@ -49,16 +49,16 @@ class BooleanExpertRuleTest {
         Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
 
         return Stream.of(
-                // --- Test with whatever operator with UNKNOWN field for an expected exception --- //
-                Arguments.of(EQUALS, FieldType.UNKNOWN, network, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, voltageLevel, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, generator, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, load, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, bus, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, busbarSection, PowsyblException.class),
+                // --- Test with whatever operator with an unsupported field for an expected exception --- //
+                Arguments.of(EQUALS, FieldType.RATED_S, network, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.P0, generator, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, load, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
 
-                // --- Test with UNKNOWN operator with a supported field for an expected exception --- //
-                Arguments.of(UNKNOWN, FieldType.VOLTAGE_REGULATOR_ON, generator, PowsyblException.class)
+                // --- Test with IS operator with a supported field for an expected exception --- //
+                Arguments.of(IS, FieldType.VOLTAGE_REGULATOR_ON, generator, PowsyblException.class)
         );
     }
 
@@ -84,14 +84,18 @@ class BooleanExpertRuleTest {
                 // --- EQUALS--- //
                 //Generator fields
                 Arguments.of(EQUALS, FieldType.VOLTAGE_REGULATOR_ON, true, gen, true),
+                Arguments.of(EQUALS, FieldType.VOLTAGE_REGULATOR_ON, false, gen, false),
                 // Terminal fields
                 Arguments.of(EQUALS, FieldType.CONNECTED, true, gen, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED, false, gen, false),
 
                 // --- NOT_EQUALS--- //
                 //Generator fields
                 Arguments.of(NOT_EQUALS, FieldType.VOLTAGE_REGULATOR_ON, false, gen, true),
+                Arguments.of(NOT_EQUALS, FieldType.VOLTAGE_REGULATOR_ON, true, gen, false),
                 // Terminal fields
-                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, gen, true)
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, gen, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, gen, false)
         );
     }
 }

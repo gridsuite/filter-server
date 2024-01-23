@@ -52,16 +52,16 @@ class NumberExpertRuleTest {
         Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
 
         return Stream.of(
-                // --- Test with whatever operator with UNKNOWN field for an expected exception --- //
-                Arguments.of(EQUALS, FieldType.UNKNOWN, network, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, voltageLevel, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, generator, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, load, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, bus, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, busbarSection, PowsyblException.class),
+                // --- Test with whatever operator with an unsupported field for an expected exception --- //
+                Arguments.of(EQUALS, FieldType.RATED_S, network, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.P0, generator, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, load, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
 
-                // --- Test with UNKNOWN operator with a supported field for an expected exception --- //
-                Arguments.of(UNKNOWN, FieldType.MIN_P, generator, PowsyblException.class)
+                // --- Test with IS operator with a supported field for an expected exception --- //
+                Arguments.of(IS, FieldType.MIN_P, generator, PowsyblException.class)
         );
     }
 
@@ -102,150 +102,317 @@ class NumberExpertRuleTest {
         Mockito.when(gen.getTerminal()).thenReturn(terminal);
         Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
 
+        // for testing none EXISTS
+        Generator gen1 = Mockito.mock(Generator.class);
+        Mockito.when(gen1.getType()).thenReturn(IdentifiableType.GENERATOR);
+        // Generator fields
+        Mockito.when(gen1.getMinP()).thenReturn(Double.NaN);
+        Mockito.when(gen1.getMaxP()).thenReturn(Double.NaN);
+        Mockito.when(gen1.getTargetV()).thenReturn(Double.NaN);
+        Mockito.when(gen1.getTargetP()).thenReturn(Double.NaN);
+        Mockito.when(gen1.getTargetQ()).thenReturn(Double.NaN);
+        Mockito.when(gen1.getRatedS()).thenReturn(Double.NaN);
+        // GeneratorStartup extension fields
+        GeneratorStartup genStartup1 = Mockito.mock(GeneratorStartup.class);
+        Mockito.when(genStartup1.getPlannedActivePowerSetpoint()).thenReturn(Double.NaN);
+        Mockito.when(genStartup1.getMarginalCost()).thenReturn(Double.NaN);
+        Mockito.when(genStartup1.getPlannedOutageRate()).thenReturn(Double.NaN);
+        Mockito.when(genStartup1.getForcedOutageRate()).thenReturn(Double.NaN);
+        Mockito.when(gen1.getExtension(any())).thenReturn(genStartup1);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(gen1.getTerminal()).thenReturn(terminal1);
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(Double.NaN);
+
         return Stream.of(
                 // --- EQUALS --- //
                 // Generator fields
                 Arguments.of(EQUALS, FieldType.MIN_P, -500.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.MIN_P, -400.0, null, gen, false),
                 Arguments.of(EQUALS, FieldType.MAX_P, 100.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.MAX_P, 90.0, null, gen, false),
                 Arguments.of(EQUALS, FieldType.TARGET_V, 20.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.TARGET_V, 10.0, null, gen, false),
                 Arguments.of(EQUALS, FieldType.TARGET_P, 30.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.TARGET_P, 20.0, null, gen, false),
                 Arguments.of(EQUALS, FieldType.TARGET_Q, 40.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.TARGET_Q, 30.0, null, gen, false),
                 Arguments.of(EQUALS, FieldType.RATED_S, 60.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.RATED_S, 50.0, null, gen, false),
                 // GeneratorStartup extension fields
                 Arguments.of(EQUALS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 50.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 40.0, null, gen, false),
                 Arguments.of(EQUALS, FieldType.MARGINAL_COST, 50.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.MARGINAL_COST, 40.0, null, gen, false),
                 Arguments.of(EQUALS, FieldType.PLANNED_OUTAGE_RATE, 50.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.PLANNED_OUTAGE_RATE, 40.0, null, gen, false),
                 Arguments.of(EQUALS, FieldType.FORCED_OUTAGE_RATE, 50.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.FORCED_OUTAGE_RATE, 40.0, null, gen, false),
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, gen, true),
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, gen, false),
 
                 // --- GREATER_OR_EQUALS --- //
                 // Generator fields
                 Arguments.of(GREATER_OR_EQUALS, FieldType.MIN_P, -600.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MIN_P, -500.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MIN_P, -400.0, null, gen, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_P, 90.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_P, 100.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_P, 110.0, null, gen, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_V, 10.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_V, 20.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_V, 30.0, null, gen, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_P, 20.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_P, 30.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_P, 40.0, null, gen, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_Q, 30.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_Q, 40.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_Q, 50.0, null, gen, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.RATED_S, 50.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.RATED_S, 60.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.RATED_S, 70.0, null, gen, false),
                 // GeneratorStartup extension fields
                 Arguments.of(GREATER_OR_EQUALS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 40.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 50.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 60.0, null, gen, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.MARGINAL_COST, 40.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MARGINAL_COST, 50.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MARGINAL_COST, 60.0, null, gen, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.PLANNED_OUTAGE_RATE, 40.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.PLANNED_OUTAGE_RATE, 50.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.PLANNED_OUTAGE_RATE, 60.0, null, gen, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.FORCED_OUTAGE_RATE, 40.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.FORCED_OUTAGE_RATE, 50.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.FORCED_OUTAGE_RATE, 60.0, null, gen, false),
                 // VoltageLevel fields
                 Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, gen, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, gen, false),
 
                 // --- GREATER --- //
                 // Generator fields
                 Arguments.of(GREATER, FieldType.MIN_P, -600.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.MIN_P, -500.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.MIN_P, -400.0, null, gen, false),
                 Arguments.of(GREATER, FieldType.MAX_P, 90.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.MAX_P, 100.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.MAX_P, 110.0, null, gen, false),
                 Arguments.of(GREATER, FieldType.TARGET_V, 10.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.TARGET_V, 20.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.TARGET_V, 30.0, null, gen, false),
                 Arguments.of(GREATER, FieldType.TARGET_P, 20.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.TARGET_P, 30.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.TARGET_P, 40.0, null, gen, false),
                 Arguments.of(GREATER, FieldType.TARGET_Q, 30.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.TARGET_Q, 40.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.TARGET_Q, 50.0, null, gen, false),
                 Arguments.of(GREATER, FieldType.RATED_S, 50.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.RATED_S, 60.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.RATED_S, 70.0, null, gen, false),
                 // GeneratorStartup extension fields
                 Arguments.of(GREATER, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 40.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 50.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 60.0, null, gen, false),
                 Arguments.of(GREATER, FieldType.MARGINAL_COST, 40.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.MARGINAL_COST, 50.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.MARGINAL_COST, 60.0, null, gen, false),
                 Arguments.of(GREATER, FieldType.PLANNED_OUTAGE_RATE, 40.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.PLANNED_OUTAGE_RATE, 50.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.PLANNED_OUTAGE_RATE, 60.0, null, gen, false),
                 Arguments.of(GREATER, FieldType.FORCED_OUTAGE_RATE, 40.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.FORCED_OUTAGE_RATE, 50.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.FORCED_OUTAGE_RATE, 60.0, null, gen, false),
                 // VoltageLevel fields
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, gen, true),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 13.0, null, gen, false),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 14.0, null, gen, false),
 
                 // --- LOWER_OR_EQUALS --- //
                 // Generator fields
                 Arguments.of(LOWER_OR_EQUALS, FieldType.MIN_P, -400.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MIN_P, -500.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MIN_P, -600.0, null, gen, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_P, 110.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_P, 100.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_P, 90.0, null, gen, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_V, 30.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_V, 20.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_V, 10.0, null, gen, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_P, 40.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_P, 30.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_P, 20.0, null, gen, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_Q, 50.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_Q, 40.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_Q, 30.0, null, gen, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.RATED_S, 70.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.RATED_S, 60.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.RATED_S, 50.0, null, gen, false),
                 // GeneratorStartup extension fields
                 Arguments.of(LOWER_OR_EQUALS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 60.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 50.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 40.0, null, gen, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.MARGINAL_COST, 60.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MARGINAL_COST, 50.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MARGINAL_COST, 40.0, null, gen, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.PLANNED_OUTAGE_RATE, 60.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.PLANNED_OUTAGE_RATE, 50.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.PLANNED_OUTAGE_RATE, 40.0, null, gen, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.FORCED_OUTAGE_RATE, 60.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.FORCED_OUTAGE_RATE, 50.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.FORCED_OUTAGE_RATE, 40.0, null, gen, false),
                 // VoltageLevel fields
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, gen, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, gen, false),
 
                 // --- LOWER --- //
                 // Generator fields
                 Arguments.of(LOWER, FieldType.MIN_P, -400.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.MIN_P, -500.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.MIN_P, -600.0, null, gen, false),
                 Arguments.of(LOWER, FieldType.MAX_P, 110.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.MAX_P, 100.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.MAX_P, 90.0, null, gen, false),
                 Arguments.of(LOWER, FieldType.TARGET_V, 30.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.TARGET_V, 20.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.TARGET_V, 10.0, null, gen, false),
                 Arguments.of(LOWER, FieldType.TARGET_P, 40.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.TARGET_P, 30.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.TARGET_P, 20.0, null, gen, false),
                 Arguments.of(LOWER, FieldType.TARGET_Q, 50.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.TARGET_Q, 40.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.TARGET_Q, 30.0, null, gen, false),
                 Arguments.of(LOWER, FieldType.RATED_S, 70.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.RATED_S, 60.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.RATED_S, 50.0, null, gen, false),
                 // GeneratorStartup extension fields
                 Arguments.of(LOWER, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 60.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 50.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, 40.0, null, gen, false),
                 Arguments.of(LOWER, FieldType.MARGINAL_COST, 60.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.MARGINAL_COST, 50.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.MARGINAL_COST, 40.0, null, gen, false),
                 Arguments.of(LOWER, FieldType.PLANNED_OUTAGE_RATE, 60.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.PLANNED_OUTAGE_RATE, 50.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.PLANNED_OUTAGE_RATE, 40.0, null, gen, false),
                 Arguments.of(LOWER, FieldType.FORCED_OUTAGE_RATE, 60.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.FORCED_OUTAGE_RATE, 50.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.FORCED_OUTAGE_RATE, 40.0, null, gen, false),
                 // VoltageLevel fields
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, gen, true),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 13.0, null, gen, false),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 12.0, null, gen, false),
 
                 // --- BETWEEN --- //
                 // Generator fields
                 Arguments.of(BETWEEN, FieldType.MIN_P, null, Set.of(-600.0, -400.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.MIN_P, null, Set.of(-450.0, -400.0), gen, false),
                 Arguments.of(BETWEEN, FieldType.MAX_P, null, Set.of(90.0, 110.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.MAX_P, null, Set.of(105.0, 110.0), gen, false),
                 Arguments.of(BETWEEN, FieldType.TARGET_V, null, Set.of(10.0, 30.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.TARGET_V, null, Set.of(25.0, 30.0), gen, false),
                 Arguments.of(BETWEEN, FieldType.TARGET_P, null, Set.of(20.0, 40.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.TARGET_P, null, Set.of(35.0, 40.0), gen, false),
                 Arguments.of(BETWEEN, FieldType.TARGET_Q, null, Set.of(30.0, 50.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.TARGET_Q, null, Set.of(45.0, 50.0), gen, false),
                 Arguments.of(BETWEEN, FieldType.RATED_S, null, Set.of(50.0, 70.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.RATED_S, null, Set.of(65.0, 70.0), gen, false),
                 // GeneratorStartup extension fields
                 Arguments.of(BETWEEN, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, null, Set.of(40.0, 60.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, null, Set.of(55.0, 60.0), gen, false),
                 Arguments.of(BETWEEN, FieldType.MARGINAL_COST, null, Set.of(40.0, 60.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.MARGINAL_COST, null, Set.of(55.0, 60.0), gen, false),
                 Arguments.of(BETWEEN, FieldType.PLANNED_OUTAGE_RATE, null, Set.of(40.0, 60.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.PLANNED_OUTAGE_RATE, null, Set.of(55.0, 60.0), gen, false),
                 Arguments.of(BETWEEN, FieldType.FORCED_OUTAGE_RATE, null, Set.of(40.0, 60.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.FORCED_OUTAGE_RATE, null, Set.of(55.0, 60.0), gen, false),
                 // VoltageLevel fields
                 Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), gen, true),
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(13.5, 14.0), gen, false),
 
                 // --- EXISTS --- //
                 // Generator fields
                 Arguments.of(EXISTS, FieldType.MIN_P, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.MIN_P, null, null, gen1, false),
                 Arguments.of(EXISTS, FieldType.MAX_P, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.MAX_P, null, null, gen1, false),
                 Arguments.of(EXISTS, FieldType.TARGET_V, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.TARGET_V, null, null, gen1, false),
                 Arguments.of(EXISTS, FieldType.TARGET_P, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.TARGET_P, null, null, gen1, false),
                 Arguments.of(EXISTS, FieldType.TARGET_Q, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.TARGET_Q, null, null, gen1, false),
                 Arguments.of(EXISTS, FieldType.RATED_S, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.RATED_S, null, null, gen1, false),
                 // GeneratorStartup extension fields
                 Arguments.of(EXISTS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, null, null, gen1, false),
                 Arguments.of(EXISTS, FieldType.MARGINAL_COST, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.MARGINAL_COST, null, null, gen1, false),
                 Arguments.of(EXISTS, FieldType.PLANNED_OUTAGE_RATE, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.PLANNED_OUTAGE_RATE, null, null, gen1, false),
                 Arguments.of(EXISTS, FieldType.FORCED_OUTAGE_RATE, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.FORCED_OUTAGE_RATE, null, null, gen1, false),
                 // VoltageLevel fields
                 Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, gen, true),
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, gen1, false),
 
                 // --- IN --- //
                 // Generator fields
                 Arguments.of(IN, FieldType.MIN_P, null, Set.of(-600.0, -500.0, -400.0), gen, true),
+                Arguments.of(IN, FieldType.MIN_P, null, Set.of(-600.0, -400.0), gen, false),
                 Arguments.of(IN, FieldType.MAX_P, null, Set.of(90.0, 100.0, 110.0), gen, true),
+                Arguments.of(IN, FieldType.MAX_P, null, Set.of(90.0, 110.0), gen, false),
                 Arguments.of(IN, FieldType.TARGET_V, null, Set.of(10.0, 20.0, 30.0), gen, true),
+                Arguments.of(IN, FieldType.TARGET_V, null, Set.of(10.0, 30.0), gen, false),
                 Arguments.of(IN, FieldType.TARGET_P, null, Set.of(20.0, 30.0, 40.0), gen, true),
+                Arguments.of(IN, FieldType.TARGET_P, null, Set.of(20.0, 40.0), gen, false),
                 Arguments.of(IN, FieldType.TARGET_Q, null, Set.of(30.0, 40.0, 50.0), gen, true),
+                Arguments.of(IN, FieldType.TARGET_Q, null, Set.of(30.0, 50.0), gen, false),
                 Arguments.of(IN, FieldType.RATED_S, null, Set.of(50.0, 60.0, 70.0), gen, true),
+                Arguments.of(IN, FieldType.RATED_S, null, Set.of(50.0, 70.0), gen, false),
                 // GeneratorStartup extension fields
                 Arguments.of(IN, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, null, Set.of(40.0, 50.0, 60.0), gen, true),
+                Arguments.of(IN, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, null, Set.of(40.0, 60.0), gen, false),
                 Arguments.of(IN, FieldType.MARGINAL_COST, null, Set.of(40.0, 50.0, 60.0), gen, true),
+                Arguments.of(IN, FieldType.MARGINAL_COST, null, Set.of(40.0, 60.0), gen, false),
                 Arguments.of(IN, FieldType.PLANNED_OUTAGE_RATE, null, Set.of(40.0, 50.0, 60.0), gen, true),
+                Arguments.of(IN, FieldType.PLANNED_OUTAGE_RATE, null, Set.of(40.0, 60.0), gen, false),
                 Arguments.of(IN, FieldType.FORCED_OUTAGE_RATE, null, Set.of(40.0, 50.0, 60.0), gen, true),
+                Arguments.of(IN, FieldType.FORCED_OUTAGE_RATE, null, Set.of(40.0, 60.0), gen, false),
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), gen, true),
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), gen, false),
 
                 // --- NOT_IN --- //
                 // Generator fields
                 Arguments.of(NOT_IN, FieldType.MIN_P, null, Set.of(-600.0, -400.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.MIN_P, null, Set.of(-600.0, -500.0, -400.0), gen, false),
                 Arguments.of(NOT_IN, FieldType.MAX_P, null, Set.of(90.0, 110.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.MAX_P, null, Set.of(90.0, 100.0, 110.0), gen, false),
                 Arguments.of(NOT_IN, FieldType.TARGET_V, null, Set.of(10.0, 30.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.TARGET_V, null, Set.of(10.0, 20.0, 30.0), gen, false),
                 Arguments.of(NOT_IN, FieldType.TARGET_P, null, Set.of(20.0, 40.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.TARGET_P, null, Set.of(20.0, 30.0, 40.0), gen, false),
                 Arguments.of(NOT_IN, FieldType.TARGET_Q, null, Set.of(30.0, 50.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.TARGET_Q, null, Set.of(30.0, 40.0, 50.0), gen, false),
                 Arguments.of(NOT_IN, FieldType.RATED_S, null, Set.of(50.0, 70.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.RATED_S, null, Set.of(50.0, 60.0, 70.0), gen, false),
                 // GeneratorStartup extension fields
                 Arguments.of(NOT_IN, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, null, Set.of(40.0, 60.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.PLANNED_ACTIVE_POWER_SET_POINT, null, Set.of(40.0, 50.0, 60.0), gen, false),
                 Arguments.of(NOT_IN, FieldType.MARGINAL_COST, null, Set.of(40.0, 60.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.MARGINAL_COST, null, Set.of(40.0, 50.0, 60.0), gen, false),
                 Arguments.of(NOT_IN, FieldType.PLANNED_OUTAGE_RATE, null, Set.of(40.0, 60.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.PLANNED_OUTAGE_RATE, null, Set.of(40.0, 50.0, 60.0), gen, false),
                 Arguments.of(NOT_IN, FieldType.FORCED_OUTAGE_RATE, null, Set.of(40.0, 60.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.FORCED_OUTAGE_RATE, null, Set.of(40.0, 50.0, 60.0), gen, false),
                 // VoltageLevel fields
-                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), gen, true)
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), gen, true),
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), gen, false)
         );
     }
 
@@ -260,42 +427,65 @@ class NumberExpertRuleTest {
         Mockito.when(load.getTerminal()).thenReturn(terminal);
         Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
 
+        // for testing none EXISTS
+        Load load1 = Mockito.mock(Load.class);
+        Mockito.when(load1.getType()).thenReturn(IdentifiableType.LOAD);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(load1.getTerminal()).thenReturn(terminal1);
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(Double.NaN);
+
         return Stream.of(
                 // --- EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, true),
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, false),
 
                 // --- GREATER_OR_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, false),
 
                 // --- GREATER --- //
                 // VoltageLevel fields
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, true),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, false),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, false),
 
                 // --- LOWER_OR_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, false),
 
                 // --- LOWER --- //
                 // VoltageLevel fields
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, true),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, false),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, false),
 
                 // --- BETWEEN --- //
                 // VoltageLevel fields
                 Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, true),
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(13.5, 14.0), load, false),
 
                 // --- EXISTS --- //
                 // VoltageLevel fields
                 Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, load, true),
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, load1, false),
 
                 // --- IN --- //
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), load, true),
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, false),
 
                 // --- NOT_IN --- //
                 // VoltageLevel fields
-                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, true)
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, true),
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), load, false)
         );
     }
 
@@ -308,42 +498,63 @@ class NumberExpertRuleTest {
         Mockito.when(bus.getVoltageLevel()).thenReturn(voltageLevel);
         Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
 
+        // for testing none EXISTS
+        Bus bus1 = Mockito.mock(Bus.class);
+        Mockito.when(bus1.getType()).thenReturn(IdentifiableType.BUS);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(bus1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(Double.NaN);
+
         return Stream.of(
                 // --- EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, bus, true),
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, bus, false),
 
                 // --- GREATER_OR_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, bus, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, bus, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, bus, false),
 
                 // --- GREATER --- //
                 // VoltageLevel fields
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, bus, true),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 13.0, null, bus, false),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 14.0, null, bus, false),
 
                 // --- LOWER_OR_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, bus, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, bus, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, bus, false),
 
                 // --- LOWER --- //
                 // VoltageLevel fields
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, bus, true),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 13.0, null, bus, false),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 12.0, null, bus, false),
 
                 // --- BETWEEN --- //
                 // VoltageLevel fields
                 Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), bus, true),
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(13.5, 14.0), bus, false),
 
                 // --- EXISTS --- //
                 // VoltageLevel fields
                 Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, bus, true),
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, bus1, false),
 
                 // --- IN --- //
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), bus, true),
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), bus, false),
 
                 // --- NOT_IN --- //
                 // VoltageLevel fields
-                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), bus, true)
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), bus, true),
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), bus, false)
         );
     }
 
@@ -358,42 +569,65 @@ class NumberExpertRuleTest {
         Mockito.when(busbarSection.getTerminal()).thenReturn(terminal);
         Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
 
+        // for testing none EXISTS
+        BusbarSection busbarSection1 = Mockito.mock(BusbarSection.class);
+        Mockito.when(busbarSection1.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(busbarSection1.getTerminal()).thenReturn(terminal1);
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(Double.NaN);
+
         return Stream.of(
                 // --- EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, busbarSection, true),
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, busbarSection, false),
 
                 // --- GREATER_OR_EQUALS --- //
                 // VoltageLevel fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, busbarSection, true),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, busbarSection, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, busbarSection, false),
 
                 // --- GREATER --- //
                 // VoltageLevel fields
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, busbarSection, true),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 13.0, null, busbarSection, false),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 14.0, null, busbarSection, false),
 
                 // --- LOWER_OR_EQUALS --- //
                 // VoltageLevel fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, busbarSection, true),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, busbarSection, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, busbarSection, false),
 
                 // --- LOWER --- //
                 // VoltageLevel fields
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, busbarSection, true),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 13.0, null, busbarSection, false),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 12.0, null, busbarSection, false),
 
                 // --- BETWEEN --- //
                 // VoltageLevel fields
                 Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), busbarSection, true),
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(13.5, 14.0), busbarSection, false),
 
                 // --- EXISTS --- //
                 // VoltageLevel fields
                 Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, busbarSection, true),
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, busbarSection1, false),
 
                 // --- IN --- //
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), busbarSection, true),
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), busbarSection, false),
 
                 // --- NOT_IN --- //
                 // VoltageLevel fields
-                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), busbarSection, true)
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), busbarSection, true),
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), busbarSection, false)
         );
     }
 }

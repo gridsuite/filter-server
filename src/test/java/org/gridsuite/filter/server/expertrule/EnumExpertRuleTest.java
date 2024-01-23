@@ -51,16 +51,16 @@ class EnumExpertRuleTest {
         Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
 
         return Stream.of(
-                // --- Test with whatever operator with UNKNOWN field for an expected exception --- //
-                Arguments.of(EQUALS, FieldType.UNKNOWN, network, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, voltageLevel, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, generator, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, load, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, bus, PowsyblException.class),
-                Arguments.of(EQUALS, FieldType.UNKNOWN, busbarSection, PowsyblException.class),
+                // --- Test with whatever operator with an unsupported field for an expected exception --- //
+                Arguments.of(EQUALS, FieldType.RATED_S, network, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.P0, generator, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, load, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
 
-                // --- Test with UNKNOWN operator with a supported field for an expected exception --- //
-                Arguments.of(UNKNOWN, FieldType.ENERGY_SOURCE, generator, PowsyblException.class)
+                // --- Test with IS operator with a supported field for an expected exception --- //
+                Arguments.of(IS, FieldType.ENERGY_SOURCE, generator, PowsyblException.class)
                 );
     }
 
@@ -94,26 +94,34 @@ class EnumExpertRuleTest {
                 // --- EQUALS --- //
                 // Generator fields
                 Arguments.of(EQUALS, FieldType.ENERGY_SOURCE, EnergySource.HYDRO.name(), null, gen, true),
+                Arguments.of(EQUALS, FieldType.ENERGY_SOURCE, EnergySource.THERMAL.name(), null, gen, false),
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, gen, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, gen, false),
 
                 // --- NOT_EQUALS --- //
                 // Generator fields
                 Arguments.of(NOT_EQUALS, FieldType.ENERGY_SOURCE, EnergySource.THERMAL.name(), null, gen, true),
+                Arguments.of(NOT_EQUALS, FieldType.ENERGY_SOURCE, EnergySource.HYDRO.name(), null, gen, false),
                 // VoltageLevel fields
                 Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, gen, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, gen, false),
 
                 // --- IN --- //
                 // Generator fields
                 Arguments.of(IN, FieldType.ENERGY_SOURCE, null, Set.of(EnergySource.HYDRO.name(), EnergySource.THERMAL.name()), gen, true),
+                Arguments.of(IN, FieldType.ENERGY_SOURCE, null, Set.of(EnergySource.NUCLEAR.name(), EnergySource.THERMAL.name()), gen, false),
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), gen, true),
+                Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), gen, false),
 
                 // --- NOT_IN --- //
                 // Generator fields
                 Arguments.of(NOT_IN, FieldType.ENERGY_SOURCE, null, Set.of(EnergySource.NUCLEAR.name(), EnergySource.THERMAL.name()), gen, true),
+                Arguments.of(NOT_IN, FieldType.ENERGY_SOURCE, null, Set.of(EnergySource.HYDRO.name(), EnergySource.THERMAL.name()), gen, false),
                 // VoltageLevel fields
-                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), gen, true)
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), gen, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), gen, false)
         );
     }
 
@@ -134,18 +142,22 @@ class EnumExpertRuleTest {
                 // --- EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, load, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, load, false),
 
                 // --- NOT_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, load, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, load, false),
 
                 // --- IN --- //
                  // VoltageLevel fields
                 Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), load, true),
+                Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), load, false),
 
                 // --- NOT_IN --- //
                 // VoltageLevel fields
-                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), load, true)
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), load, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), load, false)
         );
     }
 
@@ -164,18 +176,22 @@ class EnumExpertRuleTest {
                 // --- EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, bus, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, bus, false),
 
                 // --- NOT_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, bus, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, bus, false),
 
                 // --- IN --- //
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), bus, true),
+                Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), bus, false),
 
                 // --- NOT_IN --- //
                 // VoltageLevel fields
-                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), bus, true)
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), bus, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), bus, false)
         );
     }
 
@@ -196,18 +212,22 @@ class EnumExpertRuleTest {
                 // --- EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, busbarSection, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, busbarSection, false),
 
                 // --- NOT_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, busbarSection, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, busbarSection, false),
 
                 // --- IN --- //
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), busbarSection, true),
+                Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), busbarSection, false),
 
                 // --- NOT_IN --- //
                 // VoltageLevel fields
-                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), busbarSection, true)
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), busbarSection, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), busbarSection, false)
         );
     }
 }
