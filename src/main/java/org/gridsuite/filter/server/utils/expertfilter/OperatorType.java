@@ -10,6 +10,7 @@ package org.gridsuite.filter.server.utils.expertfilter;
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
 public enum OperatorType {
+    UNKNOWN, // used for test covering
     // Common
     EQUALS,
     NOT_EQUALS,

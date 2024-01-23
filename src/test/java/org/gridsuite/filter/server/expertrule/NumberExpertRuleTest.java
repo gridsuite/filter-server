@@ -1,5 +1,6 @@
 package org.gridsuite.filter.server.expertrule;
 
+import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.NumberExpertRule;
@@ -15,9 +16,54 @@ import java.util.stream.Stream;
 
 import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
 class NumberExpertRuleTest {
+
+    @ParameterizedTest
+    @MethodSource({
+        "provideArgumentsForTestWithException"
+    })
+    void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
+        NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).build();
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment));
+    }
+
+    static Stream<Arguments> provideArgumentsForTestWithException() {
+
+        Network network = Mockito.mock(Network.class);
+        Mockito.when(network.getType()).thenReturn(IdentifiableType.NETWORK);
+
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getType()).thenReturn(IdentifiableType.VOLTAGE_LEVEL);
+
+        Generator generator = Mockito.mock(Generator.class);
+        Mockito.when(generator.getType()).thenReturn(IdentifiableType.GENERATOR);
+        Mockito.when(generator.getMinP()).thenReturn(-500.0);
+
+        Load load = Mockito.mock(Load.class);
+        Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
+
+        Bus bus = Mockito.mock(Bus.class);
+        Mockito.when(bus.getType()).thenReturn(IdentifiableType.BUS);
+
+        BusbarSection busbarSection = Mockito.mock(BusbarSection.class);
+        Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
+
+        return Stream.of(
+                // --- Test with whatever operator with UNKNOWN field for an expected exception --- //
+                Arguments.of(EQUALS, FieldType.UNKNOWN, network, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.UNKNOWN, voltageLevel, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.UNKNOWN, generator, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.UNKNOWN, load, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.UNKNOWN, bus, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.UNKNOWN, busbarSection, PowsyblException.class),
+
+                // --- Test with UNKNOWN operator with a supported field for an expected exception --- //
+                Arguments.of(UNKNOWN, FieldType.MIN_P, generator, PowsyblException.class)
+        );
+    }
 
     @ParameterizedTest
     @MethodSource({
