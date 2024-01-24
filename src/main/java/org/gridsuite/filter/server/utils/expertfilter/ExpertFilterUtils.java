@@ -42,10 +42,8 @@ public final class ExpertFilterUtils {
 
     private static String getVoltageLevelFieldValue(FieldType field, VoltageLevel voltageLevel) {
         return switch (field) {
-            case COUNTRY -> {
-                Optional<Country> country = voltageLevel.getSubstation().flatMap(Substation::getCountry);
-                yield country.isPresent() ? String.valueOf(country.get()) : "";
-            }
+            case COUNTRY ->
+                voltageLevel.getSubstation().flatMap(Substation::getCountry).map(String::valueOf).orElse(null);
             case NOMINAL_VOLTAGE -> String.valueOf(voltageLevel.getNominalV());
             case VOLTAGE_LEVEL_ID -> voltageLevel.getId();
             case LOW_VOLTAGE_LIMIT -> String.valueOf(voltageLevel.getLowVoltageLimit());
