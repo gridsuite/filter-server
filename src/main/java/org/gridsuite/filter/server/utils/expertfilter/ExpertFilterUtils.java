@@ -131,7 +131,7 @@ public final class ExpertFilterUtils {
 
     private static String getSubstationFieldValue(FieldType field, Substation substation) {
         return switch (field) {
-            case COUNTRY -> String.valueOf(substation.getCountry());
+            case COUNTRY -> String.valueOf(substation.getCountry().orElse(null));
             default ->
                 throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + substation.getType() + "]");
         };

@@ -70,7 +70,8 @@ class NumberExpertRuleTest {
         "provideArgumentsForGeneratorTest",
         "provideArgumentsForLoadTest",
         "provideArgumentsForBusTest",
-        "provideArgumentsForBusBarSectionTest"
+        "provideArgumentsForBusBarSectionTest",
+        "provideArgumentsForVoltageLevelTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -628,6 +629,111 @@ class NumberExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), busbarSection, true),
                 Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), busbarSection, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForVoltageLevelTest() {
+
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getType()).thenReturn(IdentifiableType.VOLTAGE_LEVEL);
+        Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
+        Mockito.when(voltageLevel.getLowVoltageLimit()).thenReturn(40.0);
+        Mockito.when(voltageLevel.getHighVoltageLimit()).thenReturn(400.0);
+
+        // for testing none EXISTS
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel1.getType()).thenReturn(IdentifiableType.VOLTAGE_LEVEL);
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(Double.NaN);
+        Mockito.when(voltageLevel1.getLowVoltageLimit()).thenReturn(Double.NaN);
+        Mockito.when(voltageLevel1.getHighVoltageLimit()).thenReturn(Double.NaN);
+
+        return Stream.of(
+            // --- EQUALS --- //
+            Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, voltageLevel, true),
+            Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, voltageLevel, false),
+            Arguments.of(EQUALS, FieldType.LOW_VOLTAGE_LIMIT, 40.0, null, voltageLevel, true),
+            Arguments.of(EQUALS, FieldType.LOW_VOLTAGE_LIMIT, 50.0, null, voltageLevel, false),
+            Arguments.of(EQUALS, FieldType.HIGH_VOLTAGE_LIMIT, 400.0, null, voltageLevel, true),
+            Arguments.of(EQUALS, FieldType.HIGH_VOLTAGE_LIMIT, 500.0, null, voltageLevel, false),
+
+            // --- GREATER_OR_EQUALS --- //
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, voltageLevel, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, voltageLevel, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, voltageLevel, false),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.LOW_VOLTAGE_LIMIT, 30.0, null, voltageLevel, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.LOW_VOLTAGE_LIMIT, 40.0, null, voltageLevel, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.LOW_VOLTAGE_LIMIT, 50.0, null, voltageLevel, false),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.HIGH_VOLTAGE_LIMIT, 300.0, null, voltageLevel, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.HIGH_VOLTAGE_LIMIT, 400.0, null, voltageLevel, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.HIGH_VOLTAGE_LIMIT, 500.0, null, voltageLevel, false),
+
+            // --- GREATER --- //
+            Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, voltageLevel, true),
+            Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 13.0, null, voltageLevel, false),
+            Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 14.0, null, voltageLevel, false),
+            Arguments.of(GREATER, FieldType.LOW_VOLTAGE_LIMIT, 30.0, null, voltageLevel, true),
+            Arguments.of(GREATER, FieldType.LOW_VOLTAGE_LIMIT, 40.0, null, voltageLevel, false),
+            Arguments.of(GREATER, FieldType.LOW_VOLTAGE_LIMIT, 50.0, null, voltageLevel, false),
+            Arguments.of(GREATER, FieldType.HIGH_VOLTAGE_LIMIT, 300.0, null, voltageLevel, true),
+            Arguments.of(GREATER, FieldType.HIGH_VOLTAGE_LIMIT, 400.0, null, voltageLevel, false),
+            Arguments.of(GREATER, FieldType.HIGH_VOLTAGE_LIMIT, 500.0, null, voltageLevel, false),
+
+            // --- LOWER_OR_EQUALS --- //
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, voltageLevel, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, voltageLevel, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, voltageLevel, false),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.LOW_VOLTAGE_LIMIT, 50.0, null, voltageLevel, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.LOW_VOLTAGE_LIMIT, 40.0, null, voltageLevel, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.LOW_VOLTAGE_LIMIT, 30.0, null, voltageLevel, false),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.HIGH_VOLTAGE_LIMIT, 500.0, null, voltageLevel, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.HIGH_VOLTAGE_LIMIT, 400.0, null, voltageLevel, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.HIGH_VOLTAGE_LIMIT, 300.0, null, voltageLevel, false),
+
+            // --- LOWER --- //
+            // voltageLevelerator fields
+            Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, voltageLevel, true),
+            Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 13.0, null, voltageLevel, false),
+            Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 12.0, null, voltageLevel, false),
+            Arguments.of(LOWER, FieldType.LOW_VOLTAGE_LIMIT, 50.0, null, voltageLevel, true),
+            Arguments.of(LOWER, FieldType.LOW_VOLTAGE_LIMIT, 40.0, null, voltageLevel, false),
+            Arguments.of(LOWER, FieldType.LOW_VOLTAGE_LIMIT, 30.0, null, voltageLevel, false),
+            Arguments.of(LOWER, FieldType.HIGH_VOLTAGE_LIMIT, 500.0, null, voltageLevel, true),
+            Arguments.of(LOWER, FieldType.HIGH_VOLTAGE_LIMIT, 400.0, null, voltageLevel, false),
+            Arguments.of(LOWER, FieldType.HIGH_VOLTAGE_LIMIT, 300.0, null, voltageLevel, false),
+
+            // --- BETWEEN --- //
+            Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), voltageLevel, true),
+            Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(13.5, 14.0), voltageLevel, false),
+            Arguments.of(BETWEEN, FieldType.LOW_VOLTAGE_LIMIT, null, Set.of(30.0, 50.0), voltageLevel, true),
+            Arguments.of(BETWEEN, FieldType.LOW_VOLTAGE_LIMIT, null, Set.of(50.0, 60.0), voltageLevel, false),
+            Arguments.of(BETWEEN, FieldType.LOW_VOLTAGE_LIMIT, null, Set.of(20.0, 30.0), voltageLevel, false),
+            Arguments.of(BETWEEN, FieldType.HIGH_VOLTAGE_LIMIT, null, Set.of(300.0, 500.0), voltageLevel, true),
+            Arguments.of(BETWEEN, FieldType.HIGH_VOLTAGE_LIMIT, null, Set.of(500.0, 600.0), voltageLevel, false),
+            Arguments.of(BETWEEN, FieldType.HIGH_VOLTAGE_LIMIT, null, Set.of(200.0, 300.0), voltageLevel, false),
+
+            // --- EXISTS --- //
+            Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, voltageLevel, true),
+            Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, voltageLevel1, false),
+            Arguments.of(EXISTS, FieldType.LOW_VOLTAGE_LIMIT, null, null, voltageLevel, true),
+            Arguments.of(EXISTS, FieldType.LOW_VOLTAGE_LIMIT, null, null, voltageLevel1, false),
+            Arguments.of(EXISTS, FieldType.HIGH_VOLTAGE_LIMIT, null, null, voltageLevel, true),
+            Arguments.of(EXISTS, FieldType.HIGH_VOLTAGE_LIMIT, null, null, voltageLevel1, false),
+
+            // --- IN --- //
+            Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), voltageLevel, true),
+            Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), voltageLevel, false),
+            Arguments.of(IN, FieldType.LOW_VOLTAGE_LIMIT, null, Set.of(30.0, 40.0, 50.0), voltageLevel, true),
+            Arguments.of(IN, FieldType.LOW_VOLTAGE_LIMIT, null, Set.of(30.0, 50.0), voltageLevel, false),
+            Arguments.of(IN, FieldType.HIGH_VOLTAGE_LIMIT, null, Set.of(300.0, 400.0, 500.0), voltageLevel, true),
+            Arguments.of(IN, FieldType.HIGH_VOLTAGE_LIMIT, null, Set.of(300.0, 500.0), voltageLevel, false),
+
+            // --- NOT_IN --- //
+            Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), voltageLevel, true),
+            Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), voltageLevel, false),
+            Arguments.of(NOT_IN, FieldType.LOW_VOLTAGE_LIMIT, null, Set.of(30.0, 50.0), voltageLevel, true),
+            Arguments.of(NOT_IN, FieldType.LOW_VOLTAGE_LIMIT, null, Set.of(30.0, 40.0, 50.0), voltageLevel, false),
+            Arguments.of(NOT_IN, FieldType.HIGH_VOLTAGE_LIMIT, null, Set.of(300.0, 500.0), voltageLevel, true),
+            Arguments.of(NOT_IN, FieldType.HIGH_VOLTAGE_LIMIT, null, Set.of(300.0, 400.0, 500.0), voltageLevel, false)
         );
     }
 }
