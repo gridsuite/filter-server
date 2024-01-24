@@ -10,7 +10,6 @@ package org.gridsuite.filter.server.utils.expertfilter;
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
 public enum FieldType {
-    UNKNOWN, // used for test covering
     ID,
     NAME,
     NOMINAL_VOLTAGE,
@@ -29,4 +28,6 @@ public enum FieldType {
     MARGINAL_COST,
     PLANNED_OUTAGE_RATE,
     FORCED_OUTAGE_RATE,
+    P0,
+    Q0,
 }
