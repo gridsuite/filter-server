@@ -11,8 +11,6 @@ import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
