@@ -52,7 +52,7 @@ class NumberExpertRuleTest {
         Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
 
         return Stream.of(
-                // --- Test with whatever operator with an unsupported field for an expected exception --- //
+                // --- Test an unsupported field for each equipment --- //
                 Arguments.of(EQUALS, FieldType.RATED_S, network, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.P0, generator, PowsyblException.class),
@@ -60,7 +60,7 @@ class NumberExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
 
-                // --- Test with IS operator with a supported field for an expected exception --- //
+                // --- Test an unsupported operator for this rule type --- //
                 Arguments.of(IS, FieldType.MIN_P, generator, PowsyblException.class)
         );
     }

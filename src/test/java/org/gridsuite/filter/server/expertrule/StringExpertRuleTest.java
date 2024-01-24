@@ -50,7 +50,7 @@ class StringExpertRuleTest {
         Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
 
         return Stream.of(
-                // --- Test with whatever operator with UNKNOWN field for an expected exception --- //
+                // --- Test an unsupported field for each equipment --- //
                 Arguments.of(IS, FieldType.RATED_S, network, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
                 Arguments.of(IS, FieldType.P0, generator, PowsyblException.class),
@@ -58,7 +58,7 @@ class StringExpertRuleTest {
                 Arguments.of(IS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, busbarSection, PowsyblException.class),
 
-                // --- Test with EQUALS operator with a supported field for an expected exception --- //
+                // --- Test an unsupported operator for this rule type --- //
                 Arguments.of(EQUALS, FieldType.ID, generator, PowsyblException.class)
         );
     }
