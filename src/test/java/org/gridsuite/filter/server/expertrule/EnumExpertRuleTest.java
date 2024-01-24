@@ -50,6 +50,9 @@ class EnumExpertRuleTest {
         BusbarSection busbarSection = Mockito.mock(BusbarSection.class);
         Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
 
+        Battery battery = Mockito.mock(Battery.class);
+        Mockito.when(battery.getType()).thenReturn(IdentifiableType.BATTERY);
+
         return Stream.of(
                 // --- Test an unsupported field for each equipment --- //
                 Arguments.of(EQUALS, FieldType.RATED_S, network, PowsyblException.class),
@@ -58,6 +61,7 @@ class EnumExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.RATED_S, load, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, battery, PowsyblException.class),
 
                 // --- Test an unsupported operator for this rule type --- //
                 Arguments.of(IS, FieldType.ENERGY_SOURCE, generator, PowsyblException.class)
@@ -69,7 +73,8 @@ class EnumExpertRuleTest {
         "provideArgumentsForGeneratorTest",
         "provideArgumentsForLoadTest",
         "provideArgumentsForBusTest",
-        "provideArgumentsForBusBarSectionTest"})
+        "provideArgumentsForBusBarSectionTest",
+        "provideArgumentsForBatteryTest"})
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         EnumExpertRule rule = EnumExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
         assertEquals(expected, rule.evaluateRule(equipment));
@@ -228,6 +233,42 @@ class EnumExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), busbarSection, true),
                 Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), busbarSection, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForBatteryTest() {
+
+        Battery battery = Mockito.mock(Battery.class);
+        Mockito.when(battery.getType()).thenReturn(IdentifiableType.BATTERY);
+        // VoltageLevel fields
+        Substation substation = Mockito.mock(Substation.class);
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getSubstation()).thenReturn(Optional.of(substation));
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(battery.getTerminal()).thenReturn(terminal);
+        Mockito.when(substation.getCountry()).thenReturn(Optional.of(Country.FR));
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, battery, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, battery, false),
+
+                // --- NOT_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, battery, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, battery, false),
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), battery, true),
+                Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), battery, false),
+
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), battery, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), battery, false)
         );
     }
 }
