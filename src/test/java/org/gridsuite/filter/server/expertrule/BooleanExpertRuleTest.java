@@ -67,7 +67,8 @@ class BooleanExpertRuleTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"provideArgumentsForGeneratorTest", "provideArgumentsForShuntCompensatorTest", "provideArgumentsForBatteryTest"})
+    @MethodSource({"provideArgumentsForGeneratorTest", "provideArgumentsForShuntCompensatorTest", "provideArgumentsForBatteryTest", "provideArgumentsForLinesTest"
+    })
     void testEvaluateRule(OperatorType operator, FieldType field, boolean value, Identifiable<?> equipment, boolean expected) {
         BooleanExpertRule rule = BooleanExpertRule.builder().operator(operator).field(field).value(value).build();
         assertEquals(expected, rule.evaluateRule(equipment));
@@ -144,6 +145,36 @@ class BooleanExpertRuleTest {
                 // Terminal fields
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, battery, true),
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, battery, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForLinesTest() {
+
+        Line line = Mockito.mock(Line.class);
+        Mockito.when(line.getType()).thenReturn(IdentifiableType.LINE);
+        // Terminal fields
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.isConnected()).thenReturn(true);
+        Mockito.when(line.getTerminal(Branch.Side.ONE)).thenReturn(terminal1);
+
+        Terminal terminal2 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal2.isConnected()).thenReturn(true);
+        Mockito.when(line.getTerminal(Branch.Side.TWO)).thenReturn(terminal2);
+
+        return Stream.of(
+                // --- EQUALS--- //
+                // Terminal fields
+                Arguments.of(EQUALS, FieldType.CONNECTED_1, true, line, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED_1, false, line, false),
+                Arguments.of(EQUALS, FieldType.CONNECTED_2, true, line, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED_2, false, line, false),
+
+                // --- NOT_EQUALS--- //
+                // Terminal fields
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_1, false, line, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_1, true, line, false),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_2, false, line, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_2, true, line, false)
         );
     }
 }

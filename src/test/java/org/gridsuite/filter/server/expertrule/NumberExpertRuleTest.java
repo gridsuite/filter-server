@@ -77,7 +77,8 @@ class NumberExpertRuleTest {
         "provideArgumentsForBusBarSectionTest",
         "provideArgumentsForShuntCompensatorTest",
         "provideArgumentsForBatteryTest",
-        "provideArgumentsForVoltageLevelTest"
+        "provideArgumentsForVoltageLevelTest",
+        "provideArgumentsForLinesTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -937,6 +938,262 @@ class NumberExpertRuleTest {
                 Arguments.of(NOT_IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(3., 6.), shuntCompensator, false),
                 Arguments.of(NOT_IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(6., 4.), shuntCompensator, true),
                 Arguments.of(NOT_IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(3., 6.), shuntCompensator, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForLinesTest() {
+
+        Line line = Mockito.mock(Line.class);
+        Mockito.when(line.getType()).thenReturn(IdentifiableType.LINE);
+        // Line Fields
+
+        Mockito.when(line.getR()).thenReturn(150.);
+        Mockito.when(line.getX()).thenReturn(50.);
+        Mockito.when(line.getG1()).thenReturn(10.);
+        Mockito.when(line.getG2()).thenReturn(5.);
+        Mockito.when(line.getB1()).thenReturn(200.);
+        Mockito.when(line.getB2()).thenReturn(250.);
+
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(line.getTerminal(Branch.Side.ONE)).thenReturn(terminal1);
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(13.);
+
+        VoltageLevel voltageLevel2 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal2 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal2.getVoltageLevel()).thenReturn(voltageLevel2);
+        Mockito.when(line.getTerminal(Branch.Side.TWO)).thenReturn(terminal2);
+        Mockito.when(voltageLevel2.getNominalV()).thenReturn(17.);
+
+        // for testing none EXISTS
+        Line line1 = Mockito.mock(Line.class);
+        Mockito.when(line1.getType()).thenReturn(IdentifiableType.LINE);
+        // VoltageLevel fields
+        VoltageLevel voltageLevelNone = Mockito.mock(VoltageLevel.class);
+        Terminal terminalNone = Mockito.mock(Terminal.class);
+        Mockito.when(terminalNone.getVoltageLevel()).thenReturn(voltageLevelNone);
+        Mockito.when(line1.getTerminal(Branch.Side.ONE)).thenReturn(terminalNone);
+        Mockito.when(voltageLevelNone.getNominalV()).thenReturn(Double.NaN);
+
+        VoltageLevel voltageLevelNone2 = Mockito.mock(VoltageLevel.class);
+        Terminal terminalNone2 = Mockito.mock(Terminal.class);
+        Mockito.when(terminalNone2.getVoltageLevel()).thenReturn(voltageLevelNone2);
+        Mockito.when(line1.getTerminal(Branch.Side.TWO)).thenReturn(terminalNone2);
+        Mockito.when(voltageLevelNone2.getNominalV()).thenReturn(Double.NaN);
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE_1, 13., null, line, true),
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE_1, 14., null, line, false),
+
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE_2, 17., null, line, true),
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE_2, 14., null, line, false),
+
+                // Line fields
+                Arguments.of(EQUALS, FieldType.SERIE_RESISTANCE, 150., null, line, true),
+                Arguments.of(EQUALS, FieldType.SERIE_RESISTANCE, 149., null, line, false),
+                Arguments.of(EQUALS, FieldType.SERIE_REACTANCE, 50., null, line, true),
+                Arguments.of(EQUALS, FieldType.SERIE_REACTANCE, 49., null, line, false),
+                Arguments.of(EQUALS, FieldType.SHUNT_CONDUCTANCE_1, 10., null, line, true),
+                Arguments.of(EQUALS, FieldType.SHUNT_CONDUCTANCE_1, 14., null, line, false),
+                Arguments.of(EQUALS, FieldType.SHUNT_CONDUCTANCE_2, 5., null, line, true),
+                Arguments.of(EQUALS, FieldType.SHUNT_CONDUCTANCE_2, 14., null, line, false),
+                Arguments.of(EQUALS, FieldType.SHUNT_SUSCEPTANCE_1, 200., null, line, true),
+                Arguments.of(EQUALS, FieldType.SHUNT_SUSCEPTANCE_1, 14., null, line, false),
+                Arguments.of(EQUALS, FieldType.SHUNT_SUSCEPTANCE_2, 250., null, line, true),
+                Arguments.of(EQUALS, FieldType.SHUNT_SUSCEPTANCE_2, 14., null, line, false),
+
+                // --- GREATER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_1, 12., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_1, 13., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_1, 14., null, line, false),
+
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_2, 12., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_2, 17., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_2, 18., null, line, false),
+
+                // Line fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SERIE_RESISTANCE, 149., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SERIE_RESISTANCE, 150., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SERIE_RESISTANCE, 151., null, line, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SERIE_REACTANCE, 49., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SERIE_REACTANCE, 50., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SERIE_REACTANCE, 51., null, line, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_1, 9., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_1, 10., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_1, 14., null, line, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_2, 4., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_2, 5., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_2, 14., null, line, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_1, 199., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_1, 200., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_1, 201., null, line, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_2, 249., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_2, 250., null, line, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_2, 251., null, line, false),
+
+                // --- GREATER --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE_1, 12., null, line, true),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE_1, 13., null, line, false),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE_1, 14., null, line, false),
+
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE_2, 16., null, line, true),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE_2, 17., null, line, false),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE_2, 18., null, line, false),
+
+                // Line fields
+                Arguments.of(GREATER, FieldType.SERIE_RESISTANCE, 149., null, line, true),
+                Arguments.of(GREATER, FieldType.SERIE_RESISTANCE, 150., null, line, false),
+                Arguments.of(GREATER, FieldType.SERIE_RESISTANCE, 151., null, line, false),
+                Arguments.of(GREATER, FieldType.SERIE_REACTANCE, 49., null, line, true),
+                Arguments.of(GREATER, FieldType.SERIE_REACTANCE, 50., null, line, false),
+                Arguments.of(GREATER, FieldType.SERIE_REACTANCE, 51., null, line, false),
+                Arguments.of(GREATER, FieldType.SHUNT_CONDUCTANCE_1, 9., null, line, true),
+                Arguments.of(GREATER, FieldType.SHUNT_CONDUCTANCE_1, 10., null, line, false),
+                Arguments.of(GREATER, FieldType.SHUNT_CONDUCTANCE_1, 14., null, line, false),
+                Arguments.of(GREATER, FieldType.SHUNT_CONDUCTANCE_2, 4., null, line, true),
+                Arguments.of(GREATER, FieldType.SHUNT_CONDUCTANCE_2, 5., null, line, false),
+                Arguments.of(GREATER, FieldType.SHUNT_CONDUCTANCE_2, 14., null, line, false),
+                Arguments.of(GREATER, FieldType.SHUNT_SUSCEPTANCE_1, 199., null, line, true),
+                Arguments.of(GREATER, FieldType.SHUNT_SUSCEPTANCE_1, 200., null, line, false),
+                Arguments.of(GREATER, FieldType.SHUNT_SUSCEPTANCE_1, 201., null, line, false),
+                Arguments.of(GREATER, FieldType.SHUNT_SUSCEPTANCE_2, 249., null, line, true),
+                Arguments.of(GREATER, FieldType.SHUNT_SUSCEPTANCE_2, 250., null, line, false),
+                Arguments.of(GREATER, FieldType.SHUNT_SUSCEPTANCE_2, 251., null, line, false),
+
+                // --- LOWER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_1, 14., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_1, 13., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_1, 12., null, line, false),
+
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_2, 18., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_2, 17., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE_2, 12., null, line, false),
+
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SERIE_RESISTANCE, 151., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SERIE_RESISTANCE, 150., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SERIE_RESISTANCE, 149., null, line, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SERIE_REACTANCE, 51., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SERIE_REACTANCE, 50., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SERIE_REACTANCE, 49., null, line, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_1, 11., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_1, 10., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_1, 9., null, line, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_2, 6., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_2, 5., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_CONDUCTANCE_2, 4., null, line, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_1, 201., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_1, 200., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_1, 199., null, line, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_2, 251., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_2, 250., null, line, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SHUNT_SUSCEPTANCE_2, 249., null, line, false),
+
+                // --- LOWER --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE_1, 14., null, line, true),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE_1, 13., null, line, false),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE_1, 12., null, line, false),
+
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE_2, 18., null, line, true),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE_2, 17., null, line, false),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE_2, 12., null, line, false),
+
+                Arguments.of(LOWER, FieldType.SERIE_RESISTANCE, 151., null, line, true),
+                Arguments.of(LOWER, FieldType.SERIE_RESISTANCE, 150., null, line, false),
+                Arguments.of(LOWER, FieldType.SERIE_RESISTANCE, 149., null, line, false),
+                Arguments.of(LOWER, FieldType.SERIE_REACTANCE, 51., null, line, true),
+                Arguments.of(LOWER, FieldType.SERIE_REACTANCE, 50., null, line, false),
+                Arguments.of(LOWER, FieldType.SERIE_REACTANCE, 49., null, line, false),
+                Arguments.of(LOWER, FieldType.SHUNT_CONDUCTANCE_1, 11., null, line, true),
+                Arguments.of(LOWER, FieldType.SHUNT_CONDUCTANCE_1, 10., null, line, false),
+                Arguments.of(LOWER, FieldType.SHUNT_CONDUCTANCE_1, 9., null, line, false),
+                Arguments.of(LOWER, FieldType.SHUNT_CONDUCTANCE_2, 6., null, line, true),
+                Arguments.of(LOWER, FieldType.SHUNT_CONDUCTANCE_2, 5., null, line, false),
+                Arguments.of(LOWER, FieldType.SHUNT_CONDUCTANCE_2, 4., null, line, false),
+                Arguments.of(LOWER, FieldType.SHUNT_SUSCEPTANCE_1, 201., null, line, true),
+                Arguments.of(LOWER, FieldType.SHUNT_SUSCEPTANCE_1, 200., null, line, false),
+                Arguments.of(LOWER, FieldType.SHUNT_SUSCEPTANCE_1, 199., null, line, false),
+                Arguments.of(LOWER, FieldType.SHUNT_SUSCEPTANCE_2, 251., null, line, true),
+                Arguments.of(LOWER, FieldType.SHUNT_SUSCEPTANCE_2, 250., null, line, false),
+                Arguments.of(LOWER, FieldType.SHUNT_SUSCEPTANCE_2, 249., null, line, false),
+
+                // --- BETWEEN --- //
+                // VoltageLevel fields
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE_1, null, Set.of(12., 14.), line, true),
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE_1, null, Set.of(13.5, 14.), line, false),
+
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE_2, null, Set.of(16., 18.), line, true),
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE_2, null, Set.of(17.5, 19.), line, false),
+
+                Arguments.of(BETWEEN, FieldType.SERIE_RESISTANCE, null, Set.of(120., 160.), line, true),
+                Arguments.of(BETWEEN, FieldType.SERIE_RESISTANCE, null, Set.of(120., 140.), line, false),
+                Arguments.of(BETWEEN, FieldType.SERIE_REACTANCE, null, Set.of(49., 51.), line, true),
+                Arguments.of(BETWEEN, FieldType.SERIE_REACTANCE, null, Set.of(12., 14.), line, false),
+                Arguments.of(BETWEEN, FieldType.SHUNT_CONDUCTANCE_1, null, Set.of(9., 14.), line, true),
+                Arguments.of(BETWEEN, FieldType.SHUNT_CONDUCTANCE_1, null, Set.of(12., 14.), line, false),
+                Arguments.of(BETWEEN, FieldType.SHUNT_CONDUCTANCE_2, null, Set.of(2., 6.), line, true),
+                Arguments.of(BETWEEN, FieldType.SHUNT_CONDUCTANCE_2, null, Set.of(12., 14.), line, false),
+                Arguments.of(BETWEEN, FieldType.SHUNT_SUSCEPTANCE_1, null, Set.of(199., 200.), line, true),
+                Arguments.of(BETWEEN, FieldType.SHUNT_SUSCEPTANCE_1, null, Set.of(201., 204.), line, false),
+                Arguments.of(BETWEEN, FieldType.SHUNT_SUSCEPTANCE_2, null, Set.of(245., 255.), line, true),
+                Arguments.of(BETWEEN, FieldType.SHUNT_SUSCEPTANCE_2, null, Set.of(240., 249.), line, false),
+
+                // --- EXISTS --- //
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE_1, null, null, line, true),
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE_1, null, null, line1, false),
+
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE_2, null, null, line, true),
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE_2, null, null, line1, false),
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE_1, null, Set.of(12., 13., 14.), line, true),
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE_1, null, Set.of(12., 14.), line, false),
+
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE_2, null, Set.of(12., 17., 14.), line, true),
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE_2, null, Set.of(12., 14.), line, false),
+
+                Arguments.of(IN, FieldType.SERIE_RESISTANCE, null, Set.of(120., 150.), line, true),
+                Arguments.of(IN, FieldType.SERIE_RESISTANCE, null, Set.of(120., 140.), line, false),
+                Arguments.of(IN, FieldType.SERIE_REACTANCE, null, Set.of(49., 50.), line, true),
+                Arguments.of(IN, FieldType.SERIE_REACTANCE, null, Set.of(12., 14.), line, false),
+                Arguments.of(IN, FieldType.SHUNT_CONDUCTANCE_1, null, Set.of(9., 10.), line, true),
+                Arguments.of(IN, FieldType.SHUNT_CONDUCTANCE_1, null, Set.of(12., 14.), line, false),
+                Arguments.of(IN, FieldType.SHUNT_CONDUCTANCE_2, null, Set.of(2., 5., 14.), line, true),
+                Arguments.of(IN, FieldType.SHUNT_CONDUCTANCE_2, null, Set.of(2., 14.), line, false),
+                Arguments.of(IN, FieldType.SHUNT_SUSCEPTANCE_1, null, Set.of(199., 200.), line, true),
+                Arguments.of(IN, FieldType.SHUNT_SUSCEPTANCE_1, null, Set.of(199., 204.), line, false),
+                Arguments.of(IN, FieldType.SHUNT_SUSCEPTANCE_2, null, Set.of(250., 240.), line, true),
+                Arguments.of(IN, FieldType.SHUNT_SUSCEPTANCE_2, null, Set.of(240., 249.), line, false),
+
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE_1, null, Set.of(12., 14.), line, true),
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE_1, null, Set.of(12., 13., 14.), line, false),
+
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE_2, null, Set.of(12., 14.), line, true),
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE_2, null, Set.of(12., 17., 14.), line, false),
+
+                Arguments.of(NOT_IN, FieldType.SERIE_RESISTANCE, null, Set.of(120., 149.), line, true),
+                Arguments.of(NOT_IN, FieldType.SERIE_RESISTANCE, null, Set.of(120., 140., 150.), line, false),
+                Arguments.of(NOT_IN, FieldType.SERIE_REACTANCE, null, Set.of(49., 51.), line, true),
+                Arguments.of(NOT_IN, FieldType.SERIE_REACTANCE, null, Set.of(50., 49., 51.), line, false),
+                Arguments.of(NOT_IN, FieldType.SHUNT_CONDUCTANCE_1, null, Set.of(9., 11.), line, true),
+                Arguments.of(NOT_IN, FieldType.SHUNT_CONDUCTANCE_1, null, Set.of(9., 10., 11.), line, false),
+                Arguments.of(NOT_IN, FieldType.SHUNT_CONDUCTANCE_2, null, Set.of(4., 6.), line, true),
+                Arguments.of(NOT_IN, FieldType.SHUNT_CONDUCTANCE_2, null, Set.of(4., 5., 6.), line, false),
+                Arguments.of(NOT_IN, FieldType.SHUNT_SUSCEPTANCE_1, null, Set.of(199., 201.), line, true),
+                Arguments.of(NOT_IN, FieldType.SHUNT_SUSCEPTANCE_1, null, Set.of(199., 200., 201.), line, false),
+                Arguments.of(NOT_IN, FieldType.SHUNT_SUSCEPTANCE_2, null, Set.of(249., 251.), line, true),
+                Arguments.of(NOT_IN, FieldType.SHUNT_SUSCEPTANCE_2, null, Set.of(249., 250., 251.), line, false)
         );
     }
 

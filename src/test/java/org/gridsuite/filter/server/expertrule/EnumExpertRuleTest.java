@@ -85,7 +85,8 @@ class EnumExpertRuleTest {
         "provideArgumentsForBusBarSectionTest",
         "provideArgumentsForBatteryTest",
         "provideArgumentsForVoltageLevelTest",
-        "provideArgumentsForSubstationTest"
+        "provideArgumentsForSubstationTest",
+        "provideArgumentsForLinesTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         EnumExpertRule rule = EnumExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -413,6 +414,44 @@ class EnumExpertRuleTest {
             // --- NOT_IN --- //
             Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), substation, true),
             Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), substation, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForLinesTest() {
+
+        Line line = Mockito.mock(Line.class);
+        Mockito.when(line.getType()).thenReturn(IdentifiableType.LINE);
+        // VoltageLevel fields
+        Substation substation = Mockito.mock(Substation.class);
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+
+        Mockito.when(voltageLevel.getSubstation()).thenReturn(Optional.of(substation));
+
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(line.getTerminal(Branch.Side.ONE)).thenReturn(terminal1);
+        Mockito.when(substation.getCountry()).thenReturn(Optional.of(Country.FR));
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.COUNTRY_1, Country.FR.name(), null, line, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY_1, Country.DE.name(), null, line, false),
+
+                // --- NOT_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY_1, Country.DE.name(), null, line, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY_1, Country.FR.name(), null, line, false),
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.COUNTRY_1, null, Set.of(Country.FR.name(), Country.DE.name()), line, true),
+                Arguments.of(IN, FieldType.COUNTRY_1, null, Set.of(Country.BE.name(), Country.DE.name()), line, false),
+
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.COUNTRY_1, null, Set.of(Country.BE.name(), Country.DE.name()), line, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY_1, null, Set.of(Country.FR.name(), Country.DE.name()), line, false)
         );
     }
 }
