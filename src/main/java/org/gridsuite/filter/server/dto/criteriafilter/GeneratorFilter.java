@@ -31,9 +31,9 @@ public class GeneratorFilter extends AbstractInjectionFilter {
     EnergySource energySource;
 
     public GeneratorFilter(String equipmentID, String equipmentName, String substationName,
-        SortedSet<String> countries, Map<String, List<String>> freeProperties,
+        SortedSet<String> countries, Map<String, List<String>> substationFreeProperties, Map<String, List<String>> freeProperties,
         NumericalFilter nominalVoltage, EnergySource energySource) {
-        super(new InjectionFilterAttributes(equipmentID, equipmentName, substationName, countries, freeProperties, nominalVoltage));
+        super(new InjectionFilterAttributes(equipmentID, equipmentName, substationName, countries, substationFreeProperties, freeProperties, nominalVoltage));
         this.energySource = energySource;
     }
 

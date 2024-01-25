@@ -149,7 +149,8 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) dto.getEquipmentFilterForm();
         builder.substationName(injectionFilter.getSubstationName())
             .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
-            .substationFreeProperties(convert(injectionFilter.getFreeProperties()))
+            .substationFreeProperties(convert(injectionFilter.getSubstationFreeProperties()))
+            .freeProperties(convert(injectionFilter.getFreeProperties()))
             .nominalVoltage(AbstractFilterRepositoryProxy.convert(injectionFilter.getNominalVoltage()));
     }
 
@@ -173,6 +174,8 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             entity.getEquipmentName(),
             entity.getSubstationName(),
             setToSorterSet(entity.getCountries()),
+            convert(entity.getSubstationFreeProperties()),
+            //TODO ADAPT ONCE ENTITIES HAVE BEEN UPDATED
             convert(entity.getSubstationFreeProperties()),
             convert(entity.getNominalVoltage())
         );

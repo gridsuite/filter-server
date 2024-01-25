@@ -299,7 +299,7 @@ public class FilterEntityControllerTest {
         AbstractFilter generatorFormFilter = new CriteriaFilter(
                 filterId1,
                 modificationDate,
-                new GeneratorFilter("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), null, new NumericalFilter(RangeType.RANGE, 50., null), null)
+                new GeneratorFilter("eqId1", "gen1", "s1", new TreeSet<>(Set.of("FR", "BE")), null, null, new NumericalFilter(RangeType.RANGE, 50., null), null)
         );
 
         modifyFormFilter(filterId1, generatorFormFilter, userId);
@@ -318,7 +318,7 @@ public class FilterEntityControllerTest {
         AbstractFilter generatorFormFilter2 = new CriteriaFilter(
                 filterId1,
                 modificationDate,
-                new GeneratorFilter("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), null, new NumericalFilter(RangeType.RANGE, 50., null), null)
+                new GeneratorFilter("eqId2", "gen2", "s2", new TreeSet<>(Set.of("FR", "BE")), null, null, new NumericalFilter(RangeType.RANGE, 50., null), null)
         );
         modifyFormFilter(filterId1, generatorFormFilter2, userId);
 
@@ -1160,7 +1160,7 @@ public class FilterEntityControllerTest {
         OrderedMap<String, List<String>> workAroundProps =
             Set.of(EquipmentType.SHUNT_COMPENSATOR, EquipmentType.STATIC_VAR_COMPENSATOR).contains(equipmentType) ? null : FREE_PROPS;
         InjectionFilterAttributes injectionFilterAttributes = new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
-            sortedCountries, workAroundProps, numericalFilter);
+            sortedCountries, workAroundProps, null, numericalFilter);
         switch (equipmentType) {
             case BATTERY:
                 abstractInjectionFilter = new BatteryFilter(injectionFilterAttributes);
@@ -1176,6 +1176,7 @@ public class FilterEntityControllerTest {
                         injectionFilterAttributes.getEquipmentName(),
                         injectionFilterAttributes.getSubstationName(),
                         injectionFilterAttributes.getCountries(),
+                        injectionFilterAttributes.getSubstationFreeProperties(),
                         injectionFilterAttributes.getFreeProperties(),
                         injectionFilterAttributes.getNominalVoltage(),
                         energySource);
@@ -1408,7 +1409,7 @@ public class FilterEntityControllerTest {
         NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
         SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
         VoltageLevelFilter voltageLevelFilter = new VoltageLevelFilter(equipmentID, equipmentName,
-            sortedCountries, null, numericalFilter);
+            sortedCountries, null, null, numericalFilter);
         Date modificationDate = new Date();
 
         CriteriaFilter filter = new CriteriaFilter(

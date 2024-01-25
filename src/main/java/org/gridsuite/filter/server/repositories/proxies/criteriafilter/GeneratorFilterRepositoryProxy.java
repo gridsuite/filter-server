@@ -58,6 +58,8 @@ public class GeneratorFilterRepositoryProxy extends AbstractFilterRepositoryProx
                 generatorFilterEntity.getSubstationName(),
                 AbstractFilterRepositoryProxy.setToSorterSet(generatorFilterEntity.getCountries()),
                 AbstractFilterRepositoryProxy.convert(generatorFilterEntity.getSubstationFreeProperties()),
+                //TODO ADAPT ONCE ENTITIES HAVE BEEN UPDATED
+                AbstractFilterRepositoryProxy.convert(generatorFilterEntity.getSubstationFreeProperties()),
                 AbstractFilterRepositoryProxy.convert(generatorFilterEntity.getNominalVoltage()),
                 generatorFilterEntity.getEnergySource());
     }
