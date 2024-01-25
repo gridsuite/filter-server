@@ -43,6 +43,9 @@ class StringExpertRuleTest {
         Load load = Mockito.mock(Load.class);
         Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
 
+        ShuntCompensator shuntCompensator = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+
         Bus bus = Mockito.mock(Bus.class);
         Mockito.when(bus.getType()).thenReturn(IdentifiableType.BUS);
 
@@ -58,6 +61,7 @@ class StringExpertRuleTest {
                 Arguments.of(IS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
                 Arguments.of(IS, FieldType.P0, generator, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, load, PowsyblException.class),
+                Arguments.of(IS, FieldType.RATED_S, shuntCompensator, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, busbarSection, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, battery, PowsyblException.class),
