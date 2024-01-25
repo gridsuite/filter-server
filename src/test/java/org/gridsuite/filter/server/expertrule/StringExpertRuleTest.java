@@ -49,6 +49,9 @@ class StringExpertRuleTest {
         BusbarSection busbarSection = Mockito.mock(BusbarSection.class);
         Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
 
+        Battery battery = Mockito.mock(Battery.class);
+        Mockito.when(battery.getType()).thenReturn(IdentifiableType.BATTERY);
+
         return Stream.of(
                 // --- Test an unsupported field for each equipment --- //
                 Arguments.of(IS, FieldType.RATED_S, network, PowsyblException.class),
@@ -57,6 +60,7 @@ class StringExpertRuleTest {
                 Arguments.of(IS, FieldType.RATED_S, load, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, busbarSection, PowsyblException.class),
+                Arguments.of(IS, FieldType.RATED_S, battery, PowsyblException.class),
 
                 // --- Test an unsupported operator for this rule type --- //
                 Arguments.of(EQUALS, FieldType.ID, generator, PowsyblException.class)
@@ -68,7 +72,8 @@ class StringExpertRuleTest {
         "provideArgumentsForGeneratorTest",
         "provideArgumentsForLoadTest",
         "provideArgumentsForBusTest",
-        "provideArgumentsForBusBarSectionTest"
+        "provideArgumentsForBusBarSectionTest",
+        "provideArgumentsForBatteryTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         StringExpertRule rule = StringExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -455,6 +460,103 @@ class StringExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL_2", "VL_3"), busbarSection, true),
                 Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL", "VL_2"), busbarSection, false)
+
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForBatteryTest() {
+
+        Battery battery = Mockito.mock(Battery.class);
+        Mockito.when(battery.getType()).thenReturn(IdentifiableType.BATTERY);
+        // Common fields
+        Mockito.when(battery.getId()).thenReturn("ID");
+        Mockito.when(battery.getNameOrId()).thenReturn("NAME");
+        // VoltageLevel fields
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getId()).thenReturn("VL");
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(battery.getTerminal()).thenReturn(terminal);
+
+        // for testing none EXISTS
+        Battery battery1 = Mockito.mock(Battery.class);
+        Mockito.when(battery1.getType()).thenReturn(IdentifiableType.BATTERY);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(battery1.getTerminal()).thenReturn(terminal1);
+
+        return Stream.of(
+                // --- IS --- //
+                // Common fields
+                Arguments.of(IS, FieldType.ID, "id", null, battery, true),
+                Arguments.of(IS, FieldType.ID, "id_1", null, battery, false),
+                Arguments.of(IS, FieldType.NAME, "name", null, battery, true),
+                Arguments.of(IS, FieldType.NAME, "name_1", null, battery, false),
+                // VoltageLevel fields
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID, "vl", null, battery, true),
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID, "vl_1", null, battery, false),
+
+                // --- CONTAINS --- //
+                // Common fields
+                Arguments.of(CONTAINS, FieldType.ID, "i", null, battery, true),
+                Arguments.of(CONTAINS, FieldType.ID, "ii", null, battery, false),
+                Arguments.of(CONTAINS, FieldType.NAME, "nam", null, battery, true),
+                Arguments.of(CONTAINS, FieldType.NAME, "namm", null, battery, false),
+                // VoltageLevel fields
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID, "v", null, battery, true),
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID, "vv", null, battery, false),
+
+                // --- BEGINS_WITH --- //
+                // Common fields
+                Arguments.of(BEGINS_WITH, FieldType.ID, "i", null, battery, true),
+                Arguments.of(BEGINS_WITH, FieldType.ID, "j", null, battery, false),
+                Arguments.of(BEGINS_WITH, FieldType.NAME, "n", null, battery, true),
+                Arguments.of(BEGINS_WITH, FieldType.NAME, "m", null, battery, false),
+                // VoltageLevel fields
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID, "v", null, battery, true),
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID, "s", null, battery, false),
+
+                // --- ENDS_WITH --- //
+                // Common fields
+                Arguments.of(ENDS_WITH, FieldType.ID, "d", null, battery, true),
+                Arguments.of(ENDS_WITH, FieldType.ID, "e", null, battery, false),
+                Arguments.of(ENDS_WITH, FieldType.NAME, "e", null, battery, true),
+                Arguments.of(ENDS_WITH, FieldType.NAME, "f", null, battery, false),
+                // VoltageLevel fields
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID, "l", null, battery, true),
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID, "m", null, battery, false),
+
+                // --- EXISTS --- //
+                // Common fields
+                Arguments.of(EXISTS, FieldType.ID, null, null, battery, true),
+                Arguments.of(EXISTS, FieldType.ID, null, null, battery1, false),
+                Arguments.of(EXISTS, FieldType.NAME, null, null, battery, true),
+                Arguments.of(EXISTS, FieldType.NAME, null, null, battery1, false),
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID, null, null, battery, true),
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID, null, null, battery1, false),
+
+                // --- IN --- //
+                // Common fields
+                Arguments.of(IN, FieldType.ID, null, Set.of("ID", "ID_2"), battery, true),
+                Arguments.of(IN, FieldType.ID, null, Set.of("ID_2", "ID_3"), battery, false),
+                Arguments.of(IN, FieldType.NAME, null, Set.of("NAME", "NAME_2"), battery, true),
+                Arguments.of(IN, FieldType.NAME, null, Set.of("NAME_2", "NAME_3"), battery, false),
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL", "VL_2"), battery, true),
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL_2", "VL_3"), battery, false),
+
+                // --- NOT_IN --- //
+                // Common fields
+                Arguments.of(NOT_IN, FieldType.ID, null, Set.of("ID_2", "ID_3"), battery, true),
+                Arguments.of(NOT_IN, FieldType.ID, null, Set.of("ID", "ID_2"), battery, false),
+                Arguments.of(NOT_IN, FieldType.NAME, null, Set.of("NAME_2", "NAME_3"), battery, true),
+                Arguments.of(NOT_IN, FieldType.NAME, null, Set.of("NAME", "NAME_2"), battery, false),
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL_2", "VL_3"), battery, true),
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL", "VL_2"), battery, false)
 
         );
     }
