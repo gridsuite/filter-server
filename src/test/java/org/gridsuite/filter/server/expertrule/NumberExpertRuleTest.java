@@ -696,7 +696,7 @@ class NumberExpertRuleTest {
         Mockito.when(battery.getMinP()).thenReturn(-5.0);
         Mockito.when(battery.getMaxP()).thenReturn(5.0);
         Mockito.when(battery.getTargetP()).thenReturn(3.0);
-        Mockito.when(battery.getTargetQ()).thenReturn(0.0);
+        Mockito.when(battery.getTargetQ()).thenReturn(1.0);
         // VoltageLevel fields
         VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
         Terminal terminal = Mockito.mock(Terminal.class);
@@ -726,9 +726,13 @@ class NumberExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, battery, false),
                 //Battery fields
                 Arguments.of(EQUALS, FieldType.MIN_P, -5.0, null, battery, true),
+                Arguments.of(EQUALS, FieldType.MIN_P, -4.0, null, battery, false),
                 Arguments.of(EQUALS, FieldType.MAX_P, 5.0, null, battery, true),
+                Arguments.of(EQUALS, FieldType.MAX_P, 4.0, null, battery, false),
                 Arguments.of(EQUALS, FieldType.TARGET_P, 3.0, null, battery, true),
-                Arguments.of(EQUALS, FieldType.TARGET_Q, 0.0, null, battery, true),
+                Arguments.of(EQUALS, FieldType.TARGET_P, 4.0, null, battery, false),
+                Arguments.of(EQUALS, FieldType.TARGET_Q, 1.0, null, battery, true),
+                Arguments.of(EQUALS, FieldType.TARGET_Q, 0.0, null, battery, false),
 
                 // --- GREATER_OR_EQUALS --- //
                 // VoltageLevel fields
@@ -737,9 +741,17 @@ class NumberExpertRuleTest {
                 Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, battery, false),
                 //Battery fields
                 Arguments.of(GREATER_OR_EQUALS, FieldType.MIN_P, -6.0, null, battery, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MIN_P, -5.0, null, battery, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MIN_P, -3.0, null, battery, false),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_P, 4.0, null, battery, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_P, 5.0, null, battery, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_P, 6.0, null, battery, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_P, 2.0, null, battery, true),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_P, 3.0, null, battery, true),
-                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_Q, 1.0, null, battery, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_P, 6.0, null, battery, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_Q, 0.0, null, battery, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_Q, 1.0, null, battery, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.TARGET_Q, 2.0, null, battery, false),
                 // --- GREATER --- //
                 // VoltageLevel fields
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, battery, true),
@@ -747,9 +759,17 @@ class NumberExpertRuleTest {
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 14.0, null, battery, false),
                 //Battery fields
                 Arguments.of(GREATER, FieldType.MIN_P, -6.0, null, battery, true),
+                Arguments.of(GREATER, FieldType.MIN_P, -5.0, null, battery, false),
+                Arguments.of(GREATER, FieldType.MIN_P, -4.0, null, battery, false),
                 Arguments.of(GREATER, FieldType.MAX_P, 2.0, null, battery, true),
+                Arguments.of(GREATER, FieldType.MAX_P, 5.0, null, battery, false),
+                Arguments.of(GREATER, FieldType.MAX_P, 6.0, null, battery, false),
+                Arguments.of(GREATER, FieldType.TARGET_P, 2.0, null, battery, true),
+                Arguments.of(GREATER, FieldType.TARGET_P, 5.0, null, battery, false),
                 Arguments.of(GREATER, FieldType.TARGET_P, 3.0, null, battery, false),
-                Arguments.of(GREATER, FieldType.TARGET_Q, 0.0, null, battery, false),
+                Arguments.of(GREATER, FieldType.TARGET_Q, 0.0, null, battery, true),
+                Arguments.of(GREATER, FieldType.TARGET_Q, 2.0, null, battery, false),
+                Arguments.of(GREATER, FieldType.TARGET_Q, 3.0, null, battery, false),
 
                 // --- LOWER_OR_EQUALS --- //
                 // VoltageLevel fields
@@ -757,36 +777,90 @@ class NumberExpertRuleTest {
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, battery, true),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, battery, false),
                 //Battery fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MIN_P, -4.0, null, battery, true),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.MIN_P, -5.0, null, battery, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MIN_P, -6.0, null, battery, false),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_P, 7.0, null, battery, true),
-                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_P, 20.0, null, battery, true),
-                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_Q, 0.0, null, battery, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_P, 5.0, null, battery, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_P, 2.0, null, battery, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_P, 5.0, null, battery, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_P, 3.0, null, battery, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_P, 2.0, null, battery, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_Q, 2.0, null, battery, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_Q, 1.0, null, battery, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.TARGET_Q, 0.0, null, battery, false),
 
                 // --- LOWER --- //
                 // VoltageLevel fields
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, battery, true),
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 13.0, null, battery, false),
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 12.0, null, battery, false),
-
+                //Battery fields
+                Arguments.of(LOWER, FieldType.MIN_P, -4.0, null, battery, true),
+                Arguments.of(LOWER, FieldType.MIN_P, -5.0, null, battery, false),
+                Arguments.of(LOWER, FieldType.MIN_P, -6.0, null, battery, false),
+                Arguments.of(LOWER, FieldType.MAX_P, 7.0, null, battery, true),
+                Arguments.of(LOWER, FieldType.MAX_P, 5.0, null, battery, false),
+                Arguments.of(LOWER, FieldType.MAX_P, 2.0, null, battery, false),
+                Arguments.of(LOWER, FieldType.TARGET_P, 5.0, null, battery, true),
+                Arguments.of(LOWER, FieldType.TARGET_P, 3.0, null, battery, false),
+                Arguments.of(LOWER, FieldType.TARGET_P, 2.0, null, battery, false),
+                Arguments.of(LOWER, FieldType.TARGET_Q, 2.0, null, battery, true),
+                Arguments.of(LOWER, FieldType.TARGET_Q, 1.0, null, battery, false),
+                Arguments.of(LOWER, FieldType.TARGET_Q, 0.0, null, battery, false),
                 // --- BETWEEN --- //
                 // VoltageLevel fields
                 Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), battery, true),
                 Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(13.5, 14.0), battery, false),
-
+                //Battery fields
+                Arguments.of(BETWEEN, FieldType.MIN_P, null, Set.of(-3.0, -14.0), battery, true),
+                Arguments.of(BETWEEN, FieldType.MIN_P, null, Set.of(-12.0, -14.0), battery, false),
+                Arguments.of(BETWEEN, FieldType.MAX_P, null, Set.of(2.0, 14.0), battery, true),
+                Arguments.of(BETWEEN, FieldType.MAX_P, null, Set.of(12.0, 14.0), battery, false),
+                Arguments.of(BETWEEN, FieldType.TARGET_P, null, Set.of(2.0, 14.0), battery, true),
+                Arguments.of(BETWEEN, FieldType.TARGET_P, null, Set.of(12.0, 14.0), battery, false),
+                Arguments.of(BETWEEN, FieldType.TARGET_Q, null, Set.of(0.0, 14.0), battery, true),
+                Arguments.of(BETWEEN, FieldType.TARGET_Q, null, Set.of(2.0, 14.0), battery, false),
                 // --- EXISTS --- //
                 // VoltageLevel fields
                 Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, battery, true),
                 Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, battery1, false),
+                //Battery fields
+                Arguments.of(EXISTS, FieldType.MIN_P, null, null, battery, true),
+                Arguments.of(EXISTS, FieldType.MIN_P, null, null, battery1, false),
+                Arguments.of(EXISTS, FieldType.MAX_P, null, null, battery, true),
+                Arguments.of(EXISTS, FieldType.MAX_P, null, null, battery1, false),
+                Arguments.of(EXISTS, FieldType.TARGET_P, null, null, battery, true),
+                Arguments.of(EXISTS, FieldType.TARGET_P, null, null, battery1, false),
+                Arguments.of(EXISTS, FieldType.TARGET_Q, null, null, battery, true),
+                Arguments.of(EXISTS, FieldType.TARGET_Q, null, null, battery1, false),
 
                 // --- IN --- //
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), battery, true),
                 Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), battery, false),
-
+                //Battery fields
+                Arguments.of(IN, FieldType.MIN_P, null, Set.of(-3.0, -5.0, -14.0), battery, true),
+                Arguments.of(IN, FieldType.MIN_P, null, Set.of(-12.0, -6.0, -14.0), battery, false),
+                Arguments.of(IN, FieldType.MAX_P, null, Set.of(2.0, 5.0, 14.0), battery, true),
+                Arguments.of(IN, FieldType.MAX_P, null, Set.of(12.0, 6.0, 14.0), battery, false),
+                Arguments.of(IN, FieldType.TARGET_P, null, Set.of(2.0, 3.0, 14.0), battery, true),
+                Arguments.of(IN, FieldType.TARGET_P, null, Set.of(12.0, 4.0, 14.0), battery, false),
+                Arguments.of(IN, FieldType.TARGET_Q, null, Set.of(0.0, 1.0, 14.0), battery, true),
+                Arguments.of(IN, FieldType.TARGET_Q, null, Set.of(2.0, 3.0, 14.0), battery, false),
                 // --- NOT_IN --- //
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), battery, true),
-                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), battery, false)
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), battery, false),
+                //Battery fields
+                Arguments.of(NOT_IN, FieldType.MIN_P, null, Set.of(-3.0, -14.0), battery, true),
+                Arguments.of(NOT_IN, FieldType.MIN_P, null, Set.of(-12.0, -5.0, -14.0), battery, false),
+                Arguments.of(NOT_IN, FieldType.MAX_P, null, Set.of(2.0, 14.0), battery, true),
+                Arguments.of(NOT_IN, FieldType.MAX_P, null, Set.of(12.0, 5.0, 14.0), battery, false),
+                Arguments.of(NOT_IN, FieldType.TARGET_P, null, Set.of(2.0, 14.0), battery, true),
+                Arguments.of(NOT_IN, FieldType.TARGET_P, null, Set.of(12.0, 3.0, 14.0), battery, false),
+                Arguments.of(NOT_IN, FieldType.TARGET_Q, null, Set.of(0.0, 14.0), battery, true),
+                Arguments.of(NOT_IN, FieldType.TARGET_Q, null, Set.of(2.0, 1.0, 14.0), battery, false)
         );
     }
 }
