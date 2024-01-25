@@ -421,6 +421,8 @@ class NumberExpertRuleTest {
 
         Load load = Mockito.mock(Load.class);
         Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
+        Mockito.when(load.getP0()).thenReturn(77.0);
+        Mockito.when(load.getQ0()).thenReturn(277.0);
         // VoltageLevel fields
         VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
         Terminal terminal = Mockito.mock(Terminal.class);
@@ -431,6 +433,8 @@ class NumberExpertRuleTest {
         // for testing none EXISTS
         Load load1 = Mockito.mock(Load.class);
         Mockito.when(load1.getType()).thenReturn(IdentifiableType.LOAD);
+        Mockito.when(load1.getP0()).thenReturn(Double.NaN);
+        Mockito.when(load1.getQ0()).thenReturn(Double.NaN);
         // VoltageLevel fields
         VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
         Terminal terminal1 = Mockito.mock(Terminal.class);
@@ -443,50 +447,103 @@ class NumberExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, true),
                 Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, false),
+                // Load fields
+                Arguments.of(EQUALS, FieldType.P0, 77.0, null, load, true),
+                Arguments.of(EQUALS, FieldType.P0, 50.0, null, load, false),
+                Arguments.of(EQUALS, FieldType.Q0, 277.0, null, load, true),
+                Arguments.of(EQUALS, FieldType.Q0, 300.0, null, load, false),
 
                 // --- GREATER_OR_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, true),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, true),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, false),
+                // Load fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.P0, 72.0, null, load, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.P0, 77.0, null, load, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.P0, 78.0, null, load, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.Q0, 272.0, null, load, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.Q0, 277.0, null, load, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.Q0, 278.0, null, load, false),
 
                 // --- GREATER --- //
                 // VoltageLevel fields
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, true),
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, false),
                 Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, false),
+                // Load fields
+                Arguments.of(GREATER, FieldType.P0, 70.0, null, load, true),
+                Arguments.of(GREATER, FieldType.P0, 77.0, null, load, false),
+                Arguments.of(GREATER, FieldType.P0, 78.0, null, load, false),
+                Arguments.of(GREATER, FieldType.Q0, 270.0, null, load, true),
+                Arguments.of(GREATER, FieldType.Q0, 277.0, null, load, false),
+                Arguments.of(GREATER, FieldType.Q0, 278.0, null, load, false),
 
                 // --- LOWER_OR_EQUALS --- //
                 // VoltageLevel fields
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, true),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, true),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, false),
+                // Load fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.P0, 80.0, null, load, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.P0, 77.0, null, load, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.P0, 70.0, null, load, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.Q0, 300.0, null, load, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.Q0, 277.0, null, load, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.Q0, 77.0, null, load, false),
 
                 // --- LOWER --- //
                 // VoltageLevel fields
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, load, true),
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 13.0, null, load, false),
                 Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 12.0, null, load, false),
+                // Load fields
+                Arguments.of(LOWER, FieldType.P0, 99.0, null, load, true),
+                Arguments.of(LOWER, FieldType.P0, 77.0, null, load, false),
+                Arguments.of(LOWER, FieldType.P0, 70.0, null, load, false),
+                Arguments.of(LOWER, FieldType.Q0, 300.0, null, load, true),
+                Arguments.of(LOWER, FieldType.Q0, 277.0, null, load, false),
+                Arguments.of(LOWER, FieldType.Q0, 270.0, null, load, false),
 
                 // --- BETWEEN --- //
                 // VoltageLevel fields
                 Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, true),
                 Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(13.5, 14.0), load, false),
+                // Load fields
+                Arguments.of(BETWEEN, FieldType.P0, null, Set.of(60.0, 80.0), load, true),
+                Arguments.of(BETWEEN, FieldType.P0, null, Set.of(60.0, 70.0), load, false),
+                Arguments.of(BETWEEN, FieldType.Q0, null, Set.of(270.0, 280.0), load, true),
+                Arguments.of(BETWEEN, FieldType.Q0, null, Set.of(100.0, 260.0), load, false),
 
                 // --- EXISTS --- //
                 // VoltageLevel fields
                 Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, load, true),
                 Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, load1, false),
+                // Load fields
+                Arguments.of(EXISTS, FieldType.P0, null, null, load, true),
+                Arguments.of(EXISTS, FieldType.P0, null, null, load1, false),
+                Arguments.of(EXISTS, FieldType.Q0, null, null, load, true),
+                Arguments.of(EXISTS, FieldType.Q0, null, null, load1, false),
 
                 // --- IN --- //
                 // VoltageLevel fields
                 Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), load, true),
                 Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, false),
+                // Load fields
+                Arguments.of(IN, FieldType.P0, null, Set.of(12.0, 77.0, 100.0), load, true),
+                Arguments.of(IN, FieldType.P0, null, Set.of(12.0, 100.0), load, false),
+                Arguments.of(IN, FieldType.Q0, null, Set.of(120.0, 277.0, 300.0), load, true),
+                Arguments.of(IN, FieldType.Q0, null, Set.of(120.0, 300.0), load, false),
 
                 // --- NOT_IN --- //
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), load, true),
-                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), load, false)
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), load, false),
+                // Load fields
+                Arguments.of(NOT_IN, FieldType.P0, null, Set.of(120.0, 140.0), load, true),
+                Arguments.of(NOT_IN, FieldType.P0, null, Set.of(70.0, 77.0, 140.0), load, false),
+                Arguments.of(NOT_IN, FieldType.Q0, null, Set.of(120.0, 300.0), load, true),
+                Arguments.of(NOT_IN, FieldType.Q0, null, Set.of(120.0, 277.0, 300.0), load, false)
         );
     }
 
