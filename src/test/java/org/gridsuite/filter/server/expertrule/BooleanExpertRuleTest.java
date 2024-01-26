@@ -63,7 +63,8 @@ class BooleanExpertRuleTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"provideArgumentsForGeneratorTest"})
+    @MethodSource({"provideArgumentsForGeneratorTest", "provideArgumentsForBatteryTest"
+    })
     void testEvaluateRule(OperatorType operator, FieldType field, boolean value, Identifiable<?> equipment, boolean expected) {
         BooleanExpertRule rule = BooleanExpertRule.builder().operator(operator).field(field).value(value).build();
         assertEquals(expected, rule.evaluateRule(equipment));
@@ -96,6 +97,28 @@ class BooleanExpertRuleTest {
                 // Terminal fields
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, gen, true),
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, gen, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForBatteryTest() {
+
+        Battery battery = Mockito.mock(Battery.class);
+        Mockito.when(battery.getType()).thenReturn(IdentifiableType.BATTERY);
+        // Terminal fields
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.isConnected()).thenReturn(true);
+        Mockito.when(battery.getTerminal()).thenReturn(terminal);
+
+        return Stream.of(
+                // --- EQUALS--- //
+                // Terminal fields
+                Arguments.of(EQUALS, FieldType.CONNECTED, true, battery, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED, false, battery, false),
+
+                // --- NOT_EQUALS--- //
+                // Terminal fields
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, battery, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, battery, false)
         );
     }
 }
