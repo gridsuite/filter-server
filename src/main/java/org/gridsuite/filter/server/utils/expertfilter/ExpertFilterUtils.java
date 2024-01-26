@@ -34,6 +34,7 @@ public final class ExpertFilterUtils {
                 case LOAD -> getLoadFieldValue(field, (Load) identifiable);
                 case BUS -> getBusFieldValue(field, (Bus) identifiable);
                 case BUSBAR_SECTION -> getBusBarSectionFieldValue(field, (BusbarSection) identifiable);
+                case BATTERY -> getBatteryFieldValue(field, (Battery) identifiable);
                 default -> throw new PowsyblException(TYPE_NOT_IMPLEMENTED + " [" + identifiable.getType() + "]");
             };
         };
@@ -125,6 +126,22 @@ public final class ExpertFilterUtils {
         return switch (field) {
             case CONNECTED -> String.valueOf(terminal.isConnected());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + ",terminal]");
+        };
+    }
+
+    private static String getBatteryFieldValue(FieldType field, Battery battery) {
+        return switch (field) {
+            case COUNTRY,
+                    NOMINAL_VOLTAGE,
+                    VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, battery.getTerminal().getVoltageLevel());
+            case CONNECTED -> getTerminalFieldValue(field, battery.getTerminal());
+            case MIN_P -> String.valueOf(battery.getMinP());
+            case MAX_P -> String.valueOf(battery.getMaxP());
+            case TARGET_P -> String.valueOf(battery.getTargetP());
+            case TARGET_Q -> String.valueOf(battery.getTargetQ());
+
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + battery.getType() + "]");
+
         };
     }
 }
