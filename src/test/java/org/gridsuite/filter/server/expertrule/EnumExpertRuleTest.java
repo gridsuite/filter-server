@@ -53,6 +53,9 @@ class EnumExpertRuleTest {
         Battery battery = Mockito.mock(Battery.class);
         Mockito.when(battery.getType()).thenReturn(IdentifiableType.BATTERY);
 
+        Substation substation = Mockito.mock(Substation.class);
+        Mockito.when(substation.getType()).thenReturn(IdentifiableType.SUBSTATION);
+
         return Stream.of(
                 // --- Test an unsupported field for each equipment --- //
                 Arguments.of(EQUALS, FieldType.RATED_S, network, PowsyblException.class),
@@ -62,6 +65,7 @@ class EnumExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, battery, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, substation, PowsyblException.class),
 
                 // --- Test an unsupported operator for this rule type --- //
                 Arguments.of(IS, FieldType.ENERGY_SOURCE, generator, PowsyblException.class)
@@ -74,7 +78,10 @@ class EnumExpertRuleTest {
         "provideArgumentsForLoadTest",
         "provideArgumentsForBusTest",
         "provideArgumentsForBusBarSectionTest",
-        "provideArgumentsForBatteryTest"})
+        "provideArgumentsForBatteryTest",
+        "provideArgumentsForVoltageLevelTest",
+        "provideArgumentsForSubstationTest"
+    })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         EnumExpertRule rule = EnumExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
         assertEquals(expected, rule.evaluateRule(equipment));
@@ -269,6 +276,58 @@ class EnumExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), battery, true),
                 Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), battery, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForVoltageLevelTest() {
+
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getType()).thenReturn(IdentifiableType.VOLTAGE_LEVEL);
+        Substation substation = Mockito.mock(Substation.class);
+        Mockito.when(voltageLevel.getSubstation()).thenReturn(Optional.of(substation));
+        Mockito.when(substation.getCountry()).thenReturn(Optional.of(Country.FR));
+
+        return Stream.of(
+            // --- EQUALS --- //
+            Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, voltageLevel, true),
+            Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, voltageLevel, false),
+
+            // --- NOT_EQUALS --- //
+            Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, voltageLevel, true),
+            Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, voltageLevel, false),
+
+            // --- IN --- //
+            Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), voltageLevel, true),
+            Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), voltageLevel, false),
+
+            // --- NOT_IN --- //
+            Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), voltageLevel, true),
+            Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), voltageLevel, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForSubstationTest() {
+
+        Substation substation = Mockito.mock(Substation.class);
+        Mockito.when(substation.getType()).thenReturn(IdentifiableType.SUBSTATION);
+        Mockito.when(substation.getCountry()).thenReturn(Optional.of(Country.FR));
+
+        return Stream.of(
+            // --- EQUALS --- //
+            Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, substation, true),
+            Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, substation, false),
+
+            // --- NOT_EQUALS --- //
+            Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, substation, true),
+            Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, substation, false),
+
+            // --- IN --- //
+            Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), substation, true),
+            Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), substation, false),
+
+            // --- NOT_IN --- //
+            Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), substation, true),
+            Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), substation, false)
         );
     }
 }

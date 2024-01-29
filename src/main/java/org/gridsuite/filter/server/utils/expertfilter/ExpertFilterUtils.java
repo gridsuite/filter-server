@@ -11,8 +11,6 @@ import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */
@@ -35,6 +33,7 @@ public final class ExpertFilterUtils {
                 case BUS -> getBusFieldValue(field, (Bus) identifiable);
                 case BUSBAR_SECTION -> getBusBarSectionFieldValue(field, (BusbarSection) identifiable);
                 case BATTERY -> getBatteryFieldValue(field, (Battery) identifiable);
+                case SUBSTATION -> getSubstationFieldValue(field, (Substation) identifiable);
                 default -> throw new PowsyblException(TYPE_NOT_IMPLEMENTED + " [" + identifiable.getType() + "]");
             };
         };
@@ -42,12 +41,12 @@ public final class ExpertFilterUtils {
 
     private static String getVoltageLevelFieldValue(FieldType field, VoltageLevel voltageLevel) {
         return switch (field) {
-            case COUNTRY -> {
-                Optional<Country> country = voltageLevel.getSubstation().flatMap(Substation::getCountry);
-                yield country.isPresent() ? String.valueOf(country.get()) : "";
-            }
+            case COUNTRY ->
+                voltageLevel.getSubstation().flatMap(Substation::getCountry).map(String::valueOf).orElse(null);
             case NOMINAL_VOLTAGE -> String.valueOf(voltageLevel.getNominalV());
             case VOLTAGE_LEVEL_ID -> voltageLevel.getId();
+            case LOW_VOLTAGE_LIMIT -> String.valueOf(voltageLevel.getLowVoltageLimit());
+            case HIGH_VOLTAGE_LIMIT -> String.valueOf(voltageLevel.getHighVoltageLimit());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + voltageLevel.getType() + "]");
         };
     }
@@ -142,6 +141,14 @@ public final class ExpertFilterUtils {
 
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + battery.getType() + "]");
 
+        };
+    }
+
+    private static String getSubstationFieldValue(FieldType field, Substation substation) {
+        return switch (field) {
+            case COUNTRY -> String.valueOf(substation.getCountry().orElse(null));
+            default ->
+                throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + substation.getType() + "]");
         };
     }
 }
