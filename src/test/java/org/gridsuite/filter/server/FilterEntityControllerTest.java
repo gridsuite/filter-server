@@ -1633,6 +1633,54 @@ public class FilterEntityControllerTest {
     }
 
     @Test
+    public void testExpertFilterVoltageLevel() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        Date modificationDate = new Date();
+
+        List<AbstractExpertRule> rules = new ArrayList<>();
+        StringExpertRule stringRule = StringExpertRule.builder().value("VLLOAD")
+            .field(FieldType.ID).operator(OperatorType.IS).build();
+        rules.add(stringRule);
+
+        CombinatorExpertRule vlRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.VOLTAGE_LEVEL, vlRule);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [{"id":"VLLOAD","type":"VOLTAGE_LEVEL"}]
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.VOLTAGE_LEVEL);
+        checkFilterEvaluating(expertFilter, expectedResultJson);
+    }
+
+    @Test
+    public void testExpertFilterSubstation() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        Date modificationDate = new Date();
+
+        List<AbstractExpertRule> rules = new ArrayList<>();
+        StringExpertRule stringRule = StringExpertRule.builder().value("P1")
+            .field(FieldType.ID).operator(OperatorType.IS).build();
+        rules.add(stringRule);
+
+        CombinatorExpertRule subRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.SUBSTATION, subRule);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [{"id":"P1","type":"SUBSTATION"}]
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.SUBSTATION);
+        checkFilterEvaluating(expertFilter, expectedResultJson);
+    }
+
+    @Test
     public void testExpertFilterGeneratorWithInAndNotInOperator() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 

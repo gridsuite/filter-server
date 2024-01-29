@@ -549,6 +549,12 @@ public class FilterService {
             return network.getVoltageLevelStream()
                 .filter(voltageLevel -> equipmentIds.contains(voltageLevel.getId()))
                 .collect(Collectors.toList());
+        } else if (filter instanceof ExpertFilter expertFilter) {
+            var rule = expertFilter.getRules();
+            return network.getVoltageLevelStream()
+                .map(voltageLevel -> (Identifiable<?>) voltageLevel)
+                .filter(rule::evaluateRule)
+                .collect(Collectors.toList());
         } else {
             return List.of();
         }
@@ -568,6 +574,11 @@ public class FilterService {
             List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return network.getSubstationStream()
                 .filter(substation -> equipmentIds.contains(substation.getId()))
+                .collect(Collectors.toList());
+        } else if (filter instanceof ExpertFilter expertFilter) {
+            var rule = expertFilter.getRules();
+            return network.getSubstationStream()
+                .filter(rule::evaluateRule)
                 .collect(Collectors.toList());
         } else {
             return List.of();
