@@ -71,7 +71,7 @@ class NumberExpertRuleTest {
         "provideArgumentsForLoadTest",
         "provideArgumentsForBusTest",
         "provideArgumentsForBusBarSectionTest",
-        "provideArgumentsForBatteryTest"
+        "provideArgumentsForBatteryTest",
         "provideArgumentsForVoltageLevelTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
