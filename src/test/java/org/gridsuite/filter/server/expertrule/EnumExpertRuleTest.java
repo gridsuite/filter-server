@@ -251,7 +251,7 @@ class EnumExpertRuleTest {
     private static Stream<Arguments> provideArgumentsForShuntCompensatorTest() {
 
         ShuntCompensator shuntCompensator = Mockito.mock(ShuntCompensator.class);
-        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
+        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
 
         Mockito.when(shuntCompensator.getModel(ShuntCompensatorLinearModel.class)).thenReturn(new ShuntCompensatorLinearModel() {
             @Override
@@ -297,7 +297,7 @@ class EnumExpertRuleTest {
 
                 // Shunt Compensator fields
                 Arguments.of(EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "REACTOR", null, shuntCompensator, true),
-                Arguments.of(EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "REACTOR", null, shuntCompensator, false),
+                Arguments.of(EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "CAPACITOR", null, shuntCompensator, false),
 
                 // --- NOT_EQUALS --- //
                 // VoltageLevel fields
@@ -306,7 +306,7 @@ class EnumExpertRuleTest {
 
                 // Shunt Compensator fields
                 Arguments.of(NOT_EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "CAPACITOR", null, shuntCompensator, true),
-                Arguments.of(NOT_EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "CAPACITOR", null, shuntCompensator, false),
+                Arguments.of(NOT_EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "REACTOR", null, shuntCompensator, false),
 
                 // --- IN --- //
                 // VoltageLevel fields
