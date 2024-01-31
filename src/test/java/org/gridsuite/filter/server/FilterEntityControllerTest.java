@@ -138,6 +138,9 @@ public class FilterEntityControllerTest {
         network = EurostagTutorialExample1Factory.createWithMoreGenerators(new NetworkFactoryImpl());
         network.getSubstation("P1").setProperty("region", "north");
         network.getSubstation("P2").setProperty("region", "south");
+        network.getGenerator("GEN").setProperty("region", "north");
+        network.getGenerator("GEN2").setProperty("region", "south");
+        network.getLoad("LOAD").setProperty("region", "north");
         network.getVariantManager().cloneVariant(VariantManagerConstants.INITIAL_VARIANT_ID, VARIANT_ID_1);
         network.getVariantManager().setWorkingVariant(VARIANT_ID_1);
         // remove generator 'GEN2' from network in variant VARIANT_ID_1
@@ -1160,7 +1163,7 @@ public class FilterEntityControllerTest {
         OrderedMap<String, List<String>> workAroundProps =
             Set.of(EquipmentType.SHUNT_COMPENSATOR, EquipmentType.STATIC_VAR_COMPENSATOR).contains(equipmentType) ? null : FREE_PROPS;
         InjectionFilterAttributes injectionFilterAttributes = new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
-            sortedCountries, workAroundProps, null, numericalFilter);
+            sortedCountries, workAroundProps, workAroundProps, numericalFilter);
         switch (equipmentType) {
             case BATTERY:
                 abstractInjectionFilter = new BatteryFilter(injectionFilterAttributes);
@@ -1201,7 +1204,6 @@ public class FilterEntityControllerTest {
         }
         CriteriaFilter injectionFilter = new CriteriaFilter(
                 id,
-
                 modificationDate,
                 abstractInjectionFilter
         );
@@ -1209,6 +1211,7 @@ public class FilterEntityControllerTest {
         insertFilter(id, injectionFilter);
         AbstractInjectionFilter injectionEquipment = (AbstractInjectionFilter) injectionFilter.getEquipmentFilterForm();
         injectionEquipment.setCountries(AbstractFilterRepositoryProxy.setToSorterSet(countries));
+        injectionEquipment.setSubstationFreeProperties(workAroundProps);
         injectionEquipment.setFreeProperties(workAroundProps);
         checkFormFilter(id, injectionFilter);
 

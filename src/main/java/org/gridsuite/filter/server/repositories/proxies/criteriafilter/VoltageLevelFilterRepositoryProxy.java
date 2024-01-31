@@ -58,8 +58,7 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
             voltageLevelFilterEntity.getEquipmentName(),
             setToSorterSet(voltageLevelFilterEntity.getCountries()),
             convert(voltageLevelFilterEntity.getSubstationFreeProperties()),
-            //TODO REPLACE ONCE ENTITIES HAVE BEEN UPDATED
-            convert(voltageLevelFilterEntity.getSubstationFreeProperties()),
+            convert(voltageLevelFilterEntity.getFreeProperties()),
             convert(voltageLevelFilterEntity.getNominalVoltage())
         );
     }

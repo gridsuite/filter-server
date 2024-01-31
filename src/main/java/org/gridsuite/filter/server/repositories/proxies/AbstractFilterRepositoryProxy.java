@@ -175,8 +175,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
             entity.getSubstationName(),
             setToSorterSet(entity.getCountries()),
             convert(entity.getSubstationFreeProperties()),
-            //TODO ADAPT ONCE ENTITIES HAVE BEEN UPDATED
-            convert(entity.getSubstationFreeProperties()),
+            convert(entity.getFreeProperties()),
             convert(entity.getNominalVoltage())
         );
     }

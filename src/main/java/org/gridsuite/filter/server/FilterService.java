@@ -260,6 +260,10 @@ public class FilterService {
         return FiltersUtils.matchesFreeProps(propertiesWithValues, substation);
     }
 
+    private boolean freePropertiesFilter(Identifiable<?> identifiable, Map<String, List<String>> propertiesWithValues) {
+        return FiltersUtils.matchesFreeProps(propertiesWithValues, identifiable);
+    }
+
     private boolean equipmentIdFilter(Identifiable<?> identifiable, String equipmentId) {
         return equipmentId == null || identifiable.getId().equals(equipmentId);
     }
@@ -305,6 +309,7 @@ public class FilterService {
             return stream
                     .filter(injection -> equipmentIdFilter(injection, injectionFilter.getEquipmentID()))
                     .filter(injection -> equipmentNameFilter(injection, injectionFilter.getEquipmentName()))
+                    .filter(injection -> freePropertiesFilter(injection, injectionFilter.getFreeProperties()))
                     .filter(injection -> filterByVoltage(injection.getTerminal().getVoltageLevel().getNominalV(), injectionFilter.getNominalVoltage()))
                     .filter(injection -> countryFilter(injection.getTerminal(), injectionFilter.getCountries()))
                     .filter(injection -> substationNameFilter(injection.getTerminal(), injectionFilter.getSubstationName()))
