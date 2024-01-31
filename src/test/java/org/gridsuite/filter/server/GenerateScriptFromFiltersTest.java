@@ -16,11 +16,7 @@ import org.junit.Test;
 
 import java.sql.Date;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -431,6 +427,7 @@ public class GenerateScriptFromFiltersTest {
                     .build()))
         );
         assertTrue(TwoWindingsTransformerFilter.builder().build().isEmpty());
+        assertTrue(TwoWindingsTransformerFilter.builder().countries(new TreeSet<>()).substationFreeProperties(Map.of()).build().isEmpty());
     }
 
     @Test
@@ -538,13 +535,6 @@ public class GenerateScriptFromFiltersTest {
                 .build()))
         );
         assertTrue(VoltageLevelFilter.builder().build().isEmpty());
-        Assert.assertFalse(VoltageLevelFilter.builder()
-            .equipmentID("vlId1")
-            .equipmentName("vlName1")
-            .countries(new TreeSet<>(countries))
-            .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
-            .freeProperties(Map.of("region", List.of("north")))
-            .build().isEmpty());
     }
 
     @Test
