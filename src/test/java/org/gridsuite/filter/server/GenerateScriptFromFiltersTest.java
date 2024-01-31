@@ -11,6 +11,7 @@ import com.powsybl.iidm.network.EnergySource;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.gridsuite.filter.server.dto.criteriafilter.*;
 import org.gridsuite.filter.server.utils.RangeType;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Date;
@@ -537,6 +538,13 @@ public class GenerateScriptFromFiltersTest {
                 .build()))
         );
         assertTrue(VoltageLevelFilter.builder().build().isEmpty());
+        Assert.assertFalse(VoltageLevelFilter.builder()
+            .equipmentID("vlId1")
+            .equipmentName("vlName1")
+            .countries(new TreeSet<>(countries))
+            .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
+            .freeProperties(Map.of("region", List.of("north")))
+            .build().isEmpty());
     }
 
     @Test
