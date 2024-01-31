@@ -8,8 +8,10 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.iidm.network.EnergySource;
 
+import com.powsybl.iidm.network.Identifiable;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.gridsuite.filter.server.dto.criteriafilter.*;
+import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.Test;
 
@@ -17,8 +19,7 @@ import java.sql.Date;
 import java.time.Instant;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -189,6 +190,8 @@ public class GenerateScriptFromFiltersTest {
     public void generateScriptLoadFilterTest() {
         LinkedHashSet<String> countries = new LinkedHashSet<>();
         countries.add("IT");
+        LinkedMap<String, List<String>> properties = new LinkedMap<>(Map.of("region", List.of("north")));
+        assertFalse(FiltersUtils.matchesFreeProps(properties, (Identifiable<?>) null));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
             "\n" +
@@ -209,8 +212,8 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentName("loadName1")
                     .substationName("s3")
                     .countries(new TreeSet<>(countries))
-                    .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
-                    .freeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
+                    .substationFreeProperties(properties)
+                    .freeProperties(properties)
                     .build()))
         );
     }
