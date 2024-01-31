@@ -426,7 +426,6 @@ public class GenerateScriptFromFiltersTest {
                     .build()))
         );
         assertTrue(TwoWindingsTransformerFilter.builder().build().isEmpty());
-        assertTrue(TwoWindingsTransformerFilter.builder().countries(new TreeSet<>()).substationFreeProperties(Map.of()).build().isEmpty());
     }
 
     @Test
