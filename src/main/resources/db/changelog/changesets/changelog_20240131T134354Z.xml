@@ -88,9 +88,6 @@
     <changeSet author="marcelinhug (generated)" id="1706708644337-129">
         <addForeignKeyConstraint baseColumnNames="free_properties_id" baseTableName="lcc_converter_station_filter" constraintName="FKtpfisx7dcvoaho1kfk2c2ssif" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="free_properties" validate="true"/>
     </changeSet>
-    <changeSet author="marcelinhug (generated)" id="1706708644337-130">
-        <dropForeignKeyConstraint baseTableName="SUBSTATION_FILTER" constraintName="FK96EOINO5PG4EKKE0NGQ0J2I4H"/>
-    </changeSet>
     <changeSet author="marcelinhug (generated)" id="1706708644337-131">
         <dropColumn columnName="SUBSTATION_FREE_PROPERTIES_ID" tableName="SUBSTATION_FILTER"/>
     </changeSet>

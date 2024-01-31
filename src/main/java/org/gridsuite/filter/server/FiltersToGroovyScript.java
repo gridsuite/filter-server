@@ -91,7 +91,6 @@ public class FiltersToGroovyScript {
         if (!CollectionUtils.isEmpty(injectionFilter.getCountries())) {
             template.add(COUNTRIES, injectionFilter.getCountries().stream().collect(joining("','", "['", "']")));
         }
-        //TODO REPLACE TEMPLATE CONSTS
         if (!CollectionUtils.isEmpty(injectionFilter.getSubstationFreeProperties())) {
             template.add(FREE_PROPS, makeFreePropertiesGroovy(injectionFilter.getSubstationFreeProperties()));
         }
