@@ -34,6 +34,7 @@ public final class ExpertFilterUtils {
                 case BUSBAR_SECTION -> getBusBarSectionFieldValue(field, (BusbarSection) identifiable);
                 case BATTERY -> getBatteryFieldValue(field, (Battery) identifiable);
                 case SUBSTATION -> getSubstationFieldValue(field, (Substation) identifiable);
+                case TWO_WINDINGS_TRANSFORMER -> getTwoWindingsTransformerFieldValue(field, (TwoWindingsTransformer) identifiable);
                 default -> throw new PowsyblException(TYPE_NOT_IMPLEMENTED + " [" + identifiable.getType() + "]");
             };
         };
@@ -149,6 +150,39 @@ public final class ExpertFilterUtils {
             case COUNTRY -> String.valueOf(substation.getCountry().orElse(null));
             default ->
                 throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + substation.getType() + "]");
+        };
+    }
+
+    private static String getRatioTapChangerFieldValue(FieldType field, RatioTapChanger ratioTapChanger) {
+        if (ratioTapChanger == null) {
+            return null;
+        }
+        return switch (field) {
+            case RATIO_REGULATING -> String.valueOf(ratioTapChanger.isRegulating());
+            case RATIO_TARGET_V -> String.valueOf(ratioTapChanger.getTargetV());
+            case LOAD_TAP_CHANGING_CAPABILITIES -> String.valueOf(ratioTapChanger.hasLoadTapChangingCapabilities());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + ",ratioTapChanger]");
+        };
+    }
+
+    private static String getTwoWindingsTransformerFieldValue(FieldType field, TwoWindingsTransformer twoWindingsTransformer) {
+        return switch (field) {
+            case COUNTRY -> twoWindingsTransformer.getSubstation().flatMap(Substation::getCountry).map(String::valueOf).orElse(null);
+            case CONNECTED_1 -> String.valueOf(twoWindingsTransformer.getTerminal1().isConnected());
+            case CONNECTED_2 -> String.valueOf(twoWindingsTransformer.getTerminal2().isConnected());
+            case NOMINAL_V_1 -> String.valueOf(twoWindingsTransformer.getTerminal1().getVoltageLevel().getNominalV());
+            case NOMINAL_V_2 -> String.valueOf(twoWindingsTransformer.getTerminal2().getVoltageLevel().getNominalV());
+            case VOLTAGE_LEVEL_ID_1 -> twoWindingsTransformer.getTerminal1().getVoltageLevel().getId();
+            case VOLTAGE_LEVEL_ID_2 -> twoWindingsTransformer.getTerminal2().getVoltageLevel().getId();
+            case RATED_S -> String.valueOf(twoWindingsTransformer.getRatedS());
+            case R -> String.valueOf(twoWindingsTransformer.getR());
+            case X -> String.valueOf(twoWindingsTransformer.getX());
+            case G -> String.valueOf(twoWindingsTransformer.getG());
+            case B -> String.valueOf(twoWindingsTransformer.getB());
+            case RATIO_REGULATING,
+                RATIO_TARGET_V,
+                LOAD_TAP_CHANGING_CAPABILITIES -> getRatioTapChangerFieldValue(field, twoWindingsTransformer.getRatioTapChanger());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + twoWindingsTransformer.getType() + "]");
         };
     }
 }

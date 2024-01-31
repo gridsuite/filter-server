@@ -1938,6 +1938,49 @@ public class FilterEntityControllerTest {
     }
 
     @Test
+    public void testExpertFilterTwoWindingsTransformerWithInAndNotInOperator() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLHV2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID_1).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.TWO_WINDINGS_TRANSFORMER, inFilter);
+        expertFilter.setTopologyKind(TopologyKind.NODE_BREAKER); // set optional info
+
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [
+                    {"id":"NHV2_NLOAD","type":"TWO_WINDINGS_TRANSFORMER"}
+                ]
+            """;
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.TWO_WINDINGS_TRANSFORMER);
+
+        // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
+        stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLHV2")))
+                .field(FieldType.VOLTAGE_LEVEL_ID_1).operator(OperatorType.NOT_IN).build();
+        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+
+        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.TWO_WINDINGS_TRANSFORMER, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        expectedResultJson = """
+                [
+                    {"id":"NGEN_NHV1","type":"TWO_WINDINGS_TRANSFORMER"}
+                ]
+            """;
+        // check result when evaluating a filter on a network
+        checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.TWO_WINDINGS_TRANSFORMER);
+
+        // Build a filter AND with only an IN operator
+    }
+
+    @Test
     public void lineFilterIsEmpty() {
         HvdcLineFilter hvdcFilter = new HvdcLineFilter(
                 null,

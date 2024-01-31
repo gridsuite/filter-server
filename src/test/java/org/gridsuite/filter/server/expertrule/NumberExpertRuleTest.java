@@ -51,6 +51,9 @@ class NumberExpertRuleTest {
         BusbarSection busbarSection = Mockito.mock(BusbarSection.class);
         Mockito.when(busbarSection.getType()).thenReturn(IdentifiableType.BUSBAR_SECTION);
 
+        TwoWindingsTransformer twoWindingTransformer = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingTransformer.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+
         return Stream.of(
                 // --- Test an unsupported field for each equipment --- //
                 Arguments.of(EQUALS, FieldType.RATED_S, network, PowsyblException.class),
@@ -59,6 +62,7 @@ class NumberExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.RATED_S, load, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.P0, twoWindingTransformer, PowsyblException.class),
 
                 // --- Test an unsupported operator for this rule type --- //
                 Arguments.of(IS, FieldType.MIN_P, generator, PowsyblException.class)
@@ -72,7 +76,8 @@ class NumberExpertRuleTest {
         "provideArgumentsForBusTest",
         "provideArgumentsForBusBarSectionTest",
         "provideArgumentsForBatteryTest",
-        "provideArgumentsForVoltageLevelTest"
+        "provideArgumentsForVoltageLevelTest",
+        "provideArgumentsForTwoWindingTransformerTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -969,4 +974,272 @@ class NumberExpertRuleTest {
             Arguments.of(NOT_IN, FieldType.HIGH_VOLTAGE_LIMIT, null, Set.of(300.0, 400.0, 500.0), voltageLevel, false)
         );
     }
+
+    private static Stream<Arguments> provideArgumentsForTwoWindingTransformerTest() {
+
+        TwoWindingsTransformer twoWindingsTransformer = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+        Mockito.when(twoWindingsTransformer.getR()).thenReturn(0.1);
+        Mockito.when(twoWindingsTransformer.getX()).thenReturn(0.2);
+        Mockito.when(twoWindingsTransformer.getG()).thenReturn(0.3);
+        Mockito.when(twoWindingsTransformer.getB()).thenReturn(0.4);
+        Mockito.when(twoWindingsTransformer.getRatedS()).thenReturn(100.0);
+        // Terminal fields
+        Terminal terminal = Mockito.mock(Terminal.class);
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(twoWindingsTransformer.getTerminal1()).thenReturn(terminal);
+        Mockito.when(twoWindingsTransformer.getTerminal2()).thenReturn(terminal);
+        // RatioTapChanger fields
+        RatioTapChanger ratioTapChanger = Mockito.mock(RatioTapChanger.class);
+        Mockito.when(ratioTapChanger.getTargetV()).thenReturn(13.0);
+        Mockito.when(twoWindingsTransformer.getRatioTapChanger()).thenReturn(ratioTapChanger);
+
+        // for testing none EXISTS
+        TwoWindingsTransformer twoWindingsTransformer1 = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer1.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+        Mockito.when(twoWindingsTransformer1.getR()).thenReturn(Double.NaN);
+        Mockito.when(twoWindingsTransformer1.getX()).thenReturn(Double.NaN);
+        Mockito.when(twoWindingsTransformer1.getG()).thenReturn(Double.NaN);
+        Mockito.when(twoWindingsTransformer1.getB()).thenReturn(Double.NaN);
+        Mockito.when(twoWindingsTransformer1.getRatedS()).thenReturn(Double.NaN);
+
+        // Terminal fields
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(Double.NaN);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(twoWindingsTransformer1.getTerminal1()).thenReturn(terminal1);
+        Mockito.when(twoWindingsTransformer1.getTerminal2()).thenReturn(terminal1);
+
+        // RatioTapChanger fields
+        RatioTapChanger ratioTapChanger1 = Mockito.mock(RatioTapChanger.class);
+        Mockito.when(ratioTapChanger1.getTargetV()).thenReturn(Double.NaN);
+        Mockito.when(twoWindingsTransformer1.getRatioTapChanger()).thenReturn(ratioTapChanger1);
+
+        return Stream.of(
+            // --- EQUALS --- //
+            // Terminal fields
+            Arguments.of(EQUALS, FieldType.NOMINAL_V_1, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.NOMINAL_V_1, 12.0, null, twoWindingsTransformer, false),
+            Arguments.of(EQUALS, FieldType.NOMINAL_V_2, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.NOMINAL_V_2, 12.0, null, twoWindingsTransformer, false),
+            // RatioTapChanger fields
+            Arguments.of(EQUALS, FieldType.RATIO_TARGET_V, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.RATIO_TARGET_V, 12.0, null, twoWindingsTransformer, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(EQUALS, FieldType.R, 0.1, null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.R, 0.2, null, twoWindingsTransformer, false),
+            Arguments.of(EQUALS, FieldType.X, 0.2, null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.X, 0.3, null, twoWindingsTransformer, false),
+            Arguments.of(EQUALS, FieldType.G, 0.3, null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.G, 0.4, null, twoWindingsTransformer, false),
+            Arguments.of(EQUALS, FieldType.B, 0.4, null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.B, 0.5, null, twoWindingsTransformer, false),
+            Arguments.of(EQUALS, FieldType.RATED_S, 100.0, null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.RATED_S, 200.0, null, twoWindingsTransformer, false),
+
+            // --- GREATER_OR_EQUALS --- //
+            // Terminal
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_V_1, 12.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_V_1, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_V_1, 14.0, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_V_2, 12.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_V_2, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_V_2, 14.0, null, twoWindingsTransformer, false),
+            // RatioTapChanger fields
+            Arguments.of(GREATER_OR_EQUALS, FieldType.RATIO_TARGET_V, 12.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.RATIO_TARGET_V, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.RATIO_TARGET_V, 14.0, null, twoWindingsTransformer, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(GREATER_OR_EQUALS, FieldType.R, 0.05, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.R, 0.1, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.R, 0.15, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.X, 0.15, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.X, 0.2, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.X, 0.25, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.G, 0.25, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.G, 0.3, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.G, 0.35, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.B, 0.35, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.B, 0.4, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.B, 0.45, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.RATED_S, 50.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.RATED_S, 100.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER_OR_EQUALS, FieldType.RATED_S, 150.0, null, twoWindingsTransformer, false),
+
+            // --- GREATER --- //
+            // Terminal
+            Arguments.of(GREATER, FieldType.NOMINAL_V_1, 12.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER, FieldType.NOMINAL_V_1, 13.0, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.NOMINAL_V_1, 14.0, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.NOMINAL_V_2, 12.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER, FieldType.NOMINAL_V_2, 13.0, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.NOMINAL_V_2, 14.0, null, twoWindingsTransformer, false),
+            // RatioTapChanger fields
+            Arguments.of(GREATER, FieldType.RATIO_TARGET_V, 12.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER, FieldType.RATIO_TARGET_V, 13.0, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.RATIO_TARGET_V, 14.0, null, twoWindingsTransformer, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(GREATER, FieldType.R, 0.05, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER, FieldType.R, 0.1, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.R, 0.15, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.X, 0.15, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER, FieldType.X, 0.2, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.X, 0.25, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.G, 0.25, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER, FieldType.G, 0.3, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.G, 0.35, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.B, 0.35, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER, FieldType.B, 0.4, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.B, 0.45, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.RATED_S, 50.0, null, twoWindingsTransformer, true),
+            Arguments.of(GREATER, FieldType.RATED_S, 100.0, null, twoWindingsTransformer, false),
+            Arguments.of(GREATER, FieldType.RATED_S, 150.0, null, twoWindingsTransformer, false),
+
+            // --- LOWER_OR_EQUALS --- //
+            // Terminal
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_V_1, 14.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_V_1, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_V_1, 12.0, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_V_2, 14.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_V_2, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_V_2, 12.0, null, twoWindingsTransformer, false),
+            // RatioTapChanger fields
+            Arguments.of(LOWER_OR_EQUALS, FieldType.RATIO_TARGET_V, 14.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.RATIO_TARGET_V, 13.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.RATIO_TARGET_V, 12.0, null, twoWindingsTransformer, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(LOWER_OR_EQUALS, FieldType.R, 0.15, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.R, 0.1, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.R, 0.05, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.X, 0.25, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.X, 0.2, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.X, 0.15, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.G, 0.35, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.G, 0.3, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.G, 0.25, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.B, 0.45, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.B, 0.4, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.B, 0.35, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.RATED_S, 150.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.RATED_S, 100.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER_OR_EQUALS, FieldType.RATED_S, 50.0, null, twoWindingsTransformer, false),
+
+            // --- LOWER --- //
+            // Terminal
+            Arguments.of(LOWER, FieldType.NOMINAL_V_1, 14.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER, FieldType.NOMINAL_V_1, 13.0, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.NOMINAL_V_1, 12.0, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.NOMINAL_V_2, 14.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER, FieldType.NOMINAL_V_2, 13.0, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.NOMINAL_V_2, 12.0, null, twoWindingsTransformer, false),
+            // RatioTapChanger fields
+            Arguments.of(LOWER, FieldType.RATIO_TARGET_V, 14.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER, FieldType.RATIO_TARGET_V, 13.0, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.RATIO_TARGET_V, 12.0, null, twoWindingsTransformer, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(LOWER, FieldType.R, 0.15, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER, FieldType.R, 0.1, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.R, 0.05, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.X, 0.25, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER, FieldType.X, 0.2, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.X, 0.15, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.G, 0.35, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER, FieldType.G, 0.3, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.G, 0.25, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.B, 0.45, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER, FieldType.B, 0.4, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.B, 0.35, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.RATED_S, 150.0, null, twoWindingsTransformer, true),
+            Arguments.of(LOWER, FieldType.RATED_S, 100.0, null, twoWindingsTransformer, false),
+            Arguments.of(LOWER, FieldType.RATED_S, 50.0, null, twoWindingsTransformer, false),
+
+            // --- BETWEEN --- //
+            // Terminal
+            Arguments.of(BETWEEN, FieldType.NOMINAL_V_1, null, Set.of(12.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(BETWEEN, FieldType.NOMINAL_V_1, null, Set.of(13.5, 14.0), twoWindingsTransformer, false),
+            Arguments.of(BETWEEN, FieldType.NOMINAL_V_2, null, Set.of(12.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(BETWEEN, FieldType.NOMINAL_V_2, null, Set.of(13.5, 14.0), twoWindingsTransformer, false),
+            // RatioTapChanger fields
+            Arguments.of(BETWEEN, FieldType.RATIO_TARGET_V, null, Set.of(12.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(BETWEEN, FieldType.RATIO_TARGET_V, null, Set.of(13.5, 14.0), twoWindingsTransformer, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(BETWEEN, FieldType.R, null, Set.of(0.05, 0.15), twoWindingsTransformer, true),
+            Arguments.of(BETWEEN, FieldType.R, null, Set.of(0.15, 0.25), twoWindingsTransformer, false),
+            Arguments.of(BETWEEN, FieldType.X, null, Set.of(0.15, 0.25), twoWindingsTransformer, true),
+            Arguments.of(BETWEEN, FieldType.X, null, Set.of(0.25, 0.35), twoWindingsTransformer, false),
+            Arguments.of(BETWEEN, FieldType.G, null, Set.of(0.25, 0.35), twoWindingsTransformer, true),
+            Arguments.of(BETWEEN, FieldType.G, null, Set.of(0.35, 0.45), twoWindingsTransformer, false),
+            Arguments.of(BETWEEN, FieldType.B, null, Set.of(0.35, 0.45), twoWindingsTransformer, true),
+            Arguments.of(BETWEEN, FieldType.B, null, Set.of(0.45, 0.55), twoWindingsTransformer, false),
+            Arguments.of(BETWEEN, FieldType.RATED_S, null, Set.of(50.0, 150.0), twoWindingsTransformer, true),
+            Arguments.of(BETWEEN, FieldType.RATED_S, null, Set.of(150.0, 250.0), twoWindingsTransformer, false),
+
+            // --- EXISTS --- //
+            // Terminal
+            Arguments.of(EXISTS, FieldType.NOMINAL_V_1, null, null, twoWindingsTransformer, true),
+            Arguments.of(EXISTS, FieldType.NOMINAL_V_1, null, null, twoWindingsTransformer1, false),
+            Arguments.of(EXISTS, FieldType.NOMINAL_V_2, null, null, twoWindingsTransformer, true),
+            Arguments.of(EXISTS, FieldType.NOMINAL_V_2, null, null, twoWindingsTransformer1, false),
+            // RatioTapChanger fields
+            Arguments.of(EXISTS, FieldType.RATIO_TARGET_V, null, null, twoWindingsTransformer, true),
+            Arguments.of(EXISTS, FieldType.RATIO_TARGET_V, null, null, twoWindingsTransformer1, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(EXISTS, FieldType.R, null, null, twoWindingsTransformer, true),
+            Arguments.of(EXISTS, FieldType.R, null, null, twoWindingsTransformer1, false),
+            Arguments.of(EXISTS, FieldType.X, null, null, twoWindingsTransformer, true),
+            Arguments.of(EXISTS, FieldType.X, null, null, twoWindingsTransformer1, false),
+            Arguments.of(EXISTS, FieldType.G, null, null, twoWindingsTransformer, true),
+            Arguments.of(EXISTS, FieldType.G, null, null, twoWindingsTransformer1, false),
+            Arguments.of(EXISTS, FieldType.B, null, null, twoWindingsTransformer, true),
+            Arguments.of(EXISTS, FieldType.B, null, null, twoWindingsTransformer1, false),
+            Arguments.of(EXISTS, FieldType.RATED_S, null, null, twoWindingsTransformer, true),
+            Arguments.of(EXISTS, FieldType.RATED_S, null, null, twoWindingsTransformer1, false),
+
+            // --- IN --- //
+            // Terminal
+            Arguments.of(IN, FieldType.NOMINAL_V_1, null, Set.of(12.0, 13.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.NOMINAL_V_1, null, Set.of(12.0, 14.0), twoWindingsTransformer, false),
+            Arguments.of(IN, FieldType.NOMINAL_V_2, null, Set.of(12.0, 13.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.NOMINAL_V_2, null, Set.of(12.0, 14.0), twoWindingsTransformer, false),
+            // RatioTapChanger fields
+            Arguments.of(IN, FieldType.RATIO_TARGET_V, null, Set.of(12.0, 13.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.RATIO_TARGET_V, null, Set.of(12.0, 14.0), twoWindingsTransformer, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(IN, FieldType.R, null, Set.of(0.05, 0.1, 0.15), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.R, null, Set.of(0.05, 0.15), twoWindingsTransformer, false),
+            Arguments.of(IN, FieldType.X, null, Set.of(0.15, 0.2, 0.25), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.X, null, Set.of(0.15, 0.25), twoWindingsTransformer, false),
+            Arguments.of(IN, FieldType.G, null, Set.of(0.25, 0.3, 0.35), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.G, null, Set.of(0.25, 0.35), twoWindingsTransformer, false),
+            Arguments.of(IN, FieldType.B, null, Set.of(0.35, 0.4, 0.45), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.B, null, Set.of(0.35, 0.45), twoWindingsTransformer, false),
+            Arguments.of(IN, FieldType.RATED_S, null, Set.of(50.0, 100.0, 150.0), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.RATED_S, null, Set.of(50.0, 150.0), twoWindingsTransformer, false),
+
+            // --- NOT_IN --- //
+            // Terminal
+            Arguments.of(NOT_IN, FieldType.NOMINAL_V_1, null, Set.of(12.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.NOMINAL_V_1, null, Set.of(12.0, 13.0, 14.0), twoWindingsTransformer, false),
+            Arguments.of(NOT_IN, FieldType.NOMINAL_V_2, null, Set.of(12.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.NOMINAL_V_2, null, Set.of(12.0, 13.0, 14.0), twoWindingsTransformer, false),
+            // RatioTapChanger fields
+            Arguments.of(NOT_IN, FieldType.RATIO_TARGET_V, null, Set.of(12.0, 14.0), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.RATIO_TARGET_V, null, Set.of(12.0, 13.0, 14.0), twoWindingsTransformer, false),
+            // TwoWindingsTransformer fields
+            Arguments.of(NOT_IN, FieldType.R, null, Set.of(0.05, 0.15), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.R, null, Set.of(0.05, 0.1, 0.15), twoWindingsTransformer, false),
+            Arguments.of(NOT_IN, FieldType.X, null, Set.of(0.15, 0.25), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.X, null, Set.of(0.15, 0.2, 0.25), twoWindingsTransformer, false),
+            Arguments.of(NOT_IN, FieldType.G, null, Set.of(0.25, 0.35), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.G, null, Set.of(0.25, 0.3, 0.35), twoWindingsTransformer, false),
+            Arguments.of(NOT_IN, FieldType.B, null, Set.of(0.35, 0.45), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.B, null, Set.of(0.35, 0.4, 0.45), twoWindingsTransformer, false),
+            Arguments.of(NOT_IN, FieldType.RATED_S, null, Set.of(50.0, 150.0), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.RATED_S, null, Set.of(50.0, 100.0, 150.0), twoWindingsTransformer, false)
+        );
+    }
+
 }
