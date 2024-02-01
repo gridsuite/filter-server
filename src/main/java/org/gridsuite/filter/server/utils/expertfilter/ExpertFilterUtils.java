@@ -75,7 +75,7 @@ public final class ExpertFilterUtils {
                 MAX_Q_AT_NOMINAL_V,
                 SWITCHED_ON_Q_AT_NOMINAL_V,
                 MAX_SUSCEPTANCE,
-                SWITCHED_ON_MAX_SUSCEPTANCE -> getSectionBasedFieldValue(field, shuntCompensator);
+                SWITCHED_ON_SUSCEPTANCE -> getSectionBasedFieldValue(field, shuntCompensator);
             case CONNECTED -> getTerminalFieldValue(field, shuntCompensator.getTerminal());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + shuntCompensator.getType() + "]");
         };
@@ -155,7 +155,7 @@ public final class ExpertFilterUtils {
             case MAX_Q_AT_NOMINAL_V -> String.valueOf(qAtNominalV * shuntCompensator.getMaximumSectionCount());
             case SWITCHED_ON_Q_AT_NOMINAL_V -> String.valueOf(qAtNominalV * shuntCompensator.getSectionCount());
             case MAX_SUSCEPTANCE -> String.valueOf(susceptancePerSection * shuntCompensator.getMaximumSectionCount());
-            case SWITCHED_ON_MAX_SUSCEPTANCE -> String.valueOf(susceptancePerSection * shuntCompensator.getSectionCount());
+            case SWITCHED_ON_SUSCEPTANCE -> String.valueOf(susceptancePerSection * shuntCompensator.getSectionCount());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + shuntCompensator.getType() + "]");
         };
     }

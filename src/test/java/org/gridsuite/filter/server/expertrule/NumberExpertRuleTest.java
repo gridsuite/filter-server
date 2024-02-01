@@ -761,8 +761,8 @@ class NumberExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 2., null, shuntCompensator, false),
                 Arguments.of(EQUALS, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
                 Arguments.of(EQUALS, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
-                Arguments.of(EQUALS, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
-                Arguments.of(EQUALS, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
+                Arguments.of(EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, false),
 
                 // --- GREATER_OR_EQUALS --- //
                 // VoltageLevel fields
@@ -787,9 +787,9 @@ class NumberExpertRuleTest {
                 Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, true),
                 Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 4., null, shuntCompensator, false),
-                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
-                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 2., null, shuntCompensator, true),
-                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 4., null, shuntCompensator, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 4., null, shuntCompensator, false),
 
                 // --- GREATER --- //
                 // VoltageLevel fields
@@ -814,9 +814,9 @@ class NumberExpertRuleTest {
                 Arguments.of(GREATER, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, true),
                 Arguments.of(GREATER, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, false),
                 Arguments.of(GREATER, FieldType.MAX_SUSCEPTANCE, 4., null, shuntCompensator, false),
-                Arguments.of(GREATER, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 2., null, shuntCompensator, true),
-                Arguments.of(GREATER, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 3., null, shuntCompensator, false),
-                Arguments.of(GREATER, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 4., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_SUSCEPTANCE, 4., null, shuntCompensator, false),
 
                 // --- LOWER_OR_EQUALS --- //
                 // VoltageLevel fields
@@ -841,9 +841,9 @@ class NumberExpertRuleTest {
                 Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 4., null, shuntCompensator, true),
                 Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
-                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
-                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 4., null, shuntCompensator, true),
-                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, false),
 
                 // --- LOWER --- //
                 // VoltageLevel fields
@@ -868,9 +868,9 @@ class NumberExpertRuleTest {
                 Arguments.of(LOWER, FieldType.MAX_SUSCEPTANCE, 4., null, shuntCompensator, true),
                 Arguments.of(LOWER, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, false),
                 Arguments.of(LOWER, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
-                Arguments.of(LOWER, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 4., null, shuntCompensator, true),
-                Arguments.of(LOWER, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 3., null, shuntCompensator, false),
-                Arguments.of(LOWER, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_SUSCEPTANCE, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, false),
 
                 // --- BETWEEN --- //
                 // VoltageLevel fields
@@ -889,8 +889,8 @@ class NumberExpertRuleTest {
                 Arguments.of(BETWEEN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(508., 509.), shuntCompensator, false),
                 Arguments.of(BETWEEN, FieldType.MAX_SUSCEPTANCE, null, Set.of(2., 4.), shuntCompensator, true),
                 Arguments.of(BETWEEN, FieldType.MAX_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
-                Arguments.of(BETWEEN, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, null, Set.of(2., 4.), shuntCompensator, true),
-                Arguments.of(BETWEEN, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
+                Arguments.of(BETWEEN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(2., 4.), shuntCompensator, true),
+                Arguments.of(BETWEEN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
 
                 // --- EXISTS --- //
                 // VoltageLevel fields
@@ -916,8 +916,8 @@ class NumberExpertRuleTest {
                 Arguments.of(IN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(508., 509.), shuntCompensator, false),
                 Arguments.of(IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(3., 4.), shuntCompensator, true),
                 Arguments.of(IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
-                Arguments.of(IN, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, null, Set.of(3., 4.), shuntCompensator, true),
-                Arguments.of(IN, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
+                Arguments.of(IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(3., 4.), shuntCompensator, true),
+                Arguments.of(IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
                 // --- NOT_IN --- //
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), shuntCompensator, true),
@@ -935,8 +935,8 @@ class NumberExpertRuleTest {
                 Arguments.of(NOT_IN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(507., 509.), shuntCompensator, false),
                 Arguments.of(NOT_IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(6., 4.), shuntCompensator, true),
                 Arguments.of(NOT_IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(3., 6.), shuntCompensator, false),
-                Arguments.of(NOT_IN, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, null, Set.of(6., 4.), shuntCompensator, true),
-                Arguments.of(NOT_IN, FieldType.SWITCHED_ON_MAX_SUSCEPTANCE, null, Set.of(3., 6.), shuntCompensator, false)
+                Arguments.of(NOT_IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(6., 4.), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(3., 6.), shuntCompensator, false)
         );
     }
 
