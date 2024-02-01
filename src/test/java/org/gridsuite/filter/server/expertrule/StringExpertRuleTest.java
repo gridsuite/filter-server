@@ -78,7 +78,8 @@ class StringExpertRuleTest {
         "provideArgumentsForBusTest",
         "provideArgumentsForBusBarSectionTest",
         "provideArgumentsForBatteryTest",
-        "provideArgumentsForShuntCompensatorTest"
+        "provideArgumentsForShuntCompensatorTest",
+        "provideArgumentsForLinesTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         StringExpertRule rule = StringExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -372,6 +373,130 @@ class StringExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL_2", "VL_3"), shuntCompensator, true),
                 Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL", "VL_2"), shuntCompensator, false)
+
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForLinesTest() {
+
+        Line line = Mockito.mock(Line.class);
+        Mockito.when(line.getType()).thenReturn(IdentifiableType.LINE);
+        // Common fields
+        Mockito.when(line.getId()).thenReturn("ID");
+        Mockito.when(line.getNameOrId()).thenReturn("NAME");
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel1.getId()).thenReturn("VL1");
+
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(line.getTerminal(Branch.Side.ONE)).thenReturn(terminal);
+
+        VoltageLevel voltageLevel2 = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel2.getId()).thenReturn("VL2");
+
+        Terminal terminal2 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal2.getVoltageLevel()).thenReturn(voltageLevel2);
+        Mockito.when(line.getTerminal(Branch.Side.TWO)).thenReturn(terminal2);
+
+        // for testing none EXISTS
+        Line load1 = Mockito.mock(Line.class);
+        Mockito.when(load1.getType()).thenReturn(IdentifiableType.LINE);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel11 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal11 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal11.getVoltageLevel()).thenReturn(voltageLevel11);
+        Mockito.when(load1.getTerminal(Branch.Side.ONE)).thenReturn(terminal11);
+
+        VoltageLevel voltageLevel12 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal12 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal12.getVoltageLevel()).thenReturn(voltageLevel12);
+        Mockito.when(load1.getTerminal(Branch.Side.TWO)).thenReturn(terminal12);
+
+        return Stream.of(
+                // --- IS --- //
+                // Common fields
+                Arguments.of(IS, FieldType.ID, "id", null, line, true),
+                Arguments.of(IS, FieldType.ID, "id_1", null, line, false),
+                Arguments.of(IS, FieldType.NAME, "name", null, line, true),
+                Arguments.of(IS, FieldType.NAME, "name_1", null, line, false),
+                // VoltageLevel fields
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID_1, "vl1", null, line, true),
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID_1, "vl_1", null, line, false),
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID_2, "vl2", null, line, true),
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID_2, "vl_1", null, line, false),
+
+                // --- CONTAINS --- //
+                // Common fields
+                Arguments.of(CONTAINS, FieldType.ID, "i", null, line, true),
+                Arguments.of(CONTAINS, FieldType.ID, "ii", null, line, false),
+                Arguments.of(CONTAINS, FieldType.NAME, "nam", null, line, true),
+                Arguments.of(CONTAINS, FieldType.NAME, "namm", null, line, false),
+                // VoltageLevel fields
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID_1, "v", null, line, true),
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID_1, "vv", null, line, false),
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID_2, "v", null, line, true),
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID_2, "vv", null, line, false),
+
+                // --- BEGINS_WITH --- //
+                // Common fields
+                Arguments.of(BEGINS_WITH, FieldType.ID, "i", null, line, true),
+                Arguments.of(BEGINS_WITH, FieldType.ID, "j", null, line, false),
+                Arguments.of(BEGINS_WITH, FieldType.NAME, "n", null, line, true),
+                Arguments.of(BEGINS_WITH, FieldType.NAME, "m", null, line, false),
+                // VoltageLevel fields
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID_1, "v", null, line, true),
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID_1, "s", null, line, false),
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID_2, "v", null, line, true),
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID_2, "s", null, line, false),
+
+                // --- ENDS_WITH --- //
+                // Common fields
+                Arguments.of(ENDS_WITH, FieldType.ID, "d", null, line, true),
+                Arguments.of(ENDS_WITH, FieldType.ID, "e", null, line, false),
+                Arguments.of(ENDS_WITH, FieldType.NAME, "e", null, line, true),
+                Arguments.of(ENDS_WITH, FieldType.NAME, "f", null, line, false),
+                // VoltageLevel fields
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID_1, "1", null, line, true),
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID_1, "m", null, line, false),
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID_2, "2", null, line, true),
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID_2, "m", null, line, false),
+
+                // --- EXISTS --- //
+                // Common fields
+                Arguments.of(EXISTS, FieldType.ID, null, null, line, true),
+                Arguments.of(EXISTS, FieldType.ID, null, null, load1, false),
+                Arguments.of(EXISTS, FieldType.NAME, null, null, line, true),
+                Arguments.of(EXISTS, FieldType.NAME, null, null, load1, false),
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID_1, null, null, line, true),
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID_1, null, null, load1, false),
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID_2, null, null, line, true),
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID_2, null, null, load1, false),
+
+                // --- IN --- //
+                // Common fields
+                Arguments.of(IN, FieldType.ID, null, Set.of("ID", "ID_2"), line, true),
+                Arguments.of(IN, FieldType.ID, null, Set.of("ID_2", "ID_3"), line, false),
+                Arguments.of(IN, FieldType.NAME, null, Set.of("NAME", "NAME_2"), line, true),
+                Arguments.of(IN, FieldType.NAME, null, Set.of("NAME_2", "NAME_3"), line, false),
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID_1, null, Set.of("VL1", "VL_2"), line, true),
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID_1, null, Set.of("VL_2", "VL_3"), line, false),
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID_2, null, Set.of("VL2", "VL_2"), line, true),
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID_2, null, Set.of("VL_2", "VL_3"), line, false),
+
+                // --- NOT_IN --- //
+                // Common fields
+                Arguments.of(NOT_IN, FieldType.ID, null, Set.of("ID_2", "ID_3"), line, true),
+                Arguments.of(NOT_IN, FieldType.ID, null, Set.of("ID", "ID_2"), line, false),
+                Arguments.of(NOT_IN, FieldType.NAME, null, Set.of("NAME_2", "NAME_3"), line, true),
+                Arguments.of(NOT_IN, FieldType.NAME, null, Set.of("NAME", "NAME_2"), line, false),
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID_1, null, Set.of("VL_2", "VL_3"), line, true),
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID_1, null, Set.of("VL1", "VL_2"), line, false),
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID_2, null, Set.of("VL_2", "VL_3"), line, true),
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID_2, null, Set.of("VL2", "VL_2"), line, false)
 
         );
     }
