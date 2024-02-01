@@ -77,7 +77,8 @@ class StringExpertRuleTest {
         "provideArgumentsForLoadTest",
         "provideArgumentsForBusTest",
         "provideArgumentsForBusBarSectionTest",
-        "provideArgumentsForBatteryTest"
+        "provideArgumentsForBatteryTest",
+        "provideArgumentsForShuntCompensatorTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         StringExpertRule rule = StringExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -274,6 +275,103 @@ class StringExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL_2", "VL_3"), load, true),
                 Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL", "VL_2"), load, false)
+
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForShuntCompensatorTest() {
+
+        ShuntCompensator shuntCompensator = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+        // Common fields
+        Mockito.when(shuntCompensator.getId()).thenReturn("ID");
+        Mockito.when(shuntCompensator.getNameOrId()).thenReturn("NAME");
+        // VoltageLevel fields
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getId()).thenReturn("VL");
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(shuntCompensator.getTerminal()).thenReturn(terminal);
+
+        // for testing none EXISTS
+        ShuntCompensator shuntCompensator1 = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator1.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(shuntCompensator1.getTerminal()).thenReturn(terminal1);
+
+        return Stream.of(
+                // --- IS --- //
+                // Common fields
+                Arguments.of(IS, FieldType.ID, "id", null, shuntCompensator, true),
+                Arguments.of(IS, FieldType.ID, "id_1", null, shuntCompensator, false),
+                Arguments.of(IS, FieldType.NAME, "name", null, shuntCompensator, true),
+                Arguments.of(IS, FieldType.NAME, "name_1", null, shuntCompensator, false),
+                // VoltageLevel fields
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID, "vl", null, shuntCompensator, true),
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID, "vl_1", null, shuntCompensator, false),
+
+                // --- CONTAINS --- //
+                // Common fields
+                Arguments.of(CONTAINS, FieldType.ID, "i", null, shuntCompensator, true),
+                Arguments.of(CONTAINS, FieldType.ID, "ii", null, shuntCompensator, false),
+                Arguments.of(CONTAINS, FieldType.NAME, "nam", null, shuntCompensator, true),
+                Arguments.of(CONTAINS, FieldType.NAME, "namm", null, shuntCompensator, false),
+                // VoltageLevel fields
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID, "v", null, shuntCompensator, true),
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID, "vv", null, shuntCompensator, false),
+
+                // --- BEGINS_WITH --- //
+                // Common fields
+                Arguments.of(BEGINS_WITH, FieldType.ID, "i", null, shuntCompensator, true),
+                Arguments.of(BEGINS_WITH, FieldType.ID, "j", null, shuntCompensator, false),
+                Arguments.of(BEGINS_WITH, FieldType.NAME, "n", null, shuntCompensator, true),
+                Arguments.of(BEGINS_WITH, FieldType.NAME, "m", null, shuntCompensator, false),
+                // VoltageLevel fields
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID, "v", null, shuntCompensator, true),
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID, "s", null, shuntCompensator, false),
+
+                // --- ENDS_WITH --- //
+                // Common fields
+                Arguments.of(ENDS_WITH, FieldType.ID, "d", null, shuntCompensator, true),
+                Arguments.of(ENDS_WITH, FieldType.ID, "e", null, shuntCompensator, false),
+                Arguments.of(ENDS_WITH, FieldType.NAME, "e", null, shuntCompensator, true),
+                Arguments.of(ENDS_WITH, FieldType.NAME, "f", null, shuntCompensator, false),
+                // VoltageLevel fields
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID, "l", null, shuntCompensator, true),
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID, "m", null, shuntCompensator, false),
+
+                // --- EXISTS --- //
+                // Common fields
+                Arguments.of(EXISTS, FieldType.ID, null, null, shuntCompensator, true),
+                Arguments.of(EXISTS, FieldType.ID, null, null, shuntCompensator1, false),
+                Arguments.of(EXISTS, FieldType.NAME, null, null, shuntCompensator, true),
+                Arguments.of(EXISTS, FieldType.NAME, null, null, shuntCompensator1, false),
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID, null, null, shuntCompensator, true),
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID, null, null, shuntCompensator1, false),
+
+                // --- IN --- //
+                // Common fields
+                Arguments.of(IN, FieldType.ID, null, Set.of("ID", "ID_2"), shuntCompensator, true),
+                Arguments.of(IN, FieldType.ID, null, Set.of("ID_2", "ID_3"), shuntCompensator, false),
+                Arguments.of(IN, FieldType.NAME, null, Set.of("NAME", "NAME_2"), shuntCompensator, true),
+                Arguments.of(IN, FieldType.NAME, null, Set.of("NAME_2", "NAME_3"), shuntCompensator, false),
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL", "VL_2"), shuntCompensator, true),
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL_2", "VL_3"), shuntCompensator, false),
+
+                // --- NOT_IN --- //
+                // Common fields
+                Arguments.of(NOT_IN, FieldType.ID, null, Set.of("ID_2", "ID_3"), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.ID, null, Set.of("ID", "ID_2"), shuntCompensator, false),
+                Arguments.of(NOT_IN, FieldType.NAME, null, Set.of("NAME_2", "NAME_3"), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.NAME, null, Set.of("NAME", "NAME_2"), shuntCompensator, false),
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL_2", "VL_3"), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL", "VL_2"), shuntCompensator, false)
 
         );
     }
