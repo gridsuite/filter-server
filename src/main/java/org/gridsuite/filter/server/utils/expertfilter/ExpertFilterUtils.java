@@ -148,12 +148,12 @@ public final class ExpertFilterUtils {
 
     private static String getSectionBasedFieldValue(FieldType field, ShuntCompensator shuntCompensator) {
         double susceptancePerSection = shuntCompensator.getModel(ShuntCompensatorLinearModel.class).getBPerSection();
-        double voltageLevelPower = Math.pow(shuntCompensator.getTerminal().getVoltageLevel().getNominalV(), 2);
+        double qAtNominalV = Math.pow(shuntCompensator.getTerminal().getVoltageLevel().getNominalV(), 2) * Math.abs(susceptancePerSection);
 
         return switch (field) {
             case SHUNT_COMPENSATOR_TYPE -> susceptancePerSection > 0 ? "CAPACITOR" : "REACTOR";
-            case MAX_Q_AT_NOMINAL_V -> String.valueOf(voltageLevelPower * susceptancePerSection * shuntCompensator.getMaximumSectionCount());
-            case SWITCHED_ON_Q_AT_NOMINAL_V -> String.valueOf(voltageLevelPower * susceptancePerSection * shuntCompensator.getSectionCount());
+            case MAX_Q_AT_NOMINAL_V -> String.valueOf(qAtNominalV * shuntCompensator.getMaximumSectionCount());
+            case SWITCHED_ON_Q_AT_NOMINAL_V -> String.valueOf(qAtNominalV * shuntCompensator.getSectionCount());
             case MAX_SUSCEPTANCE -> String.valueOf(susceptancePerSection * shuntCompensator.getMaximumSectionCount());
             case SWITCHED_ON_MAX_SUSCEPTANCE -> String.valueOf(susceptancePerSection * shuntCompensator.getSectionCount());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + shuntCompensator.getType() + "]");
