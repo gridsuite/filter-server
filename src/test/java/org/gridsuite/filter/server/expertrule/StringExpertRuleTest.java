@@ -390,14 +390,14 @@ class StringExpertRuleTest {
 
         Terminal terminal = Mockito.mock(Terminal.class);
         Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel1);
-        Mockito.when(line.getTerminal(Branch.Side.ONE)).thenReturn(terminal);
+        Mockito.when(line.getTerminal(TwoSides.ONE)).thenReturn(terminal);
 
         VoltageLevel voltageLevel2 = Mockito.mock(VoltageLevel.class);
         Mockito.when(voltageLevel2.getId()).thenReturn("VL2");
 
         Terminal terminal2 = Mockito.mock(Terminal.class);
         Mockito.when(terminal2.getVoltageLevel()).thenReturn(voltageLevel2);
-        Mockito.when(line.getTerminal(Branch.Side.TWO)).thenReturn(terminal2);
+        Mockito.when(line.getTerminal(TwoSides.TWO)).thenReturn(terminal2);
 
         // for testing none EXISTS
         Line load1 = Mockito.mock(Line.class);
@@ -406,12 +406,12 @@ class StringExpertRuleTest {
         VoltageLevel voltageLevel11 = Mockito.mock(VoltageLevel.class);
         Terminal terminal11 = Mockito.mock(Terminal.class);
         Mockito.when(terminal11.getVoltageLevel()).thenReturn(voltageLevel11);
-        Mockito.when(load1.getTerminal(Branch.Side.ONE)).thenReturn(terminal11);
+        Mockito.when(load1.getTerminal(TwoSides.ONE)).thenReturn(terminal11);
 
         VoltageLevel voltageLevel12 = Mockito.mock(VoltageLevel.class);
         Terminal terminal12 = Mockito.mock(Terminal.class);
         Mockito.when(terminal12.getVoltageLevel()).thenReturn(voltageLevel12);
-        Mockito.when(load1.getTerminal(Branch.Side.TWO)).thenReturn(terminal12);
+        Mockito.when(load1.getTerminal(TwoSides.TWO)).thenReturn(terminal12);
 
         return Stream.of(
                 // --- IS --- //

@@ -958,13 +958,13 @@ class NumberExpertRuleTest {
         VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
         Terminal terminal1 = Mockito.mock(Terminal.class);
         Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
-        Mockito.when(line.getTerminal(Branch.Side.ONE)).thenReturn(terminal1);
+        Mockito.when(line.getTerminal(TwoSides.ONE)).thenReturn(terminal1);
         Mockito.when(voltageLevel1.getNominalV()).thenReturn(13.);
 
         VoltageLevel voltageLevel2 = Mockito.mock(VoltageLevel.class);
         Terminal terminal2 = Mockito.mock(Terminal.class);
         Mockito.when(terminal2.getVoltageLevel()).thenReturn(voltageLevel2);
-        Mockito.when(line.getTerminal(Branch.Side.TWO)).thenReturn(terminal2);
+        Mockito.when(line.getTerminal(TwoSides.TWO)).thenReturn(terminal2);
         Mockito.when(voltageLevel2.getNominalV()).thenReturn(17.);
 
         // for testing none EXISTS
@@ -974,13 +974,13 @@ class NumberExpertRuleTest {
         VoltageLevel voltageLevelNone = Mockito.mock(VoltageLevel.class);
         Terminal terminalNone = Mockito.mock(Terminal.class);
         Mockito.when(terminalNone.getVoltageLevel()).thenReturn(voltageLevelNone);
-        Mockito.when(line1.getTerminal(Branch.Side.ONE)).thenReturn(terminalNone);
+        Mockito.when(line1.getTerminal(TwoSides.ONE)).thenReturn(terminalNone);
         Mockito.when(voltageLevelNone.getNominalV()).thenReturn(Double.NaN);
 
         VoltageLevel voltageLevelNone2 = Mockito.mock(VoltageLevel.class);
         Terminal terminalNone2 = Mockito.mock(Terminal.class);
         Mockito.when(terminalNone2.getVoltageLevel()).thenReturn(voltageLevelNone2);
-        Mockito.when(line1.getTerminal(Branch.Side.TWO)).thenReturn(terminalNone2);
+        Mockito.when(line1.getTerminal(TwoSides.TWO)).thenReturn(terminalNone2);
         Mockito.when(voltageLevelNone2.getNominalV()).thenReturn(Double.NaN);
 
         return Stream.of(

@@ -155,11 +155,11 @@ class BooleanExpertRuleTest {
         // Terminal fields
         Terminal terminal1 = Mockito.mock(Terminal.class);
         Mockito.when(terminal1.isConnected()).thenReturn(true);
-        Mockito.when(line.getTerminal(Branch.Side.ONE)).thenReturn(terminal1);
+        Mockito.when(line.getTerminal(TwoSides.ONE)).thenReturn(terminal1);
 
         Terminal terminal2 = Mockito.mock(Terminal.class);
         Mockito.when(terminal2.isConnected()).thenReturn(true);
-        Mockito.when(line.getTerminal(Branch.Side.TWO)).thenReturn(terminal2);
+        Mockito.when(line.getTerminal(TwoSides.TWO)).thenReturn(terminal2);
 
         return Stream.of(
                 // --- EQUALS--- //

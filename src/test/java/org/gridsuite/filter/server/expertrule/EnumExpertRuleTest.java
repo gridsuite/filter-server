@@ -433,11 +433,11 @@ class EnumExpertRuleTest {
         Mockito.when(voltageLevel2.getSubstation()).thenReturn(Optional.of(substation2));
 
         Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
-        Mockito.when(line.getTerminal(Branch.Side.ONE)).thenReturn(terminal1);
+        Mockito.when(line.getTerminal(TwoSides.ONE)).thenReturn(terminal1);
         Mockito.when(substation1.getCountry()).thenReturn(Optional.of(Country.FR));
 
         Mockito.when(terminal2.getVoltageLevel()).thenReturn(voltageLevel2);
-        Mockito.when(line.getTerminal(Branch.Side.TWO)).thenReturn(terminal2);
+        Mockito.when(line.getTerminal(TwoSides.TWO)).thenReturn(terminal2);
         Mockito.when(substation2.getCountry()).thenReturn(Optional.of(Country.SM));
 
         return Stream.of(

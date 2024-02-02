@@ -61,14 +61,14 @@ public final class ExpertFilterUtils {
 
     private static String getLineFieldValue(FieldType field, Line line) {
         return switch (field) {
-            case CONNECTED_1 -> getTerminalFieldValue(field, line.getTerminal(Branch.Side.ONE));
-            case CONNECTED_2 -> getTerminalFieldValue(field, line.getTerminal(Branch.Side.TWO));
+            case CONNECTED_1 -> getTerminalFieldValue(field, line.getTerminal(TwoSides.ONE));
+            case CONNECTED_2 -> getTerminalFieldValue(field, line.getTerminal(TwoSides.TWO));
             case COUNTRY_1,
                 VOLTAGE_LEVEL_ID_1,
-                NOMINAL_VOLTAGE_1 -> getVoltageLevelFieldValue(field, line.getTerminal(Branch.Side.ONE).getVoltageLevel());
+                NOMINAL_VOLTAGE_1 -> getVoltageLevelFieldValue(field, line.getTerminal(TwoSides.ONE).getVoltageLevel());
             case COUNTRY_2,
                 VOLTAGE_LEVEL_ID_2,
-                NOMINAL_VOLTAGE_2 -> getVoltageLevelFieldValue(field, line.getTerminal(Branch.Side.TWO).getVoltageLevel());
+                NOMINAL_VOLTAGE_2 -> getVoltageLevelFieldValue(field, line.getTerminal(TwoSides.TWO).getVoltageLevel());
             case SERIE_RESISTANCE -> String.valueOf(line.getR());
             case SERIE_REACTANCE -> String.valueOf(line.getX());
             case SHUNT_CONDUCTANCE_1 -> String.valueOf(line.getG1());
