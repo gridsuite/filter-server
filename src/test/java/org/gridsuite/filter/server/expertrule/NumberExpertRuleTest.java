@@ -45,6 +45,9 @@ class NumberExpertRuleTest {
         Load load = Mockito.mock(Load.class);
         Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
 
+        ShuntCompensator shuntCompensator = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+
         Bus bus = Mockito.mock(Bus.class);
         Mockito.when(bus.getType()).thenReturn(IdentifiableType.BUS);
 
@@ -57,6 +60,7 @@ class NumberExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.P0, generator, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, load, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, shuntCompensator, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
 
@@ -71,6 +75,7 @@ class NumberExpertRuleTest {
         "provideArgumentsForLoadTest",
         "provideArgumentsForBusTest",
         "provideArgumentsForBusBarSectionTest",
+        "provideArgumentsForShuntCompensatorTest",
         "provideArgumentsForBatteryTest",
         "provideArgumentsForVoltageLevelTest"
     })
@@ -687,6 +692,251 @@ class NumberExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), busbarSection, true),
                 Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), busbarSection, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForShuntCompensatorTest() {
+
+        ShuntCompensator shuntCompensator = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+
+        Mockito.when(shuntCompensator.getMaximumSectionCount()).thenReturn(3);
+        Mockito.when(shuntCompensator.getSectionCount()).thenReturn(3);
+        Mockito.when(shuntCompensator.getModel(ShuntCompensatorLinearModel.class)).thenReturn(new ShuntCompensatorLinearModel() {
+            @Override
+            public double getBPerSection() {
+                return 1.;
+            }
+
+            @Override
+            public ShuntCompensatorLinearModel setBPerSection(double v) {
+                return null;
+            }
+
+            @Override
+            public double getGPerSection() {
+                return 0;
+            }
+
+            @Override
+            public ShuntCompensatorLinearModel setGPerSection(double v) {
+                return null;
+            }
+
+            @Override
+            public ShuntCompensatorLinearModel setMaximumSectionCount(int i) {
+                return null;
+            }
+        });
+        // VoltageLevel fields
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(shuntCompensator.getTerminal()).thenReturn(terminal);
+        Mockito.when(voltageLevel.getNominalV()).thenReturn(13.0);
+
+        // for testing none EXISTS
+        ShuntCompensator shuntCompensator1 = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator1.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(shuntCompensator1.getTerminal()).thenReturn(terminal1);
+        Mockito.when(voltageLevel1.getNominalV()).thenReturn(Double.NaN);
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, shuntCompensator, false),
+                // Shunt Compensator Fields
+                Arguments.of(EQUALS, FieldType.MAXIMUM_SECTION_COUNT, 3., null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.MAXIMUM_SECTION_COUNT, 2., null, shuntCompensator, false),
+                Arguments.of(EQUALS, FieldType.SECTION_COUNT, 3., null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.SECTION_COUNT, 2., null, shuntCompensator, false),
+                Arguments.of(EQUALS, FieldType.MAX_Q_AT_NOMINAL_V, 507., null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.MAX_Q_AT_NOMINAL_V, 2., null, shuntCompensator, false),
+                Arguments.of(EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 507., null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 2., null, shuntCompensator, false),
+                Arguments.of(EQUALS, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
+                Arguments.of(EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, false),
+
+                // --- GREATER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, shuntCompensator, false),
+
+                // Shunt Compensator Fields
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAXIMUM_SECTION_COUNT, 3., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAXIMUM_SECTION_COUNT, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAXIMUM_SECTION_COUNT, 4., null, shuntCompensator, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SECTION_COUNT, 3., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SECTION_COUNT, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SECTION_COUNT, 4., null, shuntCompensator, false),
+
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_Q_AT_NOMINAL_V, 507., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_Q_AT_NOMINAL_V, 506., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_Q_AT_NOMINAL_V, 508., null, shuntCompensator, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 507., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 506., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 508., null, shuntCompensator, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 4., null, shuntCompensator, false),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 4., null, shuntCompensator, false),
+
+                // --- GREATER --- //
+                // VoltageLevel fields
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 12.0, null, shuntCompensator, true),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 13.0, null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.NOMINAL_VOLTAGE, 14.0, null, shuntCompensator, false),
+
+                // Shunt Compensator Fields
+                Arguments.of(GREATER, FieldType.MAXIMUM_SECTION_COUNT, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER, FieldType.MAXIMUM_SECTION_COUNT, 3., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.MAXIMUM_SECTION_COUNT, 4., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.SECTION_COUNT, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER, FieldType.SECTION_COUNT, 3., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.SECTION_COUNT, 4., null, shuntCompensator, false),
+
+                Arguments.of(GREATER, FieldType.MAX_Q_AT_NOMINAL_V, 506., null, shuntCompensator, true),
+                Arguments.of(GREATER, FieldType.MAX_Q_AT_NOMINAL_V, 507., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.MAX_Q_AT_NOMINAL_V, 508., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 506., null, shuntCompensator, true),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 507., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 508., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.MAX_SUSCEPTANCE, 4., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, true),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, false),
+                Arguments.of(GREATER, FieldType.SWITCHED_ON_SUSCEPTANCE, 4., null, shuntCompensator, false),
+
+                // --- LOWER_OR_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 13.0, null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 14.0, null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.NOMINAL_VOLTAGE, 12.0, null, shuntCompensator, false),
+
+                // Shunt Compensator Fields
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAXIMUM_SECTION_COUNT, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAXIMUM_SECTION_COUNT, 3., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAXIMUM_SECTION_COUNT, 2., null, shuntCompensator, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SECTION_COUNT, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SECTION_COUNT, 3., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SECTION_COUNT, 2., null, shuntCompensator, false),
+
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_Q_AT_NOMINAL_V, 507., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_Q_AT_NOMINAL_V, 508., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_Q_AT_NOMINAL_V, 506., null, shuntCompensator, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 507., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 508., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 506., null, shuntCompensator, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER_OR_EQUALS, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, false),
+
+                // --- LOWER --- //
+                // VoltageLevel fields
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 14.0, null, shuntCompensator, true),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 13.0, null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.NOMINAL_VOLTAGE, 12.0, null, shuntCompensator, false),
+
+                // Shunt Compensator Fields
+                Arguments.of(LOWER, FieldType.MAXIMUM_SECTION_COUNT, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER, FieldType.MAXIMUM_SECTION_COUNT, 3., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.MAXIMUM_SECTION_COUNT, 2., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.SECTION_COUNT, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER, FieldType.SECTION_COUNT, 3., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.SECTION_COUNT, 2., null, shuntCompensator, false),
+
+                Arguments.of(LOWER, FieldType.MAX_Q_AT_NOMINAL_V, 508., null, shuntCompensator, true),
+                Arguments.of(LOWER, FieldType.MAX_Q_AT_NOMINAL_V, 507., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.MAX_Q_AT_NOMINAL_V, 506., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 508., null, shuntCompensator, true),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 507., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, 506., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.MAX_SUSCEPTANCE, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER, FieldType.MAX_SUSCEPTANCE, 3., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.MAX_SUSCEPTANCE, 2., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_SUSCEPTANCE, 4., null, shuntCompensator, true),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_SUSCEPTANCE, 3., null, shuntCompensator, false),
+                Arguments.of(LOWER, FieldType.SWITCHED_ON_SUSCEPTANCE, 2., null, shuntCompensator, false),
+
+                // --- BETWEEN --- //
+                // VoltageLevel fields
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), shuntCompensator, true),
+                Arguments.of(BETWEEN, FieldType.NOMINAL_VOLTAGE, null, Set.of(13.5, 14.0), shuntCompensator, false),
+
+                // Shunt Compensator Fields
+                Arguments.of(BETWEEN, FieldType.MAXIMUM_SECTION_COUNT, null, Set.of(2.0, 4.0), shuntCompensator, true),
+                Arguments.of(BETWEEN, FieldType.MAXIMUM_SECTION_COUNT, null, Set.of(3.5, 4.0), shuntCompensator, false),
+                Arguments.of(BETWEEN, FieldType.SECTION_COUNT, null, Set.of(2.0, 4.0), shuntCompensator, true),
+                Arguments.of(BETWEEN, FieldType.SECTION_COUNT, null, Set.of(3.5, 4.0), shuntCompensator, false),
+
+                Arguments.of(BETWEEN, FieldType.MAX_Q_AT_NOMINAL_V, null, Set.of(506., 508.), shuntCompensator, true),
+                Arguments.of(BETWEEN, FieldType.MAX_Q_AT_NOMINAL_V, null, Set.of(508., 509.), shuntCompensator, false),
+                Arguments.of(BETWEEN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(506., 508.), shuntCompensator, true),
+                Arguments.of(BETWEEN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(508., 509.), shuntCompensator, false),
+                Arguments.of(BETWEEN, FieldType.MAX_SUSCEPTANCE, null, Set.of(2., 4.), shuntCompensator, true),
+                Arguments.of(BETWEEN, FieldType.MAX_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
+                Arguments.of(BETWEEN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(2., 4.), shuntCompensator, true),
+                Arguments.of(BETWEEN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
+
+                // --- EXISTS --- //
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, shuntCompensator, true),
+                Arguments.of(EXISTS, FieldType.NOMINAL_VOLTAGE, null, null, shuntCompensator1, false),
+
+                // Shunt Compensator Fields
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), shuntCompensator, true),
+                Arguments.of(IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), shuntCompensator, false),
+
+                // Shunt Compensator Fields
+                Arguments.of(IN, FieldType.MAXIMUM_SECTION_COUNT, null, Set.of(2., 3., 4.), shuntCompensator, true),
+                Arguments.of(IN, FieldType.MAXIMUM_SECTION_COUNT, null, Set.of(2., 4.), shuntCompensator, false),
+                Arguments.of(IN, FieldType.SECTION_COUNT, null, Set.of(2., 3., 4.), shuntCompensator, true),
+                Arguments.of(IN, FieldType.SECTION_COUNT, null, Set.of(2., 4.), shuntCompensator, false),
+
+                Arguments.of(IN, FieldType.MAX_Q_AT_NOMINAL_V, null, Set.of(507., 508.), shuntCompensator, true),
+                Arguments.of(IN, FieldType.MAX_Q_AT_NOMINAL_V, null, Set.of(508., 509.), shuntCompensator, false),
+                Arguments.of(IN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(507., 508.), shuntCompensator, true),
+                Arguments.of(IN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(508., 509.), shuntCompensator, false),
+                Arguments.of(IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(3., 4.), shuntCompensator, true),
+                Arguments.of(IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
+                Arguments.of(IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(3., 4.), shuntCompensator, true),
+                Arguments.of(IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(4., 6.), shuntCompensator, false),
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 14.0), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.NOMINAL_VOLTAGE, null, Set.of(12.0, 13.0, 14.0), shuntCompensator, false),
+
+                // Shunt Compensator Fields
+                Arguments.of(NOT_IN, FieldType.MAXIMUM_SECTION_COUNT, null, Set.of(2., 4.), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.MAXIMUM_SECTION_COUNT, null, Set.of(2., 3., 4.), shuntCompensator, false),
+                Arguments.of(NOT_IN, FieldType.SECTION_COUNT, null, Set.of(2., 4.), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.SECTION_COUNT, null, Set.of(2., 3., 4.), shuntCompensator, false),
+
+                Arguments.of(NOT_IN, FieldType.MAX_Q_AT_NOMINAL_V, null, Set.of(506., 508.), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.MAX_Q_AT_NOMINAL_V, null, Set.of(507., 509.), shuntCompensator, false),
+                Arguments.of(NOT_IN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(506., 508.), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.SWITCHED_ON_Q_AT_NOMINAL_V, null, Set.of(507., 509.), shuntCompensator, false),
+                Arguments.of(NOT_IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(6., 4.), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.MAX_SUSCEPTANCE, null, Set.of(3., 6.), shuntCompensator, false),
+                Arguments.of(NOT_IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(6., 4.), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.SWITCHED_ON_SUSCEPTANCE, null, Set.of(3., 6.), shuntCompensator, false)
         );
     }
 

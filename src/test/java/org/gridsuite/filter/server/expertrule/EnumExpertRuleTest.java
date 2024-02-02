@@ -44,6 +44,9 @@ class EnumExpertRuleTest {
         Load load = Mockito.mock(Load.class);
         Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
 
+        ShuntCompensator shuntCompensator = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+
         Bus bus = Mockito.mock(Bus.class);
         Mockito.when(bus.getType()).thenReturn(IdentifiableType.BUS);
 
@@ -62,6 +65,7 @@ class EnumExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.P0, generator, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, load, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, shuntCompensator, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, battery, PowsyblException.class),
@@ -77,6 +81,7 @@ class EnumExpertRuleTest {
         "provideArgumentsForGeneratorTest",
         "provideArgumentsForLoadTest",
         "provideArgumentsForBusTest",
+        "provideArgumentsForShuntCompensatorTest",
         "provideArgumentsForBusBarSectionTest",
         "provideArgumentsForBatteryTest",
         "provideArgumentsForVoltageLevelTest",
@@ -240,6 +245,86 @@ class EnumExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), busbarSection, true),
                 Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), busbarSection, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForShuntCompensatorTest() {
+
+        ShuntCompensator shuntCompensator = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+
+        Mockito.when(shuntCompensator.getModel(ShuntCompensatorLinearModel.class)).thenReturn(new ShuntCompensatorLinearModel() {
+            @Override
+            public double getBPerSection() {
+                return -1.;
+            }
+
+            @Override
+            public ShuntCompensatorLinearModel setBPerSection(double v) {
+                return null;
+            }
+
+            @Override
+            public double getGPerSection() {
+                return 0;
+            }
+
+            @Override
+            public ShuntCompensatorLinearModel setGPerSection(double v) {
+                return null;
+            }
+
+            @Override
+            public ShuntCompensatorLinearModel setMaximumSectionCount(int i) {
+                return null;
+            }
+        });
+
+        // VoltageLevel fields
+        Substation substation = Mockito.mock(Substation.class);
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getSubstation()).thenReturn(Optional.of(substation));
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(shuntCompensator.getTerminal()).thenReturn(terminal);
+        Mockito.when(substation.getCountry()).thenReturn(Optional.of(Country.FR));
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, shuntCompensator, false),
+
+                // Shunt Compensator fields
+                Arguments.of(EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "REACTOR", null, shuntCompensator, true),
+                Arguments.of(EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "CAPACITOR", null, shuntCompensator, false),
+
+                // --- NOT_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, shuntCompensator, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, shuntCompensator, false),
+
+                // Shunt Compensator fields
+                Arguments.of(NOT_EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "CAPACITOR", null, shuntCompensator, true),
+                Arguments.of(NOT_EQUALS, FieldType.SHUNT_COMPENSATOR_TYPE, "REACTOR", null, shuntCompensator, false),
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), shuntCompensator, true),
+                Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), shuntCompensator, false),
+
+                // Shunt Compensator fields
+                Arguments.of(IN, FieldType.SHUNT_COMPENSATOR_TYPE, null, Set.of("REACTOR"), shuntCompensator, true),
+                Arguments.of(IN, FieldType.SHUNT_COMPENSATOR_TYPE, null, Set.of("CAPACITOR"), shuntCompensator, false),
+
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), shuntCompensator, false),
+
+                // Shunt Compensator fields
+                Arguments.of(NOT_IN, FieldType.SHUNT_COMPENSATOR_TYPE, null, Set.of("CAPACITOR"), shuntCompensator, true),
+                Arguments.of(NOT_IN, FieldType.SHUNT_COMPENSATOR_TYPE, null, Set.of("REACTOR"), shuntCompensator, false)
         );
     }
 
