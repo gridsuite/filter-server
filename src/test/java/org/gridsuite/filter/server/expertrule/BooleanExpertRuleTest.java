@@ -67,7 +67,12 @@ class BooleanExpertRuleTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"provideArgumentsForGeneratorTest", "provideArgumentsForShuntCompensatorTest", "provideArgumentsForBatteryTest", "provideArgumentsForLinesTest"
+    @MethodSource({
+        "provideArgumentsForGeneratorTest",
+        "provideArgumentsForShuntCompensatorTest",
+        "provideArgumentsForBatteryTest",
+        "provideArgumentsForLinesTest",
+        "provideArgumentsForLoadTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, boolean value, Identifiable<?> equipment, boolean expected) {
         BooleanExpertRule rule = BooleanExpertRule.builder().operator(operator).field(field).value(value).build();
@@ -98,6 +103,28 @@ class BooleanExpertRuleTest {
                 //Generator fields
                 Arguments.of(NOT_EQUALS, FieldType.VOLTAGE_REGULATOR_ON, false, gen, true),
                 Arguments.of(NOT_EQUALS, FieldType.VOLTAGE_REGULATOR_ON, true, gen, false),
+                // Terminal fields
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, gen, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, gen, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForLoadTest() {
+
+        Load gen = Mockito.mock(Load.class);
+        Mockito.when(gen.getType()).thenReturn(IdentifiableType.LOAD);
+        // Terminal fields
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.isConnected()).thenReturn(true);
+        Mockito.when(gen.getTerminal()).thenReturn(terminal);
+
+        return Stream.of(
+                // --- EQUALS--- //
+                // Terminal fields
+                Arguments.of(EQUALS, FieldType.CONNECTED, true, gen, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED, false, gen, false),
+
+                // --- NOT_EQUALS--- //
                 // Terminal fields
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, gen, true),
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, gen, false)
