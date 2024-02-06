@@ -71,10 +71,10 @@ public final class ExpertFilterUtils {
                 NOMINAL_VOLTAGE_2 -> getVoltageLevelFieldValue(field, line.getTerminal(TwoSides.TWO).getVoltageLevel());
             case SERIE_RESISTANCE -> String.valueOf(line.getR());
             case SERIE_REACTANCE -> String.valueOf(line.getX());
-            case SHUNT_CONDUCTANCE_1 -> String.valueOf(line.getG1());
-            case SHUNT_CONDUCTANCE_2 -> String.valueOf(line.getG2());
-            case SHUNT_SUSCEPTANCE_1 -> String.valueOf(line.getB1());
-            case SHUNT_SUSCEPTANCE_2 -> String.valueOf(line.getB2());
+            case SHUNT_CONDUCTANCE_1 -> String.valueOf(line.getG1() * 1e6);
+            case SHUNT_CONDUCTANCE_2 -> String.valueOf(line.getG2() * 1e6);
+            case SHUNT_SUSCEPTANCE_1 -> String.valueOf(line.getB1() * 1e6);
+            case SHUNT_SUSCEPTANCE_2 -> String.valueOf(line.getB2() * 1e6);
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + line.getType() + "]");
         };
     }
