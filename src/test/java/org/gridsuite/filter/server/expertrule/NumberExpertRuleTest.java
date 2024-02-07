@@ -949,10 +949,10 @@ class NumberExpertRuleTest {
 
         Mockito.when(line.getR()).thenReturn(150.);
         Mockito.when(line.getX()).thenReturn(50.);
-        Mockito.when(line.getG1()).thenReturn(10.e-6);
-        Mockito.when(line.getG2()).thenReturn(5.e-6);
-        Mockito.when(line.getB1()).thenReturn(200.e-6);
-        Mockito.when(line.getB2()).thenReturn(250.e-6);
+        Mockito.when(line.getG1()).thenReturn(10.);
+        Mockito.when(line.getG2()).thenReturn(5.);
+        Mockito.when(line.getB1()).thenReturn(200.);
+        Mockito.when(line.getB2()).thenReturn(250.);
 
         // VoltageLevel fields
         VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
