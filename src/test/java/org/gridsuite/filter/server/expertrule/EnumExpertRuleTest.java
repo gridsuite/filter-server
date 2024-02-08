@@ -85,7 +85,8 @@ class EnumExpertRuleTest {
         "provideArgumentsForBusBarSectionTest",
         "provideArgumentsForBatteryTest",
         "provideArgumentsForVoltageLevelTest",
-        "provideArgumentsForSubstationTest"
+        "provideArgumentsForSubstationTest",
+        "provideArgumentsForLinesTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         EnumExpertRule rule = EnumExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -413,6 +414,60 @@ class EnumExpertRuleTest {
             // --- NOT_IN --- //
             Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), substation, true),
             Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), substation, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForLinesTest() {
+
+        Line line = Mockito.mock(Line.class);
+        Mockito.when(line.getType()).thenReturn(IdentifiableType.LINE);
+        // VoltageLevel fields
+        Substation substation1 = Mockito.mock(Substation.class);
+        Substation substation2 = Mockito.mock(Substation.class);
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        VoltageLevel voltageLevel2 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Terminal terminal2 = Mockito.mock(Terminal.class);
+
+        Mockito.when(voltageLevel1.getSubstation()).thenReturn(Optional.of(substation1));
+        Mockito.when(voltageLevel2.getSubstation()).thenReturn(Optional.of(substation2));
+
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(line.getTerminal(TwoSides.ONE)).thenReturn(terminal1);
+        Mockito.when(substation1.getCountry()).thenReturn(Optional.of(Country.FR));
+
+        Mockito.when(terminal2.getVoltageLevel()).thenReturn(voltageLevel2);
+        Mockito.when(line.getTerminal(TwoSides.TWO)).thenReturn(terminal2);
+        Mockito.when(substation2.getCountry()).thenReturn(Optional.of(Country.SM));
+
+        return Stream.of(
+                // --- EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(EQUALS, FieldType.COUNTRY_1, Country.FR.name(), null, line, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY_1, Country.DE.name(), null, line, false),
+                Arguments.of(EQUALS, FieldType.COUNTRY_2, Country.SM.name(), null, line, true),
+                Arguments.of(EQUALS, FieldType.COUNTRY_2, Country.LI.name(), null, line, false),
+
+                // --- NOT_EQUALS --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY_1, Country.DE.name(), null, line, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY_1, Country.FR.name(), null, line, false),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY_2, Country.LI.name(), null, line, true),
+                Arguments.of(NOT_EQUALS, FieldType.COUNTRY_2, Country.SM.name(), null, line, false),
+
+                // --- IN --- //
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.COUNTRY_1, null, Set.of(Country.FR.name(), Country.DE.name()), line, true),
+                Arguments.of(IN, FieldType.COUNTRY_1, null, Set.of(Country.BE.name(), Country.DE.name()), line, false),
+                Arguments.of(IN, FieldType.COUNTRY_2, null, Set.of(Country.SM.name(), Country.FO.name()), line, true),
+                Arguments.of(IN, FieldType.COUNTRY_2, null, Set.of(Country.LI.name(), Country.MC.name()), line, false),
+
+                // --- NOT_IN --- //
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.COUNTRY_1, null, Set.of(Country.BE.name(), Country.DE.name()), line, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY_1, null, Set.of(Country.FR.name(), Country.DE.name()), line, false),
+                Arguments.of(NOT_IN, FieldType.COUNTRY_2, null, Set.of(Country.LI.name(), Country.MC.name()), line, true),
+                Arguments.of(NOT_IN, FieldType.COUNTRY_2, null, Set.of(Country.SM.name(), Country.FO.name()), line, false)
         );
     }
 }
