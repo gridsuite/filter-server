@@ -433,8 +433,7 @@ public class FilterService {
     }
 
     private List<Identifiable<?>> getLineList(Network network, AbstractFilter filter) {
-        if (filter instanceof CriteriaFilter) {
-            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+        if (filter instanceof CriteriaFilter criteriaFilter) {
             LineFilter lineFilter = (LineFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getLineStream()
                 .filter(line -> equipmentIdFilter(line, lineFilter.getEquipmentID()))
@@ -445,11 +444,16 @@ public class FilterService {
                 .filter(line -> substationNameFilter(line.getTerminal1(), lineFilter.getSubstationName1()) &&
                                 substationNameFilter(line.getTerminal2(), lineFilter.getSubstationName2()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof IdentifierListFilter) {
-            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
+        } else if (filter instanceof IdentifierListFilter identifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds(identifierListFilter);
             return network.getLineStream()
                 .filter(line -> equipmentIds.contains(line.getId()))
                 .collect(Collectors.toList());
+        } else if (filter instanceof ExpertFilter expertFilter) {
+            var rule = expertFilter.getRules();
+            return network.getLineStream()
+                    .filter(rule::evaluateRule)
+                    .collect(Collectors.toList());
         } else {
             return List.of();
         }
