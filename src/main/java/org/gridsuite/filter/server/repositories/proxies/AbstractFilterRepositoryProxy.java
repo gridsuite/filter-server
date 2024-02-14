@@ -143,10 +143,9 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     public void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, CriteriaFilter dto) {
         buildGenericFilter(builder, dto);
-        if (!(dto.getEquipmentFilterForm() instanceof AbstractInjectionFilter)) {
+        if (!(dto.getEquipmentFilterForm() instanceof AbstractInjectionFilter injectionFilter)) {
             throw new PowsyblException(WRONG_FILTER_TYPE);
         }
-        AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) dto.getEquipmentFilterForm();
         builder.substationName(injectionFilter.getSubstationName())
             .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
             .substationFreeProperties(convert(injectionFilter.getSubstationFreeProperties()))
