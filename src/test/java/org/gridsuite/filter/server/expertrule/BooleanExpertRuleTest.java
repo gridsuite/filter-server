@@ -42,6 +42,9 @@ class BooleanExpertRuleTest {
         Load load = Mockito.mock(Load.class);
         Mockito.when(load.getType()).thenReturn(IdentifiableType.LOAD);
 
+        ShuntCompensator shuntCompensator = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(shuntCompensator.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+
         Bus bus = Mockito.mock(Bus.class);
         Mockito.when(bus.getType()).thenReturn(IdentifiableType.BUS);
 
@@ -54,6 +57,7 @@ class BooleanExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.RATED_S, voltageLevel, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.P0, generator, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, load, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.RATED_S, shuntCompensator, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
 
@@ -63,7 +67,12 @@ class BooleanExpertRuleTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"provideArgumentsForGeneratorTest", "provideArgumentsForBatteryTest"
+    @MethodSource({
+        "provideArgumentsForGeneratorTest",
+        "provideArgumentsForShuntCompensatorTest",
+        "provideArgumentsForBatteryTest",
+        "provideArgumentsForLinesTest",
+        "provideArgumentsForLoadTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, boolean value, Identifiable<?> equipment, boolean expected) {
         BooleanExpertRule rule = BooleanExpertRule.builder().operator(operator).field(field).value(value).build();
@@ -100,6 +109,50 @@ class BooleanExpertRuleTest {
         );
     }
 
+    private static Stream<Arguments> provideArgumentsForLoadTest() {
+
+        Load gen = Mockito.mock(Load.class);
+        Mockito.when(gen.getType()).thenReturn(IdentifiableType.LOAD);
+        // Terminal fields
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.isConnected()).thenReturn(true);
+        Mockito.when(gen.getTerminal()).thenReturn(terminal);
+
+        return Stream.of(
+                // --- EQUALS--- //
+                // Terminal fields
+                Arguments.of(EQUALS, FieldType.CONNECTED, true, gen, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED, false, gen, false),
+
+                // --- NOT_EQUALS--- //
+                // Terminal fields
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, gen, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, gen, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForShuntCompensatorTest() {
+
+        ShuntCompensator gen = Mockito.mock(ShuntCompensator.class);
+        Mockito.when(gen.getType()).thenReturn(IdentifiableType.SHUNT_COMPENSATOR);
+        // Terminal fields
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.isConnected()).thenReturn(true);
+        Mockito.when(gen.getTerminal()).thenReturn(terminal);
+
+        return Stream.of(
+                // --- EQUALS--- //
+                // Terminal fields
+                Arguments.of(EQUALS, FieldType.CONNECTED, true, gen, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED, false, gen, false),
+
+                // --- NOT_EQUALS--- //
+                // Terminal fields
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, gen, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, gen, false)
+        );
+    }
+
     private static Stream<Arguments> provideArgumentsForBatteryTest() {
 
         Battery battery = Mockito.mock(Battery.class);
@@ -119,6 +172,36 @@ class BooleanExpertRuleTest {
                 // Terminal fields
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED, false, battery, true),
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED, true, battery, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForLinesTest() {
+
+        Line line = Mockito.mock(Line.class);
+        Mockito.when(line.getType()).thenReturn(IdentifiableType.LINE);
+        // Terminal fields
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.isConnected()).thenReturn(true);
+        Mockito.when(line.getTerminal(TwoSides.ONE)).thenReturn(terminal1);
+
+        Terminal terminal2 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal2.isConnected()).thenReturn(true);
+        Mockito.when(line.getTerminal(TwoSides.TWO)).thenReturn(terminal2);
+
+        return Stream.of(
+                // --- EQUALS--- //
+                // Terminal fields
+                Arguments.of(EQUALS, FieldType.CONNECTED_1, true, line, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED_1, false, line, false),
+                Arguments.of(EQUALS, FieldType.CONNECTED_2, true, line, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED_2, false, line, false),
+
+                // --- NOT_EQUALS--- //
+                // Terminal fields
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_1, false, line, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_1, true, line, false),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_2, false, line, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_2, true, line, false)
         );
     }
 }

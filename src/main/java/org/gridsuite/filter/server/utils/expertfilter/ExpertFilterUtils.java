@@ -28,8 +28,10 @@ public final class ExpertFilterUtils {
             case NAME -> identifiable.getNameOrId();
             default -> switch (identifiable.getType()) {
                 case VOLTAGE_LEVEL -> getVoltageLevelFieldValue(field, (VoltageLevel) identifiable);
+                case LINE -> getLineFieldValue(field, (Line) identifiable);
                 case GENERATOR -> getGeneratorFieldValue(field, (Generator) identifiable);
                 case LOAD -> getLoadFieldValue(field, (Load) identifiable);
+                case SHUNT_COMPENSATOR -> getShuntCompensatorFieldValue(field, (ShuntCompensator) identifiable);
                 case BUS -> getBusFieldValue(field, (Bus) identifiable);
                 case BUSBAR_SECTION -> getBusBarSectionFieldValue(field, (BusbarSection) identifiable);
                 case BATTERY -> getBatteryFieldValue(field, (Battery) identifiable);
@@ -41,13 +43,39 @@ public final class ExpertFilterUtils {
 
     private static String getVoltageLevelFieldValue(FieldType field, VoltageLevel voltageLevel) {
         return switch (field) {
-            case COUNTRY ->
-                voltageLevel.getSubstation().flatMap(Substation::getCountry).map(String::valueOf).orElse(null);
-            case NOMINAL_VOLTAGE -> String.valueOf(voltageLevel.getNominalV());
-            case VOLTAGE_LEVEL_ID -> voltageLevel.getId();
+            case COUNTRY,
+                COUNTRY_1,
+                COUNTRY_2 ->
+                    voltageLevel.getSubstation().flatMap(Substation::getCountry).map(String::valueOf).orElse(null);
+            case NOMINAL_VOLTAGE,
+                NOMINAL_VOLTAGE_1,
+                NOMINAL_VOLTAGE_2 -> String.valueOf(voltageLevel.getNominalV());
+            case VOLTAGE_LEVEL_ID,
+                VOLTAGE_LEVEL_ID_1,
+                VOLTAGE_LEVEL_ID_2 -> voltageLevel.getId();
             case LOW_VOLTAGE_LIMIT -> String.valueOf(voltageLevel.getLowVoltageLimit());
             case HIGH_VOLTAGE_LIMIT -> String.valueOf(voltageLevel.getHighVoltageLimit());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + voltageLevel.getType() + "]");
+        };
+    }
+
+    private static String getLineFieldValue(FieldType field, Line line) {
+        return switch (field) {
+            case CONNECTED_1 -> getTerminalFieldValue(field, line.getTerminal(TwoSides.ONE));
+            case CONNECTED_2 -> getTerminalFieldValue(field, line.getTerminal(TwoSides.TWO));
+            case COUNTRY_1,
+                VOLTAGE_LEVEL_ID_1,
+                NOMINAL_VOLTAGE_1 -> getVoltageLevelFieldValue(field, line.getTerminal(TwoSides.ONE).getVoltageLevel());
+            case COUNTRY_2,
+                VOLTAGE_LEVEL_ID_2,
+                NOMINAL_VOLTAGE_2 -> getVoltageLevelFieldValue(field, line.getTerminal(TwoSides.TWO).getVoltageLevel());
+            case SERIE_RESISTANCE -> String.valueOf(line.getR());
+            case SERIE_REACTANCE -> String.valueOf(line.getX());
+            case SHUNT_CONDUCTANCE_1 -> String.valueOf(line.getG1());
+            case SHUNT_CONDUCTANCE_2 -> String.valueOf(line.getG2());
+            case SHUNT_SUSCEPTANCE_1 -> String.valueOf(line.getB1());
+            case SHUNT_SUSCEPTANCE_2 -> String.valueOf(line.getB2());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + line.getType() + "]");
         };
     }
 
@@ -58,8 +86,26 @@ public final class ExpertFilterUtils {
                 VOLTAGE_LEVEL_ID -> getVoltageLevelFieldValue(field, load.getTerminal().getVoltageLevel());
             case P0 -> String.valueOf(load.getP0());
             case Q0 -> String.valueOf(load.getQ0());
+            case CONNECTED -> getTerminalFieldValue(field, load.getTerminal());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + load.getType() + "]");
 
+        };
+    }
+
+    private static String getShuntCompensatorFieldValue(FieldType field, ShuntCompensator shuntCompensator) {
+        return switch (field) {
+            case VOLTAGE_LEVEL_ID,
+                COUNTRY,
+                NOMINAL_VOLTAGE -> getVoltageLevelFieldValue(field, shuntCompensator.getTerminal().getVoltageLevel());
+            case MAXIMUM_SECTION_COUNT -> String.valueOf(shuntCompensator.getMaximumSectionCount());
+            case SECTION_COUNT -> String.valueOf(shuntCompensator.getSectionCount());
+            case SHUNT_COMPENSATOR_TYPE,
+                MAX_Q_AT_NOMINAL_V,
+                SWITCHED_ON_Q_AT_NOMINAL_V,
+                MAX_SUSCEPTANCE,
+                SWITCHED_ON_SUSCEPTANCE -> getSectionBasedFieldValue(field, shuntCompensator);
+            case CONNECTED -> getTerminalFieldValue(field, shuntCompensator.getTerminal());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + shuntCompensator.getType() + "]");
         };
     }
 
@@ -123,8 +169,24 @@ public final class ExpertFilterUtils {
 
     private static String getTerminalFieldValue(FieldType field, Terminal terminal) {
         return switch (field) {
-            case CONNECTED -> String.valueOf(terminal.isConnected());
+            case CONNECTED,
+                CONNECTED_1,
+                CONNECTED_2 -> String.valueOf(terminal.isConnected());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + ",terminal]");
+        };
+    }
+
+    private static String getSectionBasedFieldValue(FieldType field, ShuntCompensator shuntCompensator) {
+        double susceptancePerSection = shuntCompensator.getModel(ShuntCompensatorLinearModel.class).getBPerSection();
+        double qAtNominalV = Math.pow(shuntCompensator.getTerminal().getVoltageLevel().getNominalV(), 2) * Math.abs(susceptancePerSection);
+
+        return switch (field) {
+            case SHUNT_COMPENSATOR_TYPE -> susceptancePerSection > 0 ? "CAPACITOR" : "REACTOR";
+            case MAX_Q_AT_NOMINAL_V -> String.valueOf(qAtNominalV * shuntCompensator.getMaximumSectionCount());
+            case SWITCHED_ON_Q_AT_NOMINAL_V -> String.valueOf(qAtNominalV * shuntCompensator.getSectionCount());
+            case MAX_SUSCEPTANCE -> String.valueOf(susceptancePerSection * shuntCompensator.getMaximumSectionCount());
+            case SWITCHED_ON_SUSCEPTANCE -> String.valueOf(susceptancePerSection * shuntCompensator.getSectionCount());
+            default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + shuntCompensator.getType() + "]");
         };
     }
 
