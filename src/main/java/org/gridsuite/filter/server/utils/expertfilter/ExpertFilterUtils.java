@@ -232,15 +232,15 @@ public final class ExpertFilterUtils {
             case COUNTRY -> twoWindingsTransformer.getSubstation().flatMap(Substation::getCountry).map(String::valueOf).orElse(null);
             case CONNECTED_1 -> String.valueOf(twoWindingsTransformer.getTerminal1().isConnected());
             case CONNECTED_2 -> String.valueOf(twoWindingsTransformer.getTerminal2().isConnected());
-            case NOMINAL_V_1 -> String.valueOf(twoWindingsTransformer.getTerminal1().getVoltageLevel().getNominalV());
-            case NOMINAL_V_2 -> String.valueOf(twoWindingsTransformer.getTerminal2().getVoltageLevel().getNominalV());
+            case NOMINAL_VOLTAGE_1 -> String.valueOf(twoWindingsTransformer.getTerminal1().getVoltageLevel().getNominalV());
+            case NOMINAL_VOLTAGE_2 -> String.valueOf(twoWindingsTransformer.getTerminal2().getVoltageLevel().getNominalV());
             case VOLTAGE_LEVEL_ID_1 -> twoWindingsTransformer.getTerminal1().getVoltageLevel().getId();
             case VOLTAGE_LEVEL_ID_2 -> twoWindingsTransformer.getTerminal2().getVoltageLevel().getId();
             case RATED_S -> String.valueOf(twoWindingsTransformer.getRatedS());
-            case R -> String.valueOf(twoWindingsTransformer.getR());
-            case X -> String.valueOf(twoWindingsTransformer.getX());
-            case G -> String.valueOf(twoWindingsTransformer.getG());
-            case B -> String.valueOf(twoWindingsTransformer.getB());
+            case SERIE_RESISTANCE -> String.valueOf(twoWindingsTransformer.getR());
+            case SERIE_REACTANCE -> String.valueOf(twoWindingsTransformer.getX());
+            case MAGNETIZING_CONDUCTANCE -> String.valueOf(twoWindingsTransformer.getG());
+            case MAGNETIZING_SUSCEPTANCE -> String.valueOf(twoWindingsTransformer.getB());
             case RATIO_REGULATING,
                 RATIO_TARGET_V,
                 LOAD_TAP_CHANGING_CAPABILITIES -> getRatioTapChangerFieldValue(field, twoWindingsTransformer.getRatioTapChanger());
