@@ -41,8 +41,8 @@ public class SubstationFilterEntity extends AbstractGenericFilterEntity {
     Set<String> countries;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "substationFreeProperties_id",
+    @JoinColumn(name = "freeProperties_id",
         referencedColumnName = "id",
         foreignKey = @ForeignKey)
-    FreePropertiesFilterEntity substationFreeProperties;
+    FreePropertiesFilterEntity freeProperties;
 }

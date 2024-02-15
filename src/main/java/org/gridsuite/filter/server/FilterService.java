@@ -260,6 +260,10 @@ public class FilterService {
         return FiltersUtils.matchesFreeProps(propertiesWithValues, substation);
     }
 
+    private boolean freePropertiesFilter(Identifiable<?> identifiable, Map<String, List<String>> propertiesWithValues) {
+        return FiltersUtils.matchesFreeProps(propertiesWithValues, identifiable);
+    }
+
     private boolean equipmentIdFilter(Identifiable<?> identifiable, String equipmentId) {
         return equipmentId == null || identifiable.getId().equals(equipmentId);
     }
@@ -305,10 +309,11 @@ public class FilterService {
             return stream
                     .filter(injection -> equipmentIdFilter(injection, injectionFilter.getEquipmentID()))
                     .filter(injection -> equipmentNameFilter(injection, injectionFilter.getEquipmentName()))
+                    .filter(injection -> freePropertiesFilter(injection, injectionFilter.getFreeProperties()))
                     .filter(injection -> filterByVoltage(injection.getTerminal().getVoltageLevel().getNominalV(), injectionFilter.getNominalVoltage()))
                     .filter(injection -> countryFilter(injection.getTerminal(), injectionFilter.getCountries()))
                     .filter(injection -> substationNameFilter(injection.getTerminal(), injectionFilter.getSubstationName()))
-                    .filter(injection -> freePropertiesFilter(injection.getTerminal(), injectionFilter.getFreeProperties()));
+                    .filter(injection -> freePropertiesFilter(injection.getTerminal(), injectionFilter.getSubstationFreeProperties()));
         } else if (filter instanceof IdentifierListFilter) {
             List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
@@ -469,8 +474,8 @@ public class FilterService {
                 .filter(twoWindingsTransformer -> filterByVoltages(twoWindingsTransformer, twoWindingsTransformerFilter.getNominalVoltage1(), twoWindingsTransformerFilter.getNominalVoltage2()))
                 .filter(twoWindingsTransformer -> countryFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getCountries()) ||
                                                   countryFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getCountries()))
-                .filter(twoWindingsTransformer -> freePropertiesFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getFreeProperties()) ||
-                    freePropertiesFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getFreeProperties()))
+                .filter(twoWindingsTransformer -> freePropertiesFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getSubstationFreeProperties()) ||
+                    freePropertiesFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getSubstationFreeProperties()))
                 .filter(twoWindingsTransformer -> substationNameFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getSubstationName()) ||
                                                   substationNameFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getSubstationName()))
                 .collect(Collectors.toList());
@@ -496,9 +501,9 @@ public class FilterService {
                 .filter(threeWindingsTransformer -> countryFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
                                                     countryFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getCountries()) ||
                                                     countryFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getCountries()))
-                .filter(threeWindingsTransformer -> freePropertiesFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getFreeProperties()) ||
-                                                    freePropertiesFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getFreeProperties()) ||
-                                                    freePropertiesFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getFreeProperties()))
+                .filter(threeWindingsTransformer -> freePropertiesFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getSubstationFreeProperties()) ||
+                                                    freePropertiesFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getSubstationFreeProperties()) ||
+                                                    freePropertiesFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getSubstationFreeProperties()))
                 .filter(threeWindingsTransformer -> substationNameFilter(threeWindingsTransformer.getLeg1().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
                                                     substationNameFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
                                                     substationNameFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getSubstationName()))
@@ -546,7 +551,7 @@ public class FilterService {
                 .filter(voltageLevel -> equipmentNameFilter(voltageLevel, voltageLevelFilter.getEquipmentName()))
                 .filter(voltageLevel -> filterByVoltage(voltageLevel, voltageLevelFilter.getNominalVoltage()))
                 .filter(voltageLevel -> countryFilter(voltageLevel, voltageLevelFilter.getCountries()))
-                .filter(voltageLevel -> freePropertiesFilter(voltageLevel.getNullableSubstation(), voltageLevelFilter.getFreeProperties()))
+                .filter(voltageLevel -> freePropertiesFilter(voltageLevel.getNullableSubstation(), voltageLevelFilter.getSubstationFreeProperties()))
                 .collect(Collectors.toList());
         } else if (filter instanceof IdentifierListFilter) {
             List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);

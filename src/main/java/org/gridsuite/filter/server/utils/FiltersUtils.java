@@ -70,6 +70,16 @@ public final class FiltersUtils {
         return freeProperties.entrySet().stream().allMatch(p -> p.getValue().contains(substation.getProperty(p.getKey())));
     }
 
+    public static boolean matchesFreeProps(Map<String, List<String>> freeProperties, Identifiable<?> identifiable) {
+        if (identifiable == null) {
+            return CollectionUtils.isEmpty(freeProperties);
+        }
+        if (CollectionUtils.isEmpty(freeProperties)) {
+            return true;
+        }
+        return freeProperties.entrySet().stream().allMatch(p -> p.getValue().contains(identifiable.getProperty(p.getKey())));
+    }
+
     public static boolean isEqualityNominalVoltage(Terminal terminal, Double value) {
         return isEqualityNominalVoltage(terminal.getVoltageLevel(), value);
     }

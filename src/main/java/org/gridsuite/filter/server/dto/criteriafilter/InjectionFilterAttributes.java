@@ -30,6 +30,9 @@ public class InjectionFilterAttributes {
     @Schema(description = "Countries")
     private SortedSet<String> countries;
 
+    @Schema(description = "Substation free properties")
+    private Map<String, List<String>> substationFreeProperties;
+
     @Schema(description = "Free properties")
     private Map<String, List<String>> freeProperties;
 

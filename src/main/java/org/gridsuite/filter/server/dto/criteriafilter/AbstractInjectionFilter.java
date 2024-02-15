@@ -35,8 +35,12 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
     @Schema(description = "Countries")
     private SortedSet<String> countries;
 
-    @Schema(description = "Free properties")
+    @Schema(description = "Substation free properties")
     // LinkedHashMap to keep order too
+    @JsonDeserialize(as = LinkedHashMap.class)
+    private Map<String, List<String>> substationFreeProperties;
+
+    @Schema(description = "Free properties")
     @JsonDeserialize(as = LinkedHashMap.class)
     private Map<String, List<String>> freeProperties;
 
@@ -47,6 +51,7 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
         super(injectionFilterAttributes.getEquipmentID(), injectionFilterAttributes.getEquipmentName());
         this.substationName = injectionFilterAttributes.getSubstationName();
         this.countries = injectionFilterAttributes.getCountries();
+        this.substationFreeProperties = injectionFilterAttributes.getSubstationFreeProperties();
         this.freeProperties = injectionFilterAttributes.getFreeProperties();
         this.nominalVoltage = injectionFilterAttributes.getNominalVoltage();
     }
@@ -57,6 +62,6 @@ public abstract class AbstractInjectionFilter extends AbstractEquipmentFilterFor
             && substationName == null
             && CollectionUtils.isEmpty(countries)
             && nominalVoltage == null
-            && CollectionUtils.isEmpty(freeProperties);
+            && CollectionUtils.isEmpty(substationFreeProperties);
     }
 }

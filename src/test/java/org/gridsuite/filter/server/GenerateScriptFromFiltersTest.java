@@ -8,21 +8,18 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.iidm.network.EnergySource;
 
+import com.powsybl.iidm.network.Identifiable;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.gridsuite.filter.server.dto.criteriafilter.*;
+import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.gridsuite.filter.server.utils.RangeType;
 import org.junit.Test;
 
 import java.sql.Date;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -158,6 +155,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentName("genName1")
                     .substationName("s1")
                     .countries(new TreeSet<>(countries))
+                    .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .freeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(225.).value2(250.).build())
                     .energySource(EnergySource.HYDRO)
@@ -192,6 +190,8 @@ public class GenerateScriptFromFiltersTest {
     public void generateScriptLoadFilterTest() {
         LinkedHashSet<String> countries = new LinkedHashSet<>();
         countries.add("IT");
+        LinkedMap<String, List<String>> properties = new LinkedMap<>(Map.of("region", List.of("north")));
+        assertFalse(FiltersUtils.matchesFreeProps(properties, (Identifiable<?>) null));
 
         assertEquals("import org.gridsuite.filter.server.utils.FiltersUtils;\n" +
             "\n" +
@@ -212,7 +212,8 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentName("loadName1")
                     .substationName("s3")
                     .countries(new TreeSet<>(countries))
-                    .freeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
+                    .substationFreeProperties(properties)
+                    .freeProperties(properties)
                     .build()))
         );
     }
@@ -261,6 +262,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentID("staticVarCompensatorId1")
                     .substationName("s4")
                     .countries(new TreeSet<>(countries))
+                    .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .freeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .build()))
         );
@@ -328,6 +330,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentName("danglingName1")
                     .substationName("s3")
                     .countries(new TreeSet<>(countries))
+                    .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .freeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(360.).value2(400.).build())
                     .build()))
@@ -357,6 +360,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentID("lccId1")
                     .equipmentName("lccName1")
                     .countries(new TreeSet<>(countries))
+                    .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .freeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .build()))
         );
@@ -384,6 +388,7 @@ public class GenerateScriptFromFiltersTest {
                 VscConverterStationFilter.builder()
                     .equipmentID("vscId1")
                     .countries(new TreeSet<>(countries))
+                    .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .freeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .nominalVoltage(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
                     .build()))
@@ -417,6 +422,7 @@ public class GenerateScriptFromFiltersTest {
                     .equipmentName("2wtName1")
                     .substationName("s2")
                     .countries(new TreeSet<>(countries))
+                    .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                     .freeProperties(Map.of("region", List.of("north")))
                     .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
                     .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
@@ -451,6 +457,7 @@ public class GenerateScriptFromFiltersTest {
                 .equipmentName("3wtName1")
                 .substationName("s3")
                 .countries(new TreeSet<>(countries))
+                .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                 .freeProperties(Map.of("region", List.of("north")))
                 .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(210.).value2(230.).build())
                 .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(150.).build())
@@ -523,6 +530,7 @@ public class GenerateScriptFromFiltersTest {
                 .equipmentID("vlId1")
                 .equipmentName("vlName1")
                 .countries(new TreeSet<>(countries))
+                .substationFreeProperties(new LinkedMap<>(Map.of("region", List.of("north"))))
                 .freeProperties(Map.of("region", List.of("north")))
                 .nominalVoltage(NumericalFilter.builder().type(RangeType.RANGE).value1(190.).value2(250.).build())
                 .build()))
