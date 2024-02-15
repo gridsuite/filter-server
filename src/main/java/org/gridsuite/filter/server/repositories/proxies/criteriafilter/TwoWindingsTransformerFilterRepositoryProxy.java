@@ -73,7 +73,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
             .substationName(twoWindingsTransformerFilter.getSubstationName())
             .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))
             .nominalVoltage2(convert(twoWindingsTransformerFilter.getNominalVoltage2()))
-            .substationFreeProperties(convert(twoWindingsTransformerFilter.getFreeProperties()));
+            .substationFreeProperties(convert(twoWindingsTransformerFilter.getSubstationFreeProperties()));
         buildGenericFilter(twoWindingsTransformerFilterEntityBuilder, criteriaFilter);
         return twoWindingsTransformerFilterEntityBuilder.build();
     }

@@ -57,6 +57,7 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
             voltageLevelFilterEntity.getEquipmentId(),
             voltageLevelFilterEntity.getEquipmentName(),
             setToSorterSet(voltageLevelFilterEntity.getCountries()),
+            convert(voltageLevelFilterEntity.getFreeProperties()),
             convert(voltageLevelFilterEntity.getSubstationFreeProperties()),
             convert(voltageLevelFilterEntity.getNominalVoltage())
         );
@@ -68,7 +69,7 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
         VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) criteriaFilter.getEquipmentFilterForm();
         var voltageLevelFilterEntityBuilder = VoltageLevelFilterEntity.builder()
             .countries(voltageLevelFilter.getCountries())
-            .substationFreeProperties(convert(voltageLevelFilter.getFreeProperties()))
+            .substationFreeProperties(convert(voltageLevelFilter.getSubstationFreeProperties()))
             .nominalVoltage(convert(voltageLevelFilter.getNominalVoltage()));
         buildGenericFilter(voltageLevelFilterEntityBuilder, criteriaFilter);
         return voltageLevelFilterEntityBuilder.build();

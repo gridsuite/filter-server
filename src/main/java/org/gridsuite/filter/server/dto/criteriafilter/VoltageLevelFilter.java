@@ -38,6 +38,9 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
     @Schema(description = "Countries")
     private SortedSet<String> countries;
 
+    @Schema(description = "Substation free properties")
+    private Map<String, List<String>> substationFreeProperties;
+
     @Schema(description = "Free properties")
     private Map<String, List<String>> freeProperties;
 
@@ -45,11 +48,12 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
     private NumericalFilter nominalVoltage;
 
     public VoltageLevelFilter(String equipmentID, String equipmentName,
-        SortedSet<String> countries, Map<String, List<String>> freeProperties,
+        SortedSet<String> countries, Map<String, List<String>> freeProperties, Map<String, List<String>> substationFreeProperties,
         NumericalFilter nominalVoltage) {
         super(equipmentID, equipmentName);
         this.countries = countries;
         this.freeProperties = freeProperties;
+        this.substationFreeProperties = substationFreeProperties;
         this.nominalVoltage = nominalVoltage;
     }
 
@@ -57,7 +61,7 @@ public class VoltageLevelFilter extends AbstractEquipmentFilterForm {
     public boolean isEmpty() {
         return super.isEmpty()
             && CollectionUtils.isEmpty(countries)
-            && CollectionUtils.isEmpty(freeProperties)
+            && CollectionUtils.isEmpty(substationFreeProperties)
             && nominalVoltage == null;
     }
 }

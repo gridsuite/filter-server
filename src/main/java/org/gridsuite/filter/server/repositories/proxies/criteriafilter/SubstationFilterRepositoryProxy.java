@@ -57,7 +57,7 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
             substationFilterEntity.getEquipmentId(),
             substationFilterEntity.getEquipmentName(),
             setToSorterSet(substationFilterEntity.getCountries()),
-            convert(substationFilterEntity.getSubstationFreeProperties())
+            convert(substationFilterEntity.getFreeProperties())
         );
     }
 
@@ -67,7 +67,7 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
         SubstationFilter substationFilter = (SubstationFilter) criteriaFilter.getEquipmentFilterForm();
         var substationFilterEntityBuilder = SubstationFilterEntity.builder()
             .countries(substationFilter.getCountries())
-            .substationFreeProperties(convert(substationFilter.getFreeProperties()));
+            .freeProperties(convert(substationFilter.getFreeProperties()));
         buildGenericFilter(substationFilterEntityBuilder, criteriaFilter);
         return substationFilterEntityBuilder.build();
     }
