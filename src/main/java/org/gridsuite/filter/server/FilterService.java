@@ -485,6 +485,11 @@ public class FilterService {
             return network.getTwoWindingsTransformerStream()
                     .filter(twoWindingsTransformer -> equipmentIds.contains(twoWindingsTransformer.getId()))
                     .collect(Collectors.toList());
+        } else if (filter instanceof ExpertFilter expertFilter) {
+            var rule = expertFilter.getRules();
+            return network.getTwoWindingsTransformerStream()
+                .filter(rule::evaluateRule)
+                .collect(Collectors.toList());
         } else {
             return List.of();
         }

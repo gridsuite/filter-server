@@ -55,6 +55,9 @@ class StringExpertRuleTest {
         Battery battery = Mockito.mock(Battery.class);
         Mockito.when(battery.getType()).thenReturn(IdentifiableType.BATTERY);
 
+        TwoWindingsTransformer twoWindingsTransformer = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+
         return Stream.of(
                 // --- Test an unsupported field for each equipment --- //
                 Arguments.of(IS, FieldType.RATED_S, network, PowsyblException.class),
@@ -65,6 +68,7 @@ class StringExpertRuleTest {
                 Arguments.of(IS, FieldType.RATED_S, bus, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, busbarSection, PowsyblException.class),
                 Arguments.of(IS, FieldType.RATED_S, battery, PowsyblException.class),
+                Arguments.of(IS, FieldType.P0, twoWindingsTransformer, PowsyblException.class),
 
                 // --- Test an unsupported operator for this rule type --- //
                 Arguments.of(EQUALS, FieldType.ID, generator, PowsyblException.class)
@@ -79,7 +83,8 @@ class StringExpertRuleTest {
         "provideArgumentsForBusBarSectionTest",
         "provideArgumentsForBatteryTest",
         "provideArgumentsForShuntCompensatorTest",
-        "provideArgumentsForLinesTest"
+        "provideArgumentsForLinesTest",
+        "provideArgumentsForTwoWindingsTransformerTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         StringExpertRule rule = StringExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -784,6 +789,119 @@ class StringExpertRuleTest {
                 // VoltageLevel fields
                 Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL_2", "VL_3"), battery, true),
                 Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID, null, Set.of("VL", "VL_2"), battery, false)
+
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForTwoWindingsTransformerTest() {
+
+        TwoWindingsTransformer twoWindingsTransformer = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+        // Common fields
+        Mockito.when(twoWindingsTransformer.getId()).thenReturn("ID");
+        Mockito.when(twoWindingsTransformer.getNameOrId()).thenReturn("NAME");
+        // VoltageLevel fields
+        VoltageLevel voltageLevel = Mockito.mock(VoltageLevel.class);
+        Mockito.when(voltageLevel.getId()).thenReturn("VL");
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.getVoltageLevel()).thenReturn(voltageLevel);
+        Mockito.when(twoWindingsTransformer.getTerminal1()).thenReturn(terminal);
+        Mockito.when(twoWindingsTransformer.getTerminal2()).thenReturn(terminal);
+
+        // for testing none EXISTS
+        TwoWindingsTransformer twoWindingsTransformer1 = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer1.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+        // VoltageLevel fields
+        VoltageLevel voltageLevel1 = Mockito.mock(VoltageLevel.class);
+        Terminal terminal1 = Mockito.mock(Terminal.class);
+        Mockito.when(terminal1.getVoltageLevel()).thenReturn(voltageLevel1);
+        Mockito.when(twoWindingsTransformer1.getTerminal1()).thenReturn(terminal1);
+        Mockito.when(twoWindingsTransformer1.getTerminal2()).thenReturn(terminal1);
+
+        return Stream.of(
+                // --- IS --- //
+                // Common fields
+                Arguments.of(IS, FieldType.ID, "id", null, twoWindingsTransformer, true),
+                Arguments.of(IS, FieldType.ID, "id_1", null, twoWindingsTransformer, false),
+                Arguments.of(IS, FieldType.NAME, "name", null, twoWindingsTransformer, true),
+                Arguments.of(IS, FieldType.NAME, "name_1", null, twoWindingsTransformer, false),
+                // VoltageLevel fields
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID_1, "vl", null, twoWindingsTransformer, true),
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID_1, "vl_1", null, twoWindingsTransformer, false),
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID_2, "vl", null, twoWindingsTransformer, true),
+                Arguments.of(IS, FieldType.VOLTAGE_LEVEL_ID_2, "vl_1", null, twoWindingsTransformer, false),
+
+                // --- CONTAINS --- //
+                // Common fields
+                Arguments.of(CONTAINS, FieldType.ID, "i", null, twoWindingsTransformer, true),
+                Arguments.of(CONTAINS, FieldType.ID, "ii", null, twoWindingsTransformer, false),
+                Arguments.of(CONTAINS, FieldType.NAME, "nam", null, twoWindingsTransformer, true),
+                Arguments.of(CONTAINS, FieldType.NAME, "namm", null, twoWindingsTransformer, false),
+                // VoltageLevel fields
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID_1, "v", null, twoWindingsTransformer, true),
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID_1, "vv", null, twoWindingsTransformer, false),
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID_2, "v", null, twoWindingsTransformer, true),
+                Arguments.of(CONTAINS, FieldType.VOLTAGE_LEVEL_ID_2, "vv", null, twoWindingsTransformer, false),
+
+                // --- BEGINS_WITH --- //
+                // Common fields
+                Arguments.of(BEGINS_WITH, FieldType.ID, "i", null, twoWindingsTransformer, true),
+                Arguments.of(BEGINS_WITH, FieldType.ID, "j", null, twoWindingsTransformer, false),
+                Arguments.of(BEGINS_WITH, FieldType.NAME, "n", null, twoWindingsTransformer, true),
+                Arguments.of(BEGINS_WITH, FieldType.NAME, "m", null, twoWindingsTransformer, false),
+                // VoltageLevel fields
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID_1, "v", null, twoWindingsTransformer, true),
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID_1, "s", null, twoWindingsTransformer, false),
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID_2, "v", null, twoWindingsTransformer, true),
+                Arguments.of(BEGINS_WITH, FieldType.VOLTAGE_LEVEL_ID_2, "s", null, twoWindingsTransformer, false),
+
+                // --- ENDS_WITH --- //
+                // Common fields
+                Arguments.of(ENDS_WITH, FieldType.ID, "d", null, twoWindingsTransformer, true),
+                Arguments.of(ENDS_WITH, FieldType.ID, "e", null, twoWindingsTransformer, false),
+                Arguments.of(ENDS_WITH, FieldType.NAME, "e", null, twoWindingsTransformer, true),
+                Arguments.of(ENDS_WITH, FieldType.NAME, "f", null, twoWindingsTransformer, false),
+                // VoltageLevel fields
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID_1, "l", null, twoWindingsTransformer, true),
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID_1, "m", null, twoWindingsTransformer, false),
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID_2, "l", null, twoWindingsTransformer, true),
+                Arguments.of(ENDS_WITH, FieldType.VOLTAGE_LEVEL_ID_2, "m", null, twoWindingsTransformer, false),
+
+                // --- EXISTS --- //
+                // Common fields
+                Arguments.of(EXISTS, FieldType.ID, null, null, twoWindingsTransformer, true),
+                Arguments.of(EXISTS, FieldType.ID, null, null, twoWindingsTransformer1, false),
+                Arguments.of(EXISTS, FieldType.NAME, null, null, twoWindingsTransformer, true),
+                Arguments.of(EXISTS, FieldType.NAME, null, null, twoWindingsTransformer1, false),
+                // VoltageLevel fields
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID_1, null, null, twoWindingsTransformer, true),
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID_1, null, null, twoWindingsTransformer1, false),
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID_2, null, null, twoWindingsTransformer, true),
+                Arguments.of(EXISTS, FieldType.VOLTAGE_LEVEL_ID_2, null, null, twoWindingsTransformer1, false),
+
+                // --- IN --- //
+                // Common fields
+                Arguments.of(IN, FieldType.ID, null, Set.of("ID", "ID_2"), twoWindingsTransformer, true),
+                Arguments.of(IN, FieldType.ID, null, Set.of("ID_2", "ID_3"), twoWindingsTransformer, false),
+                Arguments.of(IN, FieldType.NAME, null, Set.of("NAME", "NAME_2"), twoWindingsTransformer, true),
+                Arguments.of(IN, FieldType.NAME, null, Set.of("NAME_2", "NAME_3"), twoWindingsTransformer, false),
+                // VoltageLevel fields
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID_1, null, Set.of("VL", "VL_2"), twoWindingsTransformer, true),
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID_1, null, Set.of("VL_2", "VL_3"), twoWindingsTransformer, false),
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID_2, null, Set.of("VL", "VL_2"), twoWindingsTransformer, true),
+                Arguments.of(IN, FieldType.VOLTAGE_LEVEL_ID_2, null, Set.of("VL_2", "VL_3"), twoWindingsTransformer, false),
+
+                // --- NOT_IN --- //
+                // Common fields
+                Arguments.of(NOT_IN, FieldType.ID, null, Set.of("ID_2", "ID_3"), twoWindingsTransformer, true),
+                Arguments.of(NOT_IN, FieldType.ID, null, Set.of("ID", "ID_2"), twoWindingsTransformer, false),
+                Arguments.of(NOT_IN, FieldType.NAME, null, Set.of("NAME_2", "NAME_3"), twoWindingsTransformer, true),
+                Arguments.of(NOT_IN, FieldType.NAME, null, Set.of("NAME", "NAME_2"), twoWindingsTransformer, false),
+                // VoltageLevel fields
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID_1, null, Set.of("VL_2", "VL_3"), twoWindingsTransformer, true),
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID_1, null, Set.of("VL", "VL_2"), twoWindingsTransformer, false),
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID_2, null, Set.of("VL_2", "VL_3"), twoWindingsTransformer, true),
+                Arguments.of(NOT_IN, FieldType.VOLTAGE_LEVEL_ID_2, null, Set.of("VL", "VL_2"), twoWindingsTransformer, false)
 
         );
     }

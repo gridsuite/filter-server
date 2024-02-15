@@ -72,7 +72,8 @@ class BooleanExpertRuleTest {
         "provideArgumentsForShuntCompensatorTest",
         "provideArgumentsForBatteryTest",
         "provideArgumentsForLinesTest",
-        "provideArgumentsForLoadTest"
+        "provideArgumentsForLoadTest",
+        "provideArgumentsForTwoWindingTransformerTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, boolean value, Identifiable<?> equipment, boolean expected) {
         BooleanExpertRule rule = BooleanExpertRule.builder().operator(operator).field(field).value(value).build();
@@ -202,6 +203,60 @@ class BooleanExpertRuleTest {
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED_1, true, line, false),
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED_2, false, line, true),
                 Arguments.of(NOT_EQUALS, FieldType.CONNECTED_2, true, line, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForTwoWindingTransformerTest() {
+
+        TwoWindingsTransformer twoWindingsTransformer = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+        // Terminal fields
+        Terminal terminal = Mockito.mock(Terminal.class);
+        Mockito.when(terminal.isConnected()).thenReturn(true);
+        Mockito.when(twoWindingsTransformer.getTerminal1()).thenReturn(terminal);
+        Mockito.when(twoWindingsTransformer.getTerminal2()).thenReturn(terminal);
+
+        // RatioTapChanger fields
+        RatioTapChanger ratioTapChanger = Mockito.mock(RatioTapChanger.class);
+        Mockito.when(ratioTapChanger.isRegulating()).thenReturn(true);
+        Mockito.when(ratioTapChanger.hasLoadTapChangingCapabilities()).thenReturn(true);
+        Mockito.when(twoWindingsTransformer.getRatioTapChanger()).thenReturn(ratioTapChanger);
+
+        // null RatioTapChanger
+        TwoWindingsTransformer twoWindingsTransformer2 = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer2.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+        Mockito.when(twoWindingsTransformer2.getRatioTapChanger()).thenReturn(null);
+
+        return Stream.of(
+                // --- EQUALS--- //
+                // Terminal fields
+                Arguments.of(EQUALS, FieldType.CONNECTED_1, true, twoWindingsTransformer, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED_1, false, twoWindingsTransformer, false),
+                Arguments.of(EQUALS, FieldType.CONNECTED_2, true, twoWindingsTransformer, true),
+                Arguments.of(EQUALS, FieldType.CONNECTED_2, false, twoWindingsTransformer, false),
+
+                // RatioTapChanger fields
+                Arguments.of(EQUALS, FieldType.RATIO_REGULATING, true, twoWindingsTransformer, true),
+                Arguments.of(EQUALS, FieldType.RATIO_REGULATING, false, twoWindingsTransformer, false),
+                Arguments.of(EQUALS, FieldType.LOAD_TAP_CHANGING_CAPABILITIES, true, twoWindingsTransformer, true),
+                Arguments.of(EQUALS, FieldType.LOAD_TAP_CHANGING_CAPABILITIES, false, twoWindingsTransformer, false),
+
+                // --- NOT_EQUALS--- //
+                // Terminal fields
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_1, false, twoWindingsTransformer, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_1, true, twoWindingsTransformer, false),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_2, false, twoWindingsTransformer, true),
+                Arguments.of(NOT_EQUALS, FieldType.CONNECTED_2, true, twoWindingsTransformer, false),
+
+                // RatioTapChanger fields
+                Arguments.of(NOT_EQUALS, FieldType.RATIO_REGULATING, false, twoWindingsTransformer, true),
+                Arguments.of(NOT_EQUALS, FieldType.RATIO_REGULATING, true, twoWindingsTransformer, false),
+                Arguments.of(NOT_EQUALS, FieldType.LOAD_TAP_CHANGING_CAPABILITIES, false, twoWindingsTransformer, true),
+                Arguments.of(NOT_EQUALS, FieldType.LOAD_TAP_CHANGING_CAPABILITIES, true, twoWindingsTransformer, false),
+
+                // null RatioTapChanger
+                Arguments.of(NOT_EQUALS, FieldType.RATIO_REGULATING, false, twoWindingsTransformer2, false),
+                Arguments.of(NOT_EQUALS, FieldType.RATIO_REGULATING, true, twoWindingsTransformer2, true)
         );
     }
 }

@@ -59,6 +59,9 @@ class EnumExpertRuleTest {
         Substation substation = Mockito.mock(Substation.class);
         Mockito.when(substation.getType()).thenReturn(IdentifiableType.SUBSTATION);
 
+        TwoWindingsTransformer twoWindingsTransformer = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+
         return Stream.of(
                 // --- Test an unsupported field for each equipment --- //
                 Arguments.of(EQUALS, FieldType.RATED_S, network, PowsyblException.class),
@@ -70,6 +73,7 @@ class EnumExpertRuleTest {
                 Arguments.of(EQUALS, FieldType.RATED_S, busbarSection, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, battery, PowsyblException.class),
                 Arguments.of(EQUALS, FieldType.RATED_S, substation, PowsyblException.class),
+                Arguments.of(EQUALS, FieldType.P0, twoWindingsTransformer, PowsyblException.class),
 
                 // --- Test an unsupported operator for this rule type --- //
                 Arguments.of(IS, FieldType.ENERGY_SOURCE, generator, PowsyblException.class)
@@ -86,7 +90,8 @@ class EnumExpertRuleTest {
         "provideArgumentsForBatteryTest",
         "provideArgumentsForVoltageLevelTest",
         "provideArgumentsForSubstationTest",
-        "provideArgumentsForLinesTest"
+        "provideArgumentsForLinesTest",
+        "provideArgumentsForTwoWindingTransformerTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         EnumExpertRule rule = EnumExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
@@ -468,6 +473,33 @@ class EnumExpertRuleTest {
                 Arguments.of(NOT_IN, FieldType.COUNTRY_1, null, Set.of(Country.FR.name(), Country.DE.name()), line, false),
                 Arguments.of(NOT_IN, FieldType.COUNTRY_2, null, Set.of(Country.LI.name(), Country.MC.name()), line, true),
                 Arguments.of(NOT_IN, FieldType.COUNTRY_2, null, Set.of(Country.SM.name(), Country.FO.name()), line, false)
+        );
+    }
+
+    private static Stream<Arguments> provideArgumentsForTwoWindingTransformerTest() {
+
+        TwoWindingsTransformer twoWindingsTransformer = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+        Substation substation = Mockito.mock(Substation.class);
+        Mockito.when(substation.getCountry()).thenReturn(Optional.of(Country.FR));
+        Mockito.when(twoWindingsTransformer.getSubstation()).thenReturn(Optional.of(substation));
+
+        return Stream.of(
+            // --- EQUALS --- //
+            Arguments.of(EQUALS, FieldType.COUNTRY, Country.FR.name(), null, twoWindingsTransformer, true),
+            Arguments.of(EQUALS, FieldType.COUNTRY, Country.DE.name(), null, twoWindingsTransformer, false),
+
+            // --- NOT_EQUALS --- //
+            Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.DE.name(), null, twoWindingsTransformer, true),
+            Arguments.of(NOT_EQUALS, FieldType.COUNTRY, Country.FR.name(), null, twoWindingsTransformer, false),
+
+            // --- IN --- //
+            Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), twoWindingsTransformer, true),
+            Arguments.of(IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), twoWindingsTransformer, false),
+
+            // --- NOT_IN --- //
+            Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.BE.name(), Country.DE.name()), twoWindingsTransformer, true),
+            Arguments.of(NOT_IN, FieldType.COUNTRY, null, Set.of(Country.FR.name(), Country.DE.name()), twoWindingsTransformer, false)
         );
     }
 }
