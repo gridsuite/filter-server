@@ -42,10 +42,7 @@ public class NumberExpertRule extends AbstractExpertRule {
     private Set<Double> values;
 
     public static Double getNumberValue(String value) {
-        if (value == null) {
-            return Double.NaN;
-        }
-        return Double.parseDouble(value);
+        return value == null ? Double.NaN : Double.parseDouble(value);
     }
 
     @Override
