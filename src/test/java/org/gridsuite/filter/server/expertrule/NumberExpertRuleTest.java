@@ -1525,6 +1525,11 @@ class NumberExpertRuleTest {
         Mockito.when(ratioTapChanger1.getTargetV()).thenReturn(Double.NaN);
         Mockito.when(twoWindingsTransformer1.getRatioTapChanger()).thenReturn(ratioTapChanger1);
 
+        // null RatioTapChanger
+        TwoWindingsTransformer twoWindingsTransformer2 = Mockito.mock(TwoWindingsTransformer.class);
+        Mockito.when(twoWindingsTransformer2.getType()).thenReturn(IdentifiableType.TWO_WINDINGS_TRANSFORMER);
+        Mockito.when(twoWindingsTransformer2.getRatioTapChanger()).thenReturn(null);
+
         return Stream.of(
             // --- EQUALS --- //
             // Terminal fields
@@ -1745,7 +1750,10 @@ class NumberExpertRuleTest {
             Arguments.of(NOT_IN, FieldType.MAGNETIZING_SUSCEPTANCE, null, Set.of(0.35, 0.45), twoWindingsTransformer, true),
             Arguments.of(NOT_IN, FieldType.MAGNETIZING_SUSCEPTANCE, null, Set.of(0.35, 0.4, 0.45), twoWindingsTransformer, false),
             Arguments.of(NOT_IN, FieldType.RATED_S, null, Set.of(50.0, 150.0), twoWindingsTransformer, true),
-            Arguments.of(NOT_IN, FieldType.RATED_S, null, Set.of(50.0, 100.0, 150.0), twoWindingsTransformer, false)
+            Arguments.of(NOT_IN, FieldType.RATED_S, null, Set.of(50.0, 100.0, 150.0), twoWindingsTransformer, false),
+
+            // null RatioTapChanger
+            Arguments.of(EXISTS, FieldType.RATIO_TARGET_V, null, null, twoWindingsTransformer2, false)
         );
     }
 

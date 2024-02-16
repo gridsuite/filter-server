@@ -47,7 +47,11 @@ public class BooleanExpertRule extends AbstractExpertRule {
 
     @Override
     public boolean evaluateRule(Identifiable<?> identifiable) {
-        boolean identifiableValue = getBooleanValue(getFieldValue(this.getField(), identifiable));
+        String fieldValue = getFieldValue(this.getField(), identifiable);
+        if (fieldValue == null) {
+            return false;
+        }
+        boolean identifiableValue = getBooleanValue(fieldValue);
         boolean filterValue = this.isValue();
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue == filterValue;
