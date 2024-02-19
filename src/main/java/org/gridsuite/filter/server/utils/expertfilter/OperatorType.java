@@ -27,9 +27,12 @@ public enum OperatorType {
     IS,
     CONTAINS,
     BEGINS_WITH,
-    ENDS_WITH;
+    ENDS_WITH,
+    // Uuid
+    IS_PART_OF,
+    IS_NOT_PART_OF;
 
     public static boolean isMultipleCriteriaOperator(OperatorType operator) {
-        return operator == IN || operator == NOT_IN || operator == BETWEEN;
+        return operator == IN || operator == NOT_IN || operator == BETWEEN || operator == IS_PART_OF || operator == IS_NOT_PART_OF;
     }
 }

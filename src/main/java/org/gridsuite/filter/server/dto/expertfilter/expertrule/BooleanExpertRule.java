@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
@@ -46,7 +47,7 @@ public class BooleanExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService) {
         String fieldValue = getFieldValue(this.getField(), identifiable);
         if (fieldValue == null) {
             return false;

@@ -107,6 +107,19 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                 }
                 return ruleBuilder.build();
             }
+            case FILTER_UUID -> {
+                FilterUuidExpertRule.FilterUuidExpertRuleBuilder<?, ?> ruleBuilder = FilterUuidExpertRule.builder()
+                    .field(filterEntity.getField())
+                    .operator(filterEntity.getOperator());
+                if (filterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                    } else { // for single value
+                        ruleBuilder.value(filterEntity.getValue());
+                    }
+                }
+                return ruleBuilder.build();
+            }
             default -> throw new PowsyblException("Unknown rule data type: " + filterEntity.getDataType() + ", supported data types are: COMBINATOR, BOOLEAN, NUMBER, STRING, ENUM");
         }
     }

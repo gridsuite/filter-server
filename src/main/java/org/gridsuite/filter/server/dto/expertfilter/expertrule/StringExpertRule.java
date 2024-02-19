@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
 import java.util.HashSet;
@@ -56,7 +57,7 @@ public class StringExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService) {
         String identifiableValue = getFieldValue(this.getField(), identifiable);
         return switch (this.getOperator()) {
             case IS -> identifiableValue.equalsIgnoreCase(this.getValue());

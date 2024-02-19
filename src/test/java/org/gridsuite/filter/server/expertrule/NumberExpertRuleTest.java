@@ -3,6 +3,7 @@ package org.gridsuite.filter.server.expertrule;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
+import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.NumberExpertRule;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
 import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
@@ -10,6 +11,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Set;
 import java.util.stream.Stream;
@@ -19,7 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
+@Component
 class NumberExpertRuleTest {
+    @Autowired
+    private FilterService filterService;
 
     @ParameterizedTest
     @MethodSource({
@@ -27,7 +33,7 @@ class NumberExpertRuleTest {
     })
     void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).build();
-        assertThrows(expectedException, () -> rule.evaluateRule(equipment));
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService));
     }
 
     static Stream<Arguments> provideArgumentsForTestWithException() {
@@ -87,7 +93,7 @@ class NumberExpertRuleTest {
     })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
-        assertEquals(expected, rule.evaluateRule(equipment));
+        assertEquals(expected, rule.evaluateRule(equipment, filterService));
     }
 
     private static Stream<Arguments> provideArgumentsForGeneratorTest() {

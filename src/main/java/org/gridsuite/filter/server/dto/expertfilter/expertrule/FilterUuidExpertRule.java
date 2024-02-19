@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023, RTE (http://www.rte-france.com)
+ * Copyright (c) 2024, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -15,28 +15,27 @@ import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
+import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.isPartOf;
 
 /**
- * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
+ * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
 @AllArgsConstructor
 @SuperBuilder
-public class EnumExpertRule extends StringExpertRule {
+public class FilterUuidExpertRule extends StringExpertRule {
 
     @Override
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public DataType getDataType() {
-        return DataType.ENUM;
+        return DataType.FILTER_UUID;
     }
 
     @Override
     public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService) {
         String identifiableValue = getFieldValue(this.getField(), identifiable);
         return switch (this.getOperator()) {
-            case EQUALS -> identifiableValue.equals(this.getValue());
-            case NOT_EQUALS -> !identifiableValue.equals(this.getValue());
-            case IN -> this.getValues().contains(identifiableValue);
-            case NOT_IN -> !this.getValues().contains(identifiableValue);
+            case IS_PART_OF -> isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterService);
+            case IS_NOT_PART_OF -> !isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterService);
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }

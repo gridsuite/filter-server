@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
 import java.util.Collections;
@@ -52,7 +53,7 @@ public class NumberExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService) {
         Double identifiableValue = getNumberValue(getFieldValue(this.getField(), identifiable));
         if (Double.isNaN(identifiableValue)) {
             return false;

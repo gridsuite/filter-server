@@ -9,7 +9,15 @@ package org.gridsuite.filter.server.utils.expertfilter;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
+import org.gridsuite.filter.server.FilterService;
+import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.server.utils.FilterType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -246,5 +254,12 @@ public final class ExpertFilterUtils {
                 LOAD_TAP_CHANGING_CAPABILITIES -> getRatioTapChangerFieldValue(field, twoWindingsTransformer.getRatioTapChanger());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + twoWindingsTransformer.getType() + "]");
         };
+    }
+
+    public static boolean isPartOf(Network network, String value, Set<String> uuids, FilterService filterService) {
+        // We do not allow to use expert filters for IS_PART_OF or IS_NOT_PART_OF operators
+        List<FilterEquipments> equipments = filterService.exportFilters(uuids.stream().map(UUID::fromString).toList(), network, Set.of(FilterType.EXPERT));
+        return equipments.stream().flatMap(e -> e.getIdentifiableAttributes().stream()
+            .map(IdentifiableAttributes::getId)).toList().contains(value);
     }
 }
