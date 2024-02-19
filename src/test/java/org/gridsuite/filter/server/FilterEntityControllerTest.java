@@ -2022,4 +2022,35 @@ public class FilterEntityControllerTest {
 
         assertFalse(transformerFilter.isEmpty());
     }
+
+    @Test
+    public void testExpertFilterLoadLinkToOtherFilterWithIsPartOfOperator() throws Exception {
+        // Create identifier list filter for loads
+        UUID identifierListFilterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        Date modificationDate = new Date();
+
+        IdentifierListFilterEquipmentAttributes load = new IdentifierListFilterEquipmentAttributes("LOAD", 7d);
+        IdentifierListFilter identifierListFilter = new IdentifierListFilter(identifierListFilterId, modificationDate, EquipmentType.LOAD, List.of(load));
+        insertFilter(identifierListFilterId, identifierListFilter);
+
+        // create expert filter linked to the identifier list filter
+        UUID expertFilterId = UUID.fromString("87614d91-c168-4f89-8fb9-77a23729e88e");
+        List<AbstractExpertRule> rules = new ArrayList<>();
+        FilterUuidExpertRule filterUuidExpertRule = FilterUuidExpertRule.builder().values(Set.of(identifierListFilterId.toString()))
+            .field(FieldType.ID).operator(OperatorType.IS_PART_OF).build();
+        rules.add(filterUuidExpertRule);
+
+        CombinatorExpertRule combinatorRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(expertFilterId, modificationDate, EquipmentType.LOAD, combinatorRule);
+        insertFilter(expertFilterId, expertFilter);
+        checkExpertFilter(expertFilterId, expertFilter);
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [{"id":"LOAD","type":"LOAD"}]
+            """;
+        checkExpertFilterExportAndMetadata(expertFilterId, expectedResultJson, EquipmentType.LOAD);
+        checkFilterEvaluating(expertFilter, expectedResultJson);
+    }
 }
