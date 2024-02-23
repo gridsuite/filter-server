@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -33,7 +34,7 @@ class NumberExpertRuleTest {
     })
     void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).build();
-        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService));
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     static Stream<Arguments> provideArgumentsForTestWithException() {
@@ -93,7 +94,7 @@ class NumberExpertRuleTest {
     })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
-        assertEquals(expected, rule.evaluateRule(equipment, filterService));
+        assertEquals(expected, rule.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForGeneratorTest() {

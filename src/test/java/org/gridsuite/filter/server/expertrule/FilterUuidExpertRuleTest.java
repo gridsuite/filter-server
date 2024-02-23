@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -76,7 +77,7 @@ class FilterUuidExpertRuleTest {
     void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
         FilterService filterService = Mockito.mock(FilterService.class);
         FilterUuidExpertRule rule = FilterUuidExpertRule.builder().operator(operator).field(field).build();
-        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService));
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForTestWithException() {
@@ -191,7 +192,7 @@ class FilterUuidExpertRuleTest {
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         FilterService filterService = initMockFilters(equipment.getNetwork());
         FilterUuidExpertRule rule = FilterUuidExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
-        assertEquals(expected, rule.evaluateRule(equipment, filterService));
+        assertEquals(expected, rule.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForGeneratorTest() {

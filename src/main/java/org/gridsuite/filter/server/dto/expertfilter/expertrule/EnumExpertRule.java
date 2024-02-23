@@ -12,7 +12,11 @@ import com.powsybl.iidm.network.Identifiable;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.FilterService;
+import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
+
+import java.util.Map;
+import java.util.UUID;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
 
@@ -30,7 +34,7 @@ public class EnumExpertRule extends StringExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> mapFilters) {
         String identifiableValue = getFieldValue(this.getField(), identifiable);
         return switch (this.getOperator()) {
             case EQUALS -> identifiableValue.equals(this.getValue());

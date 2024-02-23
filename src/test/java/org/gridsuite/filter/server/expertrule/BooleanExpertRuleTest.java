@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.stream.Stream;
 
 import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.*;
@@ -30,7 +31,7 @@ class BooleanExpertRuleTest {
     })
     void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
         BooleanExpertRule rule = BooleanExpertRule.builder().operator(operator).field(field).build();
-        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService));
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     static Stream<Arguments> provideArgumentsForTestWithException() {
@@ -83,7 +84,7 @@ class BooleanExpertRuleTest {
     })
     void testEvaluateRule(OperatorType operator, FieldType field, boolean value, Identifiable<?> equipment, boolean expected) {
         BooleanExpertRule rule = BooleanExpertRule.builder().operator(operator).field(field).value(value).build();
-        assertEquals(expected, rule.evaluateRule(equipment, filterService));
+        assertEquals(expected, rule.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForGeneratorTest() {

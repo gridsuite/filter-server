@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -30,7 +31,7 @@ class CombinatorExpertRuleTest {
     @MethodSource({"provideArgumentsForTest"})
     void testEvaluateRule(CombinatorType combinatorType, List<AbstractExpertRule> rules, Identifiable<?> equipment, boolean expected) {
         CombinatorExpertRule filter = CombinatorExpertRule.builder().combinator(combinatorType).rules(rules).build();
-        assertEquals(expected, filter.evaluateRule(equipment, filterService));
+        assertEquals(expected, filter.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForTest() {

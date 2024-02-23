@@ -319,7 +319,8 @@ public class FilterService {
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            return stream.filter(ident -> rule.evaluateRule(ident, this));
+            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
+            return stream.filter(ident -> rule.evaluateRule(ident, this, mapFilters));
         } else {
             return Stream.empty();
         }
@@ -456,8 +457,9 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
+            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
             return network.getLineStream()
-                    .filter(ident -> rule.evaluateRule(ident, this))
+                    .filter(ident -> rule.evaluateRule(ident, this, mapFilters))
                     .collect(Collectors.toList());
         } else {
             return List.of();
@@ -487,8 +489,9 @@ public class FilterService {
                     .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
+            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
             return network.getTwoWindingsTransformerStream()
-                .filter(ident -> rule.evaluateRule(ident, this))
+                .filter(ident -> rule.evaluateRule(ident, this, mapFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -565,9 +568,10 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
+            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
             return network.getVoltageLevelStream()
                 .map(voltageLevel -> (Identifiable<?>) voltageLevel)
-                .filter(ident -> rule.evaluateRule(ident, this))
+                .filter(ident -> rule.evaluateRule(ident, this, mapFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -591,8 +595,9 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
+            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
             return network.getSubstationStream()
-                .filter(ident -> rule.evaluateRule(ident, this))
+                .filter(ident -> rule.evaluateRule(ident, this, mapFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -631,7 +636,8 @@ public class FilterService {
                     .flatMap(VoltageLevel.BusBreakerView::getBusStream);
 
             var rule = expertFilter.getRules();
-            return stream.filter(ident -> rule.evaluateRule(ident, this)).toList();
+            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
+            return stream.filter(ident -> rule.evaluateRule(ident, this, mapFilters)).toList();
         } else {
             return List.of();
         }
