@@ -319,8 +319,8 @@ public class FilterService {
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
-            return stream.filter(ident -> rule.evaluateRule(ident, this, mapFilters));
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
+            return stream.filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters));
         } else {
             return Stream.empty();
         }
@@ -457,9 +457,9 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
             return network.getLineStream()
-                    .filter(ident -> rule.evaluateRule(ident, this, mapFilters))
+                    .filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters))
                     .collect(Collectors.toList());
         } else {
             return List.of();
@@ -489,9 +489,9 @@ public class FilterService {
                     .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
             return network.getTwoWindingsTransformerStream()
-                .filter(ident -> rule.evaluateRule(ident, this, mapFilters))
+                .filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -568,10 +568,10 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
             return network.getVoltageLevelStream()
                 .map(voltageLevel -> (Identifiable<?>) voltageLevel)
-                .filter(ident -> rule.evaluateRule(ident, this, mapFilters))
+                .filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -595,9 +595,9 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
             return network.getSubstationStream()
-                .filter(ident -> rule.evaluateRule(ident, this, mapFilters))
+                .filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -636,8 +636,8 @@ public class FilterService {
                     .flatMap(VoltageLevel.BusBreakerView::getBusStream);
 
             var rule = expertFilter.getRules();
-            Map<UUID, FilterEquipments> mapFilters = new HashMap<>();
-            return stream.filter(ident -> rule.evaluateRule(ident, this, mapFilters)).toList();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
+            return stream.filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters)).toList();
         } else {
             return List.of();
         }

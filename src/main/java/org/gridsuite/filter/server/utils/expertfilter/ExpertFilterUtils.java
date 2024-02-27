@@ -260,25 +260,25 @@ public final class ExpertFilterUtils {
         };
     }
 
-    private static List<FilterEquipments> getFilterEquipments(Network network, Set<String> uuids, FilterService filterService, Map<UUID, FilterEquipments> mapFilters) {
+    private static List<FilterEquipments> getFilterEquipments(Network network, Set<String> uuids, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
         List<FilterEquipments> res = new ArrayList<>();
         uuids.stream().map(UUID::fromString).forEach(uuid -> {
-            if (mapFilters.containsKey(uuid)) {
-                if (mapFilters.get(uuid) != null) {
-                    res.add(mapFilters.get(uuid));
+            if (cachedUuidFilters.containsKey(uuid)) {
+                if (cachedUuidFilters.get(uuid) != null) {
+                    res.add(cachedUuidFilters.get(uuid));
                 }
             } else {
                 // We do not allow to use expert filters for IS_PART_OF or IS_NOT_PART_OF operators
                 List<FilterEquipments> filterEquipments = filterService.exportFilters(List.of(uuid), network, Set.of(FilterType.EXPERT));
-                mapFilters.put(uuid, !CollectionUtils.isEmpty(filterEquipments) ? filterEquipments.get(0) : null);
+                cachedUuidFilters.put(uuid, !CollectionUtils.isEmpty(filterEquipments) ? filterEquipments.get(0) : null);
                 res.addAll(filterEquipments);
             }
         });
         return res;
     }
 
-    public static boolean isPartOf(Network network, String value, Set<String> uuids, FilterService filterService, Map<UUID, FilterEquipments> mapFilters) {
-        List<FilterEquipments> equipments = getFilterEquipments(network, uuids, filterService, mapFilters);
+    public static boolean isPartOf(Network network, String value, Set<String> uuids, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
+        List<FilterEquipments> equipments = getFilterEquipments(network, uuids, filterService, cachedUuidFilters);
         return equipments.stream().flatMap(e -> e.getIdentifiableAttributes().stream()
             .map(IdentifiableAttributes::getId)).collect(Collectors.toSet()).contains(value);
     }

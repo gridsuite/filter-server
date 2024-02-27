@@ -35,11 +35,11 @@ public class FilterUuidExpertRule extends StringExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> mapFilters) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
         String identifiableValue = getFieldValue(this.getField(), identifiable);
         return switch (this.getOperator()) {
-            case IS_PART_OF -> ExpertFilterUtils.isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterService, mapFilters);
-            case IS_NOT_PART_OF -> !ExpertFilterUtils.isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterService, mapFilters);
+            case IS_PART_OF -> ExpertFilterUtils.isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterService, cachedUuidFilters);
+            case IS_NOT_PART_OF -> !ExpertFilterUtils.isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterService, cachedUuidFilters);
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }

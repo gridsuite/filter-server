@@ -56,7 +56,7 @@ public class NumberExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> mapFilters) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
         Double identifiableValue = getNumberValue(getFieldValue(this.getField(), identifiable));
         if (Double.isNaN(identifiableValue)) {
             return false;

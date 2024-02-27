@@ -61,7 +61,7 @@ public abstract class AbstractExpertRule {
     @Schema(description = "Rules")
     private List<AbstractExpertRule> rules;
 
-    public abstract boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> mapFilters);
+    public abstract boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters);
 
     public abstract DataType getDataType();
 

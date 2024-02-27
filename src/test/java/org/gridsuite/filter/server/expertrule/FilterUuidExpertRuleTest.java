@@ -19,12 +19,13 @@ import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttribut
 import org.gridsuite.filter.server.utils.FilterType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
 import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +41,8 @@ import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.IS_PAR
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Component
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@RunWith(SpringRunner.class)
+@SpringBootTest
 class FilterUuidExpertRuleTest {
     private static final UUID FILTER_GENERATOR_1_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
     private static final UUID FILTER_GENERATOR_2_UUID = UUID.fromString("7928181d-7977-4592-ba19-88027e4254e4");

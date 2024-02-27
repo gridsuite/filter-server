@@ -60,7 +60,7 @@ public class StringExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> mapFilters) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
         String identifiableValue = getFieldValue(this.getField(), identifiable);
         return switch (this.getOperator()) {
             case IS -> identifiableValue.equalsIgnoreCase(this.getValue());

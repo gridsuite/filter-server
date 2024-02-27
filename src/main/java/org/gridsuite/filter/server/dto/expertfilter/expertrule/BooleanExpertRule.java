@@ -51,7 +51,7 @@ public class BooleanExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> mapFilters) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
         String fieldValue = getFieldValue(this.getField(), identifiable);
         if (fieldValue == null) {
             return false;

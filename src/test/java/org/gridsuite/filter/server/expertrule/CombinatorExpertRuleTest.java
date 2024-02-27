@@ -12,9 +12,11 @@ import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +24,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Component
+@RunWith(SpringRunner.class)
+@SpringBootTest
 class CombinatorExpertRuleTest {
     @Autowired
     private FilterService filterService;
