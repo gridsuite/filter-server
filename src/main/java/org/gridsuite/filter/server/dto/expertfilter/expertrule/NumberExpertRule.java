@@ -15,11 +15,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.FilterService;
+import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils.getFieldValue;
@@ -52,7 +56,7 @@ public class NumberExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
         Double identifiableValue = getNumberValue(getFieldValue(this.getField(), identifiable));
         if (Double.isNaN(identifiableValue)) {
             return false;

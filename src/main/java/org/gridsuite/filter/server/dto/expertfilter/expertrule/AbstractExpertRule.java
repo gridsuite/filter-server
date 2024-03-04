@@ -16,12 +16,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.gridsuite.filter.server.FilterService;
+import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
 import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -35,7 +39,8 @@ import java.util.List;
     @JsonSubTypes.Type(value = BooleanExpertRule.class, name = "BOOLEAN"),
     @JsonSubTypes.Type(value = EnumExpertRule.class, name = "ENUM"),
     @JsonSubTypes.Type(value = NumberExpertRule.class, name = "NUMBER"),
-    @JsonSubTypes.Type(value = CombinatorExpertRule.class, name = "COMBINATOR")
+    @JsonSubTypes.Type(value = CombinatorExpertRule.class, name = "COMBINATOR"),
+    @JsonSubTypes.Type(value = FilterUuidExpertRule.class, name = "FILTER_UUID"),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
@@ -56,7 +61,7 @@ public abstract class AbstractExpertRule {
     @Schema(description = "Rules")
     private List<AbstractExpertRule> rules;
 
-    public abstract boolean evaluateRule(Identifiable<?> identifiable);
+    public abstract boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters);
 
     public abstract DataType getDataType();
 

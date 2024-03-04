@@ -319,7 +319,8 @@ public class FilterService {
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
-            return stream.filter(rule::evaluateRule);
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
+            return stream.filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters));
         } else {
             return Stream.empty();
         }
@@ -456,8 +457,9 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
             return network.getLineStream()
-                    .filter(rule::evaluateRule)
+                    .filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters))
                     .collect(Collectors.toList());
         } else {
             return List.of();
@@ -487,8 +489,9 @@ public class FilterService {
                     .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
             return network.getTwoWindingsTransformerStream()
-                .filter(rule::evaluateRule)
+                .filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -565,9 +568,10 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
             return network.getVoltageLevelStream()
                 .map(voltageLevel -> (Identifiable<?>) voltageLevel)
-                .filter(rule::evaluateRule)
+                .filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -591,8 +595,9 @@ public class FilterService {
                 .collect(Collectors.toList());
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
             return network.getSubstationStream()
-                .filter(rule::evaluateRule)
+                .filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters))
                 .collect(Collectors.toList());
         } else {
             return List.of();
@@ -631,7 +636,8 @@ public class FilterService {
                     .flatMap(VoltageLevel.BusBreakerView::getBusStream);
 
             var rule = expertFilter.getRules();
-            return stream.filter(rule::evaluateRule).toList();
+            Map<UUID, FilterEquipments> cachedUuidFilters = new HashMap<>();
+            return stream.filter(ident -> rule.evaluateRule(ident, this, cachedUuidFilters)).toList();
         } else {
             return List.of();
         }
@@ -698,39 +704,39 @@ public class FilterService {
         return identifiables;
     }
 
-    private List<Identifiable<?>> toIdentifiableFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
-        if (filter.getType() == FilterType.CRITERIA || filter.getType() == FilterType.IDENTIFIER_LIST || filter.getType() == FilterType.EXPERT) {
-            Network network = networkStoreService.getNetwork(networkUuid);
-
-            if (network == null) {
-                throw new PowsyblException("Network '" + networkUuid + "' not found");
-            }
-
-            if (variantId != null) {
-                network.getVariantManager().setWorkingVariant(variantId);
-            }
-
-            return getIdentifiables(filter, network);
-        } else {
-            throw new PowsyblException("Filter implementation not yet supported: " + filter.getClass().getSimpleName());
+    private Network getNetwork(UUID networkUuid, String variantId) {
+        Network network = networkStoreService.getNetwork(networkUuid);
+        if (network == null) {
+            throw new PowsyblException("Network '" + networkUuid + "' not found");
         }
+        if (variantId != null) {
+            network.getVariantManager().setWorkingVariant(variantId);
+        }
+        return network;
     }
 
     private List<IdentifiableAttributes> getIdentifiableAttributes(AbstractFilter filter, UUID networkUuid, String variantId) {
-        if (filter instanceof IdentifierListFilter &&
+        if (filter.getType() == FilterType.SCRIPT) {
+            throw new PowsyblException("Filter implementation not yet supported: " + filter.getClass().getSimpleName());
+        }
+        Network network = getNetwork(networkUuid, variantId);
+        return getIdentifiableAttributes(filter, network);
+    }
+
+    private List<IdentifiableAttributes> getIdentifiableAttributes(AbstractFilter filter, Network network) {
+        if (filter instanceof IdentifierListFilter identifierListFilter &&
             (filter.getEquipmentType() == EquipmentType.GENERATOR ||
-             filter.getEquipmentType() == EquipmentType.LOAD)) {
-            IdentifierListFilter identifierListFilter = (IdentifierListFilter) filter;
-            return toIdentifiableFilter(filter, networkUuid, variantId)
-                    .stream()
-                    .map(identifiable -> new IdentifiableAttributes(identifiable.getId(),
-                            identifiable.getType(),
-                            identifierListFilter.getDistributionKey(identifiable.getId())))
-                    .collect(Collectors.toList());
+                filter.getEquipmentType() == EquipmentType.LOAD)) {
+            return getIdentifiables(filter, network)
+                .stream()
+                .map(identifiable -> new IdentifiableAttributes(identifiable.getId(),
+                    identifiable.getType(),
+                    identifierListFilter.getDistributionKey(identifiable.getId())))
+                .toList();
         } else {
-            return toIdentifiableFilter(filter, networkUuid, variantId).stream()
-                    .map(identifiable -> new IdentifiableAttributes(identifiable.getId(), identifiable.getType(), null))
-                    .collect(Collectors.toList());
+            return getIdentifiables(filter, network).stream()
+                .map(identifiable -> new IdentifiableAttributes(identifiable.getId(), identifiable.getType(), null))
+                .toList();
         }
     }
 
@@ -757,12 +763,16 @@ public class FilterService {
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
+        Network network = getNetwork(networkUuid, variantId);
+        return exportFilters(ids, network, Set.of());
+    }
 
+    public List<FilterEquipments> exportFilters(List<UUID> ids, Network network, Set<FilterType> filterTypesToExclude) {
         // we stream on the ids so that we can keep the same order of ids sent
         return ids.stream()
-                .map(id -> getFilter(id).orElse(null))
-                .filter(Objects::nonNull)
-                .map(filter -> filter.getFilterEquipments(getIdentifiableAttributes(filter, networkUuid, variantId)))
-                .collect(Collectors.toList());
+            .map(id -> getFilter(id).orElse(null))
+            .filter(filter -> filter != null && !filterTypesToExclude.contains(filter.getType()))
+            .map(filter -> filter.getFilterEquipments(getIdentifiableAttributes(filter, network)))
+            .toList();
     }
 }

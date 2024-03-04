@@ -9,7 +9,19 @@ package org.gridsuite.filter.server.utils.expertfilter;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
+import org.apache.commons.collections4.CollectionUtils;
+import org.gridsuite.filter.server.FilterService;
+import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.server.utils.FilterType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
@@ -246,5 +258,28 @@ public final class ExpertFilterUtils {
                 LOAD_TAP_CHANGING_CAPABILITIES -> getRatioTapChangerFieldValue(field, twoWindingsTransformer.getRatioTapChanger());
             default -> throw new PowsyblException(FIELD_AND_TYPE_NOT_IMPLEMENTED + " [" + field + "," + twoWindingsTransformer.getType() + "]");
         };
+    }
+
+    private static List<FilterEquipments> getFilterEquipments(Network network, Set<String> uuids, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
+        List<FilterEquipments> res = new ArrayList<>();
+        uuids.stream().map(UUID::fromString).forEach(uuid -> {
+            if (cachedUuidFilters.containsKey(uuid)) {
+                if (cachedUuidFilters.get(uuid) != null) {
+                    res.add(cachedUuidFilters.get(uuid));
+                }
+            } else {
+                // We do not allow to use expert filters for IS_PART_OF or IS_NOT_PART_OF operators
+                List<FilterEquipments> filterEquipments = filterService.exportFilters(List.of(uuid), network, Set.of(FilterType.EXPERT));
+                cachedUuidFilters.put(uuid, !CollectionUtils.isEmpty(filterEquipments) ? filterEquipments.get(0) : null);
+                res.addAll(filterEquipments);
+            }
+        });
+        return res;
+    }
+
+    public static boolean isPartOf(Network network, String value, Set<String> uuids, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
+        List<FilterEquipments> equipments = getFilterEquipments(network, uuids, filterService, cachedUuidFilters);
+        return equipments.stream().flatMap(e -> e.getIdentifiableAttributes().stream()
+            .map(IdentifiableAttributes::getId)).collect(Collectors.toSet()).contains(value);
     }
 }

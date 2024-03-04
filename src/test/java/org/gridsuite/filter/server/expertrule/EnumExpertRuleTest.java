@@ -2,14 +2,20 @@ package org.gridsuite.filter.server.expertrule;
 
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
+import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.EnumExpertRule;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
 import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -18,7 +24,11 @@ import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
 class EnumExpertRuleTest {
+    @Autowired
+    private FilterService filterService;
 
     @ParameterizedTest
     @MethodSource({
@@ -26,7 +36,7 @@ class EnumExpertRuleTest {
     })
     void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
         EnumExpertRule rule = EnumExpertRule.builder().operator(operator).field(field).build();
-        assertThrows(expectedException, () -> rule.evaluateRule(equipment));
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     static Stream<Arguments> provideArgumentsForTestWithException() {
@@ -95,7 +105,7 @@ class EnumExpertRuleTest {
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         EnumExpertRule rule = EnumExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
-        assertEquals(expected, rule.evaluateRule(equipment));
+        assertEquals(expected, rule.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForGeneratorTest() {

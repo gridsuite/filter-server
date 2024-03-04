@@ -4,6 +4,7 @@ import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.Identifiable;
 import com.powsybl.iidm.network.IdentifiableType;
+import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
@@ -11,20 +12,29 @@ import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
 class CombinatorExpertRuleTest {
+    @Autowired
+    private FilterService filterService;
 
     @ParameterizedTest
     @MethodSource({"provideArgumentsForTest"})
     void testEvaluateRule(CombinatorType combinatorType, List<AbstractExpertRule> rules, Identifiable<?> equipment, boolean expected) {
         CombinatorExpertRule filter = CombinatorExpertRule.builder().combinator(combinatorType).rules(rules).build();
-        assertEquals(expected, filter.evaluateRule(equipment));
+        assertEquals(expected, filter.evaluateRule(equipment, filterService, new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForTest() {
