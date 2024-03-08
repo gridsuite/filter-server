@@ -12,7 +12,7 @@ import com.powsybl.iidm.network.Identifiable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.FilterService;
+import org.gridsuite.filter.server.FilterLoader;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
@@ -35,12 +35,12 @@ public class CombinatorExpertRule extends AbstractExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterLoader filterLoader, Map<UUID, FilterEquipments> cachedUuidFilters) {
         // As long as there are rules, we go down the tree
         if (CombinatorType.AND == this.getCombinator()) {
             for (AbstractExpertRule rule : this.getRules()) {
                 // Recursively evaluate the rule
-                if (!rule.evaluateRule(identifiable, filterService, cachedUuidFilters)) {
+                if (!rule.evaluateRule(identifiable, filterLoader, cachedUuidFilters)) {
                     // If any rule is false, the whole combination is false
                     return false;
                 }
@@ -49,7 +49,7 @@ public class CombinatorExpertRule extends AbstractExpertRule {
         } else if (CombinatorType.OR == this.getCombinator()) {
             for (AbstractExpertRule rule : this.getRules()) {
                 // Recursively evaluate the rule
-                if (rule.evaluateRule(identifiable, filterService, cachedUuidFilters)) {
+                if (rule.evaluateRule(identifiable, filterLoader, cachedUuidFilters)) {
                     // If any rule is true, the whole combination is true
                     return true;
                 }
