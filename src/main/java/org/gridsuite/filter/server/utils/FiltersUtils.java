@@ -288,8 +288,7 @@ public final class FiltersUtils {
     }
 
     private static <I extends Injection<I>> Stream<Injection<I>> getInjectionList(Stream<Injection<I>> stream, AbstractFilter filter, FilterLoader filterLoader) {
-        if (filter instanceof CriteriaFilter) {
-            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+        if (filter instanceof CriteriaFilter criteriaFilter) {
             AbstractInjectionFilter injectionFilter = (AbstractInjectionFilter) criteriaFilter.getEquipmentFilterForm();
             return stream
                 .filter(injection -> equipmentIdFilter(injection, injectionFilter.getEquipmentID()))
@@ -299,8 +298,8 @@ public final class FiltersUtils {
                 .filter(injection -> countryFilter(injection.getTerminal(), injectionFilter.getCountries()))
                 .filter(injection -> substationNameFilter(injection.getTerminal(), injectionFilter.getSubstationName()))
                 .filter(injection -> freePropertiesFilter(injection.getTerminal(), injectionFilter.getSubstationFreeProperties()));
-        } else if (filter instanceof IdentifierListFilter) {
-            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
+        } else if (filter instanceof IdentifierListFilter identifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds(identifierListFilter);
             return stream.filter(injection -> equipmentIds.contains(injection.getId()));
         } else if (filter instanceof ExpertFilter expertFilter) {
             var rule = expertFilter.getRules();
@@ -312,8 +311,7 @@ public final class FiltersUtils {
     }
 
     private static List<Identifiable<?>> getGeneratorList(Network network, AbstractFilter filter, FilterLoader filterLoader) {
-        if (filter instanceof CriteriaFilter) {
-            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+        if (filter instanceof CriteriaFilter criteriaFilter) {
             GeneratorFilter generatorFilter = (GeneratorFilter) criteriaFilter.getEquipmentFilterForm();
             return getInjectionList(network.getGeneratorStream().map(injection -> injection), filter, filterLoader)
                 .filter(injection -> filterByEnergySource((Generator) injection, generatorFilter.getEnergySource()))
@@ -406,8 +404,7 @@ public final class FiltersUtils {
     }
 
     private static List<Identifiable<?>> get2WTransformerList(Network network, AbstractFilter filter, FilterLoader filterLoader) {
-        if (filter instanceof CriteriaFilter) {
-            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+        if (filter instanceof CriteriaFilter criteriaFilter) {
             TwoWindingsTransformerFilter twoWindingsTransformerFilter = (TwoWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getTwoWindingsTransformerStream()
                 .filter(twoWindingsTransformer -> equipmentIdFilter(twoWindingsTransformer, twoWindingsTransformerFilter.getEquipmentID()))
@@ -420,8 +417,8 @@ public final class FiltersUtils {
                 .filter(twoWindingsTransformer -> substationNameFilter(twoWindingsTransformer.getTerminal1(), twoWindingsTransformerFilter.getSubstationName()) ||
                     substationNameFilter(twoWindingsTransformer.getTerminal2(), twoWindingsTransformerFilter.getSubstationName()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof IdentifierListFilter) {
-            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
+        } else if (filter instanceof IdentifierListFilter identifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds(identifierListFilter);
 
             return network.getTwoWindingsTransformerStream()
                 .filter(twoWindingsTransformer -> equipmentIds.contains(twoWindingsTransformer.getId()))
@@ -437,9 +434,8 @@ public final class FiltersUtils {
         }
     }
 
-    private static List<Identifiable<?>> get3WTransformerList(Network network, AbstractFilter filter, FilterLoader filterLoader) {
-        if (filter instanceof CriteriaFilter) {
-            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+    private static List<Identifiable<?>> get3WTransformerList(Network network, AbstractFilter filter) {
+        if (filter instanceof CriteriaFilter criteriaFilter) {
             ThreeWindingsTransformerFilter threeWindingsTransformerFilter = (ThreeWindingsTransformerFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getThreeWindingsTransformerStream()
                 .filter(threeWindingsTransformer -> equipmentIdFilter(threeWindingsTransformer, threeWindingsTransformerFilter.getEquipmentID()))
@@ -455,8 +451,8 @@ public final class FiltersUtils {
                     substationNameFilter(threeWindingsTransformer.getLeg2().getTerminal(), threeWindingsTransformerFilter.getSubstationName()) ||
                     substationNameFilter(threeWindingsTransformer.getLeg3().getTerminal(), threeWindingsTransformerFilter.getSubstationName()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof IdentifierListFilter) {
-            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
+        } else if (filter instanceof IdentifierListFilter identifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds(identifierListFilter);
 
             return network.getThreeWindingsTransformerStream()
                 .filter(threeWindingsTransformer -> equipmentIds.contains(threeWindingsTransformer.getId()))
@@ -466,9 +462,8 @@ public final class FiltersUtils {
         }
     }
 
-    private static List<Identifiable<?>> getHvdcList(Network network, AbstractFilter filter, FilterLoader filterLoader) {
-        if (filter instanceof CriteriaFilter) {
-            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+    private static List<Identifiable<?>> getHvdcList(Network network, AbstractFilter filter) {
+        if (filter instanceof CriteriaFilter criteriaFilter) {
             HvdcLineFilter hvdcLineFilter = (HvdcLineFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getHvdcLineStream()
                 .filter(hvdcLine -> equipmentIdFilter(hvdcLine, hvdcLineFilter.getEquipmentID()))
@@ -479,8 +474,8 @@ public final class FiltersUtils {
                 .filter(hvdcLine -> substationNameFilter(hvdcLine.getConverterStation1().getTerminal(), hvdcLineFilter.getSubstationName1()) &&
                     substationNameFilter(hvdcLine.getConverterStation2().getTerminal(), hvdcLineFilter.getSubstationName2()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof IdentifierListFilter) {
-            List<String> equipmentsIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
+        } else if (filter instanceof IdentifierListFilter identifierListFilter) {
+            List<String> equipmentsIds = getIdentifierListFilterEquipmentIds(identifierListFilter);
             return network.getHvdcLineStream()
                 .filter(hvdcLine -> equipmentsIds.contains(hvdcLine.getId()))
                 .collect(Collectors.toList());
@@ -490,8 +485,7 @@ public final class FiltersUtils {
     }
 
     private static List<Identifiable<?>> getVoltageLevelList(Network network, AbstractFilter filter, FilterLoader filterloader) {
-        if (filter instanceof CriteriaFilter) {
-            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+        if (filter instanceof CriteriaFilter criteriaFilter) {
             VoltageLevelFilter voltageLevelFilter = (VoltageLevelFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getVoltageLevelStream()
                 .filter(voltageLevel -> equipmentIdFilter(voltageLevel, voltageLevelFilter.getEquipmentID()))
@@ -500,8 +494,8 @@ public final class FiltersUtils {
                 .filter(voltageLevel -> countryFilter(voltageLevel, voltageLevelFilter.getCountries()))
                 .filter(voltageLevel -> freePropertiesFilter(voltageLevel.getNullableSubstation(), voltageLevelFilter.getSubstationFreeProperties()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof IdentifierListFilter) {
-            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
+        } else if (filter instanceof IdentifierListFilter identifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds(identifierListFilter);
             return network.getVoltageLevelStream()
                 .filter(voltageLevel -> equipmentIds.contains(voltageLevel.getId()))
                 .collect(Collectors.toList());
@@ -518,8 +512,7 @@ public final class FiltersUtils {
     }
 
     private static List<Identifiable<?>> getSubstationList(Network network, AbstractFilter filter, FilterLoader filterLoader) {
-        if (filter instanceof CriteriaFilter) {
-            CriteriaFilter criteriaFilter = (CriteriaFilter) filter;
+        if (filter instanceof CriteriaFilter criteriaFilter) {
             SubstationFilter substationFilter = (SubstationFilter) criteriaFilter.getEquipmentFilterForm();
             return network.getSubstationStream()
                 .filter(substation -> equipmentIdFilter(substation, substationFilter.getEquipmentID()))
@@ -527,8 +520,8 @@ public final class FiltersUtils {
                 .filter(substation -> countryFilter(substation, substationFilter.getCountries()))
                 .filter(substation -> freePropertiesFilter(substation, substationFilter.getFreeProperties()))
                 .collect(Collectors.toList());
-        } else if (filter instanceof IdentifierListFilter) {
-            List<String> equipmentIds = getIdentifierListFilterEquipmentIds((IdentifierListFilter) filter);
+        } else if (filter instanceof IdentifierListFilter identifierListFilter) {
+            List<String> equipmentIds = getIdentifierListFilterEquipmentIds(identifierListFilter);
             return network.getSubstationStream()
                 .filter(substation -> equipmentIds.contains(substation.getId()))
                 .collect(Collectors.toList());
@@ -568,7 +561,7 @@ public final class FiltersUtils {
                 identifiables = getVscConverterStationList(network, filter, filterLoader);
                 break;
             case HVDC_LINE:
-                identifiables = getHvdcList(network, filter, filterLoader);
+                identifiables = getHvdcList(network, filter);
                 break;
             case DANGLING_LINE:
                 identifiables = getDanglingLineList(network, filter, filterLoader);
@@ -580,7 +573,7 @@ public final class FiltersUtils {
                 identifiables = get2WTransformerList(network, filter, filterLoader);
                 break;
             case THREE_WINDINGS_TRANSFORMER:
-                identifiables = get3WTransformerList(network, filter, filterLoader);
+                identifiables = get3WTransformerList(network, filter);
                 break;
             case BUS:
                 identifiables = getBusList(network, filter, filterLoader);
