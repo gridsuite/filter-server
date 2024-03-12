@@ -10,10 +10,10 @@ import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
 import org.apache.commons.collections4.CollectionUtils;
-import org.gridsuite.filter.server.FilterService;
+import org.gridsuite.filter.server.FilterLoader;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.FilterServiceUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -260,7 +260,7 @@ public final class ExpertFilterUtils {
         };
     }
 
-    private static List<FilterEquipments> getFilterEquipments(Network network, Set<String> uuids, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
+    public static List<FilterEquipments> getFilterEquipments(Network network, Set<String> uuids, FilterLoader filterLoader, Map<UUID, FilterEquipments> cachedUuidFilters) {
         List<FilterEquipments> res = new ArrayList<>();
         uuids.stream().map(UUID::fromString).forEach(uuid -> {
             if (cachedUuidFilters.containsKey(uuid)) {
@@ -269,7 +269,7 @@ public final class ExpertFilterUtils {
                 }
             } else {
                 // We do not allow to use expert filters for IS_PART_OF or IS_NOT_PART_OF operators
-                List<FilterEquipments> filterEquipments = filterService.exportFilters(List.of(uuid), network, Set.of(FilterType.EXPERT));
+                List<FilterEquipments> filterEquipments = FilterServiceUtils.getFilterEquipmentsFromUuid(network, uuid, filterLoader);
                 cachedUuidFilters.put(uuid, !CollectionUtils.isEmpty(filterEquipments) ? filterEquipments.get(0) : null);
                 res.addAll(filterEquipments);
             }
@@ -277,8 +277,8 @@ public final class ExpertFilterUtils {
         return res;
     }
 
-    public static boolean isPartOf(Network network, String value, Set<String> uuids, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
-        List<FilterEquipments> equipments = getFilterEquipments(network, uuids, filterService, cachedUuidFilters);
+    public static boolean isPartOf(Network network, String value, Set<String> uuids, FilterLoader filterLoader, Map<UUID, FilterEquipments> cachedUuidFilters) {
+        List<FilterEquipments> equipments = getFilterEquipments(network, uuids, filterLoader, cachedUuidFilters);
         return equipments.stream().flatMap(e -> e.getIdentifiableAttributes().stream()
             .map(IdentifiableAttributes::getId)).collect(Collectors.toSet()).contains(value);
     }

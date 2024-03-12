@@ -11,10 +11,10 @@ import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Identifiable;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
 import org.gridsuite.filter.server.utils.expertfilter.ExpertFilterUtils;
+import org.gridsuite.filter.server.FilterLoader;
 
 import java.util.Map;
 import java.util.UUID;
@@ -35,11 +35,11 @@ public class FilterUuidExpertRule extends StringExpertRule {
     }
 
     @Override
-    public boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters) {
+    public boolean evaluateRule(Identifiable<?> identifiable, FilterLoader filterLoader, Map<UUID, FilterEquipments> cachedUuidFilters) {
         String identifiableValue = getFieldValue(this.getField(), identifiable);
         return switch (this.getOperator()) {
-            case IS_PART_OF -> ExpertFilterUtils.isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterService, cachedUuidFilters);
-            case IS_NOT_PART_OF -> !ExpertFilterUtils.isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterService, cachedUuidFilters);
+            case IS_PART_OF -> ExpertFilterUtils.isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterLoader, cachedUuidFilters);
+            case IS_NOT_PART_OF -> !ExpertFilterUtils.isPartOf(identifiable.getNetwork(), identifiableValue, this.getValues(), filterLoader, cachedUuidFilters);
             default -> throw new PowsyblException(this.getOperator() + " operator not supported with " + this.getDataType() + " rule data type");
         };
     }

@@ -16,7 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.FilterService;
+import org.gridsuite.filter.server.FilterLoader;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.server.utils.expertfilter.DataType;
@@ -61,7 +61,7 @@ public abstract class AbstractExpertRule {
     @Schema(description = "Rules")
     private List<AbstractExpertRule> rules;
 
-    public abstract boolean evaluateRule(Identifiable<?> identifiable, FilterService filterService, Map<UUID, FilterEquipments> cachedUuidFilters);
+    public abstract boolean evaluateRule(Identifiable<?> identifiable, FilterLoader filterLoader, Map<UUID, FilterEquipments> cachedUuidFilters);
 
     public abstract DataType getDataType();
 

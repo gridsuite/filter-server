@@ -12,17 +12,20 @@ import com.powsybl.iidm.network.ShuntCompensator;
 import com.powsybl.iidm.network.Terminal;
 import com.powsybl.iidm.network.TwoSides;
 import com.powsybl.iidm.network.VoltageLevel;
+import org.gridsuite.filter.server.FilterLoader;
+import org.gridsuite.filter.server.FilterLoaderImpl;
 import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.FilterUuidExpertRule;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.server.utils.FilterServiceUtils;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
 import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -40,6 +43,8 @@ import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.IS_NOT
 import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.IS_PART_OF;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -78,7 +83,7 @@ class FilterUuidExpertRuleTest {
     void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
         FilterService filterService = Mockito.mock(FilterService.class);
         FilterUuidExpertRule rule = FilterUuidExpertRule.builder().operator(operator).field(field).build();
-        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService, new HashMap<>()));
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment, new FilterLoaderImpl(filterService.getFilterRepositories()), new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForTestWithException() {
@@ -116,70 +121,43 @@ class FilterUuidExpertRuleTest {
         );
     }
 
-    private FilterService initMockFilters(Network network) {
-        FilterService filterService = Mockito.mock(FilterService.class);
+    private void mockGetFilterEquipments(MockedStatic<FilterServiceUtils> filterServiceUtilsMockedStatic, Network network, UUID filterUuid, IdentifiableAttributes identifiableAttributes) {
+        filterServiceUtilsMockedStatic.when(() -> FilterServiceUtils.getFilterEquipmentsFromUuid(eq(network), eq(filterUuid), any(FilterLoader.class)))
+            .thenReturn(List.of(new FilterEquipments(filterUuid, List.of(identifiableAttributes), null)));
+    }
 
+    private void initMockFilters(Network network, MockedStatic<FilterServiceUtils> filtersUtilsMock) {
         // Generator
-        Mockito.when(filterService.exportFilters(List.of(FILTER_GENERATOR_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_GENERATOR_1_UUID, List.of(new IdentifiableAttributes("ID1", IdentifiableType.GENERATOR, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_GENERATOR_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_GENERATOR_2_UUID, List.of(new IdentifiableAttributes("ID2", IdentifiableType.GENERATOR, 100D)), null)));
-
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_GENERATOR_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_GENERATOR_1_UUID, List.of(new IdentifiableAttributes("VL1", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_GENERATOR_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_GENERATOR_2_UUID, List.of(new IdentifiableAttributes("VL2", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_GENERATOR_1_UUID, new IdentifiableAttributes("ID1", IdentifiableType.GENERATOR, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_GENERATOR_2_UUID, new IdentifiableAttributes("ID2", IdentifiableType.GENERATOR, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_GENERATOR_1_UUID, new IdentifiableAttributes("VL1", IdentifiableType.VOLTAGE_LEVEL, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_GENERATOR_2_UUID, new IdentifiableAttributes("VL2", IdentifiableType.VOLTAGE_LEVEL, 100D));
 
         // Load
-        Mockito.when(filterService.exportFilters(List.of(FILTER_LOAD_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_LOAD_1_UUID, List.of(new IdentifiableAttributes("ID1", IdentifiableType.LOAD, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_LOAD_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_LOAD_2_UUID, List.of(new IdentifiableAttributes("ID2", IdentifiableType.LOAD, 100D)), null)));
-
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_LOAD_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_LOAD_1_UUID, List.of(new IdentifiableAttributes("VL1", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_LOAD_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_LOAD_2_UUID, List.of(new IdentifiableAttributes("VL2", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_LOAD_1_UUID, new IdentifiableAttributes("ID1", IdentifiableType.LOAD, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_LOAD_2_UUID, new IdentifiableAttributes("ID2", IdentifiableType.LOAD, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_LOAD_1_UUID, new IdentifiableAttributes("VL1", IdentifiableType.VOLTAGE_LEVEL, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_LOAD_2_UUID, new IdentifiableAttributes("VL2", IdentifiableType.VOLTAGE_LEVEL, 100D));
 
         // Battery
-        Mockito.when(filterService.exportFilters(List.of(FILTER_BATTERY_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_BATTERY_1_UUID, List.of(new IdentifiableAttributes("ID1", IdentifiableType.BATTERY, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_BATTERY_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_BATTERY_2_UUID, List.of(new IdentifiableAttributes("ID2", IdentifiableType.BATTERY, 100D)), null)));
-
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_BATTERY_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_BATTERY_1_UUID, List.of(new IdentifiableAttributes("VL1", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_BATTERY_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_BATTERY_2_UUID, List.of(new IdentifiableAttributes("VL2", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_BATTERY_1_UUID, new IdentifiableAttributes("ID1", IdentifiableType.BATTERY, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_BATTERY_2_UUID, new IdentifiableAttributes("ID2", IdentifiableType.BATTERY, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_BATTERY_1_UUID, new IdentifiableAttributes("VL1", IdentifiableType.VOLTAGE_LEVEL, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_BATTERY_2_UUID, new IdentifiableAttributes("VL2", IdentifiableType.VOLTAGE_LEVEL, 100D));
 
         // Shunt compensator
-        Mockito.when(filterService.exportFilters(List.of(FILTER_SHUNT_COMPENSATOR_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_SHUNT_COMPENSATOR_1_UUID, List.of(new IdentifiableAttributes("ID1", IdentifiableType.SHUNT_COMPENSATOR, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_SHUNT_COMPENSATOR_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_SHUNT_COMPENSATOR_2_UUID, List.of(new IdentifiableAttributes("ID2", IdentifiableType.SHUNT_COMPENSATOR, 100D)), null)));
-
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_SHUNT_COMPENSATOR_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_SHUNT_COMPENSATOR_1_UUID, List.of(new IdentifiableAttributes("VL1", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_SHUNT_COMPENSATOR_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_SHUNT_COMPENSATOR_2_UUID, List.of(new IdentifiableAttributes("VL2", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_SHUNT_COMPENSATOR_1_UUID, new IdentifiableAttributes("ID1", IdentifiableType.SHUNT_COMPENSATOR, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_SHUNT_COMPENSATOR_2_UUID, new IdentifiableAttributes("ID2", IdentifiableType.SHUNT_COMPENSATOR, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_SHUNT_COMPENSATOR_1_UUID, new IdentifiableAttributes("VL1", IdentifiableType.VOLTAGE_LEVEL, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_SHUNT_COMPENSATOR_2_UUID, new IdentifiableAttributes("VL2", IdentifiableType.VOLTAGE_LEVEL, 100D));
 
         // Line
-        Mockito.when(filterService.exportFilters(List.of(FILTER_LINE_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_LINE_1_UUID, List.of(new IdentifiableAttributes("ID1", IdentifiableType.LINE, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_LINE_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_LINE_2_UUID, List.of(new IdentifiableAttributes("ID2", IdentifiableType.LINE, 100D)), null)));
-
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_1_LINE_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_1_LINE_1_UUID, List.of(new IdentifiableAttributes("VL11", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_2_LINE_1_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_2_LINE_1_UUID, List.of(new IdentifiableAttributes("VL21", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
-
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_1_LINE_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_1_LINE_2_UUID, List.of(new IdentifiableAttributes("VL12", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
-        Mockito.when(filterService.exportFilters(List.of(FILTER_VOLTAGE_LEVEL_2_LINE_2_UUID), network, Set.of(FilterType.EXPERT))).thenReturn(List.of(
-            new FilterEquipments(FILTER_VOLTAGE_LEVEL_2_LINE_2_UUID, List.of(new IdentifiableAttributes("VL22", IdentifiableType.VOLTAGE_LEVEL, 100D)), null)));
-
-        return filterService;
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_LINE_1_UUID, new IdentifiableAttributes("ID1", IdentifiableType.LINE, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_LINE_2_UUID, new IdentifiableAttributes("ID2", IdentifiableType.LINE, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_1_LINE_1_UUID, new IdentifiableAttributes("VL11", IdentifiableType.VOLTAGE_LEVEL, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_2_LINE_1_UUID, new IdentifiableAttributes("VL21", IdentifiableType.VOLTAGE_LEVEL, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_1_LINE_2_UUID, new IdentifiableAttributes("VL12", IdentifiableType.VOLTAGE_LEVEL, 100D));
+        mockGetFilterEquipments(filtersUtilsMock, network, FILTER_VOLTAGE_LEVEL_2_LINE_2_UUID, new IdentifiableAttributes("VL22", IdentifiableType.VOLTAGE_LEVEL, 100D));
     }
 
     @ParameterizedTest
@@ -191,9 +169,12 @@ class FilterUuidExpertRuleTest {
         "provideArgumentsForLineTest"
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
-        FilterService filterService = initMockFilters(equipment.getNetwork());
-        FilterUuidExpertRule rule = FilterUuidExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
-        assertEquals(expected, rule.evaluateRule(equipment, filterService, new HashMap<>()));
+        FilterService filterService = Mockito.mock(FilterService.class);
+        try (MockedStatic<FilterServiceUtils> filterServiceUtilsMockedStatic = Mockito.mockStatic(FilterServiceUtils.class)) {
+            initMockFilters(equipment.getNetwork(), filterServiceUtilsMockedStatic);
+            FilterUuidExpertRule rule = FilterUuidExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
+            assertEquals(expected, rule.evaluateRule(equipment, new FilterLoaderImpl(filterService.getFilterRepositories()), new HashMap<>()));
+        }
     }
 
     private static Stream<Arguments> provideArgumentsForGeneratorTest() {

@@ -3,6 +3,7 @@ package org.gridsuite.filter.server.expertrule;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.extensions.GeneratorStartup;
+import org.gridsuite.filter.server.FilterLoaderImpl;
 import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.NumberExpertRule;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
@@ -37,7 +38,7 @@ class NumberExpertRuleTest {
     })
     void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).build();
-        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService, new HashMap<>()));
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment, new FilterLoaderImpl(filterService.getFilterRepositories()), new HashMap<>()));
     }
 
     static Stream<Arguments> provideArgumentsForTestWithException() {
@@ -97,7 +98,7 @@ class NumberExpertRuleTest {
     })
     void testEvaluateRule(OperatorType operator, FieldType field, Double value, Set<Double> values, Identifiable<?> equipment, boolean expected) {
         NumberExpertRule rule = NumberExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
-        assertEquals(expected, rule.evaluateRule(equipment, filterService, new HashMap<>()));
+        assertEquals(expected, rule.evaluateRule(equipment, new FilterLoaderImpl(filterService.getFilterRepositories()), new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForGeneratorTest() {

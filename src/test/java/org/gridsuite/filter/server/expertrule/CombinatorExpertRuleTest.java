@@ -4,6 +4,7 @@ import com.powsybl.iidm.network.EnergySource;
 import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.Identifiable;
 import com.powsybl.iidm.network.IdentifiableType;
+import org.gridsuite.filter.server.FilterLoaderImpl;
 import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
@@ -34,7 +35,7 @@ class CombinatorExpertRuleTest {
     @MethodSource({"provideArgumentsForTest"})
     void testEvaluateRule(CombinatorType combinatorType, List<AbstractExpertRule> rules, Identifiable<?> equipment, boolean expected) {
         CombinatorExpertRule filter = CombinatorExpertRule.builder().combinator(combinatorType).rules(rules).build();
-        assertEquals(expected, filter.evaluateRule(equipment, filterService, new HashMap<>()));
+        assertEquals(expected, filter.evaluateRule(equipment, new FilterLoaderImpl(filterService.getFilterRepositories()), new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForTest() {

@@ -2,6 +2,7 @@ package org.gridsuite.filter.server.expertrule;
 
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
+import org.gridsuite.filter.server.FilterLoaderImpl;
 import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.StringExpertRule;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
@@ -35,7 +36,7 @@ class StringExpertRuleTest {
     })
     void testEvaluateRuleWithException(OperatorType operator, FieldType field, Identifiable<?> equipment, Class expectedException) {
         StringExpertRule rule = StringExpertRule.builder().operator(operator).field(field).build();
-        assertThrows(expectedException, () -> rule.evaluateRule(equipment, filterService, new HashMap<>()));
+        assertThrows(expectedException, () -> rule.evaluateRule(equipment, new FilterLoaderImpl(filterService.getFilterRepositories()), new HashMap<>()));
     }
 
     static Stream<Arguments> provideArgumentsForTestWithException() {
@@ -98,7 +99,7 @@ class StringExpertRuleTest {
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         StringExpertRule rule = StringExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
-        assertEquals(expected, rule.evaluateRule(equipment, filterService, new HashMap<>()));
+        assertEquals(expected, rule.evaluateRule(equipment, new FilterLoaderImpl(filterService.getFilterRepositories()), new HashMap<>()));
     }
 
     private static Stream<Arguments> provideArgumentsForGeneratorTest() {
