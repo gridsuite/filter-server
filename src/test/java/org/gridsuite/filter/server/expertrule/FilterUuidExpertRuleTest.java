@@ -18,7 +18,7 @@ import org.gridsuite.filter.server.FilterService;
 import org.gridsuite.filter.server.dto.expertfilter.expertrule.FilterUuidExpertRule;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.server.utils.FiltersUtils;
+import org.gridsuite.filter.server.utils.FilterServiceUtils;
 import org.gridsuite.filter.server.utils.expertfilter.FieldType;
 import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -121,12 +121,12 @@ class FilterUuidExpertRuleTest {
         );
     }
 
-    private void mockGetFilterEquipments(MockedStatic<FiltersUtils> filtersUtilsMockedStatic, Network network, UUID filterUuid, IdentifiableAttributes identifiableAttributes) {
-        filtersUtilsMockedStatic.when(() -> FiltersUtils.getFilterEquipmentsFromUuid(eq(network), eq(filterUuid), any(FilterLoader.class)))
+    private void mockGetFilterEquipments(MockedStatic<FilterServiceUtils> filterServiceUtilsMockedStatic, Network network, UUID filterUuid, IdentifiableAttributes identifiableAttributes) {
+        filterServiceUtilsMockedStatic.when(() -> FilterServiceUtils.getFilterEquipmentsFromUuid(eq(network), eq(filterUuid), any(FilterLoader.class)))
             .thenReturn(List.of(new FilterEquipments(filterUuid, List.of(identifiableAttributes), null)));
     }
 
-    private void initMockFilters(Network network, MockedStatic<FiltersUtils> filtersUtilsMock) {
+    private void initMockFilters(Network network, MockedStatic<FilterServiceUtils> filtersUtilsMock) {
         // Generator
         mockGetFilterEquipments(filtersUtilsMock, network, FILTER_GENERATOR_1_UUID, new IdentifiableAttributes("ID1", IdentifiableType.GENERATOR, 100D));
         mockGetFilterEquipments(filtersUtilsMock, network, FILTER_GENERATOR_2_UUID, new IdentifiableAttributes("ID2", IdentifiableType.GENERATOR, 100D));
@@ -170,8 +170,8 @@ class FilterUuidExpertRuleTest {
     })
     void testEvaluateRule(OperatorType operator, FieldType field, String value, Set<String> values, Identifiable<?> equipment, boolean expected) {
         FilterService filterService = Mockito.mock(FilterService.class);
-        try (MockedStatic<FiltersUtils> filtersUtilsMockedStatic = Mockito.mockStatic(FiltersUtils.class)) {
-            initMockFilters(equipment.getNetwork(), filtersUtilsMockedStatic);
+        try (MockedStatic<FilterServiceUtils> filterServiceUtilsMockedStatic = Mockito.mockStatic(FilterServiceUtils.class)) {
+            initMockFilters(equipment.getNetwork(), filterServiceUtilsMockedStatic);
             FilterUuidExpertRule rule = FilterUuidExpertRule.builder().operator(operator).field(field).value(value).values(values).build();
             assertEquals(expected, rule.evaluateRule(equipment, new FilterLoaderImpl(filterService.getFilterRepositories()), new HashMap<>()));
         }

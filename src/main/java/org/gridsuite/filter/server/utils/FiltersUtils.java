@@ -23,7 +23,6 @@ import org.gridsuite.filter.server.dto.criteriafilter.TwoWindingsTransformerFilt
 import org.gridsuite.filter.server.dto.criteriafilter.VoltageLevelFilter;
 import org.gridsuite.filter.server.dto.expertfilter.ExpertFilter;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
-import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.springframework.util.AntPathMatcher;
@@ -536,7 +535,7 @@ public final class FiltersUtils {
         }
     }
 
-    private static List<Identifiable<?>> getIdentifiables(AbstractFilter filter, Network network, FilterLoader filterLoader) {
+    public static List<Identifiable<?>> getIdentifiables(AbstractFilter filter, Network network, FilterLoader filterLoader) {
         List<Identifiable<?>> identifiables;
         switch (filter.getEquipmentType()) {
             case GENERATOR:
@@ -591,29 +590,5 @@ public final class FiltersUtils {
                 throw new PowsyblException("Unknown equipment type");
         }
         return identifiables;
-    }
-
-    public static List<IdentifiableAttributes> getIdentifiableAttributes(AbstractFilter filter, Network network, FilterLoader filterLoader) {
-        if (filter instanceof IdentifierListFilter identifierListFilter &&
-            (filter.getEquipmentType() == EquipmentType.GENERATOR ||
-                filter.getEquipmentType() == EquipmentType.LOAD)) {
-            return getIdentifiables(filter, network, filterLoader)
-                .stream()
-                .map(identifiable -> new IdentifiableAttributes(identifiable.getId(),
-                    identifiable.getType(),
-                    identifierListFilter.getDistributionKey(identifiable.getId())))
-                .toList();
-        } else {
-            return getIdentifiables(filter, network, filterLoader).stream()
-                .map(identifiable -> new IdentifiableAttributes(identifiable.getId(), identifiable.getType(), null))
-                .toList();
-        }
-    }
-
-    public static List<FilterEquipments> getFilterEquipmentsFromUuid(Network network, UUID uuid, FilterLoader filterLoader) {
-        List<AbstractFilter> filters = filterLoader.getFilters(List.of(uuid));
-        return filters.stream().filter(filter -> filter != null && filter.getType() != FilterType.EXPERT)
-            .map(filter -> filter.getFilterEquipments(FiltersUtils.getIdentifiableAttributes(filter, network, filterLoader)))
-            .toList();
     }
 }

@@ -13,7 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.server.FilterLoader;
 import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.server.utils.FiltersUtils;
+import org.gridsuite.filter.server.utils.FilterServiceUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -269,7 +269,7 @@ public final class ExpertFilterUtils {
                 }
             } else {
                 // We do not allow to use expert filters for IS_PART_OF or IS_NOT_PART_OF operators
-                List<FilterEquipments> filterEquipments = FiltersUtils.getFilterEquipmentsFromUuid(network, uuid, filterLoader);
+                List<FilterEquipments> filterEquipments = FilterServiceUtils.getFilterEquipmentsFromUuid(network, uuid, filterLoader);
                 cachedUuidFilters.put(uuid, !CollectionUtils.isEmpty(filterEquipments) ? filterEquipments.get(0) : null);
                 res.addAll(filterEquipments);
             }

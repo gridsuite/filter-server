@@ -28,8 +28,8 @@ import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.Ide
 import org.gridsuite.filter.server.repositories.proxies.scriptfilter.ScriptFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.scriptfilter.ScriptFilterRepository;
 import org.gridsuite.filter.server.utils.EquipmentType;
+import org.gridsuite.filter.server.utils.FilterServiceUtils;
 import org.gridsuite.filter.server.utils.FilterType;
-import org.gridsuite.filter.server.utils.FiltersUtils;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -246,7 +246,7 @@ public class FilterService {
             throw new PowsyblException("Filter implementation not yet supported: " + filter.getClass().getSimpleName());
         }
         Network network = getNetwork(networkUuid, variantId);
-        return FiltersUtils.getIdentifiableAttributes(filter, network, filterLoader);
+        return FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader);
     }
 
     public List<IdentifiableAttributes> evaluateFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
@@ -285,7 +285,7 @@ public class FilterService {
         return ids.stream()
             .map(id -> getFilter(id).orElse(null))
             .filter(filter -> filter != null && !filterTypesToExclude.contains(filter.getType()))
-            .map(filter -> filter.getFilterEquipments(FiltersUtils.getIdentifiableAttributes(filter, network, filterLoader)))
+            .map(filter -> filter.getFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
             .toList();
     }
 
