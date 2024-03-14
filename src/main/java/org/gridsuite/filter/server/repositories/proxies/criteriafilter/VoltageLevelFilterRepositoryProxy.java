@@ -7,16 +7,16 @@
 
 package org.gridsuite.filter.server.repositories.proxies.criteriafilter;
 
-import org.gridsuite.filter.server.dto.criteriafilter.AbstractEquipmentFilterForm;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.CriteriaFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.VoltageLevelFilter;
+import org.gridsuite.filter.criteriafilter.AbstractEquipmentFilterForm;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.criteriafilter.CriteriaFilter;
+import org.gridsuite.filter.criteriafilter.VoltageLevelFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.criteriafilter.VoltageLevelFilterEntity;
 import org.gridsuite.filter.server.repositories.criteriafilter.VoltageLevelFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterType;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -53,14 +53,14 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
     @Override
     public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         VoltageLevelFilterEntity voltageLevelFilterEntity = (VoltageLevelFilterEntity) entity;
-        return new VoltageLevelFilter(
-            voltageLevelFilterEntity.getEquipmentId(),
-            voltageLevelFilterEntity.getEquipmentName(),
-            setToSorterSet(voltageLevelFilterEntity.getCountries()),
-            convert(voltageLevelFilterEntity.getFreeProperties()),
-            convert(voltageLevelFilterEntity.getSubstationFreeProperties()),
-            convert(voltageLevelFilterEntity.getNominalVoltage())
-        );
+        return VoltageLevelFilter.builder()
+            .equipmentID(voltageLevelFilterEntity.getEquipmentId())
+            .equipmentName(voltageLevelFilterEntity.getEquipmentName())
+            .countries(setToSorterSet(voltageLevelFilterEntity.getCountries()))
+            .freeProperties(convert(voltageLevelFilterEntity.getFreeProperties()))
+            .substationFreeProperties(convert(voltageLevelFilterEntity.getSubstationFreeProperties()))
+            .nominalVoltage(convert(voltageLevelFilterEntity.getNominalVoltage()))
+            .build();
     }
 
     @Override

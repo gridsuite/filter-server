@@ -7,16 +7,16 @@
 
 package org.gridsuite.filter.server.repositories.proxies.criteriafilter;
 
-import org.gridsuite.filter.server.dto.criteriafilter.AbstractEquipmentFilterForm;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.CriteriaFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.SubstationFilter;
+import org.gridsuite.filter.criteriafilter.AbstractEquipmentFilterForm;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.criteriafilter.CriteriaFilter;
+import org.gridsuite.filter.criteriafilter.SubstationFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.criteriafilter.SubstationFilterEntity;
 import org.gridsuite.filter.server.repositories.criteriafilter.SubstationFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterType;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -53,12 +53,12 @@ public class SubstationFilterRepositoryProxy extends AbstractFilterRepositoryPro
     @Override
     public AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity) {
         SubstationFilterEntity substationFilterEntity = (SubstationFilterEntity) entity;
-        return new SubstationFilter(
-            substationFilterEntity.getEquipmentId(),
-            substationFilterEntity.getEquipmentName(),
-            setToSorterSet(substationFilterEntity.getCountries()),
-            convert(substationFilterEntity.getFreeProperties())
-        );
+        return SubstationFilter.builder()
+            .equipmentID(substationFilterEntity.getEquipmentId())
+            .equipmentName(substationFilterEntity.getEquipmentName())
+            .countries(setToSorterSet(substationFilterEntity.getCountries()))
+            .freeProperties(convert(substationFilterEntity.getFreeProperties()))
+            .build();
     }
 
     @Override

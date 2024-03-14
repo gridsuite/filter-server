@@ -12,10 +12,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
-import org.gridsuite.filter.server.utils.expertfilter.DataType;
-import org.gridsuite.filter.server.utils.expertfilter.FieldType;
-import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
+import org.gridsuite.filter.utils.expertfilter.CombinatorType;
+import org.gridsuite.filter.utils.expertfilter.DataType;
+import org.gridsuite.filter.utils.expertfilter.FieldType;
+import org.gridsuite.filter.utils.expertfilter.OperatorType;
 
 import java.util.List;
 import java.util.UUID;

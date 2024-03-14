@@ -45,6 +45,7 @@
         <powsybl-ws-dependencies.version>2.7.0</powsybl-ws-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
         <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
+        <gridsuite-filter.version>1.0.0-SNAPSHOT</gridsuite-filter.version>
     </properties>
 
     <build>
@@ -83,6 +84,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.gridsuite</groupId>
+                <artifactId>gridsuite-filter</artifactId>
+                <version>${gridsuite-filter.version}</version>
+            </dependency>
+
             <!-- overrides of imports -->
 
             <!-- imports -->
@@ -98,6 +105,10 @@
 
     <dependencies>
         <!-- Compilation dependencies -->
+        <dependency>
+            <groupId>org.gridsuite</groupId>
+            <artifactId>gridsuite-filter</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>

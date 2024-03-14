@@ -8,17 +8,17 @@
 package org.gridsuite.filter.server.repositories.proxies.expertfiler;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.AbstractEquipmentFilterForm;
-import org.gridsuite.filter.server.dto.expertfilter.ExpertFilter;
-import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.criteriafilter.AbstractEquipmentFilterForm;
+import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleEntity;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterType;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.gridsuite.filter.server.utils.expertfilter.OperatorType.isMultipleCriteriaOperator;
+import static org.gridsuite.filter.utils.expertfilter.OperatorType.isMultipleCriteriaOperator;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>

@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.utils.EquipmentType;
+import org.gridsuite.filter.utils.EquipmentType;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

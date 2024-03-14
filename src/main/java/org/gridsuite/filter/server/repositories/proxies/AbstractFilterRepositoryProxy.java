@@ -9,14 +9,15 @@ package org.gridsuite.filter.server.repositories.proxies;
 
 import com.powsybl.commons.PowsyblException;
 
-import org.gridsuite.filter.server.dto.*;
-import org.gridsuite.filter.server.dto.criteriafilter.*;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.criteriafilter.*;
+import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.entities.*;
 import org.gridsuite.filter.server.entities.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterType;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;

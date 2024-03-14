@@ -11,11 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.IFilterAttributes;
-import org.gridsuite.filter.server.dto.IdsByGroup;
-import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
-import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.IdsByGroup;
+import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -111,25 +111,6 @@ public class FilterController {
         @ApiResponse(responseCode = "404", description = "The filters don't exist")})
     public ResponseEntity<List<AbstractFilter>> getFiltersMetadata(@RequestParam("ids") List<UUID> ids) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
-    }
-
-    @PutMapping(value = "/filters/{id}/replace-with-script")
-    @Operation(summary = "Replace a filter with a script filter")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter have been replaced successfully")})
-    public ResponseEntity<AbstractFilter> replaceFilterWithScript(@PathVariable("id") UUID id, @RequestHeader("userId") String userId) {
-        return ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(service.replaceFilterWithScript(id, userId));
-    }
-
-    @PostMapping(value = "/filters/{id}/new-script")
-    @Operation(summary = "Create a new script filter from a filter")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The script filter have been created successfully")})
-    public ResponseEntity<AbstractFilter> newScriptFromFilter(@PathVariable("id") UUID filterId,
-                                                              @RequestParam(required = false, value = "newId") UUID newId) {
-        return ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(service.newScriptFromFilter(filterId, newId));
     }
 
     @GetMapping(value = "/filters/{id}/export", produces = MediaType.APPLICATION_JSON_VALUE)
