@@ -7,22 +7,50 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.IFilterAttributes;
-import org.gridsuite.filter.IdsByGroup;
 import org.gridsuite.filter.FilterLoader;
-import org.gridsuite.filter.criteriafilter.*;
+import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.criteriafilter.CriteriaFilter;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.*;
+import org.gridsuite.filter.server.repositories.criteriafilter.BatteryFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.BusBarSectionFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.DanglingLineFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.GeneratorFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.HvdcLineFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.LccConverterStationFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.LineFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.LoadFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.ShuntCompensatorFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.StaticVarCompensatorFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.SubstationFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.ThreeWindingsTransformerFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.TwoWindingsTransformerFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.VoltageLevelFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.VscConverterStationFilterRepository;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.*;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.BatteryFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.BusBarSectionFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.DanglingLineFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.GeneratorFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.HvdcLineFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LccConverterStationFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LineFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LoadFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.ShuntCompensatorFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.StaticVarCompensatorFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.SubstationFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.ThreeWindingsTransformerFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.TwoWindingsTransformerFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.VoltageLevelFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.VscConverterStationFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.scriptfilter.ScriptFilterRepositoryProxy;
@@ -36,7 +64,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
@@ -239,7 +273,7 @@ public class FilterService {
         return ids.stream()
             .map(id -> getFilter(id).orElse(null))
             .filter(filter -> filter != null && !filterTypesToExclude.contains(filter.getType()))
-            .map(filter -> filter.getFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
+            .map(filter -> filter.toFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
             .toList();
     }
 }
