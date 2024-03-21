@@ -6,7 +6,8 @@
  */
 package org.gridsuite.filter.server;
 
-import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 
 import java.util.List;

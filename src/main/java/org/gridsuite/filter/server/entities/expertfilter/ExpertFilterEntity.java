@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.utils.EquipmentType;
+import org.gridsuite.filter.utils.EquipmentType;
 
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>

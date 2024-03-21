@@ -8,14 +8,14 @@ package org.gridsuite.filter.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.criteriafilter.CriteriaFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.LineFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.NumericalFilter;
+import org.gridsuite.filter.criteriafilter.CriteriaFilter;
+import org.gridsuite.filter.criteriafilter.LineFilter;
+import org.gridsuite.filter.criteriafilter.NumericalFilter;
 import org.gridsuite.filter.server.entities.criteriafilter.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.criteriafilter.GeneratorFilterEntity;
 import org.gridsuite.filter.server.repositories.criteriafilter.GeneratorFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.criteriafilter.GeneratorFilterRepositoryProxy;
-import org.gridsuite.filter.server.utils.RangeType;
+import org.gridsuite.filter.utils.RangeType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

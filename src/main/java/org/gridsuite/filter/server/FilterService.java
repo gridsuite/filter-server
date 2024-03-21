@@ -7,36 +7,70 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.IFilterAttributes;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.FilterLoader;
+import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.criteriafilter.CriteriaFilter;
+import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
-import org.gridsuite.filter.server.dto.criteriafilter.*;
-import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
-import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.server.dto.scriptfilter.ScriptFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.*;
+import org.gridsuite.filter.server.repositories.criteriafilter.BatteryFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.BusBarSectionFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.DanglingLineFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.GeneratorFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.HvdcLineFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.LccConverterStationFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.LineFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.LoadFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.ShuntCompensatorFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.StaticVarCompensatorFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.SubstationFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.ThreeWindingsTransformerFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.TwoWindingsTransformerFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.VoltageLevelFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.VscConverterStationFilterRepository;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.*;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.BatteryFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.BusBarSectionFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.DanglingLineFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.GeneratorFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.HvdcLineFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LccConverterStationFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LineFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LoadFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.ShuntCompensatorFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.StaticVarCompensatorFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.SubstationFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.ThreeWindingsTransformerFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.TwoWindingsTransformerFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.VoltageLevelFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.VscConverterStationFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.scriptfilter.ScriptFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.scriptfilter.ScriptFilterRepository;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterServiceUtils;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterServiceUtils;
+import org.gridsuite.filter.utils.FilterType;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
@@ -54,14 +88,11 @@ public class FilterService {
 
     private final Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories = new HashMap<>();
 
-    private final FiltersToGroovyScript filtersToScript;
-
     private final NetworkStoreService networkStoreService;
 
     private final NotificationService notificationService;
 
-    public FilterService(FiltersToGroovyScript filtersToScript,
-                         final ScriptFilterRepository scriptFiltersRepository,
+    public FilterService(final ScriptFilterRepository scriptFiltersRepository,
                          final LineFilterRepository lineFilterRepository,
                          final GeneratorFilterRepository generatorFilterRepository,
                          final LoadFilterRepository loadFilterRepository,
@@ -81,8 +112,6 @@ public class FilterService {
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
                          NotificationService notificationService) {
-        this.filtersToScript = filtersToScript;
-
         filterRepositories.put(EquipmentType.LINE.name(), new LineFilterRepositoryProxy(lineFilterRepository));
         filterRepositories.put(EquipmentType.GENERATOR.name(), new GeneratorFilterRepositoryProxy(generatorFilterRepository));
         filterRepositories.put(EquipmentType.LOAD.name(), new LoadFilterRepositoryProxy(loadFilterRepository));
@@ -189,47 +218,6 @@ public class FilterService {
         filterRepositories.values().forEach(AbstractFilterRepositoryProxy::deleteAll);
     }
 
-    private String generateGroovyScriptFromFilter(AbstractFilter filter) {
-        return filtersToScript.generateGroovyScriptFromFilters(filter);
-    }
-
-    @Transactional
-    public AbstractFilter replaceFilterWithScript(UUID id, String userId) {
-        Objects.requireNonNull(id);
-        AbstractFilter result;
-        Optional<AbstractFilter> filter = getFilter(id);
-        if (filter.isPresent()) {
-            if (filter.get().getType() == FilterType.SCRIPT) {
-                throw new PowsyblException(WRONG_FILTER_TYPE);
-            } else {
-                String script = generateGroovyScriptFromFilter(filter.get());
-                getRepository(filter.get()).deleteById(filter.get().getId());
-                result = getRepository(new ScriptFilter()).insert(ScriptFilter.builder().id(filter.get().getId()).script(script).build());
-            }
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
-        }
-        notificationService.emitElementUpdated(id, userId);
-        return result;
-    }
-
-    @Transactional
-    public AbstractFilter newScriptFromFilter(UUID filterId, UUID newId) {
-        Objects.requireNonNull(filterId);
-
-        Optional<AbstractFilter> filter = getFilter(filterId);
-        if (filter.isPresent()) {
-            if (filter.get().getType() == FilterType.SCRIPT) {
-                throw new PowsyblException(WRONG_FILTER_TYPE);
-            } else {
-                String script = generateGroovyScriptFromFilter(filter.get());
-                return getRepository(new ScriptFilter()).insert(ScriptFilter.builder().id(newId == null ? UUID.randomUUID() : newId).script(script).build());
-            }
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterId + NOT_FOUND);
-        }
-    }
-
     private Network getNetwork(UUID networkUuid, String variantId) {
         Network network = networkStoreService.getNetwork(networkUuid);
         if (network == null) {
@@ -285,11 +273,7 @@ public class FilterService {
         return ids.stream()
             .map(id -> getFilter(id).orElse(null))
             .filter(filter -> filter != null && !filterTypesToExclude.contains(filter.getType()))
-            .map(filter -> filter.getFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
+            .map(filter -> filter.toFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
             .toList();
-    }
-
-    public Map<String, AbstractFilterRepositoryProxy<?, ?>> getFilterRepositories() {
-        return filterRepositories;
     }
 }
