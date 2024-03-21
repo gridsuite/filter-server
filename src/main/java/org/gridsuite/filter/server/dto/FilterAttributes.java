@@ -10,9 +10,10 @@ package org.gridsuite.filter.server.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterType;
 
 import java.util.Date;
 import java.util.UUID;

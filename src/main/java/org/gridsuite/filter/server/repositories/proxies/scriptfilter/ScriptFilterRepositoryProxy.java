@@ -8,15 +8,15 @@
 package org.gridsuite.filter.server.repositories.proxies.scriptfilter;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.server.dto.criteriafilter.AbstractEquipmentFilterForm;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.scriptfilter.ScriptFilter;
+import org.gridsuite.filter.criteriafilter.AbstractEquipmentFilterForm;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.scriptfilter.ScriptFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.scriptfilter.ScriptFilterEntity;
 import org.gridsuite.filter.server.repositories.scriptfilter.ScriptFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterType;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>

@@ -25,23 +25,24 @@ import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import jakarta.servlet.ServletException;
 import org.apache.commons.collections4.OrderedMap;
 import org.apache.commons.collections4.map.LinkedMap;
-import org.gridsuite.filter.server.dto.AbstractFilter;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.criteriafilter.DanglingLineFilter;
+import org.gridsuite.filter.criteriafilter.*;
+import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.expertfilter.expertrule.*;
+import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
+import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.gridsuite.filter.server.dto.FilterAttributes;
-import org.gridsuite.filter.server.dto.IFilterAttributes;
-import org.gridsuite.filter.server.dto.criteriafilter.DanglingLineFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.*;
-import org.gridsuite.filter.server.dto.expertfilter.ExpertFilter;
-import org.gridsuite.filter.server.dto.expertfilter.expertrule.*;
-import org.gridsuite.filter.server.dto.identifierlistfilter.FilterEquipments;
-import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilter;
-import org.gridsuite.filter.server.dto.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
-import org.gridsuite.filter.server.dto.scriptfilter.ScriptFilter;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.utils.*;
-import org.gridsuite.filter.server.utils.expertfilter.CombinatorType;
-import org.gridsuite.filter.server.utils.expertfilter.FieldType;
-import org.gridsuite.filter.server.utils.expertfilter.OperatorType;
+import org.gridsuite.filter.server.utils.FieldsMatcher;
+import org.gridsuite.filter.server.utils.MatcherJson;
+import org.gridsuite.filter.utils.*;
+import org.gridsuite.filter.utils.expertfilter.CombinatorType;
+import org.gridsuite.filter.utils.expertfilter.FieldType;
+import org.gridsuite.filter.utils.expertfilter.OperatorType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -261,35 +262,30 @@ public class FilterEntityControllerTest {
         CriteriaFilter hvdcLineCriteriaFilter = new CriteriaFilter(
                 filterId1,
                 dateModification,
-                new HvdcLineFilter(
-                        "equipmentID",
-                        "equipmentName",
-                        "substationName1",
-                        "substationName2",
-                        COUNTRIES1,
-                        COUNTRIES2,
-                        new NumericalFilter(RangeType.RANGE, 50., null)
-                )
+                HvdcLineFilter.builder()
+                    .equipmentID("equipmentID")
+                    .equipmentName("equipmentName")
+                    .substationName1("substationName1")
+                    .substationName2("substationName2")
+                    .countries1(COUNTRIES1)
+                    .countries2(COUNTRIES2)
+                    .nominalVoltage(new NumericalFilter(RangeType.RANGE, 50., null))
+                    .build()
         );
         modifyFormFilter(filterId1, hvdcLineCriteriaFilter, userId);
         checkFormFilter(filterId1, hvdcLineCriteriaFilter);
-
-        ScriptFilter scriptFilter = new ScriptFilter(filterId2, modificationDate, "test");
-        insertFilter(filterId2, scriptFilter);
-        checkScriptFilter(filterId2, scriptFilter);
 
         var res = mvc.perform(get(URL_TEMPLATE))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
         filterAttributes = objectMapper.readValue(res, new TypeReference<>() {
         });
-        assertEquals(2, filterAttributes.size());
+        assertEquals(1, filterAttributes.size());
         if (!filterAttributes.get(0).getId().equals(filterId1)) {
             Collections.reverse(filterAttributes);
         }
 
         matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
-        matchFilterInfos(filterAttributes.get(1), filterId2, FilterType.SCRIPT, null, modificationDate);
 
         filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
@@ -329,13 +325,9 @@ public class FilterEntityControllerTest {
         modifyFormFilter(filterId1, generatorFormFilter2, userId);
 
         // delete
-        mvc.perform(delete(URL_TEMPLATE + "/" + filterId2)).andExpect(status().isOk());
-
         mvc.perform(delete(URL_TEMPLATE + "/" + filterId2)).andExpect(status().isNotFound());
 
         mvc.perform(get(URL_TEMPLATE + "/" + filterId2)).andExpect(status().isNotFound());
-
-        mvc.perform(put(URL_TEMPLATE + "/" + filterId2).contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(scriptFilter)).header(USER_ID_HEADER, userId)).andExpect(status().isNotFound());
 
         filterService.deleteAll();
     }
@@ -362,22 +354,6 @@ public class FilterEntityControllerTest {
 
         CriteriaFilter lineCriteriaFilterBEFR = insertLineFilter(filterId3, null, null, null, new TreeSet<>(Set.of("BE")), new TreeSet<>(Set.of("FR")),
                 rangeTypes, values1, values2, NETWORK_UUID_6, null, bothMatch, false);
-
-        // update form filter <-> script filter (rejected)
-        ScriptFilter scriptFilter = new ScriptFilter(filterId4, modificationDate, "test");
-        insertFilter(filterId4, scriptFilter);
-        checkScriptFilter(filterId4, scriptFilter);
-        assertThrows(ServletException.class, () -> mvc.perform(put(URL_TEMPLATE + "/" + filterId3)
-                .content(objectMapper.writeValueAsString(scriptFilter))
-                .contentType(APPLICATION_JSON)
-                .header(USER_ID_HEADER, userId)));
-        assertThrows(ServletException.class, () -> mvc.perform(put(URL_TEMPLATE + "/" + filterId4)
-                .content(objectMapper.writeValueAsString(lineCriteriaFilterBEFR))
-                .contentType(APPLICATION_JSON)
-                .header(USER_ID_HEADER, userId)));
-
-        mvc.perform(delete(URL_TEMPLATE + "/" + filterId3)).andExpect(status().isOk());
-        mvc.perform(delete(URL_TEMPLATE + "/" + filterId4)).andExpect(status().isOk());
 
         // more country filters
         rangeTypes.add(RangeType.GREATER_OR_EQUAL);
@@ -722,63 +698,6 @@ public class FilterEntityControllerTest {
             "P2", "P2", Set.of("FR", "IT"), NETWORK_UUID, null, "[{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]");
         insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
             "P2", "P2", Set.of("ES", "PT"), NETWORK_UUID, null, "[]");
-    }
-
-    @Test
-    public void testFilterToScript() throws Exception {
-        String userId = "userId";
-        UUID filterId1 = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
-        UUID filterId2 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f");
-        UUID filterId3 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
-        Date modificationDate = new Date();
-
-        LineFilter lineFilter = LineFilter.builder()
-            .equipmentID("equipmentID").equipmentName("equipmentName")
-            .substationName1("substationName1").substationName2("substationName2")
-            .countries1(COUNTRIES1).countries2(COUNTRIES2)
-            .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 5., 8.))
-            .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 6., null))
-            .build();
-
-        CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
-                filterId1,
-                modificationDate,
-                lineFilter
-        );
-
-        insertFilter(filterId1, lineCriteriaFilter);
-        checkFormFilter(filterId1, lineCriteriaFilter);
-
-        // new script from filter
-        mvc.perform(post(URL_TEMPLATE + "/" + filterId1 + "/new-script?newId=" + UUID.randomUUID())).andExpect(status().isOk());
-
-        mvc.perform(get(URL_TEMPLATE))
-            .andExpect(status().isOk())
-            .andExpect(content().json("[{\"type\":\"CRITERIA\"}, {\"type\":\"SCRIPT\"}]"));
-
-        // replace filter with script
-        mvc.perform(put(URL_TEMPLATE + "/" + filterId1 + "/replace-with-script").header(USER_ID_HEADER, userId)).andExpect(status().isOk());
-
-        checkElementUpdatedMessageSent(filterId1, userId);
-
-        mvc.perform(get(URL_TEMPLATE))
-            .andExpect(status().isOk())
-            .andExpect(content().json("[{\"type\":\"SCRIPT\"}, {\"type\":\"SCRIPT\"}]"));
-
-        checkScriptFilter(filterId1, new ScriptFilter(filterId1, modificationDate, "&& equipment.terminal1.voltageLevel.substation.name.equals('substationName1')"));
-
-        ScriptFilter scriptFilter = new ScriptFilter(filterId2, modificationDate, "test");
-
-        insertFilter(filterId2, scriptFilter);
-        checkScriptFilter(filterId2, new ScriptFilter(filterId2, modificationDate, "test"));
-
-        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(post(URL_TEMPLATE + "/" + filterId2 + "/new-script?newId=" + UUID.randomUUID()).header(USER_ID_HEADER, userId)));
-        assertThrows("Wrong filter type, should never happen", Exception.class, () -> mvc.perform(put(URL_TEMPLATE + "/" + filterId2 + "/replace-with-script").header(USER_ID_HEADER, userId)));
-        mvc.perform(post(URL_TEMPLATE + "/" + filterId3 + "/new-script?newId=" + filterId2)).andExpect(status().isNotFound());
-        mvc.perform(put(URL_TEMPLATE + "/" + filterId3 + "/replace-with-script").header(USER_ID_HEADER, userId)).andExpect(status().isNotFound());
-
-        assertThrows("Filter implementation not yet supported: ScriptFilter", ServletException.class, () -> mvc.perform(get(URL_TEMPLATE + "/" + filterId2 + "/export?networkUuid=" + NETWORK_UUID)
-            .contentType(APPLICATION_JSON)));
     }
 
     @Test
@@ -1423,8 +1342,12 @@ public class FilterEntityControllerTest {
                                           UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
         NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
         SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        VoltageLevelFilter voltageLevelFilter = new VoltageLevelFilter(equipmentID, equipmentName,
-            sortedCountries, null, null, numericalFilter);
+        VoltageLevelFilter voltageLevelFilter = VoltageLevelFilter.builder()
+            .equipmentID(equipmentID)
+            .equipmentName(equipmentName)
+            .countries(sortedCountries)
+            .nominalVoltage(numericalFilter)
+            .build();
         Date modificationDate = new Date();
 
         CriteriaFilter filter = new CriteriaFilter(
@@ -1461,7 +1384,11 @@ public class FilterEntityControllerTest {
     private void insertSubstationFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
                                         UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
         SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        SubstationFilter substationFilter = new SubstationFilter(equipmentID, equipmentName, sortedCountries, null);
+        SubstationFilter substationFilter = SubstationFilter.builder()
+            .equipmentID(equipmentID)
+            .equipmentName(equipmentName)
+            .countries(sortedCountries)
+            .build();
         Date modificationDate = new Date();
 
         CriteriaFilter filter = new CriteriaFilter(
@@ -1501,12 +1428,6 @@ public class FilterEntityControllerTest {
         matchFormFilterInfos(foundFilter, criteriaFilter);
     }
 
-    private void checkScriptFilter(UUID filterId, ScriptFilter scriptFilter) throws Exception {
-        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        ScriptFilter foundFilter = objectMapper.readValue(foundFilterAsString, ScriptFilter.class);
-        matchScriptFilterInfos(foundFilter, scriptFilter);
-    }
-
     private void checkIdentifierListFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         IdentifierListFilter foundFilter = objectMapper.readValue(foundFilterAsString, IdentifierListFilter.class);
@@ -1540,11 +1461,6 @@ public class FilterEntityControllerTest {
 
     private void matchEquipmentFormFilter(AbstractEquipmentFilterForm equipmentFilterForm1, AbstractEquipmentFilterForm equipmentFilterForm2) {
         assertThat(equipmentFilterForm1, new FieldsMatcher<>(equipmentFilterForm2));
-    }
-
-    private void matchScriptFilterInfos(ScriptFilter scriptFilter1, ScriptFilter scriptFilter2) {
-        matchFilterInfos(scriptFilter1, scriptFilter2);
-        assertTrue(scriptFilter1.getScript().contains(scriptFilter2.getScript()));
     }
 
     private void matchIdentifierListFilterInfos(IdentifierListFilter identifierListFilter1, IdentifierListFilter identifierListFilter2) {
@@ -1998,15 +1914,9 @@ public class FilterEntityControllerTest {
 
     @Test
     public void lineFilterIsEmpty() {
-        HvdcLineFilter hvdcFilter = new HvdcLineFilter(
-                null,
-                null,
-                null,
-                null,
-                new TreeSet<>(),
-                new TreeSet<>(),
-                new NumericalFilter(RangeType.RANGE, 50., null)
-        );
+        HvdcLineFilter hvdcFilter = HvdcLineFilter.builder()
+            .nominalVoltage(new NumericalFilter(RangeType.RANGE, 50., null))
+            .build();
         assertFalse(hvdcFilter.isEmpty());
     }
 

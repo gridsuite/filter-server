@@ -7,16 +7,16 @@
 
 package org.gridsuite.filter.server.repositories.proxies.criteriafilter;
 
-import org.gridsuite.filter.server.dto.criteriafilter.AbstractEquipmentFilterForm;
-import org.gridsuite.filter.server.dto.AbstractFilter;
-import org.gridsuite.filter.server.dto.criteriafilter.ShuntCompensatorFilter;
+import org.gridsuite.filter.criteriafilter.AbstractEquipmentFilterForm;
+import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.criteriafilter.ShuntCompensatorFilter;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.criteriafilter.AbstractInjectionFilterEntity;
 import org.gridsuite.filter.server.entities.criteriafilter.ShuntCompensatorFilterEntity;
 import org.gridsuite.filter.server.repositories.criteriafilter.ShuntCompensatorFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.utils.EquipmentType;
-import org.gridsuite.filter.server.utils.FilterType;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterType;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
