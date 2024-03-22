@@ -70,7 +70,7 @@ import static org.gridsuite.filter.server.repositories.proxies.AbstractFilterRep
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -157,13 +157,13 @@ public class FilterEntityControllerTest {
         Network network4 = ShuntTestCaseFactory.create(new NetworkFactoryImpl());
         Network network5 = ThreeWindingsTransformerNetworkFactory.create(new NetworkFactoryImpl());
         network6 = EurostagTutorialExample1Factory.createWithFixedCurrentLimits(new NetworkFactoryImpl());
-        given(networkStoreService.getNetwork(eq(NETWORK_UUID), nullable(PreloadingStrategy.class))).willReturn(network);
-        given(networkStoreService.getNetwork(eq(NETWORK_UUID_2), nullable(PreloadingStrategy.class))).willReturn(network2);
-        given(networkStoreService.getNetwork(eq(NETWORK_UUID_3), nullable(PreloadingStrategy.class))).willReturn(network3);
-        given(networkStoreService.getNetwork(eq(NETWORK_UUID_4), nullable(PreloadingStrategy.class))).willReturn(network4);
-        given(networkStoreService.getNetwork(eq(NETWORK_UUID_5), nullable(PreloadingStrategy.class))).willReturn(network5);
-        given(networkStoreService.getNetwork(eq(NETWORK_UUID_6), nullable(PreloadingStrategy.class))).willReturn(network6);
-        given(networkStoreService.getNetwork(eq(NETWORK_NOT_FOUND_UUID), nullable(PreloadingStrategy.class))).willReturn(null);
+        given(networkStoreService.getNetwork(eq(NETWORK_UUID), any(PreloadingStrategy.class))).willReturn(network);
+        given(networkStoreService.getNetwork(eq(NETWORK_UUID_2), any(PreloadingStrategy.class))).willReturn(network2);
+        given(networkStoreService.getNetwork(eq(NETWORK_UUID_3), any(PreloadingStrategy.class))).willReturn(network3);
+        given(networkStoreService.getNetwork(eq(NETWORK_UUID_4), any(PreloadingStrategy.class))).willReturn(network4);
+        given(networkStoreService.getNetwork(eq(NETWORK_UUID_5), any(PreloadingStrategy.class))).willReturn(network5);
+        given(networkStoreService.getNetwork(eq(NETWORK_UUID_6), any(PreloadingStrategy.class))).willReturn(network6);
+        given(networkStoreService.getNetwork(eq(NETWORK_NOT_FOUND_UUID), any(PreloadingStrategy.class))).willReturn(null);
 
         Configuration.setDefaults(new Configuration.Defaults() {
 
