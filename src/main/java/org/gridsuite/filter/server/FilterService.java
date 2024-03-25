@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
+import com.powsybl.network.store.client.PreloadingStrategy;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
@@ -219,7 +220,7 @@ public class FilterService {
     }
 
     private Network getNetwork(UUID networkUuid, String variantId) {
-        Network network = networkStoreService.getNetwork(networkUuid);
+        Network network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
         if (network == null) {
             throw new PowsyblException("Network '" + networkUuid + "' not found");
         }
