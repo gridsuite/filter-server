@@ -58,6 +58,7 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
             .substationName(twoWindingsTransformerFilterEntity.getSubstationName())
             .countries(setToSorterSet(twoWindingsTransformerFilterEntity.getCountries()))
             .substationFreeProperties(convert(twoWindingsTransformerFilterEntity.getSubstationFreeProperties()))
+            .freeProperties(convert(twoWindingsTransformerFilterEntity.getFreeProperties()))
             .nominalVoltage1(convert(twoWindingsTransformerFilterEntity.getNominalVoltage1()))
             .nominalVoltage2(convert(twoWindingsTransformerFilterEntity.getNominalVoltage2()))
             .build();
@@ -72,7 +73,8 @@ public class TwoWindingsTransformerFilterRepositoryProxy extends AbstractFilterR
             .substationName(twoWindingsTransformerFilter.getSubstationName())
             .nominalVoltage1(convert(twoWindingsTransformerFilter.getNominalVoltage1()))
             .nominalVoltage2(convert(twoWindingsTransformerFilter.getNominalVoltage2()))
-            .substationFreeProperties(convert(twoWindingsTransformerFilter.getSubstationFreeProperties()));
+            .substationFreeProperties(convert(twoWindingsTransformerFilter.getSubstationFreeProperties()))
+            .freeProperties(convert(twoWindingsTransformerFilter.getFreeProperties()));
         buildGenericFilter(twoWindingsTransformerFilterEntityBuilder, criteriaFilter);
         return twoWindingsTransformerFilterEntityBuilder.build();
     }

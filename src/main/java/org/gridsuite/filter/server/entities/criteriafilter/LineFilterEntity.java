@@ -67,4 +67,10 @@ public class LineFilterEntity extends AbstractGenericFilterEntity {
         referencedColumnName = "id",
         foreignKey = @ForeignKey)
     FreePropertiesFilterEntity substationFreeProperties2;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "freeProperties_id",
+            referencedColumnName = "id",
+            foreignKey = @ForeignKey)
+    FreePropertiesFilterEntity freeProperties;
 }
