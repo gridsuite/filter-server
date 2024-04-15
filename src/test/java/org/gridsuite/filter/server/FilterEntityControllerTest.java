@@ -1619,7 +1619,7 @@ public class FilterEntityControllerTest {
             .field(FieldType.ID).operator(OperatorType.IS).build();
         rules.add(stringRule);
         PropertiesExpertRule propertiesExpertRule = PropertiesExpertRule.builder().propertyName("region").propertyValues(List.of("north"))
-                .field(FieldType.FREE_PROPERTIES).operator(OperatorType.EQUALS).build();
+                .field(FieldType.FREE_PROPERTIES).operator(OperatorType.IN).build();
         rules.add(propertiesExpertRule);
 
         CombinatorExpertRule subRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
