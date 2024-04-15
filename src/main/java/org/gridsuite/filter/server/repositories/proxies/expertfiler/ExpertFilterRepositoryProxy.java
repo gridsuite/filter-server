@@ -66,101 +66,84 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                         .build();
             }
             case BOOLEAN -> {
-                if (filterEntity instanceof ExpertRuleValueEntity booleanFilterEntity) {
-                    return BooleanExpertRule.builder()
-                            .field(booleanFilterEntity.getField())
-                            .operator(booleanFilterEntity.getOperator())
-                            .value(Boolean.parseBoolean(booleanFilterEntity.getValue()))
-                            .build();
-                } else {
-                    throw new PowsyblException("Invalid entity type for BOOLEAN rule");
-                }
-
+                ExpertRuleValueEntity booleanFilterEntity = (ExpertRuleValueEntity) filterEntity;
+                return BooleanExpertRule.builder()
+                        .field(booleanFilterEntity.getField())
+                        .operator(booleanFilterEntity.getOperator())
+                        .value(Boolean.parseBoolean(booleanFilterEntity.getValue()))
+                        .build();
             }
             case NUMBER -> {
-                if (filterEntity instanceof ExpertRuleValueEntity numberFilterEntity) {
-                    NumberExpertRule.NumberExpertRuleBuilder<?, ?> ruleBuilder = NumberExpertRule.builder()
-                            .field(filterEntity.getField())
-                            .operator(filterEntity.getOperator());
-                    if (numberFilterEntity.getValue() != null) {
-                        if (isMultipleCriteriaOperator(numberFilterEntity.getOperator())) { // for multiple values
-                            ruleBuilder.values(Stream.of(numberFilterEntity.getValue().split(",")).map(Double::valueOf).collect(Collectors.toSet()));
-                        } else { // for single value
-                            ruleBuilder.value(Double.valueOf(numberFilterEntity.getValue()));
-                        }
+                ExpertRuleValueEntity numberFilterEntity = (ExpertRuleValueEntity) filterEntity;
+                NumberExpertRule.NumberExpertRuleBuilder<?, ?> ruleBuilder = NumberExpertRule.builder()
+                        .field(filterEntity.getField())
+                        .operator(filterEntity.getOperator());
+                if (numberFilterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(numberFilterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(numberFilterEntity.getValue().split(",")).map(Double::valueOf).collect(Collectors.toSet()));
+                    } else { // for single value
+                        ruleBuilder.value(Double.valueOf(numberFilterEntity.getValue()));
                     }
-                    return ruleBuilder.build();
-                } else {
-                    throw new PowsyblException("Invalid entity type for NUMBER rule");
                 }
+                return ruleBuilder.build();
 
             }
             case STRING -> {
-                if (filterEntity instanceof ExpertRuleValueEntity stringFilterEntity) {
-                    StringExpertRule.StringExpertRuleBuilder<?, ?> ruleBuilder = StringExpertRule.builder()
-                            .field(filterEntity.getField())
-                            .operator(filterEntity.getOperator());
-                    if (stringFilterEntity.getValue() != null) {
-                        if (isMultipleCriteriaOperator(stringFilterEntity.getOperator())) { // for multiple values
-                            ruleBuilder.values(Stream.of(stringFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
-                        } else { // for single value
-                            ruleBuilder.value(stringFilterEntity.getValue());
-                        }
+                ExpertRuleValueEntity stringFilterEntity = (ExpertRuleValueEntity) filterEntity;
+                StringExpertRule.StringExpertRuleBuilder<?, ?> ruleBuilder = StringExpertRule.builder()
+                        .field(filterEntity.getField())
+                        .operator(filterEntity.getOperator());
+                if (stringFilterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(stringFilterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(stringFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                    } else { // for single value
+                        ruleBuilder.value(stringFilterEntity.getValue());
                     }
-                    return ruleBuilder.build();
-                } else {
-                    throw new PowsyblException("Invalid entity type for NUMBER rule");
                 }
+                return ruleBuilder.build();
 
             }
             case ENUM -> {
-                if (filterEntity instanceof ExpertRuleValueEntity enumFilterEntity) {
-                    EnumExpertRule.EnumExpertRuleBuilder<?, ?> ruleBuilder = EnumExpertRule.builder()
-                            .field(enumFilterEntity.getField())
-                            .operator(enumFilterEntity.getOperator());
-                    if (enumFilterEntity.getValue() != null) {
-                        if (isMultipleCriteriaOperator(enumFilterEntity.getOperator())) { // for multiple values
-                            ruleBuilder.values(Stream.of(enumFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
-                        } else { // for single value
-                            ruleBuilder.value(enumFilterEntity.getValue());
-                        }
+                ExpertRuleValueEntity enumFilterEntity = (ExpertRuleValueEntity) filterEntity;
+                EnumExpertRule.EnumExpertRuleBuilder<?, ?> ruleBuilder = EnumExpertRule.builder()
+                        .field(enumFilterEntity.getField())
+                        .operator(enumFilterEntity.getOperator());
+                if (enumFilterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(enumFilterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(enumFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                    } else { // for single value
+                        ruleBuilder.value(enumFilterEntity.getValue());
                     }
-                    return ruleBuilder.build();
-                } else {
-                    throw new PowsyblException("Invalid entity type for ENUM rule");
-
                 }
+                return ruleBuilder.build();
             }
             case FILTER_UUID -> {
-                if (filterEntity instanceof ExpertRuleValueEntity filterUuidFilterEntity) {
-                    FilterUuidExpertRule.FilterUuidExpertRuleBuilder<?, ?> ruleBuilder = FilterUuidExpertRule.builder()
-                            .field(filterEntity.getField())
-                            .operator(filterEntity.getOperator());
-                    if (filterUuidFilterEntity.getValue() != null) {
-                        if (isMultipleCriteriaOperator(filterUuidFilterEntity.getOperator())) { // for multiple values
-                            ruleBuilder.values(Stream.of(filterUuidFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
-                        } else { // for single value
-                            ruleBuilder.value(filterUuidFilterEntity.getValue());
-                        }
+                ExpertRuleValueEntity filterUuidFilterEntity = (ExpertRuleValueEntity) filterEntity;
+
+                FilterUuidExpertRule.FilterUuidExpertRuleBuilder<?, ?> ruleBuilder = FilterUuidExpertRule.builder()
+                        .field(filterEntity.getField())
+                        .operator(filterEntity.getOperator());
+                if (filterUuidFilterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(filterUuidFilterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(filterUuidFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                    } else { // for single value
+                        ruleBuilder.value(filterUuidFilterEntity.getValue());
                     }
-                    return ruleBuilder.build();
-                } else {
-                    throw new PowsyblException("Invalid entity type for FILTER_UUID rule");
                 }
+                return ruleBuilder.build();
+
             }
             case PROPERTIES -> {
-                if (filterEntity instanceof ExpertRulePropertiesEntity propertiesFilterEntity) {
-                    return PropertiesExpertRule.builder()
-                            .field(propertiesFilterEntity.getField())
-                            .operator(propertiesFilterEntity.getOperator())
-                            .propertyValues(propertiesFilterEntity.getPropertyValues())
-                            .propertyName(propertiesFilterEntity.getPropertyName())
-                            .build();
-                } else {
-                    throw new PowsyblException("Invalid entity type for PROPERTIES rule");
-                }
+                ExpertRulePropertiesEntity propertiesFilterEntity = (ExpertRulePropertiesEntity) filterEntity;
+                return PropertiesExpertRule.builder()
+                        .field(propertiesFilterEntity.getField())
+                        .operator(propertiesFilterEntity.getOperator())
+                        .propertyValues(propertiesFilterEntity.getPropertyValues())
+                        .propertyName(propertiesFilterEntity.getPropertyName())
+                        .build();
             }
-            default -> throw new PowsyblException("Unknown rule data type: " + filterEntity.getDataType() + ", supported data types are: " + Arrays.stream(DataType.values()).map(Enum::name).collect(Collectors.joining(", ")));
+            default ->
+                    throw new PowsyblException("Unknown rule data type: " + filterEntity.getDataType() + ", supported data types are: " + Arrays.stream(DataType.values()).map(Enum::name).collect(Collectors.joining(", ")));
         }
     }
 
