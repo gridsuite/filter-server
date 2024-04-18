@@ -65,13 +65,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
@@ -170,12 +164,14 @@ public class FilterService {
     }
 
     @Transactional
-    public Optional<AbstractFilter> createFilter(UUID sourceFilterId, UUID filterId) {
+    public Optional<UUID> duplicateFilter(UUID sourceFilterId) {
         Optional<AbstractFilter> sourceFilterOptional = getFilter(sourceFilterId);
         if (sourceFilterOptional.isPresent()) {
+            UUID newFilterId = UUID.randomUUID();
             AbstractFilter sourceFilter = sourceFilterOptional.get();
-            sourceFilter.setId(filterId);
-            return Optional.of(createFilter(sourceFilter));
+            sourceFilter.setId(newFilterId);
+            createFilter(sourceFilter);
+            return Optional.of(newFilterId);
         }
         return Optional.empty();
     }
