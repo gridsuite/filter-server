@@ -1,0 +1,41 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="souissimai (generated)" id="1712491731660-87">
+        <createTable tableName="expert_rule_properties">
+            <column name="property_name" type="VARCHAR(255)"/>
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="expert_rule_propertiesPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="souissimai (generated)" id="1712491731660-88">
+        <createTable tableName="expert_rule_value">
+            <column name="value_" type="VARCHAR(255)"/>
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="expert_rule_valuePK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="souissimai (generated)" id="1712491731660-89">
+        <createTable tableName="expert_rule_property_value">
+            <column name="expert_rule_properties_entity_id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="property_valuePK"/>
+            </column>
+            <column name="property_values" type="VARCHAR(255)"/>
+            <column name="pos" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="property_valuePK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="souissimai (generated)" id="1712491731660-90">
+    <sqlFile
+            encoding="UTF-8"
+            path="migrationDataExpertRule_20240407T120841Z.sql"
+            relativeToChangelogFile="true"
+            splitStatements="true"
+            stripComments="true"/>
+    </changeSet>
+    <changeSet author="souissimai (generated)" id="1712491731660-91">
+        <dropColumn columnName="value_" tableName="EXPERT_RULE"/>
+    </changeSet>
+</databaseChangeLog>
