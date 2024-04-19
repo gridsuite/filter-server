@@ -15,11 +15,15 @@ import org.gridsuite.filter.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleEntity;
+import org.gridsuite.filter.server.entities.expertfilter.ExpertRulePropertiesEntity;
+import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleValueEntity;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterType;
+import org.gridsuite.filter.utils.expertfilter.DataType;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -62,65 +66,84 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                         .build();
             }
             case BOOLEAN -> {
+                ExpertRuleValueEntity booleanFilterEntity = (ExpertRuleValueEntity) filterEntity;
                 return BooleanExpertRule.builder()
-                        .field(filterEntity.getField())
-                        .operator(filterEntity.getOperator())
-                        .value(Boolean.parseBoolean(filterEntity.getValue()))
+                        .field(booleanFilterEntity.getField())
+                        .operator(booleanFilterEntity.getOperator())
+                        .value(Boolean.parseBoolean(booleanFilterEntity.getValue()))
                         .build();
             }
             case NUMBER -> {
+                ExpertRuleValueEntity numberFilterEntity = (ExpertRuleValueEntity) filterEntity;
                 NumberExpertRule.NumberExpertRuleBuilder<?, ?> ruleBuilder = NumberExpertRule.builder()
                         .field(filterEntity.getField())
                         .operator(filterEntity.getOperator());
-                if (filterEntity.getValue() != null) {
-                    if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
-                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).map(Double::valueOf).collect(Collectors.toSet()));
+                if (numberFilterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(numberFilterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(numberFilterEntity.getValue().split(",")).map(Double::valueOf).collect(Collectors.toSet()));
                     } else { // for single value
-                        ruleBuilder.value(Double.valueOf(filterEntity.getValue()));
+                        ruleBuilder.value(Double.valueOf(numberFilterEntity.getValue()));
                     }
                 }
                 return ruleBuilder.build();
+
             }
             case STRING -> {
+                ExpertRuleValueEntity stringFilterEntity = (ExpertRuleValueEntity) filterEntity;
                 StringExpertRule.StringExpertRuleBuilder<?, ?> ruleBuilder = StringExpertRule.builder()
                         .field(filterEntity.getField())
                         .operator(filterEntity.getOperator());
-                if (filterEntity.getValue() != null) {
-                    if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
-                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                if (stringFilterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(stringFilterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(stringFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
                     } else { // for single value
-                        ruleBuilder.value(filterEntity.getValue());
+                        ruleBuilder.value(stringFilterEntity.getValue());
                     }
                 }
                 return ruleBuilder.build();
+
             }
             case ENUM -> {
+                ExpertRuleValueEntity enumFilterEntity = (ExpertRuleValueEntity) filterEntity;
                 EnumExpertRule.EnumExpertRuleBuilder<?, ?> ruleBuilder = EnumExpertRule.builder()
-                        .field(filterEntity.getField())
-                        .operator(filterEntity.getOperator());
-                if (filterEntity.getValue() != null) {
-                    if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
-                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                        .field(enumFilterEntity.getField())
+                        .operator(enumFilterEntity.getOperator());
+                if (enumFilterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(enumFilterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(enumFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
                     } else { // for single value
-                        ruleBuilder.value(filterEntity.getValue());
+                        ruleBuilder.value(enumFilterEntity.getValue());
                     }
                 }
                 return ruleBuilder.build();
             }
             case FILTER_UUID -> {
+                ExpertRuleValueEntity filterUuidFilterEntity = (ExpertRuleValueEntity) filterEntity;
+
                 FilterUuidExpertRule.FilterUuidExpertRuleBuilder<?, ?> ruleBuilder = FilterUuidExpertRule.builder()
-                    .field(filterEntity.getField())
-                    .operator(filterEntity.getOperator());
-                if (filterEntity.getValue() != null) {
-                    if (isMultipleCriteriaOperator(filterEntity.getOperator())) { // for multiple values
-                        ruleBuilder.values(Stream.of(filterEntity.getValue().split(",")).collect(Collectors.toSet()));
+                        .field(filterEntity.getField())
+                        .operator(filterEntity.getOperator());
+                if (filterUuidFilterEntity.getValue() != null) {
+                    if (isMultipleCriteriaOperator(filterUuidFilterEntity.getOperator())) { // for multiple values
+                        ruleBuilder.values(Stream.of(filterUuidFilterEntity.getValue().split(",")).collect(Collectors.toSet()));
                     } else { // for single value
-                        ruleBuilder.value(filterEntity.getValue());
+                        ruleBuilder.value(filterUuidFilterEntity.getValue());
                     }
                 }
                 return ruleBuilder.build();
+
             }
-            default -> throw new PowsyblException("Unknown rule data type: " + filterEntity.getDataType() + ", supported data types are: COMBINATOR, BOOLEAN, NUMBER, STRING, ENUM");
+            case PROPERTIES -> {
+                ExpertRulePropertiesEntity propertiesFilterEntity = (ExpertRulePropertiesEntity) filterEntity;
+                return PropertiesExpertRule.builder()
+                        .field(propertiesFilterEntity.getField())
+                        .operator(propertiesFilterEntity.getOperator())
+                        .propertyValues(propertiesFilterEntity.getPropertyValues())
+                        .propertyName(propertiesFilterEntity.getPropertyName())
+                        .build();
+            }
+            default ->
+                    throw new PowsyblException("Unknown rule data type: " + filterEntity.getDataType() + ", supported data types are: " + Arrays.stream(DataType.values()).map(Enum::name).collect(Collectors.joining(", ")));
         }
     }
 
@@ -147,16 +170,55 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
         throw new PowsyblException(WRONG_FILTER_TYPE);
     }
 
+    public static ExpertRuleEntity.ExpertRuleEntityBuilder<?, ?> getRuleBuilder(AbstractExpertRule filter) {
+        ExpertRuleEntity.ExpertRuleEntityBuilder<?, ?> expertRuleEntityBuilder = null;
+        if (filter.getDataType() == DataType.COMBINATOR) {
+            expertRuleEntityBuilder = ExpertRuleEntity.builder()
+                    .id(UUID.randomUUID())
+                    .combinator(filter.getCombinator())
+                    .operator(filter.getOperator())
+                    .dataType(filter.getDataType())
+                    .field(filter.getField());
+        }
+        if (filter.getDataType() == DataType.PROPERTIES) {
+            PropertiesExpertRule propertiesRule = (PropertiesExpertRule) filter;
+            expertRuleEntityBuilder = ExpertRulePropertiesEntity.builder()
+                    .id(UUID.randomUUID())
+                    .combinator(filter.getCombinator())
+                    .operator(filter.getOperator())
+                    .dataType(filter.getDataType())
+                    .field(filter.getField())
+                    .propertyValues(propertiesRule.getPropertyValues())
+                    .propertyName(propertiesRule.getPropertyName());
+
+        } else if (filter.getDataType() == DataType.BOOLEAN ||
+                filter.getDataType() == DataType.NUMBER ||
+                filter.getDataType() == DataType.STRING ||
+                filter.getDataType() == DataType.ENUM ||
+                filter.getDataType() == DataType.FILTER_UUID) {
+            expertRuleEntityBuilder = ExpertRuleValueEntity.builder()
+                    .id(UUID.randomUUID())
+                    .combinator(filter.getCombinator())
+                    .operator(filter.getOperator())
+                    .dataType(filter.getDataType())
+                    .field(filter.getField())
+                    .value(filter.getStringValue());
+        }
+
+        return expertRuleEntityBuilder;
+    }
+
     public static ExpertRuleEntity dtoToEntity(AbstractExpertRule filter) {
-        var expertFilterEntityBuilder = ExpertRuleEntity.builder()
-                .id(UUID.randomUUID())
-                .combinator(filter.getCombinator())
-                .operator(filter.getOperator())
-                .dataType(filter.getDataType())
-                .field(filter.getField())
-                .value(filter.getStringValue());
-        expertFilterEntityBuilder.rules(dtoToEntities(filter.getRules(), expertFilterEntityBuilder.build()));
-        return expertFilterEntityBuilder.build();
+        ExpertRuleEntity.ExpertRuleEntityBuilder<?, ?> expertRuleEntityBuilder = getRuleBuilder(filter);
+
+        if (expertRuleEntityBuilder == null) {
+            throw new PowsyblException("Unsupported data type: " + filter.getDataType());
+        }
+
+        List<ExpertRuleEntity> rules = dtoToEntities(filter.getRules(), expertRuleEntityBuilder.build());
+        expertRuleEntityBuilder.rules(rules);
+
+        return expertRuleEntityBuilder.build();
     }
 
     private static List<ExpertRuleEntity> dtoToEntities(List<AbstractExpertRule> ruleFromDto, ExpertRuleEntity parentRuleEntity) {
@@ -166,15 +228,7 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
 
         return ruleFromDto.stream()
                 .map(rule -> {
-                    var expertRuleEntityBuilder = ExpertRuleEntity.builder()
-                            .id(UUID.randomUUID())
-                            .combinator(rule.getCombinator())
-                            .operator(rule.getOperator())
-                            .dataType(rule.getDataType())
-                            .field(rule.getField())
-                            .value(rule.getStringValue())
-                            .parentRule(parentRuleEntity);
-
+                    ExpertRuleEntity.ExpertRuleEntityBuilder<?, ?> expertRuleEntityBuilder = getRuleBuilder(rule).parentRule(parentRuleEntity);
                     List<ExpertRuleEntity> rules = dtoToEntities(rule.getRules(), expertRuleEntityBuilder.build());
                     expertRuleEntityBuilder.rules(rules);
 
