@@ -64,4 +64,10 @@ public class TwoWindingsTransformerFilterEntity extends AbstractGenericFilterEnt
         referencedColumnName = "id",
         foreignKey = @ForeignKey)
     FreePropertiesFilterEntity substationFreeProperties;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "freeProperties_id",
+            referencedColumnName = "id",
+            foreignKey = @ForeignKey)
+    FreePropertiesFilterEntity freeProperties;
 }

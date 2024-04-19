@@ -64,6 +64,7 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
             .nominalVoltage2(convert(lineFilterEntity.getNominalVoltage2()))
             .freeProperties1(convert(lineFilterEntity.getSubstationFreeProperties1()))
             .freeProperties2(convert(lineFilterEntity.getSubstationFreeProperties2()))
+            .freeProperties(convert(lineFilterEntity.getFreeProperties()))
             .build();
     }
 
@@ -79,7 +80,8 @@ public class LineFilterRepositoryProxy extends AbstractFilterRepositoryProxy<Lin
             .substationName1(lineFilter.getSubstationName1())
             .substationName2(lineFilter.getSubstationName2())
             .substationFreeProperties1(convert(lineFilter.getFreeProperties1()))
-            .substationFreeProperties2(convert(lineFilter.getFreeProperties2()));
+            .substationFreeProperties2(convert(lineFilter.getFreeProperties2()))
+            .freeProperties(convert(lineFilter.getFreeProperties()));
         buildGenericFilter(lineFilterEntityBuilder, criteriaFilter);
         return lineFilterEntityBuilder.build();
     }
