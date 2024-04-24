@@ -74,11 +74,11 @@ public class FilterController {
             .body(service.createFilter(filter));
     }
 
-    @PostMapping(value = "/filters/{filterId}/duplicate")
+    @PostMapping(value = "/filters", params = "duplicateFrom")
     @Operation(summary = "Duplicate a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created"),
                            @ApiResponse(responseCode = "404", description = "Source filter not found")})
-    public ResponseEntity<UUID> duplicateFilter(@PathVariable("filterId") UUID filterId) {
+    public ResponseEntity<UUID> duplicateFilter(@RequestParam("duplicateFrom") UUID filterId) {
         return service.duplicateFilter(filterId).map(newFilterId -> ResponseEntity.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(newFilterId))

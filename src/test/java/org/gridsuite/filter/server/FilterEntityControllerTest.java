@@ -714,7 +714,7 @@ public class FilterEntityControllerTest {
                 lineFilter
         );
         insertFilter(filterId1, lineCriteriaFilter);
-        mvc.perform(post("/" + FilterApi.API_VERSION + "/filters/" + filterId1 + "/duplicate")).andExpect(status().isOk());
+        mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId1)).andExpect(status().isOk());
         checkFormFilter(filterId1, lineCriteriaFilter);
     }
 
