@@ -70,7 +70,8 @@ public class VoltageLevelFilterRepositoryProxy extends AbstractFilterRepositoryP
         var voltageLevelFilterEntityBuilder = VoltageLevelFilterEntity.builder()
             .countries(voltageLevelFilter.getCountries())
             .substationFreeProperties(convert(voltageLevelFilter.getSubstationFreeProperties()))
-            .nominalVoltage(convert(voltageLevelFilter.getNominalVoltage()));
+            .nominalVoltage(convert(voltageLevelFilter.getNominalVoltage()))
+            .freeProperties(convert(voltageLevelFilter.getFreeProperties()));
         buildGenericFilter(voltageLevelFilterEntityBuilder, criteriaFilter);
         return voltageLevelFilterEntityBuilder.build();
     }

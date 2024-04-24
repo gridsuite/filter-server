@@ -29,6 +29,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "expert_rule")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class ExpertRuleEntity {
     @Id
     @Column(name = "id")
@@ -41,10 +42,6 @@ public class ExpertRuleEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "field")
     private FieldType field;
-
-    // TODO FM this string can store an array too (',' separated), we should store an array because right now it's limited to 255 char
-    @Column(name = "value_") // "value" is not supported in UT with H2
-    private String value;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "operator")
