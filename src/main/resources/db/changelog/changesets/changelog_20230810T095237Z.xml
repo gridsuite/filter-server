@@ -3,7 +3,7 @@
     <changeSet author="hedhiliabd" id="1626975171877-1">
         <validCheckSum>8:69b54d23810d9c683a83059dd23bd9a0</validCheckSum>
         <modifyDataType columnName="equipment_type"
-                        newDataType="tinyint"
+                        newDataType="smallint"
                         tableName="identifier_list_filter"/>
     </changeSet>
 </databaseChangeLog>
