@@ -170,7 +170,7 @@ public class FilterService {
             UUID newFilterId = UUID.randomUUID();
             AbstractFilter sourceFilter = sourceFilterOptional.get();
             sourceFilter.setId(newFilterId);
-            createFilter(sourceFilter);
+            this.createFilter(sourceFilter);
             return Optional.of(newFilterId);
         }
         return Optional.empty();
