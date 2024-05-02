@@ -62,6 +62,7 @@ import org.gridsuite.filter.utils.FilterType;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -158,7 +159,7 @@ public class FilterService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
         return getRepository(filter).insert(filter);
     }
@@ -170,7 +171,7 @@ public class FilterService {
             UUID newFilterId = UUID.randomUUID();
             AbstractFilter sourceFilter = sourceFilterOptional.get();
             sourceFilter.setId(newFilterId);
-            this.createFilter(sourceFilter);
+            createFilter(sourceFilter);
             return Optional.of(newFilterId);
         }
         return Optional.empty();
