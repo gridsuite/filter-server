@@ -74,14 +74,14 @@ public class FilterController {
             .body(service.createFilter(filter));
     }
 
-    @PostMapping(value = "/filters")
-    @Operation(summary = "Create a filter from an existing filter")
+    @PostMapping(value = "/filters", params = "duplicateFrom")
+    @Operation(summary = "Duplicate a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created"),
                            @ApiResponse(responseCode = "404", description = "Source filter not found")})
-    public ResponseEntity<AbstractFilter> createFilter(@RequestParam("duplicateFrom") UUID sourceFilterId, @RequestParam("id") UUID filterId) {
-        return service.createFilter(sourceFilterId, filterId).map(filter -> ResponseEntity.ok()
+    public ResponseEntity<UUID> duplicateFilter(@RequestParam("duplicateFrom") UUID filterId) {
+        return service.duplicateFilter(filterId).map(newFilterId -> ResponseEntity.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(filter))
+                        .body(newFilterId))
                 .orElse(ResponseEntity.notFound().build());
     }
 
