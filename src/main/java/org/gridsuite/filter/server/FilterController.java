@@ -74,7 +74,7 @@ public class FilterController {
             .body(service.createFilter(filter));
     }
 
-    @PostMapping(value = "/filters", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/filters/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create filters with provided uuids")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters has been successfully created")})
     public ResponseEntity<List<AbstractFilter>> createFilters(@RequestBody Map<UUID, AbstractFilter> filtersToCreateMap) {
@@ -95,7 +95,7 @@ public class FilterController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "/filters", params = "duplicateFrom")
+    @PostMapping(value = "/filters/batch")
     @Operation(summary = "Duplicate filters from provided uuids")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters has been successfully created"),
                            @ApiResponse(responseCode = "404", description = "Source filter not found")})
