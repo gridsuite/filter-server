@@ -83,12 +83,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.gridsuite</groupId>
-                <artifactId>gridsuite-filter</artifactId>
-                <version>${gridsuite-filter.version}</version>
-            </dependency>
-
             <!-- overrides of imports -->
 
             <!-- imports -->
