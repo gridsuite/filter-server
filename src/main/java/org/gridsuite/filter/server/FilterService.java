@@ -10,6 +10,7 @@ import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
+import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
@@ -19,39 +20,11 @@ import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.BatteryFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.BusBarSectionFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.DanglingLineFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.GeneratorFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.HvdcLineFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.LccConverterStationFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.LineFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.LoadFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.ShuntCompensatorFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.StaticVarCompensatorFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.SubstationFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.ThreeWindingsTransformerFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.TwoWindingsTransformerFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.VoltageLevelFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.VscConverterStationFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.BatteryFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.BusBarSectionFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.DanglingLineFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.GeneratorFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.HvdcLineFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LccConverterStationFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LineFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LoadFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.ShuntCompensatorFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.StaticVarCompensatorFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.SubstationFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.ThreeWindingsTransformerFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.TwoWindingsTransformerFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.VoltageLevelFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.VscConverterStationFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.scriptfilter.ScriptFilterRepositoryProxy;
@@ -81,6 +54,7 @@ public class FilterService {
 
     private static final String FILTER_LIST = "Filter list ";
     private static final String NOT_FOUND = " not found";
+    public static final String FILTER_UUIDS_NOT_FOUND = "Some filter uuids not found while duplicating filters";
 
     private final Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories = new HashMap<>();
 
@@ -164,6 +138,14 @@ public class FilterService {
         return getRepository(filter).insert(filter);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public List<AbstractFilter> createFilters(List<AbstractFilter> filters) {
+        if (CollectionUtils.isEmpty(filters)) {
+            return Collections.emptyList();
+        }
+        return getRepository(filters.get(0)).insertAll(filters);
+    }
+
     @Transactional
     public Optional<UUID> duplicateFilter(UUID sourceFilterId) {
         Optional<AbstractFilter> sourceFilterOptional = getFilter(sourceFilterId);
@@ -175,6 +157,28 @@ public class FilterService {
             return Optional.of(newFilterId);
         }
         return Optional.empty();
+    }
+
+    @Transactional
+    public Map<UUID, UUID> duplicateFilters(List<UUID> filterUuids) {
+        Map<UUID, UUID> uuidsMap = new HashMap<>();
+
+        List<AbstractFilter> sourceFilters = getFilters(filterUuids);
+
+        // check whether found all
+        if (filterUuids.size() != sourceFilters.size()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_UUIDS_NOT_FOUND);
+        }
+
+        List<AbstractFilter> filtersToDuplicate = sourceFilters.stream().peek(sourceFilter -> {
+            UUID newFilterId = UUID.randomUUID();
+            uuidsMap.put(sourceFilter.getId(), newFilterId);
+            sourceFilter.setId(newFilterId);
+        }).toList();
+
+        createFilters(filtersToDuplicate);
+
+        return uuidsMap;
     }
 
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
@@ -210,6 +214,11 @@ public class FilterService {
         if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
+    }
+
+    public void deleteFilters(List<UUID> ids) {
+        Objects.requireNonNull(ids);
+        filterRepositories.values().forEach(repository -> repository.deleteAllByIds(ids));
     }
 
     public void deleteAll() {

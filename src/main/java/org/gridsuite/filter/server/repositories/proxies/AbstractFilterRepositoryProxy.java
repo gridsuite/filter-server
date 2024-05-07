@@ -8,11 +8,10 @@
 package org.gridsuite.filter.server.repositories.proxies;
 
 import com.powsybl.commons.PowsyblException;
-
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.criteriafilter.*;
 import org.gridsuite.filter.server.dto.FilterAttributes;
-import org.gridsuite.filter.server.entities.*;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.entities.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
@@ -123,6 +122,11 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return toDto(getRepository().save(fromDto(f)));
     }
 
+    public List<AbstractFilter> insertAll(List<AbstractFilter> filters) {
+        List<F> savedFilterEntities = getRepository().saveAll(filters.stream().map(this::fromDto).toList());
+        return savedFilterEntities.stream().map(this::toDto).toList();
+    }
+
     public void modify(UUID id, AbstractFilter f) {
         f.setId(id);
         toDto(getRepository().save(fromDto(f)));
@@ -130,6 +134,10 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     public boolean deleteById(UUID id) {
         return getRepository().removeById(id) != 0;
+    }
+
+    public void deleteAllByIds(List<UUID> ids) {
+        getRepository().deleteAllByIdIn(ids);
     }
 
     public void deleteAll() {

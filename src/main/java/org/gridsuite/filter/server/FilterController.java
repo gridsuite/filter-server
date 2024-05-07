@@ -74,6 +74,16 @@ public class FilterController {
             .body(service.createFilter(filter));
     }
 
+    @PostMapping(value = "/filters", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create filters with provided uuids")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters has been successfully created")})
+    public ResponseEntity<List<AbstractFilter>> createFilters(@RequestBody Map<UUID, AbstractFilter> filtersToCreateMap) {
+        filtersToCreateMap.forEach((uuid, expertFilter) -> expertFilter.setId(uuid));
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(service.createFilters(filtersToCreateMap.values().stream().toList()));
+    }
+
     @PostMapping(value = "/filters", params = "duplicateFrom")
     @Operation(summary = "Duplicate a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created"),
@@ -83,6 +93,17 @@ public class FilterController {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(newFilterId))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping(value = "/filters", params = "duplicateFrom")
+    @Operation(summary = "Duplicate filters from provided uuids")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters has been successfully created"),
+                           @ApiResponse(responseCode = "404", description = "Source filter not found")})
+    public ResponseEntity<Map<UUID, UUID>> duplicateFilters(@RequestBody List<UUID> filterUuids) {
+        Map<UUID, UUID> uuidsMap = service.duplicateFilters(filterUuids);
+        return ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(uuidsMap);
     }
 
     @PutMapping(value = "/filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -102,6 +123,14 @@ public class FilterController {
     @ApiResponse(responseCode = "200", description = "The filter has been deleted")
     public ResponseEntity<Void> deleteFilter(@PathVariable("id") UUID id) {
         service.deleteFilter(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping(value = "/filters")
+    @Operation(summary = "delete the filters")
+    @ApiResponse(responseCode = "200", description = "The filters have been deleted")
+    public ResponseEntity<Void> deleteFilters(@RequestBody List<UUID> ids) {
+        service.deleteFilters(ids);
         return ResponseEntity.ok().build();
     }
 
