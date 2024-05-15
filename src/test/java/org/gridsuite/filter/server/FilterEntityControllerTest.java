@@ -139,10 +139,13 @@ public class FilterEntityControllerTest {
 
         network = EurostagTutorialExample1Factory.createWithMoreGenerators(new NetworkFactoryImpl());
         network.getSubstation("P1").setProperty("region", "north");
+        network.getSubstation("P1").setName("P1");
         network.getSubstation("P2").setProperty("region", "south");
         network.getGenerator("GEN").setProperty("region", "north");
+        network.getGenerator("GEN").setName("GEN");
         network.getGenerator("GEN2").setProperty("region", "south");
         network.getLoad("LOAD").setProperty("region", "north");
+        network.getVoltageLevel("VLGEN").setName("VLGEN");
         network.getVariantManager().cloneVariant(VariantManagerConstants.INITIAL_VARIANT_ID, VARIANT_ID_1);
         network.getVariantManager().setWorkingVariant(VARIANT_ID_1);
         // remove generator 'GEN2' from network in variant VARIANT_ID_1
@@ -420,7 +423,7 @@ public class FilterEntityControllerTest {
     @Test
     public void testShuntCompensatorFilter() throws Exception {
         insertInjectionFilter(EquipmentType.SHUNT_COMPENSATOR, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "SHUNT", "SHUNT", "S1", Set.of("FR"), RangeType.EQUALITY, 380., null, null, NETWORK_UUID_4, null, "[{\"id\":\"SHUNT\",\"type\":\"SHUNT_COMPENSATOR\"}]");
+            "SHUNT", null, "S1", Set.of("FR"), RangeType.EQUALITY, 380., null, null, NETWORK_UUID_4, null, "[{\"id\":\"SHUNT\",\"type\":\"SHUNT_COMPENSATOR\"}]");
     }
 
     @Test
@@ -499,16 +502,16 @@ public class FilterEntityControllerTest {
         final String bothMatch = "[{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"},{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\"}]";
 
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("FR"), rangeTypes, values1, values2, null, NETWORK_UUID, null, matchNHV2NLOAD);
+            "NHV2_NLOAD", null, "P2", Set.of("FR"), rangeTypes, values1, values2, null, NETWORK_UUID, null, matchNHV2NLOAD);
         // no eqpt/substation filter: only NHV2_NLOAD match because of RANGE filter
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
                 null, null, null, Set.of("FR"), rangeTypes, values1, values2, null, NETWORK_UUID, null, matchNHV2NLOAD);
         // bad substationName
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "substationNameNotFound", Set.of("FR"), rangeTypes, values1, values2, null, NETWORK_UUID, null, noMatch);
+            "NHV2_NLOAD", null, "substationNameNotFound", Set.of("FR"), rangeTypes, values1, values2, null, NETWORK_UUID, null, noMatch);
         // this network has only FR substations: IT does not match:
         insertTransformerFilter(EquipmentType.TWO_WINDINGS_TRANSFORMER, UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e"),
-            "NHV2_NLOAD", "NHV2_NLOAD", "P2", Set.of("IT"), rangeTypes, values1, values2, null, NETWORK_UUID, null, noMatch);
+            "NHV2_NLOAD", null, "P2", Set.of("IT"), rangeTypes, values1, values2, null, NETWORK_UUID, null, noMatch);
 
         // change RANGE into "> 24"
         rangeTypes.set(1, RangeType.GREATER_THAN);
@@ -693,9 +696,9 @@ public class FilterEntityControllerTest {
         insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
             "P1", "P1", Set.of("ES", "PT"), NETWORK_UUID, null, "[]");
         insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "P2", "P2", Set.of("FR", "IT"), NETWORK_UUID, null, "[{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]");
+            "P2", null, Set.of("FR", "IT"), NETWORK_UUID, null, "[{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]");
         insertSubstationFilter(UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300f"),
-            "P2", "P2", Set.of("ES", "PT"), NETWORK_UUID, null, "[]");
+            "P2", null, Set.of("ES", "PT"), NETWORK_UUID, null, "[]");
     }
 
     @Test
