@@ -62,6 +62,8 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             case COMBINATOR -> {
                 return CombinatorExpertRule.builder()
                         .combinator(filterEntity.getCombinator())
+                        .field(filterEntity.getField())
+                        .operator(filterEntity.getOperator())
                         .rules(entitiesToDto(filterEntity.getRules()))
                         .build();
             }
