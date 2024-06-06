@@ -130,7 +130,7 @@ public class FilterService {
                 .stream()
                 .flatMap(repository -> repository.getFilters(ids)
                         .stream())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -166,17 +166,17 @@ public class FilterService {
         List<AbstractFilter> sourceFilters = getFilters(filterUuids);
 
         // check whether found all
-        if (filterUuids.size() != sourceFilters.size()) {
+        if (sourceFilters.isEmpty() || sourceFilters.size() != filterUuids.size()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_UUIDS_NOT_FOUND);
         }
 
-        List<AbstractFilter> filtersToDuplicate = sourceFilters.stream().peek(sourceFilter -> {
+        sourceFilters.forEach(sourceFilter -> {
             UUID newFilterId = UUID.randomUUID();
             uuidsMap.put(sourceFilter.getId(), newFilterId);
             sourceFilter.setId(newFilterId);
-        }).toList();
+        });
 
-        createFilters(filtersToDuplicate);
+        getRepository(sourceFilters.get(0)).insertAll(sourceFilters);
 
         return uuidsMap;
     }
