@@ -25,6 +25,7 @@ import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import jakarta.servlet.ServletException;
 import org.apache.commons.collections4.OrderedMap;
 import org.apache.commons.collections4.map.LinkedMap;
+import org.assertj.core.api.Assertions;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.criteriafilter.DanglingLineFilter;
@@ -39,7 +40,9 @@ import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.utils.FieldsMatcher;
 import org.gridsuite.filter.server.utils.MatcherJson;
-import org.gridsuite.filter.utils.*;
+import org.gridsuite.filter.utils.EquipmentType;
+import org.gridsuite.filter.utils.FilterType;
+import org.gridsuite.filter.utils.RangeType;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.utils.expertfilter.FieldType;
 import org.gridsuite.filter.utils.expertfilter.OperatorType;
@@ -64,6 +67,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
@@ -716,9 +720,27 @@ public class FilterEntityControllerTest {
                 modificationDate,
                 lineFilter
         );
+
+        // --- insert filter --- //
         insertFilter(filterId1, lineCriteriaFilter);
-        mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId1)).andExpect(status().isOk());
+
+        // check the inserted filter
         checkFormFilter(filterId1, lineCriteriaFilter);
+
+        // --- duplicate filter -- //
+        UUID newFilterId1 = duplicateFilter(filterId1);
+
+        // check the duplicated filter whether it is matched to the original
+        lineCriteriaFilter.setId(newFilterId1);
+        checkFormFilter(newFilterId1, lineCriteriaFilter);
+
+        // --- delete filters --- //
+        deleteFilter(filterId1);
+        deleteFilter(newFilterId1);
+
+        // check empty after delete all
+        List<IFilterAttributes> allFilters = getAllFilters();
+        Assertions.assertThat(allFilters).isEmpty();
     }
 
     @Test
@@ -1041,7 +1063,7 @@ public class FilterEntityControllerTest {
         assertEquals(FilterType.EXPERT, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
-        mvc.perform(delete(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk());
+        deleteFilter(filterId);
     }
 
     private void checkFilterEvaluating(AbstractFilter filter, String expectedJson) throws Exception {
@@ -1059,6 +1081,47 @@ public class FilterEntityControllerTest {
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, AbstractFilter.class);
+    }
+
+    private List<AbstractFilter> insertFilters(Map<UUID, AbstractFilter> filtersToCreateMap) throws Exception {
+        String response = mvc.perform(post(URL_TEMPLATE + "/batch")
+                        .content(objectMapper.writeValueAsString(filtersToCreateMap))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, new TypeReference<>() { });
+    }
+
+    private UUID duplicateFilter(UUID filterId) throws Exception {
+        String response = mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, UUID.class);
+    }
+
+    private Map<UUID, UUID> duplicateFilters(List<UUID> sourceFilterUuids) throws Exception {
+        String response = mvc.perform(post(URL_TEMPLATE + "/batch/duplicate")
+                        .content(objectMapper.writeValueAsString(sourceFilterUuids))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, new TypeReference<>() { });
+    }
+
+    private void deleteFilter(UUID filterId) throws Exception {
+        mvc.perform(delete(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk());
+    }
+
+    private void deleteFilters(List<UUID> filterUuids) throws Exception {
+        mvc.perform(delete(URL_TEMPLATE)
+                        .content(objectMapper.writeValueAsString(filterUuids))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    private List<IFilterAttributes> getAllFilters() throws Exception {
+        String response = mvc.perform(get(URL_TEMPLATE)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, new TypeReference<>() { });
     }
 
     private void modifyFormFilter(UUID filterId, AbstractFilter newFilter, String userId) throws Exception {
@@ -1165,7 +1228,7 @@ public class FilterEntityControllerTest {
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
+        deleteFilter(id);
     }
 
     private void insertTransformerFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
@@ -1224,7 +1287,7 @@ public class FilterEntityControllerTest {
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
+        deleteFilter(id);
     }
 
     private void insertHvdcLineFilter(UUID id, String equipmentID, String equipmentName,
@@ -1273,7 +1336,7 @@ public class FilterEntityControllerTest {
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
+        deleteFilter(id);
 
         filterAttributes = objectMapper.readValue(
             mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
@@ -1333,7 +1396,7 @@ public class FilterEntityControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(content().json(expectedJsonExport));
         if (delete) {
-            mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
+            deleteFilter(id);
         }
         return filter;
     }
@@ -1379,7 +1442,7 @@ public class FilterEntityControllerTest {
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
+        deleteFilter(id);
     }
 
     private void insertSubstationFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
@@ -1420,7 +1483,7 @@ public class FilterEntityControllerTest {
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
 
-        mvc.perform(delete(URL_TEMPLATE + "/" + id)).andExpect(status().isOk());
+        deleteFilter(id);
     }
 
     private void checkFormFilter(UUID filterId, CriteriaFilter criteriaFilter) throws Exception {
@@ -1994,4 +2057,65 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(expertFilterId, expectedResultJson, EquipmentType.LOAD);
         checkFilterEvaluating(expertFilter, expectedResultJson);
     }
+
+    @Test
+    public void testDuplicateFiltersInBatch() throws Exception {
+        UUID filterId1 = UUID.randomUUID();
+        LineFilter lineFilter1 = LineFilter.builder().equipmentID("equipmentID1").equipmentName("equipmentName1")
+                .substationName1("substationName1")
+                .substationName2("substationName2").countries1(COUNTRIES1).countries2(COUNTRIES2)
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 5., 8.))
+                .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 6., null))
+                .build();
+        CriteriaFilter lineCriteriaFilter1 = new CriteriaFilter(
+                filterId1,
+                new Date(),
+                lineFilter1
+        );
+
+        UUID filterId2 = UUID.randomUUID();
+        LineFilter lineFilter2 = LineFilter.builder().equipmentID("equipmentID2").equipmentName("equipmentName2")
+                .substationName1("substationName3").countries1(COUNTRIES1).countries2(COUNTRIES2)
+                .substationName2("substationName4")
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 4., 9.))
+                .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 5., null))
+                .build();
+        CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
+                filterId2,
+                new Date(),
+                lineFilter2
+        );
+
+        Map<UUID, AbstractFilter> filtersToCreateMap = Map.of(
+                filterId1, lineCriteriaFilter1,
+                filterId2, lineCriteriaFilter2
+        );
+
+        // --- insert in batch --- //
+        insertFilters(filtersToCreateMap);
+
+        // check inserted filters
+        checkFormFilter(filterId1, lineCriteriaFilter1);
+        checkFormFilter(filterId2, lineCriteriaFilter2);
+
+        // --- duplicate in batch --- //
+        Map<UUID, UUID> sourceAndNewUuidMap = duplicateFilters(List.of(filterId1, filterId2));
+
+        sourceAndNewUuidMap.forEach((sourceUuid, newUuid) -> filtersToCreateMap.get(sourceUuid).setId(newUuid));
+
+        // check each duplicated filter whether it is matched to the original
+        for (Map.Entry<UUID, UUID> entry : sourceAndNewUuidMap.entrySet()) {
+            UUID sourceUuid = entry.getKey();
+            UUID newUuid = entry.getValue();
+            checkFormFilter(newUuid, (CriteriaFilter) filtersToCreateMap.get(sourceUuid));
+        }
+
+        // --- delete filters in batch -- //
+        deleteFilters(Stream.concat(sourceAndNewUuidMap.keySet().stream(), sourceAndNewUuidMap.values().stream()).toList());
+
+        // check empty after delete all
+        List<IFilterAttributes> allFilters = getAllFilters();
+        Assertions.assertThat(allFilters).isEmpty();
+    }
+
 }

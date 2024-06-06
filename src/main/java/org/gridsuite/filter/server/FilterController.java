@@ -86,7 +86,7 @@ public class FilterController {
 
     @PostMapping(value = "/filters", params = "duplicateFrom")
     @Operation(summary = "Duplicate a filter")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created"),
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The uuid of the new filter has been successfully duplicated"),
                            @ApiResponse(responseCode = "404", description = "Source filter not found")})
     public ResponseEntity<UUID> duplicateFilter(@RequestParam("duplicateFrom") UUID filterId) {
         return service.duplicateFilter(filterId).map(newFilterId -> ResponseEntity.ok()
@@ -95,9 +95,9 @@ public class FilterController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "/filters/batch")
+    @PostMapping(value = "/filters/batch/duplicate")
     @Operation(summary = "Duplicate filters from provided uuids")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters has been successfully created"),
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The map of sourceUuid and newUuid of duplicated filters"),
                            @ApiResponse(responseCode = "404", description = "Source filter not found")})
     public ResponseEntity<Map<UUID, UUID>> duplicateFilters(@RequestBody List<UUID> filterUuids) {
         Map<UUID, UUID> uuidsMap = service.duplicateFilters(filterUuids);
