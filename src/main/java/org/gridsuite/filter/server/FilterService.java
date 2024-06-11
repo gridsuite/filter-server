@@ -229,16 +229,16 @@ public class FilterService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_UUIDS_NOT_FOUND);
         }
 
-        // collect filters into two lists which have type changed or not changed
-        Map<Boolean, List<AbstractFilter>> filtersTypeNotChangedOrChanged = oldFilters.stream().collect(Collectors
-                .partitioningBy(oldFilter -> oldFilter.getType() == filtersToModifyMap.get(oldFilter.getId()).getType()));
-        List<AbstractFilter> filtersTypeNotChanged = filtersTypeNotChangedOrChanged.get(Boolean.TRUE);
-        List<AbstractFilter> filtersTypeChanged = filtersTypeNotChangedOrChanged.get(Boolean.FALSE);
+        // collect filters into two lists which have repository changed or not changed
+        Map<Boolean, List<AbstractFilter>> filtersReposNotChangedOrChanged = oldFilters.stream().collect(Collectors
+                .partitioningBy(oldFilter -> getRepository(oldFilter) == getRepository(filtersToModifyMap.get(oldFilter.getId()))));
+        List<AbstractFilter> filtersReposNotChanged = filtersReposNotChangedOrChanged.get(Boolean.TRUE);
+        List<AbstractFilter> filtersReposChanged = filtersReposNotChangedOrChanged.get(Boolean.FALSE);
 
         List<AbstractFilter> changedFilters = new ArrayList<>();
 
-        // --- perform change filters which have type not changed --- //
-        Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filtersTypeNotChanged.stream()
+        // --- perform change filters which have repository not changed --- //
+        Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filtersReposNotChanged.stream()
                 .map(filter -> {
                     AbstractFilter newFilter = filtersToModifyMap.get(filter.getId());
                     newFilter.setId(filter.getId());
@@ -248,13 +248,13 @@ public class FilterService {
         repositoryFiltersMap.forEach((repository, subFilters) ->
                 changedFilters.addAll(repository.modifyAll(subFilters.stream().collect(Collectors.toMap(AbstractFilter::getId, filter -> filter)))));
 
-        // --- perform change filters which have type changed --- //
-        List<AbstractFilter> filterTypeChangedToModify = filtersTypeChanged.stream()
+        // --- perform change filters which have repository changed --- //
+        List<AbstractFilter> filtersReposChangedToModify = filtersReposChanged.stream()
             .filter(filter -> filter.getType() != FilterType.SCRIPT &&
                 filtersToModifyMap.get(filter.getId()).getType() != FilterType.SCRIPT)
             .toList();
 
-        repositoryFiltersMap = filterTypeChangedToModify.stream()
+        repositoryFiltersMap = filtersReposChangedToModify.stream()
                 .map(filter -> {
                     AbstractFilter newFilter = filtersToModifyMap.get(filter.getId());
                     newFilter.setId(filter.getId());
@@ -262,7 +262,7 @@ public class FilterService {
                 })
                 .collect(Collectors.groupingBy(this::getRepository));
 
-        // delete old filters which have type changed
+        // delete old filters which have repository changed
         repositoryFiltersMap.forEach((repository, subFilters) ->
             repository.deleteAllByIds(subFilters.stream().map(AbstractFilter::getId).toList()));
         // create new filters with existing ids

@@ -706,9 +706,8 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testDuplicateFilter() throws Exception {
+    public void testLineFilterCrud() throws Exception {
         UUID filterId1 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
-        Date modificationDate = new Date();
         LineFilter lineFilter = LineFilter.builder().equipmentID("equipmentID").equipmentName("equipmentName")
             .substationName1("substationName1")
             .substationName2("substationName2").countries1(COUNTRIES1).countries2(COUNTRIES2)
@@ -716,8 +715,8 @@ public class FilterEntityControllerTest {
             .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 6., null))
             .build();
         CriteriaFilter lineCriteriaFilter = new CriteriaFilter(
-                filterId1,
-                modificationDate,
+                null,
+                new Date(),
                 lineFilter
         );
 
@@ -725,6 +724,7 @@ public class FilterEntityControllerTest {
         insertFilter(filterId1, lineCriteriaFilter);
 
         // check the inserted filter
+        lineCriteriaFilter.setId(filterId1);
         checkFormFilter(filterId1, lineCriteriaFilter);
 
         // --- duplicate filter -- //
@@ -733,6 +733,41 @@ public class FilterEntityControllerTest {
         // check the duplicated filter whether it is matched to the original
         lineCriteriaFilter.setId(newFilterId1);
         checkFormFilter(newFilterId1, lineCriteriaFilter);
+
+        // --- modify filter --- //
+        LineFilter lineFilter2 = LineFilter.builder().equipmentID("equipmentID").equipmentName("equipmentName")
+                .substationName1("substationName1")
+                .substationName2("substationName2").countries1(COUNTRIES2).countries2(COUNTRIES1)
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 4., 9.))
+                .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 5., null))
+                .build();
+        CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
+                null,
+                new Date(),
+                lineFilter2
+        );
+        modifyFilter(filterId1, lineCriteriaFilter2, "userId");
+
+        // check the modified filter
+        lineCriteriaFilter2.setId(filterId1);
+        checkFormFilter(filterId1, lineCriteriaFilter2);
+
+        // --- modify filter with equipment type changed --- //
+        GeneratorFilter generatorFilter = GeneratorFilter.builder().equipmentID("eqId1").equipmentName("gen1")
+                .substationName("s1")
+                .countries(new TreeSet<>(Set.of("FR", "BE")))
+                .nominalVoltage(new NumericalFilter(RangeType.RANGE, 50., null))
+                .build();
+        CriteriaFilter generatorCriteriaFilter = new CriteriaFilter(
+                null,
+                new Date(),
+                generatorFilter
+        );
+        modifyFilter(filterId1, generatorCriteriaFilter, "userId");
+
+        // check the modified filter
+        generatorCriteriaFilter.setId(filterId1);
+        checkFormFilter(filterId1, generatorCriteriaFilter);
 
         // --- delete filters --- //
         deleteFilter(filterId1);
@@ -1101,6 +1136,23 @@ public class FilterEntityControllerTest {
     private Map<UUID, UUID> duplicateFilters(List<UUID> sourceFilterUuids) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE + "/batch/duplicate")
                         .content(objectMapper.writeValueAsString(sourceFilterUuids))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, new TypeReference<>() { });
+    }
+
+    private void modifyFilter(UUID filterId, AbstractFilter filter, String userId) throws Exception {
+        mvc.perform(put(URL_TEMPLATE + "/" + filterId)
+                        .content(objectMapper.writeValueAsString(filter))
+                        .contentType(APPLICATION_JSON)
+                        .header(USER_ID_HEADER, userId))
+                .andExpect(status().isOk());
+        checkElementUpdatedMessageSent(filterId, userId);
+    }
+
+    private List<AbstractFilter> modifyFilters(Map<UUID, AbstractFilter> filtersToModifyMap) throws Exception {
+        String response = mvc.perform(put(URL_TEMPLATE + "/batch")
+                        .content(objectMapper.writeValueAsString(filtersToModifyMap))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, new TypeReference<>() { });
@@ -2059,7 +2111,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testDuplicateFiltersInBatch() throws Exception {
+    public void testLineFiltersCrudInBatch() throws Exception {
         UUID filterId1 = UUID.randomUUID();
         LineFilter lineFilter1 = LineFilter.builder().equipmentID("equipmentID1").equipmentName("equipmentName1")
                 .substationName1("substationName1")
@@ -2068,7 +2120,7 @@ public class FilterEntityControllerTest {
                 .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 6., null))
                 .build();
         CriteriaFilter lineCriteriaFilter1 = new CriteriaFilter(
-                filterId1,
+                null,
                 new Date(),
                 lineFilter1
         );
@@ -2081,7 +2133,7 @@ public class FilterEntityControllerTest {
                 .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 5., null))
                 .build();
         CriteriaFilter lineCriteriaFilter2 = new CriteriaFilter(
-                filterId2,
+                null,
                 new Date(),
                 lineFilter2
         );
@@ -2095,7 +2147,9 @@ public class FilterEntityControllerTest {
         insertFilters(filtersToCreateMap);
 
         // check inserted filters
+        lineCriteriaFilter1.setId(filterId1);
         checkFormFilter(filterId1, lineCriteriaFilter1);
+        lineCriteriaFilter2.setId(filterId2);
         checkFormFilter(filterId2, lineCriteriaFilter2);
 
         // --- duplicate in batch --- //
@@ -2109,6 +2163,40 @@ public class FilterEntityControllerTest {
             UUID newUuid = entry.getValue();
             checkFormFilter(newUuid, (CriteriaFilter) filtersToCreateMap.get(sourceUuid));
         }
+
+        // --- modify filters in batch --- //
+        LineFilter lineFilter3 = LineFilter.builder().equipmentID("equipmentID").equipmentName("equipmentName")
+                .substationName1("substationName1")
+                .substationName2("substationName2").countries1(COUNTRIES2).countries2(COUNTRIES1)
+                .nominalVoltage1(new NumericalFilter(RangeType.RANGE, 3., 10.))
+                .nominalVoltage2(new NumericalFilter(RangeType.EQUALITY, 4., null))
+                .build();
+        CriteriaFilter lineCriteriaFilter3 = new CriteriaFilter(
+                null,
+                new Date(),
+                lineFilter3
+        );
+        GeneratorFilter generatorFilter = GeneratorFilter.builder().equipmentID("eqId1").equipmentName("gen1")
+                .substationName("s1")
+                .countries(new TreeSet<>(Set.of("FR", "BE")))
+                .nominalVoltage(new NumericalFilter(RangeType.RANGE, 50., null))
+                .build();
+        CriteriaFilter generatorCriteriaFilter = new CriteriaFilter(
+                null,
+                new Date(),
+                generatorFilter
+        );
+        Map<UUID, AbstractFilter> filtersToModifyMap = Map.of(
+                filterId1, lineCriteriaFilter3,
+                filterId2, generatorCriteriaFilter
+        );
+        modifyFilters(filtersToModifyMap);
+
+        // check modified filters
+        lineCriteriaFilter3.setId(filterId1);
+        checkFormFilter(filterId1, lineCriteriaFilter3);
+        generatorCriteriaFilter.setId(filterId2);
+        checkFormFilter(filterId2, generatorCriteriaFilter);
 
         // --- delete filters in batch -- //
         deleteFilters(Stream.concat(sourceAndNewUuidMap.keySet().stream(), sourceAndNewUuidMap.values().stream()).toList());
