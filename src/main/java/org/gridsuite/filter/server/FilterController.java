@@ -118,6 +118,15 @@ public class FilterController {
         }
     }
 
+    @PutMapping(value = "/filters/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Modify filters in batch")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters has been successfully modified")})
+    public ResponseEntity<List<AbstractFilter>> changeFilters(@RequestBody Map<UUID, AbstractFilter> filtersToModifyMap) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(service.changeFilters(filtersToModifyMap));
+    }
+
     @DeleteMapping(value = "/filters/{id}")
     @Operation(summary = "delete the filter")
     @ApiResponse(responseCode = "200", description = "The filter has been deleted")

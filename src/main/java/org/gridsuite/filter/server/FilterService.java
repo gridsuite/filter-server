@@ -54,7 +54,7 @@ public class FilterService {
 
     private static final String FILTER_LIST = "Filter list ";
     private static final String NOT_FOUND = " not found";
-    public static final String FILTER_UUIDS_NOT_FOUND = "Some filter uuids not found while duplicating filters";
+    public static final String FILTER_UUIDS_NOT_FOUND = "Some filter uuids not found";
 
     private final Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories = new HashMap<>();
 
@@ -143,7 +143,13 @@ public class FilterService {
         if (CollectionUtils.isEmpty(filters)) {
             return Collections.emptyList();
         }
-        return getRepository(filters.get(0)).insertAll(filters);
+
+        Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filters.stream()
+            .collect(Collectors.groupingBy(this::getRepository));
+
+        List<AbstractFilter> createdFilters = new ArrayList<>();
+        repositoryFiltersMap.forEach((repository, subFilters) -> createdFilters.addAll(repository.insertAll(subFilters)));
+        return createdFilters;
     }
 
     @Transactional
@@ -176,12 +182,16 @@ public class FilterService {
             sourceFilter.setId(newFilterId);
         });
 
-        getRepository(sourceFilters.get(0)).insertAll(sourceFilters);
+        Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = sourceFilters.stream()
+                .collect(Collectors.groupingBy(this::getRepository));
+
+        repositoryFiltersMap.forEach(AbstractFilterRepositoryProxy::insertAll);
 
         return uuidsMap;
     }
 
-    private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
+    private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity,
+            ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
         if (!filter.getType().equals(FilterType.CRITERIA)) {
             return filterRepositories.get(filter.getType().name());
         }
@@ -207,6 +217,58 @@ public class FilterService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
         notificationService.emitElementUpdated(id, userId);
+    }
+
+    @Transactional
+    public List<AbstractFilter> changeFilters(Map<UUID, AbstractFilter> filtersToModifyMap) {
+        List<UUID> filterUuids = filtersToModifyMap.keySet().stream().toList();
+        List<AbstractFilter> oldFilters = getFilters(filterUuids);
+
+        // check whether found all
+        if (oldFilters.isEmpty() || oldFilters.size() != filterUuids.size()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_UUIDS_NOT_FOUND);
+        }
+
+        // collect filters into two lists which have type changed or not changed
+        Map<Boolean, List<AbstractFilter>> filtersTypeNotChangedOrChanged = oldFilters.stream().collect(Collectors
+                .partitioningBy(oldFilter -> oldFilter.getType() == filtersToModifyMap.get(oldFilter.getId()).getType()));
+        List<AbstractFilter> filtersTypeNotChanged = filtersTypeNotChangedOrChanged.get(Boolean.TRUE);
+        List<AbstractFilter> filtersTypeChanged = filtersTypeNotChangedOrChanged.get(Boolean.FALSE);
+
+        List<AbstractFilter> changedFilters = new ArrayList<>();
+
+        // --- perform change filters which have type not changed --- //
+        Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filtersTypeNotChanged.stream()
+                .map(filter -> {
+                    AbstractFilter newFilter = filtersToModifyMap.get(filter.getId());
+                    newFilter.setId(filter.getId());
+                    return newFilter;
+                })
+                .collect(Collectors.groupingBy(this::getRepository));
+        repositoryFiltersMap.forEach((repository, subFilters) ->
+                changedFilters.addAll(repository.modifyAll(subFilters.stream().collect(Collectors.toMap(AbstractFilter::getId, filter -> filter)))));
+
+        // --- perform change filters which have type changed --- //
+        List<AbstractFilter> filterTypeChangedToModify = filtersTypeChanged.stream()
+            .filter(filter -> filter.getType() != FilterType.SCRIPT &&
+                filtersToModifyMap.get(filter.getId()).getType() != FilterType.SCRIPT)
+            .toList();
+
+        repositoryFiltersMap = filterTypeChangedToModify.stream()
+                .map(filter -> {
+                    AbstractFilter newFilter = filtersToModifyMap.get(filter.getId());
+                    newFilter.setId(filter.getId());
+                    return newFilter;
+                })
+                .collect(Collectors.groupingBy(this::getRepository));
+
+        // delete old filters which have type changed
+        repositoryFiltersMap.forEach((repository, subFilters) ->
+            repository.deleteAllByIds(subFilters.stream().map(AbstractFilter::getId).toList()));
+        // create new filters with existing ids
+        repositoryFiltersMap.forEach((repository, subFilters) -> changedFilters.addAll(repository.insertAll(subFilters)));
+
+        return changedFilters;
     }
 
     public void deleteFilter(UUID id) {

@@ -132,6 +132,12 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         toDto(getRepository().save(fromDto(f)));
     }
 
+    public List<AbstractFilter> modifyAll(Map<UUID, AbstractFilter> filtersToModifyMap) {
+        filtersToModifyMap.forEach((uuid, expertFilter) -> expertFilter.setId(uuid));
+        List<F> savedFilterEntities = getRepository().saveAll(filtersToModifyMap.values().stream().map(this::fromDto).toList());
+        return savedFilterEntities.stream().map(this::toDto).toList();
+    }
+
     public boolean deleteById(UUID id) {
         return getRepository().removeById(id) != 0;
     }
