@@ -69,11 +69,13 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             }
             case BOOLEAN -> {
                 ExpertRuleValueEntity booleanFilterEntity = (ExpertRuleValueEntity) filterEntity;
-                return BooleanExpertRule.builder()
+                BooleanExpertRule.BooleanExpertRuleBuilder<?, ?> ruleBuilder = BooleanExpertRule.builder()
                         .field(booleanFilterEntity.getField())
-                        .operator(booleanFilterEntity.getOperator())
-                        .value(Boolean.parseBoolean(booleanFilterEntity.getValue()))
-                        .build();
+                        .operator(booleanFilterEntity.getOperator());
+                if (booleanFilterEntity.getValue() != null) {
+                    ruleBuilder.value(Boolean.parseBoolean(booleanFilterEntity.getValue()));
+                }
+                return ruleBuilder.build();
             }
             case NUMBER -> {
                 ExpertRuleValueEntity numberFilterEntity = (ExpertRuleValueEntity) filterEntity;
