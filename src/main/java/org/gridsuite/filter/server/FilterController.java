@@ -75,8 +75,8 @@ public class FilterController {
     }
 
     @PostMapping(value = "/filters/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Create filters with provided uuids")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters has been successfully created")})
+    @Operation(summary = "Create filters from provided uuids")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters have been successfully created")})
     public ResponseEntity<List<AbstractFilter>> createFilters(@RequestBody Map<UUID, AbstractFilter> filtersToCreateMap) {
         filtersToCreateMap.forEach((uuid, expertFilter) -> expertFilter.setId(uuid));
         return ResponseEntity.ok()
@@ -107,7 +107,7 @@ public class FilterController {
     }
 
     @PutMapping(value = "/filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Modify a filter")
+    @Operation(summary = "Modify a filter from a provided fitler uuid and the whole new filter object")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully modified")})
     public ResponseEntity<Void> changeFilter(@PathVariable UUID id, @RequestBody AbstractFilter filter, @RequestHeader("userId") String userId) {
         try {
@@ -119,8 +119,8 @@ public class FilterController {
     }
 
     @PutMapping(value = "/filters/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Modify filters in batch")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters has been successfully modified")})
+    @Operation(summary = "Modify filters in batch from a provided map of each filter uuid and the corresponding whole new filter object")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters have been successfully modified")})
     public ResponseEntity<List<AbstractFilter>> changeFilters(@RequestBody Map<UUID, AbstractFilter> filtersToModifyMap) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
