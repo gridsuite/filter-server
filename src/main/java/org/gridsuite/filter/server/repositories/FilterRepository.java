@@ -30,4 +30,7 @@ public interface FilterRepository<T extends AbstractFilterEntity> extends JpaRep
 
     @Transactional
     Integer removeById(UUID id);
+
+    @Transactional
+    void deleteAllByIdIn(List<UUID> ids);
 }
