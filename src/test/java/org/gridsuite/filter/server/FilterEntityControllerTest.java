@@ -746,7 +746,7 @@ public class FilterEntityControllerTest {
                 new Date(),
                 lineFilter2
         );
-        modifyFilter(filterId1, lineCriteriaFilter2, "userId");
+        updateFilter(filterId1, lineCriteriaFilter2, "userId");
 
         // check the modified filter
         lineCriteriaFilter2.setId(filterId1);
@@ -763,7 +763,7 @@ public class FilterEntityControllerTest {
                 new Date(),
                 generatorFilter
         );
-        modifyFilter(filterId1, generatorCriteriaFilter, "userId");
+        updateFilter(filterId1, generatorCriteriaFilter, "userId");
 
         // check the modified filter
         generatorCriteriaFilter.setId(filterId1);
@@ -1141,7 +1141,7 @@ public class FilterEntityControllerTest {
         return objectMapper.readValue(response, new TypeReference<>() { });
     }
 
-    private void modifyFilter(UUID filterId, AbstractFilter filter, String userId) throws Exception {
+    private void updateFilter(UUID filterId, AbstractFilter filter, String userId) throws Exception {
         mvc.perform(put(URL_TEMPLATE + "/" + filterId)
                         .content(objectMapper.writeValueAsString(filter))
                         .contentType(APPLICATION_JSON)
@@ -1150,11 +1150,13 @@ public class FilterEntityControllerTest {
         checkElementUpdatedMessageSent(filterId, userId);
     }
 
-    private List<AbstractFilter> modifyFilters(Map<UUID, AbstractFilter> filtersToModifyMap) throws Exception {
+    private List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap, String userId) throws Exception {
         String response = mvc.perform(put(URL_TEMPLATE + "/batch")
-                        .content(objectMapper.writeValueAsString(filtersToModifyMap))
-                        .contentType(APPLICATION_JSON))
+                        .content(objectMapper.writeValueAsString(filtersToUpdateMap))
+                        .contentType(APPLICATION_JSON)
+                        .header(USER_ID_HEADER, userId))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        filtersToUpdateMap.keySet().forEach(filterId -> checkElementUpdatedMessageSent(filterId, userId));
         return objectMapper.readValue(response, new TypeReference<>() { });
     }
 
@@ -2190,7 +2192,7 @@ public class FilterEntityControllerTest {
                 filterId1, lineCriteriaFilter3,
                 filterId2, generatorCriteriaFilter
         );
-        modifyFilters(filtersToModifyMap);
+        updateFilters(filtersToModifyMap, "userId");
 
         // check modified filters
         lineCriteriaFilter3.setId(filterId1);

@@ -35,7 +35,6 @@ import org.gridsuite.filter.utils.FilterType;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -133,19 +132,19 @@ public class FilterService {
                 .toList();
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
         return getRepository(filter).insert(filter);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public List<AbstractFilter> createFilters(List<AbstractFilter> filters) {
         if (CollectionUtils.isEmpty(filters)) {
             return Collections.emptyList();
         }
 
         Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filters.stream()
-            .collect(Collectors.groupingBy(this::getRepository));
+                .collect(Collectors.groupingBy(this::getRepository));
 
         List<AbstractFilter> createdFilters = new ArrayList<>();
         repositoryFiltersMap.forEach((repository, subFilters) -> createdFilters.addAll(repository.insertAll(subFilters)));
@@ -199,76 +198,33 @@ public class FilterService {
     }
 
     @Transactional
-    public <F extends AbstractFilter> void changeFilter(UUID id, F newFilter, String userId) {
-        Optional<AbstractFilter> f = getFilter(id);
-        if (f.isPresent()) {
-            if (getRepository(f.get()) == getRepository(newFilter)) { // filter type has not changed
-                getRepository(newFilter).modify(id, newFilter);
+    public <F extends AbstractFilter> AbstractFilter updateFilter(UUID id, F newFilter, String userId) {
+        Optional<AbstractFilter> filterOpt = getFilter(id);
+        AbstractFilter modifiedOrCreatedFilter;
+        if (filterOpt.isPresent()) {
+            if (getRepository(filterOpt.get()) == getRepository(newFilter)) { // filter type has not changed
+                modifiedOrCreatedFilter = getRepository(newFilter).modify(id, newFilter);
             } else { // filter type has changed
-                if (f.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
+                if (filterOpt.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
                     throw new PowsyblException(WRONG_FILTER_TYPE);
                 } else {
-                    getRepository(f.get()).deleteById(id);
+                    getRepository(filterOpt.get()).deleteById(id);
                     newFilter.setId(id);
-                    createFilter(newFilter);
+                    modifiedOrCreatedFilter = createFilter(newFilter);
                 }
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
         notificationService.emitElementUpdated(id, userId);
+        return modifiedOrCreatedFilter;
     }
 
     @Transactional
-    public List<AbstractFilter> changeFilters(Map<UUID, AbstractFilter> filtersToModifyMap) {
-        List<UUID> filterUuids = filtersToModifyMap.keySet().stream().toList();
-        List<AbstractFilter> oldFilters = getFilters(filterUuids);
-
-        // check whether found all
-        if (oldFilters.isEmpty() || oldFilters.size() != filterUuids.size()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_UUIDS_NOT_FOUND);
-        }
-
-        // collect filters into two lists which have repository changed or not changed
-        Map<Boolean, List<AbstractFilter>> filtersReposNotChangedOrChanged = oldFilters.stream().collect(Collectors
-                .partitioningBy(oldFilter -> getRepository(oldFilter) == getRepository(filtersToModifyMap.get(oldFilter.getId()))));
-        List<AbstractFilter> filtersReposNotChanged = filtersReposNotChangedOrChanged.get(Boolean.TRUE);
-        List<AbstractFilter> filtersReposChanged = filtersReposNotChangedOrChanged.get(Boolean.FALSE);
-
-        List<AbstractFilter> changedFilters = new ArrayList<>();
-
-        // --- perform change filters which have repository not changed --- //
-        Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filtersReposNotChanged.stream()
-                .map(filter -> {
-                    AbstractFilter newFilter = filtersToModifyMap.get(filter.getId());
-                    newFilter.setId(filter.getId());
-                    return newFilter;
-                })
-                .collect(Collectors.groupingBy(this::getRepository));
-        repositoryFiltersMap.forEach((repository, subFilters) ->
-                changedFilters.addAll(repository.modifyAll(subFilters.stream().collect(Collectors.toMap(AbstractFilter::getId, filter -> filter)))));
-
-        // --- perform change filters which have repository changed --- //
-        List<AbstractFilter> filtersReposChangedToModify = filtersReposChanged.stream()
-            .filter(filter -> filter.getType() != FilterType.SCRIPT &&
-                filtersToModifyMap.get(filter.getId()).getType() != FilterType.SCRIPT)
+    public List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap, String userId) {
+        return filtersToUpdateMap.keySet().stream()
+            .map(filterUuid -> updateFilter(filterUuid, filtersToUpdateMap.get(filterUuid), userId))
             .toList();
-
-        repositoryFiltersMap = filtersReposChangedToModify.stream()
-                .map(filter -> {
-                    AbstractFilter newFilter = filtersToModifyMap.get(filter.getId());
-                    newFilter.setId(filter.getId());
-                    return newFilter;
-                })
-                .collect(Collectors.groupingBy(this::getRepository));
-
-        // delete old filters which have repository changed
-        repositoryFiltersMap.forEach((repository, subFilters) ->
-            repository.deleteAllByIds(subFilters.stream().map(AbstractFilter::getId).toList()));
-        // create new filters with existing ids
-        repositoryFiltersMap.forEach((repository, subFilters) -> changedFilters.addAll(repository.insertAll(subFilters)));
-
-        return changedFilters;
     }
 
     public void deleteFilter(UUID id) {
