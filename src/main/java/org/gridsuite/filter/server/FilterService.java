@@ -33,6 +33,7 @@ import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +62,8 @@ public class FilterService {
 
     private final NotificationService notificationService;
 
+    private final FilterService self;
+
     public FilterService(final ScriptFilterRepository scriptFiltersRepository,
                          final LineFilterRepository lineFilterRepository,
                          final GeneratorFilterRepository generatorFilterRepository,
@@ -80,7 +83,8 @@ public class FilterService {
                          final IdentifierListFilterRepository identifierListFilterRepository,
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
-                         NotificationService notificationService) {
+                         NotificationService notificationService,
+                         @Lazy FilterService self) {
         filterRepositories.put(EquipmentType.LINE.name(), new LineFilterRepositoryProxy(lineFilterRepository));
         filterRepositories.put(EquipmentType.GENERATOR.name(), new GeneratorFilterRepositoryProxy(generatorFilterRepository));
         filterRepositories.put(EquipmentType.LOAD.name(), new LoadFilterRepositoryProxy(loadFilterRepository));
@@ -104,6 +108,7 @@ public class FilterService {
         filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
         this.networkStoreService = networkStoreService;
         this.notificationService = notificationService;
+        this.self = self;
     }
 
     public List<IFilterAttributes> getFilters() {
@@ -158,7 +163,7 @@ public class FilterService {
             UUID newFilterId = UUID.randomUUID();
             AbstractFilter sourceFilter = sourceFilterOptional.get();
             sourceFilter.setId(newFilterId);
-            createFilter(sourceFilter);
+            self.createFilter(sourceFilter);
             return Optional.of(newFilterId);
         }
         return Optional.empty();
@@ -210,7 +215,7 @@ public class FilterService {
                 } else {
                     getRepository(filterOpt.get()).deleteById(id);
                     newFilter.setId(id);
-                    modifiedOrCreatedFilter = createFilter(newFilter);
+                    modifiedOrCreatedFilter = self.createFilter(newFilter);
                 }
             }
         } else {
@@ -223,7 +228,7 @@ public class FilterService {
     @Transactional
     public List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap, String userId) {
         return filtersToUpdateMap.keySet().stream()
-            .map(filterUuid -> updateFilter(filterUuid, filtersToUpdateMap.get(filterUuid), userId))
+            .map(filterUuid -> self.updateFilter(filterUuid, filtersToUpdateMap.get(filterUuid), userId))
             .toList();
     }
 
