@@ -25,7 +25,6 @@ import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import jakarta.servlet.ServletException;
 import org.apache.commons.collections4.OrderedMap;
 import org.apache.commons.collections4.map.LinkedMap;
-import org.assertj.core.api.Assertions;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.criteriafilter.DanglingLineFilter;
@@ -40,6 +39,7 @@ import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.utils.FieldsMatcher;
 import org.gridsuite.filter.server.utils.MatcherJson;
+import org.gridsuite.filter.server.utils.assertions.Assertions;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterType;
 import org.gridsuite.filter.utils.RangeType;
@@ -1586,7 +1586,8 @@ public class FilterEntityControllerTest {
 
     private void matchExpertFilterInfos(ExpertFilter expertFilter1, ExpertFilter expertFilter2) {
         matchFilterInfos(expertFilter1, expertFilter2);
-        assertTrue(new MatcherJson<>(objectMapper, expertFilter2.getRules()).matchesSafely(expertFilter1.getRules()));
+        Assertions.assertThat(expertFilter1).recursivelyEquals(expertFilter2, "id", "topologyKind" /* not persisted field */);
+        // assertTrue(new MatcherJson<>(objectMapper, expertFilter2.getRules()).matchesSafely(expertFilter1.getRules()));
     }
 
     private void checkElementUpdatedMessageSent(UUID elementUuid, String userId) {
