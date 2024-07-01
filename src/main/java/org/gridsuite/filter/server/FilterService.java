@@ -221,14 +221,18 @@ public class FilterService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
-        notificationService.emitElementUpdated(id, userId);
+
+        if (userId != null) {
+            notificationService.emitElementUpdated(id, userId);
+        }
+
         return modifiedOrCreatedFilter;
     }
 
     @Transactional
-    public List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap, String userId) {
+    public List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap) {
         return filtersToUpdateMap.keySet().stream()
-            .map(filterUuid -> self.updateFilter(filterUuid, filtersToUpdateMap.get(filterUuid), userId))
+            .map(filterUuid -> self.updateFilter(filterUuid, filtersToUpdateMap.get(filterUuid), null))
             .toList();
     }
 

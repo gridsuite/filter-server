@@ -121,10 +121,10 @@ public class FilterController {
     @PutMapping(value = "/filters/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update filters in batch from a given map of each filter id and the corresponding whole new filter object")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters have been successfully updated")})
-    public ResponseEntity<List<AbstractFilter>> updateFilters(@RequestBody Map<UUID, AbstractFilter> filtersToUpdateMap, @RequestHeader("userId") String userId) {
+    public ResponseEntity<List<AbstractFilter>> updateFilters(@RequestBody Map<UUID, AbstractFilter> filtersToUpdateMap) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(service.updateFilters(filtersToUpdateMap, userId));
+                .body(service.updateFilters(filtersToUpdateMap));
     }
 
     @DeleteMapping(value = "/filters/{id}")

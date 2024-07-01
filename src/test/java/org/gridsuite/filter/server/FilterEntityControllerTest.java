@@ -1150,14 +1150,19 @@ public class FilterEntityControllerTest {
         checkElementUpdatedMessageSent(filterId, userId);
     }
 
-    private List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap, String userId) throws Exception {
+    private List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap) throws Exception {
         String response = mvc.perform(put(URL_TEMPLATE + "/batch")
                         .content(objectMapper.writeValueAsString(filtersToUpdateMap))
-                        .contentType(APPLICATION_JSON)
-                        .header(USER_ID_HEADER, userId))
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        filtersToUpdateMap.keySet().forEach(filterId -> checkElementUpdatedMessageSent(filterId, userId));
         return objectMapper.readValue(response, new TypeReference<>() { });
+    }
+
+    private void updateFiltersWithNoneExistingId(Map<UUID, AbstractFilter> filtersToUpdateMap) throws Exception {
+        mvc.perform(put(URL_TEMPLATE + "/batch")
+                        .content(objectMapper.writeValueAsString(filtersToUpdateMap))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
     private void deleteFilter(UUID filterId) throws Exception {
@@ -2188,16 +2193,36 @@ public class FilterEntityControllerTest {
                 new Date(),
                 generatorFilter
         );
-        Map<UUID, AbstractFilter> filtersToModifyMap = Map.of(
+        Map<UUID, AbstractFilter> filtersToUpdateMap = Map.of(
                 filterId1, lineCriteriaFilter3,
                 filterId2, generatorCriteriaFilter
         );
-        updateFilters(filtersToModifyMap, "userId");
+        updateFilters(filtersToUpdateMap);
 
         // check modified filters
         lineCriteriaFilter3.setId(filterId1);
         checkFormFilter(filterId1, lineCriteriaFilter3);
         generatorCriteriaFilter.setId(filterId2);
+        checkFormFilter(filterId2, generatorCriteriaFilter);
+
+        // --- modify filters in batch with a none existing id --- //
+        GeneratorFilter generatorFilter2 = GeneratorFilter.builder().equipmentID("eqId1").equipmentName("gen1")
+                .substationName("s1")
+                .countries(new TreeSet<>(Set.of("FR", "BE")))
+                .nominalVoltage(new NumericalFilter(RangeType.RANGE, 60., null))
+                .build();
+        CriteriaFilter generatorCriteriaFilter2 = new CriteriaFilter(
+                null,
+                new Date(),
+                generatorFilter2
+        );
+
+        Map<UUID, AbstractFilter> filtersToUpdateMap2 = Map.of(
+                UUID.randomUUID(), lineCriteriaFilter3,
+                filterId2, generatorCriteriaFilter2
+        );
+        updateFiltersWithNoneExistingId(filtersToUpdateMap2);
+        // check modified filters => filter with filterId2 should not be changed
         checkFormFilter(filterId2, generatorCriteriaFilter);
 
         // --- delete filters in batch -- //
