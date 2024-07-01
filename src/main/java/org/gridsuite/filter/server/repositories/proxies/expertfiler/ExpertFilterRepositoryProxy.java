@@ -23,7 +23,10 @@ import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterType;
 import org.gridsuite.filter.utils.expertfilter.DataType;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,7 +61,6 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
         switch (expertRuleEntity.getDataType()) {
             case COMBINATOR -> {
                 return CombinatorExpertRule.builder()
-                        .id(expertRuleEntity.getId())
                         .combinator(expertRuleEntity.getCombinator())
                         .field(expertRuleEntity.getField())
                         .operator(expertRuleEntity.getOperator())
@@ -68,7 +70,6 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             case BOOLEAN -> {
                 ExpertRuleValueEntity booleanExpertRuleEntity = (ExpertRuleValueEntity) expertRuleEntity;
                 BooleanExpertRule.BooleanExpertRuleBuilder<?, ?> ruleBuilder = BooleanExpertRule.builder()
-                        .id(expertRuleEntity.getId())
                         .field(booleanExpertRuleEntity.getField())
                         .operator(booleanExpertRuleEntity.getOperator());
                 if (booleanExpertRuleEntity.getValue() != null) {
@@ -79,7 +80,6 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             case NUMBER -> {
                 ExpertRuleValueEntity numberExpertEntity = (ExpertRuleValueEntity) expertRuleEntity;
                 NumberExpertRule.NumberExpertRuleBuilder<?, ?> ruleBuilder = NumberExpertRule.builder()
-                        .id(expertRuleEntity.getId())
                         .field(expertRuleEntity.getField())
                         .operator(expertRuleEntity.getOperator());
                 if (numberExpertEntity.getValue() != null) {
@@ -95,7 +95,6 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             case STRING -> {
                 ExpertRuleValueEntity stringExpertRuleEntity = (ExpertRuleValueEntity) expertRuleEntity;
                 StringExpertRule.StringExpertRuleBuilder<?, ?> ruleBuilder = StringExpertRule.builder()
-                        .id(expertRuleEntity.getId())
                         .field(expertRuleEntity.getField())
                         .operator(expertRuleEntity.getOperator());
                 if (stringExpertRuleEntity.getValue() != null) {
@@ -111,7 +110,6 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             case ENUM -> {
                 ExpertRuleValueEntity enumExpertRuleEntity = (ExpertRuleValueEntity) expertRuleEntity;
                 EnumExpertRule.EnumExpertRuleBuilder<?, ?> ruleBuilder = EnumExpertRule.builder()
-                        .id(expertRuleEntity.getId())
                         .field(enumExpertRuleEntity.getField())
                         .operator(enumExpertRuleEntity.getOperator());
                 if (enumExpertRuleEntity.getValue() != null) {
@@ -127,7 +125,6 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                 ExpertRuleValueEntity filterUuidExpertRuleEntity = (ExpertRuleValueEntity) expertRuleEntity;
 
                 FilterUuidExpertRule.FilterUuidExpertRuleBuilder<?, ?> ruleBuilder = FilterUuidExpertRule.builder()
-                        .id(expertRuleEntity.getId())
                         .field(expertRuleEntity.getField())
                         .operator(expertRuleEntity.getOperator());
                 if (filterUuidExpertRuleEntity.getValue() != null) {
@@ -143,7 +140,6 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             case PROPERTIES -> {
                 ExpertRulePropertiesEntity propertiesExpertRuleEntity = (ExpertRulePropertiesEntity) expertRuleEntity;
                 return PropertiesExpertRule.builder()
-                        .id(expertRuleEntity.getId())
                         .field(propertiesExpertRuleEntity.getField())
                         .operator(propertiesExpertRuleEntity.getOperator())
                         .propertyValues(propertiesExpertRuleEntity.getPropertyValues())
@@ -182,7 +178,7 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
         ExpertRuleEntity.ExpertRuleEntityBuilder<?, ?> expertRuleEntityBuilder = null;
         if (filter.getDataType() == DataType.COMBINATOR) {
             expertRuleEntityBuilder = ExpertRuleEntity.builder()
-                    .id(Optional.ofNullable(filter.getId()).orElse(UUID.randomUUID()))
+                    .id(UUID.randomUUID())
                     .combinator(filter.getCombinator())
                     .operator(filter.getOperator())
                     .dataType(filter.getDataType())
@@ -191,7 +187,7 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
         if (filter.getDataType() == DataType.PROPERTIES) {
             PropertiesExpertRule propertiesRule = (PropertiesExpertRule) filter;
             expertRuleEntityBuilder = ExpertRulePropertiesEntity.builder()
-                    .id(Optional.ofNullable(filter.getId()).orElse(UUID.randomUUID()))
+                    .id(UUID.randomUUID())
                     .combinator(filter.getCombinator())
                     .operator(filter.getOperator())
                     .dataType(filter.getDataType())
@@ -205,7 +201,7 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                 filter.getDataType() == DataType.ENUM ||
                 filter.getDataType() == DataType.FILTER_UUID) {
             expertRuleEntityBuilder = ExpertRuleValueEntity.builder()
-                    .id(Optional.ofNullable(filter.getId()).orElse(UUID.randomUUID()))
+                    .id(UUID.randomUUID())
                     .combinator(filter.getCombinator())
                     .operator(filter.getOperator())
                     .dataType(filter.getDataType())

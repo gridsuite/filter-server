@@ -1586,8 +1586,7 @@ public class FilterEntityControllerTest {
 
     private void matchExpertFilterInfos(ExpertFilter expertFilter1, ExpertFilter expertFilter2) {
         matchFilterInfos(expertFilter1, expertFilter2);
-        Assertions.assertThat(expertFilter1).recursivelyEquals(expertFilter2, "id", "topologyKind" /* not persisted field */);
-        // assertTrue(new MatcherJson<>(objectMapper, expertFilter2.getRules()).matchesSafely(expertFilter1.getRules()));
+        Assertions.assertThat(expertFilter1).recursivelyEquals(expertFilter2, "topologyKind" /* not persisted field */);
     }
 
     private void checkElementUpdatedMessageSent(UUID elementUuid, String userId) {
