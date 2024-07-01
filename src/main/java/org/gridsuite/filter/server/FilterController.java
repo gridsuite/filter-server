@@ -97,7 +97,7 @@ public class FilterController {
 
     @PostMapping(value = "/filters/batch/duplicate")
     @Operation(summary = "Duplicate filters from given ids")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters of given ids has been successfully duplicated"),
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters of given ids have been successfully duplicated"),
                            @ApiResponse(responseCode = "404", description = "Source filter not found")})
     public ResponseEntity<Map<UUID, UUID>> duplicateFilters(@RequestBody List<UUID> filterUuids) {
         Map<UUID, UUID> uuidsMap = service.duplicateFilters(filterUuids);
