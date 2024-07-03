@@ -80,8 +80,8 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             case NUMBER -> {
                 ExpertRuleValueEntity numberExpertEntity = (ExpertRuleValueEntity) expertRuleEntity;
                 NumberExpertRule.NumberExpertRuleBuilder<?, ?> ruleBuilder = NumberExpertRule.builder()
-                        .field(expertRuleEntity.getField())
-                        .operator(expertRuleEntity.getOperator());
+                        .field(numberExpertEntity.getField())
+                        .operator(numberExpertEntity.getOperator());
                 if (numberExpertEntity.getValue() != null) {
                     if (isMultipleCriteriaOperator(numberExpertEntity.getOperator())) { // for multiple values
                         ruleBuilder.values(Stream.of(numberExpertEntity.getValue().split(",")).map(Double::valueOf).collect(Collectors.toSet()));
@@ -95,8 +95,8 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
             case STRING -> {
                 ExpertRuleValueEntity stringExpertRuleEntity = (ExpertRuleValueEntity) expertRuleEntity;
                 StringExpertRule.StringExpertRuleBuilder<?, ?> ruleBuilder = StringExpertRule.builder()
-                        .field(expertRuleEntity.getField())
-                        .operator(expertRuleEntity.getOperator());
+                        .field(stringExpertRuleEntity.getField())
+                        .operator(stringExpertRuleEntity.getOperator());
                 if (stringExpertRuleEntity.getValue() != null) {
                     if (isMultipleCriteriaOperator(stringExpertRuleEntity.getOperator())) { // for multiple values
                         ruleBuilder.values(Stream.of(stringExpertRuleEntity.getValue().split(",")).collect(Collectors.toSet()));
@@ -125,8 +125,8 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                 ExpertRuleValueEntity filterUuidExpertRuleEntity = (ExpertRuleValueEntity) expertRuleEntity;
 
                 FilterUuidExpertRule.FilterUuidExpertRuleBuilder<?, ?> ruleBuilder = FilterUuidExpertRule.builder()
-                        .field(expertRuleEntity.getField())
-                        .operator(expertRuleEntity.getOperator());
+                        .field(filterUuidExpertRuleEntity.getField())
+                        .operator(filterUuidExpertRuleEntity.getOperator());
                 if (filterUuidExpertRuleEntity.getValue() != null) {
                     if (isMultipleCriteriaOperator(filterUuidExpertRuleEntity.getOperator())) { // for multiple values
                         ruleBuilder.values(Stream.of(filterUuidExpertRuleEntity.getValue().split(",")).collect(Collectors.toSet()));

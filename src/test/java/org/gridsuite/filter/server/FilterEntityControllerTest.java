@@ -62,6 +62,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -248,14 +249,14 @@ public class FilterEntityControllerTest {
         assertThrows("Network '" + NETWORK_NOT_FOUND_UUID + "' not found", ServletException.class, () -> mvc.perform(get(URL_TEMPLATE + "/" + filterId1 + "/export?networkUuid=" + NETWORK_NOT_FOUND_UUID)
             .contentType(APPLICATION_JSON)));
 
-        mvc.perform(get(URL_TEMPLATE + "/" + filterId1 + "/export?networkUuid=" + NETWORK_UUID)
+        mvc.perform(get(URL_TEMPLATE + "/" + filterId1 + "/export").param("networkUuid", NETWORK_UUID.toString())
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json("[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\"}]"));
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
+                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", filterId1.toString())
                     .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -293,7 +294,7 @@ public class FilterEntityControllerTest {
         matchFilterInfos(filterAttributes.get(0), filterId1, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
+                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", filterId1.toString())
                     .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -312,7 +313,7 @@ public class FilterEntityControllerTest {
         modifyFormFilter(filterId1, generatorFormFilter, userId);
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId1)
+            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", filterId1.toString())
                     .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -925,7 +926,7 @@ public class FilterEntityControllerTest {
         params.add("variantId", VARIANT_ID_1);
 
         List<FilterEquipments> filterEquipments = objectMapper.readValue(
-                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/export").params(params)
+                mvc.perform(get(URL_TEMPLATE + "/export").params(params)
                                 .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString(),
@@ -1007,7 +1008,7 @@ public class FilterEntityControllerTest {
                 "ids[g4]", List.of(UUID.randomUUID().toString())
         ));
         Map<String, Long> identifiablesCount = objectMapper.readValue(
-                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/identifiables-count")
+                mvc.perform(get(URL_TEMPLATE + "/identifiables-count")
                                 .params(params)
                                 .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
@@ -1058,14 +1059,14 @@ public class FilterEntityControllerTest {
     }
 
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
-        mvc.perform(get(URL_TEMPLATE + "/" + filterId + "/export?networkUuid=" + NETWORK_UUID)
+        mvc.perform(get(URL_TEMPLATE + "/" + filterId + "/export").param("networkUuid", NETWORK_UUID.toString())
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(content().json(expectedJson));
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId)
+            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", filterId.toString())
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -1079,14 +1080,14 @@ public class FilterEntityControllerTest {
     }
 
     private void checkExpertFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
-        mvc.perform(get(URL_TEMPLATE + "/" + filterId + "/export?networkUuid=" + NETWORK_UUID)
+        mvc.perform(get(URL_TEMPLATE + "/" + filterId + "/export").param("networkUuid", NETWORK_UUID.toString())
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(content().json(expectedJson));
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", filterId)
+                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", filterId.toString())
                                 .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString(),
@@ -1102,7 +1103,7 @@ public class FilterEntityControllerTest {
     }
 
     private void checkFilterEvaluating(AbstractFilter filter, String expectedJson) throws Exception {
-        mvc.perform(post(URL_TEMPLATE + "/evaluate?networkUuid=" + NETWORK_UUID)
+        mvc.perform(post(URL_TEMPLATE + "/evaluate").param("networkUuid", NETWORK_UUID.toString())
                         .content(objectMapper.writeValueAsString(filter))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -1127,7 +1128,7 @@ public class FilterEntityControllerTest {
     }
 
     private UUID duplicateFilter(UUID filterId) throws Exception {
-        String response = mvc.perform(post("/" + FilterApi.API_VERSION + "/filters?duplicateFrom=" + filterId))
+        String response = mvc.perform(post(URL_TEMPLATE).param("duplicateFrom", filterId.toString()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, UUID.class);
@@ -1269,7 +1270,7 @@ public class FilterEntityControllerTest {
         checkFormFilter(id, injectionFilter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
                     .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -1281,8 +1282,13 @@ public class FilterEntityControllerTest {
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
-        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
-            .contentType(APPLICATION_JSON))
+        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
+                .param("networkUuid", networkUuid.toString());
+        if (variantId != null) {
+            requestBuilder.param("variantId", variantId);
+        }
+
+        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
             .andExpect(content().json(expectedJsonExport));
@@ -1328,7 +1334,7 @@ public class FilterEntityControllerTest {
         checkFormFilter(id, transformerFilter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
                     .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -1340,11 +1346,16 @@ public class FilterEntityControllerTest {
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
 
-        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-            .andExpect(content().json(expectedJsonExport));
+        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
+                .param("networkUuid", networkUuid.toString());
+        if (variantId != null) {
+            requestBuilder.param("variantId", variantId);
+        }
+
+        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonExport));
 
         deleteFilter(id);
     }
@@ -1379,7 +1390,7 @@ public class FilterEntityControllerTest {
         matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
                     .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -1389,16 +1400,21 @@ public class FilterEntityControllerTest {
         assertEquals(1, filterAttributes.size());
         matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
 
-        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-            .andExpect(content().json(expectedJsonExport));
+        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
+                .param("networkUuid", networkUuid.toString());
+        if (variantId != null) {
+            requestBuilder.param("variantId", variantId);
+        }
+
+        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonExport));
 
         deleteFilter(id);
 
         filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
                     .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString(),
@@ -1437,7 +1453,7 @@ public class FilterEntityControllerTest {
         insertFilter(id, filter);
         checkFormFilter(id, filter);
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-                mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
                                 .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString(),
@@ -1449,8 +1465,13 @@ public class FilterEntityControllerTest {
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
         assertEquals(EquipmentType.LINE, filterAttributes.get(0).getEquipmentType());
 
-        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
-                        .contentType(APPLICATION_JSON))
+        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
+                .param("networkUuid", networkUuid.toString());
+        if (variantId != null) {
+            requestBuilder.param("variantId", variantId);
+        }
+
+        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(content().json(expectedJsonExport));
@@ -1484,7 +1505,7 @@ public class FilterEntityControllerTest {
         checkFormFilter(id, filter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -1495,11 +1516,16 @@ public class FilterEntityControllerTest {
         assertEquals(id, filterAttributes.get(0).getId());
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
 
-        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-            .andExpect(content().json(expectedJsonExport));
+        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
+                .param("networkUuid", networkUuid.toString());
+        if (variantId != null) {
+            requestBuilder.param("variantId", variantId);
+        }
+
+        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonExport));
 
         deleteFilter(id);
     }
@@ -1525,7 +1551,7 @@ public class FilterEntityControllerTest {
         checkFormFilter(id, filter);
 
         List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get("/" + FilterApi.API_VERSION + "/filters/metadata?ids={id}", id)
+            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(),
@@ -1536,11 +1562,16 @@ public class FilterEntityControllerTest {
         assertEquals(id, filterAttributes.get(0).getId());
         assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
 
-        mvc.perform(get(URL_TEMPLATE + "/" + id + "/export?networkUuid=" + networkUuid + (variantId != null ? "&variantId=" + variantId : ""))
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-            .andExpect(content().json(expectedJsonExport));
+        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
+                .param("networkUuid", networkUuid.toString());
+        if (variantId != null) {
+            requestBuilder.param("variantId", variantId);
+        }
+
+        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonExport));
 
         deleteFilter(id);
     }

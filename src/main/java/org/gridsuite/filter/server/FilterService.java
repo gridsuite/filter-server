@@ -54,7 +54,7 @@ public class FilterService {
 
     private static final String FILTER_LIST = "Filter list ";
     private static final String NOT_FOUND = " not found";
-    public static final String FILTER_UUIDS_NOT_FOUND = "Some filter uuids not found";
+    public static final String FILTER_UUIDS_NOT_FOUND = "Some filter uuids have not bean found";
 
     private final Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories = new HashMap<>();
 
@@ -169,6 +169,9 @@ public class FilterService {
         return Optional.empty();
     }
 
+    /**
+     * @return Map of uuids of copied filters and uuids of new filters
+     */
     @Transactional
     public Map<UUID, UUID> duplicateFilters(List<UUID> filterUuids) {
         Map<UUID, UUID> uuidsMap = new HashMap<>();
