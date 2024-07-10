@@ -1135,7 +1135,7 @@ public class FilterEntityControllerTest {
     }
 
     private Map<UUID, UUID> duplicateFilters(List<UUID> sourceFilterUuids) throws Exception {
-        String response = mvc.perform(post(URL_TEMPLATE + "/batch/duplicate")
+        String response = mvc.perform(post(URL_TEMPLATE + "/duplicate/batch")
                         .content(objectMapper.writeValueAsString(sourceFilterUuids))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();

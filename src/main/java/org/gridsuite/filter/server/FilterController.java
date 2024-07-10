@@ -95,7 +95,7 @@ public class FilterController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "/filters/batch/duplicate")
+    @PostMapping(value = "/filters/duplicate/batch")
     @Operation(summary = "Duplicate filters from given ids")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters of given ids have been successfully duplicated"),
                            @ApiResponse(responseCode = "404", description = "Source filter not found")})
