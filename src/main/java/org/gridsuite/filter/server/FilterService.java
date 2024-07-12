@@ -10,6 +10,7 @@ import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
+import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
@@ -19,39 +20,11 @@ import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.BatteryFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.BusBarSectionFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.DanglingLineFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.GeneratorFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.HvdcLineFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.LccConverterStationFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.LineFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.LoadFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.ShuntCompensatorFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.StaticVarCompensatorFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.SubstationFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.ThreeWindingsTransformerFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.TwoWindingsTransformerFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.VoltageLevelFilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.VscConverterStationFilterRepository;
+import org.gridsuite.filter.server.repositories.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.BatteryFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.BusBarSectionFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.DanglingLineFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.GeneratorFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.HvdcLineFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LccConverterStationFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LineFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.LoadFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.ShuntCompensatorFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.StaticVarCompensatorFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.SubstationFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.ThreeWindingsTransformerFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.TwoWindingsTransformerFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.VoltageLevelFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.VscConverterStationFilterRepositoryProxy;
+import org.gridsuite.filter.server.repositories.proxies.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.scriptfilter.ScriptFilterRepositoryProxy;
@@ -60,9 +33,9 @@ import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -81,12 +54,15 @@ public class FilterService {
 
     private static final String FILTER_LIST = "Filter list ";
     private static final String NOT_FOUND = " not found";
+    public static final String FILTER_UUIDS_NOT_FOUND = "Some filter uuids have not bean found";
 
     private final Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories = new HashMap<>();
 
     private final NetworkStoreService networkStoreService;
 
     private final NotificationService notificationService;
+
+    private final FilterService self;
 
     public FilterService(final ScriptFilterRepository scriptFiltersRepository,
                          final LineFilterRepository lineFilterRepository,
@@ -107,7 +83,8 @@ public class FilterService {
                          final IdentifierListFilterRepository identifierListFilterRepository,
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
-                         NotificationService notificationService) {
+                         NotificationService notificationService,
+                         @Lazy FilterService self) {
         filterRepositories.put(EquipmentType.LINE.name(), new LineFilterRepositoryProxy(lineFilterRepository));
         filterRepositories.put(EquipmentType.GENERATOR.name(), new GeneratorFilterRepositoryProxy(generatorFilterRepository));
         filterRepositories.put(EquipmentType.LOAD.name(), new LoadFilterRepositoryProxy(loadFilterRepository));
@@ -131,6 +108,7 @@ public class FilterService {
         filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
         this.networkStoreService = networkStoreService;
         this.notificationService = notificationService;
+        this.self = self;
     }
 
     public List<IFilterAttributes> getFilters() {
@@ -156,12 +134,26 @@ public class FilterService {
                 .stream()
                 .flatMap(repository -> repository.getFilters(ids)
                         .stream())
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
         return getRepository(filter).insert(filter);
+    }
+
+    @Transactional
+    public List<AbstractFilter> createFilters(List<AbstractFilter> filters) {
+        if (CollectionUtils.isEmpty(filters)) {
+            return Collections.emptyList();
+        }
+
+        Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filters.stream()
+                .collect(Collectors.groupingBy(this::getRepository));
+
+        List<AbstractFilter> createdFilters = new ArrayList<>();
+        repositoryFiltersMap.forEach((repository, subFilters) -> createdFilters.addAll(repository.insertAll(subFilters)));
+        return createdFilters;
     }
 
     @Transactional
@@ -171,13 +163,42 @@ public class FilterService {
             UUID newFilterId = UUID.randomUUID();
             AbstractFilter sourceFilter = sourceFilterOptional.get();
             sourceFilter.setId(newFilterId);
-            createFilter(sourceFilter);
+            self.createFilter(sourceFilter);
             return Optional.of(newFilterId);
         }
         return Optional.empty();
     }
 
-    private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity, ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
+    /**
+     * @return Map of uuids of copied filters and uuids of new filters
+     */
+    @Transactional
+    public Map<UUID, UUID> duplicateFilters(List<UUID> filterUuids) {
+        Map<UUID, UUID> uuidsMap = new HashMap<>();
+
+        List<AbstractFilter> sourceFilters = getFilters(filterUuids);
+
+        // check whether found all
+        if (sourceFilters.isEmpty() || sourceFilters.size() != filterUuids.size()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_UUIDS_NOT_FOUND);
+        }
+
+        sourceFilters.forEach(sourceFilter -> {
+            UUID newFilterId = UUID.randomUUID();
+            uuidsMap.put(sourceFilter.getId(), newFilterId);
+            sourceFilter.setId(newFilterId);
+        });
+
+        Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = sourceFilters.stream()
+                .collect(Collectors.groupingBy(this::getRepository));
+
+        repositoryFiltersMap.forEach(AbstractFilterRepositoryProxy::insertAll);
+
+        return uuidsMap;
+    }
+
+    private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity,
+            ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
         if (!filter.getType().equals(FilterType.CRITERIA)) {
             return filterRepositories.get(filter.getType().name());
         }
@@ -185,24 +206,37 @@ public class FilterService {
     }
 
     @Transactional
-    public <F extends AbstractFilter> void changeFilter(UUID id, F newFilter, String userId) {
-        Optional<AbstractFilter> f = getFilter(id);
-        if (f.isPresent()) {
-            if (getRepository(f.get()) == getRepository(newFilter)) { // filter type has not changed
-                getRepository(newFilter).modify(id, newFilter);
+    public <F extends AbstractFilter> AbstractFilter updateFilter(UUID id, F newFilter, String userId) {
+        Optional<AbstractFilter> filterOpt = getFilter(id);
+        AbstractFilter modifiedOrCreatedFilter;
+        if (filterOpt.isPresent()) {
+            if (getRepository(filterOpt.get()) == getRepository(newFilter)) { // filter type has not changed
+                modifiedOrCreatedFilter = getRepository(newFilter).modify(id, newFilter);
             } else { // filter type has changed
-                if (f.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
+                if (filterOpt.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
                     throw new PowsyblException(WRONG_FILTER_TYPE);
                 } else {
-                    getRepository(f.get()).deleteById(id);
+                    getRepository(filterOpt.get()).deleteById(id);
                     newFilter.setId(id);
-                    createFilter(newFilter);
+                    modifiedOrCreatedFilter = self.createFilter(newFilter);
                 }
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
-        notificationService.emitElementUpdated(id, userId);
+
+        if (userId != null) {
+            notificationService.emitElementUpdated(id, userId);
+        }
+
+        return modifiedOrCreatedFilter;
+    }
+
+    @Transactional
+    public List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap) {
+        return filtersToUpdateMap.keySet().stream()
+            .map(filterUuid -> self.updateFilter(filterUuid, filtersToUpdateMap.get(filterUuid), null))
+            .toList();
     }
 
     public void deleteFilter(UUID id) {
@@ -210,6 +244,11 @@ public class FilterService {
         if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
+    }
+
+    public void deleteFilters(List<UUID> ids) {
+        Objects.requireNonNull(ids);
+        filterRepositories.values().forEach(repository -> repository.deleteAllByIds(ids));
     }
 
     public void deleteAll() {
