@@ -1,31 +1,27 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <changeSet author="yenguised (generated)" id="1725320054035-1">
-        <addColumn tableName="identifier_list_filter">
-            <column name="equipment_type_new" type="varchar(255)" />
-        </addColumn>
+        <modifyDataType tableName="identifier_list_filter" columnName="equipment_type" newDataType="VARCHAR(255)"/>
         <sql>
             UPDATE identifier_list_filter
-            SET equipment_type_new = CASE
-                                         WHEN equipment_type = 0 THEN 'LINE'
-                                         WHEN equipment_type = 1 THEN 'GENERATOR'
-                                         WHEN equipment_type = 2 THEN 'LOAD'
-                                         WHEN equipment_type = 3 THEN 'SHUNT_COMPENSATOR'
-                                         WHEN equipment_type = 4 THEN 'STATIC_VAR_COMPENSATOR'
-                                         WHEN equipment_type = 5 THEN 'BATTERY'
-                                         WHEN equipment_type = 6 THEN 'BUS'
-                                         WHEN equipment_type = 7 THEN 'BUSBAR_SECTION'
-                                         WHEN equipment_type = 8 THEN 'DANGLING_LINE'
-                                         WHEN equipment_type = 9 THEN 'LCC_CONVERTER_STATION'
-                                         WHEN equipment_type = 10 THEN 'VSC_CONVERTER_STATION'
-                                         WHEN equipment_type = 11 THEN 'TWO_WINDINGS_TRANSFORMER'
-                                         WHEN equipment_type = 12 THEN 'THREE_WINDINGS_TRANSFORMER'
-                                         WHEN equipment_type = 13 THEN 'HVDC_LINE'
-                                         WHEN equipment_type = 14 THEN 'SUBSTATION'
-                                         WHEN equipment_type = 15 THEN 'VOLTAGE_LEVEL'
+            SET equipment_type = CASE
+                                     WHEN equipment_type = '0' THEN 'LINE'
+                                     WHEN equipment_type = '1' THEN 'GENERATOR'
+                                     WHEN equipment_type = '2' THEN 'LOAD'
+                                     WHEN equipment_type = '3' THEN 'SHUNT_COMPENSATOR'
+                                     WHEN equipment_type = '4' THEN 'STATIC_VAR_COMPENSATOR'
+                                     WHEN equipment_type = '5' THEN 'BATTERY'
+                                     WHEN equipment_type = '6' THEN 'BUS'
+                                     WHEN equipment_type = '7' THEN 'BUSBAR_SECTION'
+                                     WHEN equipment_type = '8' THEN 'DANGLING_LINE'
+                                     WHEN equipment_type = '9' THEN 'LCC_CONVERTER_STATION'
+                                     WHEN equipment_type = '10' THEN 'VSC_CONVERTER_STATION'
+                                     WHEN equipment_type = '11' THEN 'TWO_WINDINGS_TRANSFORMER'
+                                     WHEN equipment_type = '12' THEN 'THREE_WINDINGS_TRANSFORMER'
+                                     WHEN equipment_type = '13' THEN 'HVDC_LINE'
+                                     WHEN equipment_type = '14' THEN 'SUBSTATION'
+                                     WHEN equipment_type = '15' THEN 'VOLTAGE_LEVEL'
                 END;
         </sql>
-        <dropColumn tableName="identifier_list_filter" columnName="equipment_type" />
-        <renameColumn tableName="identifier_list_filter" oldColumnName="equipment_type_new" newColumnName="equipment_type" />
     </changeSet>
 </databaseChangeLog>
