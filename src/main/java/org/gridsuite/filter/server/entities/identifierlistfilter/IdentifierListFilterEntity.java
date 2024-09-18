@@ -7,6 +7,7 @@
 
 package org.gridsuite.filter.server.entities.identifierlistfilter;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,11 +15,6 @@ import lombok.experimental.SuperBuilder;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.utils.EquipmentType;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import java.util.List;
 
 /**
@@ -33,6 +29,7 @@ import java.util.List;
 @Table(name = "identifier_list_filter")
 public class IdentifierListFilterEntity extends AbstractFilterEntity {
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "equipmentType")
     private EquipmentType equipmentType;
 
