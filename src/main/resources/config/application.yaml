@@ -16,7 +16,3 @@ powsybl:
 powsybl-ws:
   database:
     name: filters
-
-server:
-  # TODO in the near future do we need spring 3.2 "server.tomcat.max-http-response-header-size" ?
-  max-http-request-header-size: 64000

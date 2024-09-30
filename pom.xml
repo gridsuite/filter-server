@@ -45,6 +45,8 @@
         <gridsuite-dependencies.version>34</gridsuite-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
         <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
+        <!-- FIXME: powsybl-ws-commons version is overridden. To be removed at next gridsuite-dependencies.version upgrade -->
+        <powsybl-ws-commons.version>1.15.0</powsybl-ws-commons.version>
     </properties>
 
     <build>
@@ -84,6 +86,12 @@
     <dependencyManagement>
         <dependencies>
             <!-- overrides of imports -->
+            <!-- FIXME: powsybl-ws-commons version is overridden. To be removed at next gridsuite-dependencies.version upgrade -->
+            <dependency>
+                <groupId>com.powsybl</groupId>
+                <artifactId>powsybl-ws-commons</artifactId>
+                <version>${powsybl-ws-commons.version}</version>
+            </dependency>
 
             <!-- imports -->
             <dependency>
