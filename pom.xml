@@ -49,6 +49,7 @@
         <powsybl-ws-commons.version>1.15.0</powsybl-ws-commons.version>
         <!-- FIXME: powsybl-network-store modules'version is overloaded in the dependencies section.The overloads and this property below have to be removed at next powsybl-ws-dependencies.version upgrade -->
         <powsybl-network-store.version>1.18.2</powsybl-network-store.version>
+        <filter.version>1.0.14</filter.version>
     </properties>
 
     <build>
@@ -129,6 +130,9 @@
         <dependency>
             <groupId>org.gridsuite</groupId>
             <artifactId>gridsuite-filter</artifactId>
+            <!-- FIXME: gridsuite-filter modules' version is overloaded in the dependencies section.
+            The overloads and this property below have to be removed at next gridsuite-dependencies.version upgrade -->
+            <version>${filter.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
