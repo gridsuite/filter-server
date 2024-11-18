@@ -17,6 +17,8 @@ import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MigrateEquipmentFilter implements CustomSqlChange {
     private static final String EXPERT_RULE_TABLE = "expert_rule";
@@ -25,6 +27,8 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
     private static final String SUB_FREE_PROPS_ID = "substation_free_properties_id";
     private static final String NUMERIC_FILTER_ID = "numeric_filter_id_id";
     private static final String VALUE_COL = "value_";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MigrateEquipmentFilter.class);
 
     static class ExpertRuleParam {
         private final String id;
@@ -82,7 +86,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
     static class Column {
         private final String name;
         private final ColType type;
-        private String fieldValue;
+        private final String fieldValue;
 
         String name() {
             return name;
@@ -140,7 +144,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
             @Override
             Column[] columns() {
                 return new Column[]{new Column(NUMERIC_FILTER_ID, ColType.NUMERIC, "NOMINAL_VOLTAGE"),
-                                    new Column(SUB_FREE_PROPS_ID, ColType.SUBSTATION_PROPERTY, "SUBSTATION_PROPERTIES"),
+                                    new Column(SUB_FREE_PROPS_ID, ColType.SUBSTATION_PROPERTY, SUBSTATION_PROPERTIES),
                                     new Column(FREE_PROPS_ID, ColType.PROPERTY, FREE_PROPERTIES),
                                     new Column("energy_source", ColType.ENUM, "ENERGY_SOURCE")};
             }
@@ -190,7 +194,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
                 return new Column[]{new Column("three_windings_transformer_numeric_filter_id1_id", ColType.NUMERIC, NOMINAL_VOLTAGE_1),
                                     new Column("three_windings_transformer_numeric_filter_id2_id", ColType.NUMERIC, NOMINAL_VOLTAGE_2),
                                     new Column("three_windings_transformer_numeric_filter_id3_id", ColType.NUMERIC, "NOMINAL_VOLTAGE_3"),
-                                    new Column(SUB_FREE_PROPS_ID, ColType.SUBSTATION_PROPERTY, SUBSTATION_PROPERTIES_1)};
+                                    new Column(SUB_FREE_PROPS_ID, ColType.SUBSTATION_PROPERTY, SUBSTATION_PROPERTIES)};
             }
         },
         TWO_WINDINGS_TRANSFORMER("two_windings_transformer_filter") {
@@ -198,12 +202,13 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
             Column[] columns() {
                 return new Column[]{new Column("numeric_filter_id1_id", ColType.NUMERIC, NOMINAL_VOLTAGE_1),
                                     new Column("two_windings_transformernumeric_filter_id2_id", ColType.NUMERIC, NOMINAL_VOLTAGE_2),
-                                    new Column(SUB_FREE_PROPS_ID, ColType.SUBSTATION_PROPERTY, SUBSTATION_PROPERTIES_1),
+                                    new Column(SUB_FREE_PROPS_ID, ColType.SUBSTATION_PROPERTY, SUBSTATION_PROPERTIES),
                                     new Column(FREE_PROPS_ID, ColType.PROPERTY, FREE_PROPERTIES)};
             }
         },
         VOLTAGE_LEVEL("voltage_level_filter");
 
+        public static final String SUBSTATION_PROPERTIES = "SUBSTATION_PROPERTIES";
         private static final String NOMINAL_VOLTAGE_1 = "NOMINAL_VOLTAGE_1";
         private static final String NOMINAL_VOLTAGE_2 = "NOMINAL_VOLTAGE_2";
         private static final String SUBSTATION_PROPERTIES_1 = "SUBSTATION_PROPERTIES_1";
@@ -225,7 +230,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
 
         Column[] columns() {
             return new Column[]{new Column(NUMERIC_FILTER_ID, ColType.NUMERIC, "NOMINAL_VOLTAGE"),
-                                new Column(SUB_FREE_PROPS_ID, ColType.SUBSTATION_PROPERTY, "SUBSTATION_PROPERTIES"),
+                                new Column(SUB_FREE_PROPS_ID, ColType.SUBSTATION_PROPERTY, SUBSTATION_PROPERTIES),
                                 new Column(FREE_PROPS_ID, ColType.PROPERTY, FREE_PROPERTIES)};
         }
 
@@ -278,7 +283,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
                     }
                 }
             } catch (Exception throwables) {
-                throwables.printStackTrace();
+                LOGGER.error(throwables.getMessage());
                 return new SqlStatement[0]; // If any exception occurs don't do any migration
             }
         }
@@ -321,7 +326,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
 
     private void createRuleStatement(List<SqlStatement> statements, Database database, ExpertRuleParam params) {
         InsertStatement ruleStatement = new InsertStatement(database.getDefaultCatalogName(), database.getDefaultSchemaName(),
-                                                            EXPERT_RULE_TABLE);
+                EXPERT_RULE_TABLE);
 
         if (params.id() == null || params.dataType() == null) {
             return;
@@ -356,7 +361,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
         StringBuilder builder = new StringBuilder();
 
         builder.append("select free_property_filter_entities_id from free_properties_free_property_filter_entities")
-               .append(" where free_properties_filter_entity_id = ").append("'").append(propId).append("'");
+                .append(" where free_properties_filter_entity_id = ").append("'").append(propId).append("'");
 
         try (ResultSet propertyQuery = connection.createStatement().executeQuery(builder.toString())) {
             while (propertyQuery.next()) {
@@ -418,8 +423,8 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
         // Add country values
         StringBuilder builder = new StringBuilder();
         builder.append("select ").append(countryTable.valueCol()).append(" from ").append(countryTable.name())
-               .append(" where ").append(countryTable.idCol()).append(" = ")
-               .append("'").append(filterIdToMigrate).append("'");
+                .append(" where ").append(countryTable.idCol()).append(" = ")
+                .append("'").append(filterIdToMigrate).append("'");
 
         // Add country Country rule
         UUID ruleId = UUID.randomUUID();
@@ -439,7 +444,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
             } //don't create a rule for countries if null
 
             SqlStatement statement = new InsertStatement(database.getDefaultCatalogName(), database.getDefaultSchemaName(),
-                                                         EXPERT_RULE_VALUE_TABLE)
+                    EXPERT_RULE_VALUE_TABLE)
                     .addColumnValue("id", ruleId.toString())
                     .addColumnValue(VALUE_COL, countriesValue);
             statements.add(statement);
@@ -458,7 +463,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
 
             // value table
             InsertStatement ruleValueStatement = new InsertStatement(database.getDefaultCatalogName(),
-                                                                     database.getDefaultSchemaName(), EXPERT_RULE_VALUE_TABLE)
+                    database.getDefaultSchemaName(), EXPERT_RULE_VALUE_TABLE)
                     .addColumnValue("id", ruleId.toString())
                     .addColumnValue(VALUE_COL, value);
             statements.add(ruleValueStatement);
@@ -506,7 +511,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
             // insert expert_rule_value
             String value = String.join(",", values);
             InsertStatement ruleValueStatement = new InsertStatement(database.getDefaultCatalogName(),
-                                                                     database.getDefaultSchemaName(), EXPERT_RULE_VALUE_TABLE)
+                    database.getDefaultSchemaName(), EXPERT_RULE_VALUE_TABLE)
                     .addColumnValue("id", ruleId.toString())
                     .addColumnValue(VALUE_COL, value);
             statements.add(ruleValueStatement);
@@ -516,21 +521,21 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
 
     @Override
     public String getConfirmationMessage() {
-        return null;
+        return "criteria filter tables were successfully migrated";
     }
 
     @Override
     public void setUp() throws SetupException {
-        // implement
+        LOGGER.info("Set up migration for Criteria filter tables");
     }
 
     @Override
     public void setFileOpener(ResourceAccessor resourceAccessor) {
-        // implement
+        LOGGER.info("Set file opener for Criteria filter tables");
     }
 
     @Override
     public ValidationErrors validate(Database database) {
-        return null;
+        return new ValidationErrors();
     }
 }
