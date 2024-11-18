@@ -65,41 +65,17 @@ public class FilterService {
     private final FilterService self;
 
     public FilterService(final ScriptFilterRepository scriptFiltersRepository,
-                         final LineFilterRepository lineFilterRepository,
-                         final GeneratorFilterRepository generatorFilterRepository,
-                         final LoadFilterRepository loadFilterRepository,
-                         final ShuntCompensatorFilterRepository shuntCompensatorFilterRepository,
-                         final StaticVarCompensatorFilterRepository staticVarCompensatorFilterRepository,
-                         final BatteryFilterRepository batteryFilterRepository,
                          final BusBarSectionFilterRepository busBarSectionFilterRepository,
-                         final DanglingLineFilterRepository danglingLineFilterRepository,
                          final LccConverterStationFilterRepository lccConverterStationFilterRepository,
                          final VscConverterStationFilterRepository vscConverterStationFilterRepository,
-                         final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository,
-                         final ThreeWindingsTransformerFilterRepository threeWindingsTransformerFilterRepository,
-                         final HvdcLineFilterRepository hvdcLineFilterRepository,
-                         final VoltageLevelFilterRepository voltageLevelFilterRepository,
-                         final SubstationFilterRepository substationFilterRepository,
                          final IdentifierListFilterRepository identifierListFilterRepository,
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
                          NotificationService notificationService,
                          @Lazy FilterService self) {
-        filterRepositories.put(EquipmentType.LINE.name(), new LineFilterRepositoryProxy(lineFilterRepository));
-        filterRepositories.put(EquipmentType.GENERATOR.name(), new GeneratorFilterRepositoryProxy(generatorFilterRepository));
-        filterRepositories.put(EquipmentType.LOAD.name(), new LoadFilterRepositoryProxy(loadFilterRepository));
-        filterRepositories.put(EquipmentType.SHUNT_COMPENSATOR.name(), new ShuntCompensatorFilterRepositoryProxy(shuntCompensatorFilterRepository));
-        filterRepositories.put(EquipmentType.STATIC_VAR_COMPENSATOR.name(), new StaticVarCompensatorFilterRepositoryProxy(staticVarCompensatorFilterRepository));
-        filterRepositories.put(EquipmentType.BATTERY.name(), new BatteryFilterRepositoryProxy(batteryFilterRepository));
         filterRepositories.put(EquipmentType.BUSBAR_SECTION.name(), new BusBarSectionFilterRepositoryProxy(busBarSectionFilterRepository));
-        filterRepositories.put(EquipmentType.DANGLING_LINE.name(), new DanglingLineFilterRepositoryProxy(danglingLineFilterRepository));
         filterRepositories.put(EquipmentType.LCC_CONVERTER_STATION.name(), new LccConverterStationFilterRepositoryProxy(lccConverterStationFilterRepository));
         filterRepositories.put(EquipmentType.VSC_CONVERTER_STATION.name(), new VscConverterStationFilterRepositoryProxy(vscConverterStationFilterRepository));
-        filterRepositories.put(EquipmentType.TWO_WINDINGS_TRANSFORMER.name(), new TwoWindingsTransformerFilterRepositoryProxy(twoWindingsTransformerFilterRepository));
-        filterRepositories.put(EquipmentType.THREE_WINDINGS_TRANSFORMER.name(), new ThreeWindingsTransformerFilterRepositoryProxy(threeWindingsTransformerFilterRepository));
-        filterRepositories.put(EquipmentType.HVDC_LINE.name(), new HvdcLineFilterRepositoryProxy(hvdcLineFilterRepository));
-        filterRepositories.put(EquipmentType.VOLTAGE_LEVEL.name(), new VoltageLevelFilterRepositoryProxy(voltageLevelFilterRepository));
-        filterRepositories.put(EquipmentType.SUBSTATION.name(), new SubstationFilterRepositoryProxy(substationFilterRepository));
 
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
 
