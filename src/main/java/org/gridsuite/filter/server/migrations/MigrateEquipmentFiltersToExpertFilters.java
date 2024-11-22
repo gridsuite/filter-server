@@ -20,7 +20,7 @@ import liquibase.statement.core.InsertStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MigrateEquipmentFilter implements CustomSqlChange {
+public class MigrateEquipmentFiltersToExpertFilters implements CustomSqlChange {
     private static final String EXPERT_RULE_TABLE = "expert_rule";
     private static final String EXPERT_RULE_VALUE_TABLE = "expert_rule_value";
     private static final String FREE_PROPS_ID = "free_properties_id";
@@ -28,7 +28,7 @@ public class MigrateEquipmentFilter implements CustomSqlChange {
     private static final String NUMERIC_FILTER_ID = "numeric_filter_id_id";
     private static final String VALUE_COL = "value_";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MigrateEquipmentFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MigrateEquipmentFiltersToExpertFilters.class);
 
     static class ExpertRuleParam {
         private final String id;
