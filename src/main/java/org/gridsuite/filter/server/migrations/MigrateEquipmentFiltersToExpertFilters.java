@@ -240,13 +240,13 @@ public class MigrateEquipmentFiltersToExpertFilters implements CustomSqlChange {
     @Override
     public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
         List<SqlStatement> statements = new ArrayList<>();
+        JdbcConnection connection = (JdbcConnection) database.getConnection();
 
         for (Equipment equipment : Equipment.values()) {
             StringBuilder builder = new StringBuilder();
             builder.append("select * from ").append(equipment.table());
 
             try {
-                JdbcConnection connection = (JdbcConnection) database.getConnection();
 
                 // All filters to migrate in equipment filter table
                 try (ResultSet filters = connection.createStatement().executeQuery(builder.toString())) {
