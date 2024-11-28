@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.gridsuite</groupId>
             <artifactId>gridsuite-filter</artifactId>
-            <!-- TODO : Remove version when upgrading gridsuite-dependencies -->
+            <!-- FIXME: version to be removed at next gridsuite-dependencies upgrade  -->
             <version>1.0.16</version>
         </dependency>
         <dependency>
