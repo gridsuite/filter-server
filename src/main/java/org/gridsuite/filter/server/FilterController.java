@@ -172,6 +172,7 @@ public class FilterController {
     public ResponseEntity<Map<String, Long>> getIdentifiablesCountByGroup(@RequestParam(value = "networkUuid") UUID networkUuid,
                                                                           @RequestParam(value = "variantId", required = false) String variantId,
                                                                           IdsByGroup idsByGroup) {
+        Logger.getLogger("export").info(() -> "test");
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.getIdentifiablesCountByGroup(idsByGroup, networkUuid, variantId));
