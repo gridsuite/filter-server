@@ -22,7 +22,6 @@ import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.IFilterAttributes;
-import org.gridsuite.filter.criteriafilter.*;
 import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.expertfilter.expertrule.*;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
@@ -32,7 +31,6 @@ import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.assertions.Assertions;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterType;
-import org.gridsuite.filter.utils.RangeType;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.utils.expertfilter.FieldType;
 import org.gridsuite.filter.utils.expertfilter.OperatorType;
@@ -1053,30 +1051,6 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.TWO_WINDINGS_TRANSFORMER);
 
         // Build a filter AND with only an IN operator
-    }
-
-    @Test
-    public void lineFilterIsEmpty() {
-        HvdcLineFilter hvdcFilter = HvdcLineFilter.builder()
-            .nominalVoltage(new NumericalFilter(RangeType.RANGE, 50., null))
-            .build();
-        assertFalse(hvdcFilter.isEmpty());
-    }
-
-    @Test
-    public void transformerFilterIsEmpty() {
-        TwoWindingsTransformerFilter transformerFilter =
-                TwoWindingsTransformerFilter.builder()
-                        .equipmentID(null)
-                        .equipmentName(null)
-                        .substationName(null)
-                        .countries(new TreeSet<>())
-                        .freeProperties(Map.of("region", List.of("north")))
-                        .nominalVoltage1(NumericalFilter.builder().type(RangeType.RANGE).value1(370.).value2(390.).build())
-                        .nominalVoltage2(NumericalFilter.builder().type(RangeType.EQUALITY).value1(225.).build())
-                        .build();
-
-        assertFalse(transformerFilter.isEmpty());
     }
 
     @Test

@@ -14,7 +14,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
-import org.gridsuite.filter.criteriafilter.CriteriaFilter;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
@@ -164,10 +163,7 @@ public class FilterService {
 
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity,
             ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
-        if (!filter.getType().equals(FilterType.CRITERIA)) {
-            return filterRepositories.get(filter.getType().name());
-        }
-        return filterRepositories.get(((CriteriaFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
+        return filterRepositories.get(filter.getType().name());
     }
 
     @Transactional
