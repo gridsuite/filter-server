@@ -9,34 +9,25 @@ package org.gridsuite.filter.server;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
-import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.test.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
-import org.apache.commons.collections4.OrderedMap;
-import org.apache.commons.collections4.map.LinkedMap;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.IFilterAttributes;
-import org.gridsuite.filter.criteriafilter.DanglingLineFilter;
 import org.gridsuite.filter.criteriafilter.*;
 import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.expertfilter.expertrule.*;
-import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
-import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.gridsuite.filter.server.dto.FilterAttributes;
-import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.utils.FieldsMatcher;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.assertions.Assertions;
 import org.gridsuite.filter.utils.EquipmentType;
@@ -49,20 +40,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -70,8 +56,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.join;
-import static org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -99,7 +83,6 @@ public class FilterEntityControllerTest {
     private Network network;
     private Network network2;
     private Network network6;
-    private ObjectWriter objectWriter;
 
     @Autowired
     private FilterService filterService;
@@ -116,9 +99,6 @@ public class FilterEntityControllerTest {
     public static final SortedSet<String> COUNTRIES1 = new TreeSet<>(Collections.singleton("France"));
     public static final SortedSet<String> COUNTRIES2 = new TreeSet<>(Collections.singleton("Germany"));
 
-    public static final OrderedMap<String, List<String>> FREE_PROPS = new LinkedMap<>(
-        Map.of("region", List.of("north", "south")));
-
     private static final UUID NETWORK_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
     private static final UUID NETWORK_UUID_2 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e5");
     private static final UUID NETWORK_UUID_3 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e6");
@@ -127,19 +107,16 @@ public class FilterEntityControllerTest {
     private static final UUID NETWORK_UUID_6 = UUID.fromString("11111111-7977-4592-2222-88027e4254e8");
     private static final UUID NETWORK_NOT_FOUND_UUID = UUID.fromString("88888888-7977-3333-9999-88027e4254e7");
     private static final String VARIANT_ID_1 = "variant_1";
-    private static final String USER_ID_HEADER = "userId";
 
     private String elementUpdateDestination = "element.update";
 
     @Before
     public void setUp() {
         Configuration.defaultConfiguration();
-        MockitoAnnotations.initMocks(this);
-        final ObjectMapper objectMapper = new ObjectMapper();
-        objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
-        objectMapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
-        objectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-        objectMapper.disable(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE);
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
+        mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+        mapper.disable(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE);
 
         network = EurostagTutorialExample1Factory.createWithMoreGenerators(new NetworkFactoryImpl());
         network.getSubstation("P1").setProperty("region", "north");
@@ -172,8 +149,8 @@ public class FilterEntityControllerTest {
 
         Configuration.setDefaults(new Configuration.Defaults() {
 
-            private final JsonProvider jsonProvider = new JacksonJsonProvider(objectMapper);
-            private final MappingProvider mappingProvider = new JacksonMappingProvider(objectMapper);
+            private final JsonProvider jsonProvider = new JacksonJsonProvider(mapper);
+            private final MappingProvider mappingProvider = new JacksonMappingProvider(mapper);
 
             @Override
             public JsonProvider jsonProvider() {
@@ -479,41 +456,6 @@ public class FilterEntityControllerTest {
         assertEquals(4, identifiablesCount.size());
     }
 
-    private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
-        assertEquals(CollectionUtils.isEmpty(filterEquipments1), CollectionUtils.isEmpty(filterEquipments2));
-        assertEquals(filterEquipments1.size(), filterEquipments2.size());
-
-        filterEquipments1.sort(Comparator.comparing(filterEquipments -> filterEquipments.getFilterId().toString()));
-        filterEquipments2.sort(Comparator.comparing(filterEquipments -> filterEquipments.getFilterId().toString()));
-
-        for (int index = 0; index < filterEquipments1.size(); index++) {
-            FilterEquipments filterEquipment1 = filterEquipments1.get(index);
-            FilterEquipments filterEquipment2 = filterEquipments2.get(index);
-            assertEquals(filterEquipment1.getFilterId(), filterEquipment2.getFilterId());
-            assertEquals(CollectionUtils.isEmpty(filterEquipment1.getNotFoundEquipments()), CollectionUtils.isEmpty(filterEquipment2.getNotFoundEquipments()));
-            if (filterEquipment1.getNotFoundEquipments() != null) {
-                assertTrue(filterEquipment1.getNotFoundEquipments().containsAll(filterEquipment2.getNotFoundEquipments()));
-            }
-            checkIdentifiableAttributes(new ArrayList<>(filterEquipment1.getIdentifiableAttributes()), new ArrayList<>(filterEquipment2.getIdentifiableAttributes()));
-        }
-    }
-
-    private void checkIdentifiableAttributes(List<IdentifiableAttributes> identifiableAttributes1, List<IdentifiableAttributes> identifiableAttributes2) {
-        assertEquals(CollectionUtils.isEmpty(identifiableAttributes1), CollectionUtils.isEmpty(identifiableAttributes2));
-        assertEquals(identifiableAttributes1.size(), identifiableAttributes2.size());
-
-        identifiableAttributes1.sort(Comparator.comparing(IdentifiableAttributes::getId));
-        identifiableAttributes2.sort(Comparator.comparing(IdentifiableAttributes::getId));
-
-        for (int index = 0; index < identifiableAttributes1.size(); index++) {
-            IdentifiableAttributes identifiableAttribute1 = identifiableAttributes1.get(index);
-            IdentifiableAttributes identifiableAttribute2 = identifiableAttributes2.get(index);
-            assertEquals(identifiableAttribute1.getId(), identifiableAttribute2.getId());
-            assertEquals(identifiableAttribute1.getType(), identifiableAttribute2.getType());
-            assertEquals(identifiableAttribute1.getDistributionKey(), identifiableAttribute2.getDistributionKey());
-        }
-    }
-
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
         mvc.perform(get(URL_TEMPLATE + "/" + filterId + "/export").param("networkUuid", NETWORK_UUID.toString())
                         .contentType(APPLICATION_JSON))
@@ -583,28 +525,12 @@ public class FilterEntityControllerTest {
         return objectMapper.readValue(response, new TypeReference<>() { });
     }
 
-    private UUID duplicateFilter(UUID filterId) throws Exception {
-        String response = mvc.perform(post(URL_TEMPLATE).param("duplicateFrom", filterId.toString()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        return objectMapper.readValue(response, UUID.class);
-    }
-
     private Map<UUID, UUID> duplicateFilters(List<UUID> sourceFilterUuids) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE + "/duplicate/batch")
                         .content(objectMapper.writeValueAsString(sourceFilterUuids))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, new TypeReference<>() { });
-    }
-
-    private void updateFilter(UUID filterId, AbstractFilter filter, String userId) throws Exception {
-        mvc.perform(put(URL_TEMPLATE + "/" + filterId)
-                        .content(objectMapper.writeValueAsString(filter))
-                        .contentType(APPLICATION_JSON)
-                        .header(USER_ID_HEADER, userId))
-                .andExpect(status().isOk());
-        checkElementUpdatedMessageSent(filterId, userId);
     }
 
     private List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap) throws Exception {
@@ -640,404 +566,6 @@ public class FilterEntityControllerTest {
         return objectMapper.readValue(response, new TypeReference<>() { });
     }
 
-    private void modifyFormFilter(UUID filterId, AbstractFilter newFilter, String userId) throws Exception {
-        mvc.perform(put(URL_TEMPLATE + "/" + filterId)
-            .content(objectMapper.writeValueAsString(newFilter))
-            .contentType(APPLICATION_JSON)
-            .header(USER_ID_HEADER, userId))
-            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-
-        checkElementUpdatedMessageSent(filterId, userId);
-
-        String modifiedFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andReturn().getResponse().getContentAsString();
-        CriteriaFilter modifiedFilter = objectMapper.readValue(modifiedFilterAsString, CriteriaFilter.class);
-        checkFormFilter(filterId, modifiedFilter);
-
-        mvc.perform(get(URL_TEMPLATE))
-            .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
-        MvcResult mockResponse = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn();
-        modifiedFilter = objectMapper.readValue(mockResponse.getResponse().getContentAsString(), CriteriaFilter.class);
-        checkFormFilter(filterId, modifiedFilter);
-    }
-
-    private void insertInjectionFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
-                                       String substationName, Set<String> countries,
-                                       RangeType rangeType, Double value1, Double value2, EnergySource energySource,
-                                       UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
-        NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
-        AbstractInjectionFilter abstractInjectionFilter;
-        Date modificationDate = new Date();
-        SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        // compensators are on powsybl networks without substation, so filtering on substation free props would prevent match.
-        OrderedMap<String, List<String>> workAroundProps =
-            Set.of(EquipmentType.SHUNT_COMPENSATOR, EquipmentType.STATIC_VAR_COMPENSATOR).contains(equipmentType) ? null : FREE_PROPS;
-        InjectionFilterAttributes injectionFilterAttributes = new InjectionFilterAttributes(equipmentID, equipmentName, substationName,
-            sortedCountries, workAroundProps, workAroundProps, numericalFilter);
-        switch (equipmentType) {
-            case BATTERY:
-                abstractInjectionFilter = new BatteryFilter(injectionFilterAttributes);
-                break;
-            case BUSBAR_SECTION:
-                abstractInjectionFilter = new BusBarSectionFilter(injectionFilterAttributes);
-                break;
-            case DANGLING_LINE:
-                abstractInjectionFilter = new DanglingLineFilter(injectionFilterAttributes);
-                break;
-            case GENERATOR:
-                abstractInjectionFilter = new GeneratorFilter(injectionFilterAttributes.getEquipmentID(),
-                        injectionFilterAttributes.getEquipmentName(),
-                        injectionFilterAttributes.getSubstationName(),
-                        injectionFilterAttributes.getCountries(),
-                        injectionFilterAttributes.getSubstationFreeProperties(),
-                        injectionFilterAttributes.getFreeProperties(),
-                        injectionFilterAttributes.getNominalVoltage(),
-                        energySource);
-                break;
-            case LCC_CONVERTER_STATION:
-                abstractInjectionFilter = new LccConverterStationFilter(injectionFilterAttributes);
-                break;
-            case LOAD:
-                abstractInjectionFilter = new LoadFilter(injectionFilterAttributes);
-                break;
-            case SHUNT_COMPENSATOR:
-                abstractInjectionFilter = new ShuntCompensatorFilter(injectionFilterAttributes);
-                break;
-            case STATIC_VAR_COMPENSATOR:
-                abstractInjectionFilter = new StaticVarCompensatorFilter(injectionFilterAttributes);
-                break;
-            case VSC_CONVERTER_STATION:
-                abstractInjectionFilter = new VscConverterStationFilter(injectionFilterAttributes);
-                break;
-            default:
-                throw new PowsyblException("Equipment type not allowed");
-        }
-        CriteriaFilter injectionFilter = new CriteriaFilter(
-                id,
-                modificationDate,
-                abstractInjectionFilter
-        );
-
-        insertFilter(id, injectionFilter);
-        AbstractInjectionFilter injectionEquipment = (AbstractInjectionFilter) injectionFilter.getEquipmentFilterForm();
-        injectionEquipment.setCountries(AbstractFilterRepositoryProxy.setToSorterSet(countries));
-        injectionEquipment.setSubstationFreeProperties(workAroundProps);
-        injectionEquipment.setFreeProperties(workAroundProps);
-        checkFormFilter(id, injectionFilter);
-
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
-                    .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(),
-            new TypeReference<>() {
-            });
-
-        assertEquals(1, filterAttributes.size());
-        assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
-        assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
-
-        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
-                .param("networkUuid", networkUuid.toString());
-        if (variantId != null) {
-            requestBuilder.param("variantId", variantId);
-        }
-
-        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-            .andExpect(content().json(expectedJsonExport));
-
-        deleteFilter(id);
-    }
-
-    private void insertTransformerFilter(EquipmentType equipmentType, UUID id, String equipmentID, String equipmentName,
-                                         String substationName, Set<String> countries,
-                                         List<RangeType> rangeTypes, List<Double> values1, List<Double> values2, Map<String, List<String>> substationProperties,
-                                         UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
-        NumericalFilter numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
-        NumericalFilter numericalFilter2 = new NumericalFilter(rangeTypes.get(1), values1.get(1), values2.get(1));
-        AbstractEquipmentFilterForm equipmentFilterForm;
-        if (equipmentType == EquipmentType.TWO_WINDINGS_TRANSFORMER) {
-            equipmentFilterForm = TwoWindingsTransformerFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName).substationName(substationName)
-                .countries(AbstractFilterRepositoryProxy.setToSorterSet(countries))
-                .substationFreeProperties(substationProperties)
-                .nominalVoltage1(numericalFilter1)
-                .nominalVoltage2(numericalFilter2)
-                .build();
-        } else if (equipmentType == EquipmentType.THREE_WINDINGS_TRANSFORMER) {
-            NumericalFilter numericalFilter3 = new NumericalFilter(rangeTypes.get(2), values1.get(2), values2.get(2));
-            equipmentFilterForm = ThreeWindingsTransformerFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName).substationName(substationName)
-                .countries(AbstractFilterRepositoryProxy.setToSorterSet(countries))
-                .nominalVoltage1(numericalFilter1)
-                .nominalVoltage2(numericalFilter2)
-                .nominalVoltage3(numericalFilter3)
-                .build();
-        } else {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        Date modificationDate = new Date();
-
-        CriteriaFilter transformerFilter = new CriteriaFilter(
-                id,
-
-                modificationDate,
-                equipmentFilterForm
-        );
-
-        insertFilter(id, transformerFilter);
-        checkFormFilter(id, transformerFilter);
-
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
-                    .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(),
-            new TypeReference<>() {
-            });
-
-        assertEquals(1, filterAttributes.size());
-        assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
-        assertEquals(equipmentType, filterAttributes.get(0).getEquipmentType());
-
-        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
-                .param("networkUuid", networkUuid.toString());
-        if (variantId != null) {
-            requestBuilder.param("variantId", variantId);
-        }
-
-        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-                .andExpect(content().json(expectedJsonExport));
-
-        deleteFilter(id);
-    }
-
-    private void insertHvdcLineFilter(UUID id, String equipmentID, String equipmentName,
-                                      String substationName1, String substationName2, SortedSet<String> countries1,
-                                      SortedSet<String> countries2, RangeType rangeType, Double value1, Double value2,
-                                      UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
-        Date modificationDate = new Date();
-        CriteriaFilter hvdcLineFilter = new CriteriaFilter(
-                id,
-                modificationDate,
-                HvdcLineFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName)
-                    .substationName1(substationName1).substationName2(substationName2)
-                    .countries1(countries1).countries2(countries2)
-                    .freeProperties2(Map.of("region", List.of("north")))
-                    .nominalVoltage(new NumericalFilter(rangeType, value1, value2))
-                    .build()
-        );
-
-        insertFilter(id, hvdcLineFilter);
-        checkFormFilter(id, hvdcLineFilter);
-
-        String filtersAsString = mvc.perform(get(URL_TEMPLATE))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(filtersAsString,
-                new TypeReference<>() {
-                });
-        assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
-
-        filterAttributes = objectMapper.readValue(
-                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
-                    .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(),
-            new TypeReference<>() {
-            });
-
-        assertEquals(1, filterAttributes.size());
-        matchFilterInfos(filterAttributes.get(0), id, FilterType.CRITERIA, EquipmentType.HVDC_LINE, modificationDate);
-
-        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
-                .param("networkUuid", networkUuid.toString());
-        if (variantId != null) {
-            requestBuilder.param("variantId", variantId);
-        }
-
-        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-                .andExpect(content().json(expectedJsonExport));
-
-        deleteFilter(id);
-
-        filterAttributes = objectMapper.readValue(
-                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
-                    .contentType(APPLICATION_JSON))
-                        .andExpect(status().isOk())
-                        .andReturn().getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
-
-        assertEquals(0, filterAttributes.size());
-    }
-
-    private CriteriaFilter insertLineFilter(UUID id, String equipmentID, String equipmentName,
-                                            String substationName, Set<String> countries1, Set<String> countries2,
-                                            List<RangeType> rangeTypes, List<Double> values1, List<Double> values2,
-                                            UUID networkUuid, String variantId, String expectedJsonExport, boolean delete) throws Exception {
-        NumericalFilter numericalFilter1 = null;
-        if (rangeTypes.size() >= 1) {
-            numericalFilter1 = new NumericalFilter(rangeTypes.get(0), values1.get(0), values2.get(0));
-        }
-        NumericalFilter numericalFilter2 = null;
-        if (rangeTypes.size() == 2) {
-            numericalFilter2 = new NumericalFilter(rangeTypes.get(1), values1.get(1), values2.get(1));
-        }
-        AbstractEquipmentFilterForm equipmentFilterForm = LineFilter.builder().equipmentID(equipmentID).equipmentName(equipmentName)
-            .substationName1(substationName)
-            .countries1(AbstractFilterRepositoryProxy.setToSorterSet(countries1))
-            .countries2(AbstractFilterRepositoryProxy.setToSorterSet(countries2))
-            .nominalVoltage1(numericalFilter1)
-            .nominalVoltage2(numericalFilter2)
-            .build();
-        Date modificationDate = new Date();
-        CriteriaFilter filter = new CriteriaFilter(
-                id,
-
-                modificationDate,
-                equipmentFilterForm
-        );
-        insertFilter(id, filter);
-        checkFormFilter(id, filter);
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(
-                mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
-                                .contentType(APPLICATION_JSON))
-                        .andExpect(status().isOk())
-                        .andReturn().getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
-
-        assertEquals(1, filterAttributes.size());
-        assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
-        assertEquals(EquipmentType.LINE, filterAttributes.get(0).getEquipmentType());
-
-        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
-                .param("networkUuid", networkUuid.toString());
-        if (variantId != null) {
-            requestBuilder.param("variantId", variantId);
-        }
-
-        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-                .andExpect(content().json(expectedJsonExport));
-        if (delete) {
-            deleteFilter(id);
-        }
-        return filter;
-    }
-
-    private void insertVoltageLevelFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
-                                          RangeType rangeType, Double value1, Double value2,
-                                          UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
-        NumericalFilter numericalFilter = rangeType != null ? new NumericalFilter(rangeType, value1, value2) : null;
-        SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        VoltageLevelFilter voltageLevelFilter = VoltageLevelFilter.builder()
-            .equipmentID(equipmentID)
-            .equipmentName(equipmentName)
-            .countries(sortedCountries)
-            .nominalVoltage(numericalFilter)
-            .build();
-        Date modificationDate = new Date();
-
-        CriteriaFilter filter = new CriteriaFilter(
-            id,
-
-            modificationDate,
-            voltageLevelFilter
-        );
-
-        insertFilter(id, filter);
-        checkFormFilter(id, filter);
-
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(),
-            new TypeReference<>() {
-            });
-
-        assertEquals(1, filterAttributes.size());
-        assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
-
-        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
-                .param("networkUuid", networkUuid.toString());
-        if (variantId != null) {
-            requestBuilder.param("variantId", variantId);
-        }
-
-        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-                .andExpect(content().json(expectedJsonExport));
-
-        deleteFilter(id);
-    }
-
-    private void insertSubstationFilter(UUID id, String equipmentID, String equipmentName, Set<String> countries,
-                                        UUID networkUuid, String variantId, String expectedJsonExport) throws Exception {
-        SortedSet<String> sortedCountries = AbstractFilterRepositoryProxy.setToSorterSet(countries);
-        SubstationFilter substationFilter = SubstationFilter.builder()
-            .equipmentID(equipmentID)
-            .equipmentName(equipmentName)
-            .countries(sortedCountries)
-            .build();
-        Date modificationDate = new Date();
-
-        CriteriaFilter filter = new CriteriaFilter(
-            id,
-
-            modificationDate,
-            substationFilter
-        );
-
-        insertFilter(id, filter);
-        checkFormFilter(id, filter);
-
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(
-            mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", id.toString())
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(),
-            new TypeReference<>() {
-            });
-
-        assertEquals(1, filterAttributes.size());
-        assertEquals(id, filterAttributes.get(0).getId());
-        assertEquals(FilterType.CRITERIA, filterAttributes.get(0).getType());
-
-        MockHttpServletRequestBuilder requestBuilder = get(URL_TEMPLATE + "/" + id + "/export")
-                .param("networkUuid", networkUuid.toString());
-        if (variantId != null) {
-            requestBuilder.param("variantId", variantId);
-        }
-
-        mvc.perform(requestBuilder.contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
-                .andExpect(content().json(expectedJsonExport));
-
-        deleteFilter(id);
-    }
-
-    private void checkFormFilter(UUID filterId, CriteriaFilter criteriaFilter) throws Exception {
-        String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        CriteriaFilter foundFilter = objectMapper.readValue(foundFilterAsString, CriteriaFilter.class);
-        matchFormFilterInfos(foundFilter, criteriaFilter);
-    }
-
     private void checkIdentifierListFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         IdentifierListFilter foundFilter = objectMapper.readValue(foundFilterAsString, IdentifierListFilter.class);
@@ -1057,22 +585,6 @@ public class FilterEntityControllerTest {
         assertEquals(filter1.getEquipmentType(), filter2.getEquipmentType());
     }
 
-    private void matchFilterInfos(IFilterAttributes filterAttribute, UUID id, FilterType type, EquipmentType equipmentType, Date modificationDate) {
-        assertEquals(filterAttribute.getId(), id);
-        assertEquals(filterAttribute.getType(), type);
-        assertTrue((modificationDate.getTime() - filterAttribute.getModificationDate().getTime()) < 2000);
-        assertEquals(filterAttribute.getEquipmentType(), equipmentType);
-    }
-
-    private void matchFormFilterInfos(CriteriaFilter criteriaFilter1, CriteriaFilter criteriaFilter2) {
-        matchFilterInfos(criteriaFilter1, criteriaFilter2);
-        matchEquipmentFormFilter(criteriaFilter1.getEquipmentFilterForm(), criteriaFilter2.getEquipmentFilterForm());
-    }
-
-    private void matchEquipmentFormFilter(AbstractEquipmentFilterForm equipmentFilterForm1, AbstractEquipmentFilterForm equipmentFilterForm2) {
-        assertThat(equipmentFilterForm1, new FieldsMatcher<>(equipmentFilterForm2));
-    }
-
     private void matchIdentifierListFilterInfos(IdentifierListFilter identifierListFilter1, IdentifierListFilter identifierListFilter2) {
         matchFilterInfos(identifierListFilter1, identifierListFilter2);
         assertTrue(new MatcherJson<>(objectMapper, identifierListFilter2.getFilterEquipmentsAttributes()).matchesSafely(identifierListFilter1.getFilterEquipmentsAttributes()));
@@ -1081,12 +593,6 @@ public class FilterEntityControllerTest {
     private void matchExpertFilterInfos(ExpertFilter expertFilter1, ExpertFilter expertFilter2) {
         matchFilterInfos(expertFilter1, expertFilter2);
         Assertions.assertThat(expertFilter1).recursivelyEquals(expertFilter2, "topologyKind" /* not persisted field */);
-    }
-
-    private void checkElementUpdatedMessageSent(UUID elementUuid, String userId) {
-        Message<byte[]> message = output.receive(TIMEOUT, elementUpdateDestination);
-        assertEquals(elementUuid, message.getHeaders().get(NotificationService.HEADER_ELEMENT_UUID));
-        assertEquals(userId, message.getHeaders().get(NotificationService.HEADER_MODIFIED_BY));
     }
 
     @Test
