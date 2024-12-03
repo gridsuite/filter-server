@@ -24,6 +24,8 @@ import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.expertfilter.expertrule.*;
+import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.gridsuite.filter.server.dto.FilterAttributes;
@@ -48,6 +50,7 @@ import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -383,6 +386,41 @@ public class FilterEntityControllerTest {
         checkExpertFilter(filterId4, lineFilter2);
     }
 
+    private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
+        assertEquals(CollectionUtils.isEmpty(filterEquipments1), CollectionUtils.isEmpty(filterEquipments2));
+        assertEquals(filterEquipments1.size(), filterEquipments2.size());
+
+        filterEquipments1.sort(Comparator.comparing(filterEquipments -> filterEquipments.getFilterId().toString()));
+        filterEquipments2.sort(Comparator.comparing(filterEquipments -> filterEquipments.getFilterId().toString()));
+
+        for (int index = 0; index < filterEquipments1.size(); index++) {
+            FilterEquipments filterEquipment1 = filterEquipments1.get(index);
+            FilterEquipments filterEquipment2 = filterEquipments2.get(index);
+            assertEquals(filterEquipment1.getFilterId(), filterEquipment2.getFilterId());
+            assertEquals(CollectionUtils.isEmpty(filterEquipment1.getNotFoundEquipments()), CollectionUtils.isEmpty(filterEquipment2.getNotFoundEquipments()));
+            if (filterEquipment1.getNotFoundEquipments() != null) {
+                assertTrue(filterEquipment1.getNotFoundEquipments().containsAll(filterEquipment2.getNotFoundEquipments()));
+                checkIdentifiableAttributes(new ArrayList<>(filterEquipment1.getIdentifiableAttributes()), new ArrayList<>(filterEquipment2.getIdentifiableAttributes()));
+            }
+        }
+    }
+
+    private void checkIdentifiableAttributes(List<IdentifiableAttributes> identifiableAttributes1, List<IdentifiableAttributes> identifiableAttributes2) {
+        assertEquals(CollectionUtils.isEmpty(identifiableAttributes1), CollectionUtils.isEmpty(identifiableAttributes2));
+        assertEquals(identifiableAttributes1.size(), identifiableAttributes2.size());
+
+        identifiableAttributes1.sort(Comparator.comparing(IdentifiableAttributes::getId));
+        identifiableAttributes2.sort(Comparator.comparing(IdentifiableAttributes::getId));
+
+        for (int index = 0; index < identifiableAttributes1.size(); index++) {
+            IdentifiableAttributes identifiableAttribute1 = identifiableAttributes1.get(index);
+            IdentifiableAttributes identifiableAttribute2 = identifiableAttributes2.get(index);
+            assertEquals(identifiableAttribute1.getId(), identifiableAttribute2.getId());
+            assertEquals(identifiableAttribute1.getType(), identifiableAttribute2.getType());
+            assertEquals(identifiableAttribute1.getDistributionKey(), identifiableAttribute2.getDistributionKey());
+        }
+    }
+
     @Test
     public void testExportFilters() throws Exception {
         UUID filterId = UUID.randomUUID();
@@ -444,6 +482,37 @@ public class FilterEntityControllerTest {
         params.addAll("ids", values);
         params.add("networkUuid", NETWORK_UUID.toString());
         params.add("variantId", VARIANT_ID_1);
+
+        List<FilterEquipments> filterEquipments = objectMapper.readValue(
+            mvc.perform(get(URL_TEMPLATE + "/export").params(params)
+                            .contentType(APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString(),
+            new TypeReference<>() {
+            });
+
+        IdentifiableAttributes identifiableAttributes = new IdentifiableAttributes("GEN", IdentifiableType.GENERATOR, 1.0);
+        IdentifiableAttributes identifiableAttributes4 = new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null);
+
+        FilterEquipments filterEquipment1 = FilterEquipments.builder()
+                .filterId(filterId)
+                .identifiableAttributes(List.of(identifiableAttributes))
+                .notFoundEquipments(List.of("wrongId", "wrongId2"))
+                .build();
+
+        FilterEquipments filterEquipment2 = FilterEquipments.builder()
+                .filterId(filterId2)
+                .identifiableAttributes(List.of(identifiableAttributes4))
+                .build();
+
+        FilterEquipments filterEquipment3 = FilterEquipments.builder()
+                .filterId(filterId3)
+                .identifiableAttributes(List.of(identifiableAttributes4))
+                .build();
+
+        assertEquals(3, filterEquipments.size());
+        List<FilterEquipments> expected = new ArrayList<>(List.of(filterEquipment1, filterEquipment2, filterEquipment3));
+        checkFilterEquipments(expected, filterEquipments);
     }
 
     private void createExpertRules(List<AbstractExpertRule> rules, Set<String> countries, Set<Double> nominalVoltages) {
