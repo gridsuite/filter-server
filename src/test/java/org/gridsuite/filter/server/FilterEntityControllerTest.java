@@ -44,6 +44,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -105,6 +106,7 @@ public class FilterEntityControllerTest {
     private static final UUID NETWORK_UUID_6 = UUID.fromString("11111111-7977-4592-2222-88027e4254e8");
     private static final UUID NETWORK_NOT_FOUND_UUID = UUID.fromString("88888888-7977-3333-9999-88027e4254e7");
     private static final String VARIANT_ID_1 = "variant_1";
+    private static final String USER_ID_HEADER = "userId";
 
     private String elementUpdateDestination = "element.update";
 
@@ -262,6 +264,81 @@ public class FilterEntityControllerTest {
         checkIdentifierListFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
     }
 
+    private void checkElementUpdatedMessageSent(UUID elementUuid, String userId) {
+        Message<byte[]> message = output.receive(TIMEOUT, elementUpdateDestination);
+        assertEquals(elementUuid, message.getHeaders().get(NotificationService.HEADER_ELEMENT_UUID));
+        assertEquals(userId, message.getHeaders().get(NotificationService.HEADER_MODIFIED_BY));
+    }
+
+    private void updateFilter(UUID filterId, AbstractFilter filter, String userId) throws Exception {
+        mvc.perform(put(URL_TEMPLATE + "/" + filterId)
+                        .content(objectMapper.writeValueAsString(filter))
+                        .contentType(APPLICATION_JSON)
+                        .header(USER_ID_HEADER, userId))
+                .andExpect(status().isOk());
+        checkElementUpdatedMessageSent(filterId, userId);
+    }
+
+    private UUID duplicateFilter(UUID filterId) throws Exception {
+        String response = mvc.perform(post(URL_TEMPLATE).param("duplicateFrom", filterId.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, UUID.class);
+    }
+
+    @Test
+    public void testLineFilterCrud() throws Exception {
+        UUID filterId1 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
+        List<AbstractExpertRule> rules = new ArrayList<>();
+        createExpertLineRules(rules, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(5., 8.)), new TreeSet<>(Set.of(6.)));
+        CombinatorExpertRule combinator = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilter lineFilter = new ExpertFilter(null, new Date(), EquipmentType.LINE, combinator);
+
+        // --- insert filter --- //
+        insertFilter(filterId1, lineFilter);
+
+        // check the inserted filter
+        lineFilter.setId(filterId1);
+        checkExpertFilter(filterId1, lineFilter);
+
+        // --- duplicate filter -- //
+        UUID newFilterId1 = duplicateFilter(filterId1);
+
+        // check the duplicated filter whether it is matched to the original
+        lineFilter.setId(newFilterId1);
+        checkExpertFilter(newFilterId1, lineFilter);
+
+        // --- modify filter --- //
+        List<AbstractExpertRule> rules2 = new ArrayList<>();
+        createExpertLineRules(rules2, COUNTRIES2, COUNTRIES1, new TreeSet<>(Set.of(4., 9.)), new TreeSet<>(Set.of(5.)));
+        CombinatorExpertRule combinator2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
+        ExpertFilter lineFilter2 = new ExpertFilter(null, new Date(), EquipmentType.LINE, combinator2);
+        updateFilter(filterId1, lineFilter2, "userId");
+
+        // check the modified filter
+        lineFilter2.setId(filterId1);
+        checkExpertFilter(filterId1, lineFilter2);
+
+        // --- modify filter with equipment type changed --- //
+        List rules3 = new ArrayList<>();
+        createExpertRules(rules3, new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of(50.)));
+        CombinatorExpertRule combinator3 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules3).build();
+        ExpertFilter generatorFilter = new ExpertFilter(null, new Date(), EquipmentType.GENERATOR, combinator3);
+        updateFilter(filterId1, generatorFilter, "userId");
+
+        // check the modified filter
+        generatorFilter.setId(filterId1);
+        checkExpertFilter(filterId1, generatorFilter);
+
+        // --- delete filters --- //
+        deleteFilter(filterId1);
+        deleteFilter(newFilterId1);
+
+        // check empty after delete all
+        List<IFilterAttributes> allFilters = getAllFilters();
+        Assertions.assertThat(allFilters).isEmpty();
+    }
+
     @Test
     public void testGetFiltersByIds() throws Exception {
         UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
@@ -369,6 +446,48 @@ public class FilterEntityControllerTest {
         params.add("variantId", VARIANT_ID_1);
     }
 
+    private void createExpertRules(List<AbstractExpertRule> rules, Set<String> countries, Set<Double> nominalVoltages) {
+        EnumExpertRule country1Rule = EnumExpertRule.builder().field(FieldType.COUNTRY).operator(OperatorType.IN)
+                .values(countries).build();
+        rules.add(country1Rule);
+
+        NumberExpertRule nominalVoltage2Rule;
+        if (nominalVoltages.size() == 1) {
+            nominalVoltage2Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.EQUALS)
+                    .value(nominalVoltages.stream().findFirst().isPresent() ? nominalVoltages.stream().findFirst().get() : null)
+                    .build();
+        } else {
+            nominalVoltage2Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.BETWEEN)
+                    .values(nominalVoltages).build();
+        }
+        rules.add(nominalVoltage2Rule);
+    }
+
+    private void createExpertLineRules(List<AbstractExpertRule> rules, Set<String> countries1, Set<String> countries2,
+                                       Set<Double> nominalVoltage1, Set<Double> nominalVoltage2) {
+
+        EnumExpertRule country1Rule = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+                .values(countries1).build();
+        rules.add(country1Rule);
+        EnumExpertRule country2Rule = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
+                .values(countries2).build();
+        rules.add(country2Rule);
+        NumberExpertRule nominalVoltage1Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
+                .operator(OperatorType.BETWEEN).values(nominalVoltage1).build();
+        rules.add(nominalVoltage1Rule);
+
+        NumberExpertRule nominalVoltage2Rule;
+        if (nominalVoltage2.size() == 1) {
+            nominalVoltage2Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.EQUALS)
+                    .value(nominalVoltage2.stream().findFirst().isPresent() ? nominalVoltage2.stream().findFirst().get() : null)
+                    .build();
+        } else {
+            nominalVoltage2Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.BETWEEN)
+                    .values(nominalVoltage2).build();
+        }
+        rules.add(nominalVoltage2Rule);
+    }
+
     @Test
     public void testGetIdentifiablesCount() throws Exception {
         UUID filterId1 = UUID.randomUUID();
@@ -376,18 +495,8 @@ public class FilterEntityControllerTest {
         UUID filterId3 = UUID.randomUUID();
 
         ArrayList<AbstractExpertRule> rules = new ArrayList<>();
-        EnumExpertRule country1Rule = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
-                .values(new TreeSet<>(Set.of("FR"))).build();
-        rules.add(country1Rule);
-        EnumExpertRule country2Rule = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
-                .values(new TreeSet<>(Set.of("FR"))).build();
-        rules.add(country2Rule);
-        NumberExpertRule voltageLevel1Rule1 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
-                .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(360., 400.))).build();
-        rules.add(voltageLevel1Rule1);
-        NumberExpertRule voltageLevel2Rule1 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2)
-                .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(356.25, 393.7))).build();
-        rules.add(voltageLevel2Rule1);
+        createExpertLineRules(rules, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of(360., 400.)),
+                new TreeSet<>(Set.of(356.25, 393.7)));
         CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
         ExpertFilter expertFilter = new ExpertFilter(filterId1, new Date(), EquipmentType.LINE, parentRule);
 
@@ -395,18 +504,8 @@ public class FilterEntityControllerTest {
         checkExpertFilter(filterId1, expertFilter);
 
         ArrayList<AbstractExpertRule> rules2 = new ArrayList<>();
-        EnumExpertRule country1Rule2 = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
-                .values(new TreeSet<>(Set.of("FR"))).build();
-        rules2.add(country1Rule2);
-        EnumExpertRule country2Rule2 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
-                .values(new TreeSet<>(Set.of("FR"))).build();
-        rules2.add(country2Rule2);
-        NumberExpertRule voltageLevel1Rule2 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1).operator(OperatorType.BETWEEN)
-                .values(new TreeSet<>(Set.of(360., 400.))).build();
-        rules2.add(voltageLevel1Rule2);
-        NumberExpertRule voltageLevel2Rule2 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.BETWEEN)
-                .values(new TreeSet<>(Set.of(356.25, 393.7))).build();
-        rules2.add(voltageLevel2Rule2);
+        createExpertLineRules(rules2, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of(360., 400.)),
+                new TreeSet<>(Set.of(356.25, 393.7)));
         CombinatorExpertRule parentRule2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
         ExpertFilter expertFilter2 = new ExpertFilter(filterId2, new Date(), EquipmentType.LINE, parentRule2);
 
@@ -420,9 +519,6 @@ public class FilterEntityControllerTest {
         EnumExpertRule country2Rule3 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR", "IT"))).build();
         rules3.add(country2Rule3);
-        NumberExpertRule voltageLevel1Rule3 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1).operator(OperatorType.BETWEEN)
-                .values(new TreeSet<>(Set.of(380., 420.))).build();
-        rules3.add(voltageLevel1Rule3);
         CombinatorExpertRule parentRule3 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules3).build();
         ExpertFilter expertFilter3 = new ExpertFilter(filterId3, new Date(), EquipmentType.HVDC_LINE, parentRule3);
 
@@ -1089,36 +1185,14 @@ public class FilterEntityControllerTest {
         UUID filterId1 = UUID.randomUUID();
         Date date = new Date();
         ArrayList<AbstractExpertRule> rules = new ArrayList<>();
-        EnumExpertRule country1Filter1 = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
-                .values(COUNTRIES1).build();
-        rules.add(country1Filter1);
-        EnumExpertRule country2Filter1 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
-                .values(COUNTRIES2).build();
-        rules.add(country2Filter1);
-        NumberExpertRule nominalVoltage1Filter1 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
-                .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(5., 8.))).build();
-        rules.add(nominalVoltage1Filter1);
-        NumberExpertRule nominalVoltage2Filter1 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2)
-                .operator(OperatorType.EQUALS).value(6.).build();
-        rules.add(nominalVoltage2Filter1);
+        createExpertLineRules(rules, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(5., 8.)), new TreeSet<>(Set.of(6.)));
 
         CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
         ExpertFilter expertFilter1 = new ExpertFilter(filterId1, date, EquipmentType.LINE, parentRule);
 
         UUID filterId2 = UUID.randomUUID();
         ArrayList<AbstractExpertRule> rules2 = new ArrayList<>();
-        EnumExpertRule country1Filter2 = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
-                .values(COUNTRIES1).build();
-        rules2.add(country1Filter2);
-        EnumExpertRule country2Filter2 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
-                .values(COUNTRIES2).build();
-        rules2.add(country2Filter2);
-        NumberExpertRule nominalVoltage1Filter2 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
-                .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(4., 9.))).build();
-        rules2.add(nominalVoltage1Filter2);
-        NumberExpertRule nominalVoltage2Filter2 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2)
-                .operator(OperatorType.EQUALS).value(5.).build();
-        rules2.add(nominalVoltage2Filter2);
+        createExpertLineRules(rules2, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(4., 9.)), new TreeSet<>(Set.of(5.)));
 
         CombinatorExpertRule parentRule2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
         ExpertFilter expertFilter2 = new ExpertFilter(filterId2, date, EquipmentType.LINE, parentRule2);
@@ -1150,18 +1224,7 @@ public class FilterEntityControllerTest {
 
         // --- modify filters in batch --- //
         ArrayList<AbstractExpertRule> rules3 = new ArrayList<>();
-        EnumExpertRule country1Filter3 = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
-                .values(COUNTRIES1).build();
-        rules3.add(country1Filter3);
-        EnumExpertRule country2Filter3 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
-                .values(COUNTRIES2).build();
-        rules3.add(country2Filter3);
-        NumberExpertRule nominalVoltage1Filter3 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
-                .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(3., 10.))).build();
-        rules3.add(nominalVoltage1Filter3);
-        NumberExpertRule nominalVoltage2Filter3 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2)
-                .operator(OperatorType.EQUALS).value(4.).build();
-        rules3.add(nominalVoltage2Filter3);
+        createExpertLineRules(rules3, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(3., 10.)), new TreeSet<>(Set.of(4.)));
         CombinatorExpertRule parentRule3 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules3).build();
         ExpertFilter lineExpertFilter = new ExpertFilter(null, date, EquipmentType.LINE, parentRule3);
 
