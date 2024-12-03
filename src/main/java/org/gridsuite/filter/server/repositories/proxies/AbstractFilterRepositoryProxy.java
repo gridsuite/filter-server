@@ -7,12 +7,9 @@
 
 package org.gridsuite.filter.server.repositories.proxies;
 
-import com.powsybl.commons.PowsyblException;
 import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.criteriafilter.*;
 import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.entities.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.utils.EquipmentType;
@@ -38,47 +35,8 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return null;
     }
 
-    public static NumericalFilter convert(NumericFilterEntity entity) {
-        return entity != null ? new NumericalFilter(entity.getFilterType(), entity.getValue1(), entity.getValue2()) : null;
-    }
-
     public static SortedSet<String> setToSorterSet(Set<String> set) {
         return CollectionUtils.isEmpty(set) ? null : new TreeSet<>(set);
-    }
-
-    public static Map<String, List<String>> convert(FreePropertiesFilterEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        List<FreePropertyFilterEntity> freePropertyFilterEntities = entity.getFreePropertyFilterEntities();
-        if (freePropertyFilterEntities == null) {
-            return null;
-        }
-
-        // LinkedHashMap to keep order too
-        LinkedHashMap<String, List<String>> ret = new LinkedHashMap<>();
-        // can not use stream and Collectors.toMap which would go through an HashMap for the two arguments version
-        // and HashMap does not take care of order
-        freePropertyFilterEntities.forEach(p -> ret.put(p.getPropName(), p.getPropValues()));
-        return ret;
-    }
-
-    public static NumericFilterEntity convert(NumericalFilter numericalFilter) {
-        return numericalFilter != null ?
-                new NumericFilterEntity(null, numericalFilter.getType(), numericalFilter.getValue1(), numericalFilter.getValue2())
-                : null;
-    }
-
-    public static FreePropertiesFilterEntity convert(Map<String, List<String>> dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        List<FreePropertyFilterEntity> innerEntities = dto.entrySet().stream()
-            .map(p -> FreePropertyFilterEntity.builder()
-                .propName(p.getKey()).propValues(p.getValue()).build()).collect(Collectors.toList());
-        return FreePropertiesFilterEntity.builder().freePropertyFilterEntities(innerEntities).build();
     }
 
     public abstract R getRepository();
@@ -144,59 +102,9 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         getRepository().deleteAll();
     }
 
-    public void buildGenericFilter(AbstractGenericFilterEntity.AbstractGenericFilterEntityBuilder<?, ?> builder, CriteriaFilter dto) {
-        buildAbstractFilter(builder, dto);
-        builder.equipmentId(dto.getEquipmentFilterForm().getEquipmentID())
-                .equipmentName(dto.getEquipmentFilterForm().getEquipmentName());
-    }
-
-    public void buildInjectionFilter(AbstractInjectionFilterEntity.AbstractInjectionFilterEntityBuilder<?, ?> builder, CriteriaFilter dto) {
-        buildGenericFilter(builder, dto);
-        if (!(dto.getEquipmentFilterForm() instanceof AbstractInjectionFilter injectionFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        builder.substationName(injectionFilter.getSubstationName())
-            .countries(AbstractFilterRepositoryProxy.cloneIfNotEmptyOrNull(injectionFilter.getCountries()))
-            .substationFreeProperties(convert(injectionFilter.getSubstationFreeProperties()))
-            .freeProperties(convert(injectionFilter.getFreeProperties()))
-            .nominalVoltage(AbstractFilterRepositoryProxy.convert(injectionFilter.getNominalVoltage()));
-    }
-
     public void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.id(dto.getId());
     }
 
-    public AbstractFilter toFormFilterDto(AbstractGenericFilterEntity entity) {
-        return new CriteriaFilter(
-                entity.getId(),
-                entity.getModificationDate(),
-                buildEquipmentFormFilter(entity)
-        );
-    }
-
-    public abstract AbstractEquipmentFilterForm buildEquipmentFormFilter(AbstractFilterEntity entity);
-
-    public InjectionFilterAttributes buildInjectionAttributesFromEntity(AbstractInjectionFilterEntity entity) {
-        return new InjectionFilterAttributes(entity.getEquipmentId(),
-            entity.getEquipmentName(),
-            entity.getSubstationName(),
-            setToSorterSet(entity.getCountries()),
-            convert(entity.getSubstationFreeProperties()),
-            convert(entity.getFreeProperties()),
-            convert(entity.getNominalVoltage())
-        );
-    }
-
-    public static CriteriaFilter toFormFilter(AbstractFilter dto, Class<? extends AbstractEquipmentFilterForm> clazz) {
-        if (!(dto instanceof CriteriaFilter)) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        CriteriaFilter criteriaFilter = (CriteriaFilter) dto;
-
-        if (!(clazz.isInstance(criteriaFilter.getEquipmentFilterForm()))) {
-            throw new PowsyblException(WRONG_FILTER_TYPE);
-        }
-        return criteriaFilter;
-    }
 }

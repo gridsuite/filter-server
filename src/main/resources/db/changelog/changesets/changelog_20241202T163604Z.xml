@@ -1,0 +1,327 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-1">
+        <addForeignKeyConstraint baseColumnNames="id" baseTableName="expert_rule_properties" constraintName="FK3g05cwl9rfniqgmi5nk9b6gvv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="expert_rule" validate="true"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-2">
+        <addForeignKeyConstraint baseColumnNames="expert_rule_properties_entity_id" baseTableName="expert_rule_property_value" constraintName="FK3ohagp9p23iski1vtmm7ppxo2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="expert_rule_properties" validate="true"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-3">
+        <addForeignKeyConstraint baseColumnNames="id" baseTableName="expert_rule_value" constraintName="FK6dmncsum5lh1jxfrk8rfoswls" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="expert_rule" validate="true"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-4">
+        <dropForeignKeyConstraint baseTableName="VSC_CONVERTER_STATION_FILTER_ENTITY_COUNTRIES" constraintName="FK4IMLDQ8QCXRNPQJC2233SLVS"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-5">
+        <dropForeignKeyConstraint baseTableName="LINE_FILTER" constraintName="FK4WGF4JNMA3VR7T53M1E0T6NPU"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-6">
+        <dropForeignKeyConstraint baseTableName="HVDC_LINE_FILTER" constraintName="FK50FCQHX2CMT363X52L29V7VUV"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-7">
+        <dropForeignKeyConstraint baseTableName="LCC_CONVERTER_STATION_FILTER" constraintName="FK5FTBFB4HE1763MY21KXY971HP"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-8">
+        <dropForeignKeyConstraint baseTableName="LCC_CONVERTER_STATION_FILTER_ENTITY_COUNTRIES" constraintName="FK5M52YII7F36UBHSYVRKQHYNHY"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-9">
+        <dropForeignKeyConstraint baseTableName="BUSBAR_SECTION_FILTER" constraintName="FK6NHD0305AHXK7UFT7FV9BB3KW"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-10">
+        <dropForeignKeyConstraint baseTableName="SHUNT_COMPENSATOR_FILTER" constraintName="FK79DR8GSTKF4JOP4NQDBII1JB"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-11">
+        <dropForeignKeyConstraint baseTableName="DANGLING_LINE_FILTER" constraintName="FK9PYILSVDL7C6OUBXCGRMH7Q1X"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-12">
+        <dropForeignKeyConstraint baseTableName="SHUNT_COMPENSATOR_FILTER_ENTITY_COUNTRIES" constraintName="FKAKY6PISL642V9YDQWPYKLFMFV"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-13">
+        <dropForeignKeyConstraint baseTableName="STATIC_VAR_COMPENSATOR_FILTER" constraintName="FKAOKXJVMK4OQ15SM3ETFH0V79E"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-14">
+        <dropForeignKeyConstraint baseTableName="GENERATOR_FILTER_ENTITY_COUNTRIES" constraintName="FKBF18T6DQRIMCNSPTETH04WLW"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-15">
+        <dropForeignKeyConstraint baseTableName="LINE_FILTER" constraintName="FKCBQ1GV8IAWY3WUXLUDHKVSWL1"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-16">
+        <dropForeignKeyConstraint baseTableName="THREE_WINDINGS_TRANSFORMER_FILTER" constraintName="FKCI0CO25NS5VIJ0Q1FT8HNND4X"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-17">
+        <dropForeignKeyConstraint baseTableName="FREE_PROPERTIES_FREE_PROPERTY_FILTER_ENTITIES" constraintName="FKD3QJ1O28YLLSO1CHAMANX5WPL"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-18">
+        <dropForeignKeyConstraint baseTableName="FREE_PROPERTIES_FREE_PROPERTY_FILTER_ENTITIES" constraintName="FKD99IMH5KIO4EJ2QFX875YYRX"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-19">
+        <dropForeignKeyConstraint baseTableName="PROP_VALUE" constraintName="FKDFA6R0UAYX9TS3BLLHMPIG13V"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-20">
+        <dropForeignKeyConstraint baseTableName="VSC_CONVERTER_STATION_FILTER" constraintName="FKE46QRI280M8CB9N03POU8Y110"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-21">
+        <dropForeignKeyConstraint baseTableName="BATTERY_FILTER" constraintName="FKEBD6XEA5B7KUJHYYG7WTJF6OK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-22">
+        <dropForeignKeyConstraint baseTableName="BUSBAR_SECTION_FILTER" constraintName="FKEBN1U542NQLC0S2OVPXDDJY4K"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-23">
+        <dropForeignKeyConstraint baseTableName="BUSBAR_SECTION_FILTER" constraintName="FKEIKJX33JTTBSLE16I0LOXJ0YQ"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-24">
+        <dropForeignKeyConstraint baseTableName="VOLTAGE_LEVEL_FILTER" constraintName="FKEKT0GACUGVT5CK91Y0BAUBXEE"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-25">
+        <dropForeignKeyConstraint baseTableName="LOAD_FILTER" constraintName="FKEQO6AFJRWKQNV4FPLUP0M176Q"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-26">
+        <dropForeignKeyConstraint baseTableName="DANGLING_LINE_FILTER_ENTITY_COUNTRIES" constraintName="FKFK7NXJYWUE1D77WGR4A1KFIL0"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-27">
+        <dropForeignKeyConstraint baseTableName="GENERATOR_FILTER" constraintName="FKG1U13BDOMDUODLHDVQ4XXGHAH"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-28">
+        <dropForeignKeyConstraint baseTableName="GENERATOR_FILTER" constraintName="FKH7SLO9ODKMMCCFAOKDQNKRC6"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-29">
+        <dropForeignKeyConstraint baseTableName="DANGLING_LINE_FILTER" constraintName="FKH8NOIX7V97C7X6A7XK7F2SRXS"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-30">
+        <dropForeignKeyConstraint baseTableName="BUS_BAR_SECTION_FILTER_ENTITY_COUNTRIES" constraintName="FKHPM1TOD75MMX6IVXAQ6USBY7O"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-31">
+        <dropForeignKeyConstraint baseTableName="VOLTAGE_LEVEL_FILTER" constraintName="FKIH8EHCEEMQMU36KLPNCKWM3UC"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-32">
+        <dropForeignKeyConstraint baseTableName="SHUNT_COMPENSATOR_FILTER" constraintName="FKJ080H7OVUC0TPEQNOTMBIVL8E"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-33">
+        <dropForeignKeyConstraint baseTableName="VSC_CONVERTER_STATION_FILTER" constraintName="FKJBP4YQ9XRNYH53I9U1D0V3GXY"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-34">
+        <dropForeignKeyConstraint baseTableName="STATIC_VAR_COMPENSATOR_FILTER_ENTITY_COUNTRIES" constraintName="FKK1SRHBVIY2Q96FGOGJIRJL177"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-35">
+        <dropForeignKeyConstraint baseTableName="BATTERY_FILTER" constraintName="FKKHT1KTLS08KFPNE8PLB9PRJ91"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-36">
+        <dropForeignKeyConstraint baseTableName="BATTERY_FILTER_ENTITY_COUNTRIES" constraintName="FKL2LKCB6EM92DFIA4U0BS1SLBL"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-37">
+        <dropForeignKeyConstraint baseTableName="SHUNT_COMPENSATOR_FILTER" constraintName="FKLFUGMXFTO4DJOHXYPWT75QKRX"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-38">
+        <dropForeignKeyConstraint baseTableName="LOAD_FILTER_ENTITY_COUNTRIES" constraintName="FKLU97Q12KF41G00PKCBDM8XDBN"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-39">
+        <dropForeignKeyConstraint baseTableName="LCC_CONVERTER_STATION_FILTER" constraintName="FKLUN85OIAPAQA18D28C82PX3V5"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-40">
+        <dropForeignKeyConstraint baseTableName="STATIC_VAR_COMPENSATOR_FILTER" constraintName="FKLWVU0BJPQ083SR9KF0Q8C9OII"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-41">
+        <dropForeignKeyConstraint baseTableName="DANGLING_LINE_FILTER" constraintName="FKNG7IMRUWYM1JOJBVO2KN7ILFP"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-42">
+        <dropForeignKeyConstraint baseTableName="SUBSTATION_FILTER" constraintName="FKNRYGEHLPL1MKV34C8RADN0VGD"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-43">
+        <dropForeignKeyConstraint baseTableName="STATIC_VAR_COMPENSATOR_FILTER" constraintName="FKO5Y1S89XBNOU4NBM2F3HHLRPG"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-44">
+        <dropForeignKeyConstraint baseTableName="GENERATOR_FILTER" constraintName="FKOGUOOUKIIGCHH080VWVL5M0X9"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-45">
+        <dropForeignKeyConstraint baseTableName="VSC_CONVERTER_STATION_FILTER" constraintName="FKOQK8K8L4UQNSM1EDKBO5U5XJK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-46">
+        <dropForeignKeyConstraint baseTableName="TWO_WINDINGS_TRANSFORMER_FILTER" constraintName="FKP14SQXBRPMXSPN495D90RU1LK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-47">
+        <dropForeignKeyConstraint baseTableName="BATTERY_FILTER" constraintName="FKPEV48KS5SO3F15CF4VIMT258X"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-48">
+        <dropForeignKeyConstraint baseTableName="LOAD_FILTER" constraintName="FKPJ00NLOM4MSTK77YBDIVTCPPW"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-49">
+        <dropForeignKeyConstraint baseTableName="LINE_FILTER" constraintName="FKQ2GYS3UPYL14567A8SGPMKPSE"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-50">
+        <dropForeignKeyConstraint baseTableName="HVDC_LINE_FILTER" constraintName="FKRP2WQ7NW2XCX66U24GN86ADVK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-51">
+        <dropForeignKeyConstraint baseTableName="LOAD_FILTER" constraintName="FKRS4YHNO0UG8P99V6KE977GHCA"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-52">
+        <dropForeignKeyConstraint baseTableName="TWO_WINDINGS_TRANSFORMER_FILTER" constraintName="FKT2IYME3LL8CTU0YESP7X59A6Q"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-53">
+        <dropForeignKeyConstraint baseTableName="LCC_CONVERTER_STATION_FILTER" constraintName="FKTPFISX7DCVOAHO1KFK2C2SSIF"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-54">
+        <dropForeignKeyConstraint baseTableName="HVDC_LINE_FILTER_ENTITY_COUNTRIES1" constraintName="HVDCLINEFILTERENTITY_COUNTRIES_FK1"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-55">
+        <dropForeignKeyConstraint baseTableName="HVDC_LINE_FILTER_ENTITY_COUNTRIES2" constraintName="HVDCLINEFILTERENTITY_COUNTRIES_FK2"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-56">
+        <dropForeignKeyConstraint baseTableName="LINE_FILTER_ENTITY_COUNTRIES1" constraintName="LINEFILTERENTITY_COUNTRIES_FK1"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-57">
+        <dropForeignKeyConstraint baseTableName="LINE_FILTER_ENTITY_COUNTRIES2" constraintName="LINEFILTERENTITY_COUNTRIES_FK2"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-58">
+        <dropForeignKeyConstraint baseTableName="LINE_FILTER" constraintName="LINE_NUMERICFILTERID_ID_FK1"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-59">
+        <dropForeignKeyConstraint baseTableName="LINE_FILTER" constraintName="LINE_NUMERICFILTERID_ID_FK2"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-60">
+        <dropForeignKeyConstraint baseTableName="HVDC_LINE_FILTER" constraintName="NUMERICFILTERID_ID_FK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-61">
+        <dropForeignKeyConstraint baseTableName="SUBSTATION_FILTER_ENTITY_COUNTRIES" constraintName="SUBSTATIONFILTERENTITY_COUNTRIES_FK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-62">
+        <dropForeignKeyConstraint baseTableName="THREE_WINDINGS_TRANSFORMER_FILTER_ENTITY_COUNTRIES" constraintName="THREEWINDINGSTRANSFORMERFILTERENTITY_COUNTRIES_FK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-63">
+        <dropForeignKeyConstraint baseTableName="THREE_WINDINGS_TRANSFORMER_FILTER" constraintName="THREEWINDINGSTRANSFORMER_NUMERICFILTERID_ID_FK1"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-64">
+        <dropForeignKeyConstraint baseTableName="THREE_WINDINGS_TRANSFORMER_FILTER" constraintName="THREEWINDINGSTRANSFORMER_NUMERICFILTERID_ID_FK2"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-65">
+        <dropForeignKeyConstraint baseTableName="THREE_WINDINGS_TRANSFORMER_FILTER" constraintName="THREEWINDINGSTRANSFORMER_NUMERICFILTERID_ID_FK3"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-66">
+        <dropForeignKeyConstraint baseTableName="TWO_WINDINGS_TRANSFORMER_FILTER_ENTITY_COUNTRIES" constraintName="TWOWINDINGSTRANSFORMERFILTERENTITY_COUNTRIES_FK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-67">
+        <dropForeignKeyConstraint baseTableName="TWO_WINDINGS_TRANSFORMER_FILTER" constraintName="TWOWINDINGSTRANSFORMER_NUMERICFILTERID_ID_FK1"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-68">
+        <dropForeignKeyConstraint baseTableName="TWO_WINDINGS_TRANSFORMER_FILTER" constraintName="TWOWINDINGSTRANSFORMER_NUMERICFILTERID_ID_FK2"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-69">
+        <dropForeignKeyConstraint baseTableName="VOLTAGE_LEVEL_FILTER_ENTITY_COUNTRIES" constraintName="VOLTAGELEVELFILTERENTITY_COUNTRIES_FK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-70">
+        <dropForeignKeyConstraint baseTableName="VOLTAGE_LEVEL_FILTER" constraintName="VOLTAGELEVEL_NUMERICFILTERID_ID_FK"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-71">
+        <dropUniqueConstraint constraintName="UK_D1CF8EK5M0LDV6X9FU1S2G59T" tableName="FREE_PROPERTIES_FREE_PROPERTY_FILTER_ENTITIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-72">
+        <dropTable tableName="BATTERY_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-73">
+        <dropTable tableName="BATTERY_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-74">
+        <dropTable tableName="BUSBAR_SECTION_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-75">
+        <dropTable tableName="BUS_BAR_SECTION_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-76">
+        <dropTable tableName="DANGLING_LINE_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-77">
+        <dropTable tableName="DANGLING_LINE_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-78">
+        <dropTable tableName="FREE_PROPERTIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-79">
+        <dropTable tableName="FREE_PROPERTIES_FREE_PROPERTY_FILTER_ENTITIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-80">
+        <dropTable tableName="FREE_PROPERTY"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-81">
+        <dropTable tableName="GENERATOR_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-82">
+        <dropTable tableName="GENERATOR_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-83">
+        <dropTable tableName="HVDC_LINE_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-84">
+        <dropTable tableName="HVDC_LINE_FILTER_ENTITY_COUNTRIES1"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-85">
+        <dropTable tableName="HVDC_LINE_FILTER_ENTITY_COUNTRIES2"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-86">
+        <dropTable tableName="LCC_CONVERTER_STATION_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-87">
+        <dropTable tableName="LCC_CONVERTER_STATION_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-88">
+        <dropTable tableName="LINE_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-89">
+        <dropTable tableName="LINE_FILTER_ENTITY_COUNTRIES1"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-90">
+        <dropTable tableName="LINE_FILTER_ENTITY_COUNTRIES2"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-91">
+        <dropTable tableName="LOAD_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-92">
+        <dropTable tableName="LOAD_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-93">
+        <dropTable tableName="NUMERIC_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-94">
+        <dropTable tableName="PROP_VALUE"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-95">
+        <dropTable tableName="SHUNT_COMPENSATOR_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-96">
+        <dropTable tableName="SHUNT_COMPENSATOR_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-97">
+        <dropTable tableName="STATIC_VAR_COMPENSATOR_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-98">
+        <dropTable tableName="STATIC_VAR_COMPENSATOR_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-99">
+        <dropTable tableName="SUBSTATION_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-100">
+        <dropTable tableName="SUBSTATION_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-101">
+        <dropTable tableName="THREE_WINDINGS_TRANSFORMER_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-102">
+        <dropTable tableName="THREE_WINDINGS_TRANSFORMER_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-103">
+        <dropTable tableName="TWO_WINDINGS_TRANSFORMER_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-104">
+        <dropTable tableName="TWO_WINDINGS_TRANSFORMER_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-105">
+        <dropTable tableName="VOLTAGE_LEVEL_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-106">
+        <dropTable tableName="VOLTAGE_LEVEL_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-107">
+        <dropTable tableName="VSC_CONVERTER_STATION_FILTER"/>
+    </changeSet>
+    <changeSet author="elcheikhbas (generated)" id="1733157385915-108">
+        <dropTable tableName="VSC_CONVERTER_STATION_FILTER_ENTITY_COUNTRIES"/>
+    </changeSet>
+</databaseChangeLog>

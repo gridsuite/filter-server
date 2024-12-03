@@ -14,22 +14,18 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
-import org.gridsuite.filter.criteriafilter.CriteriaFilter;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
-import org.gridsuite.filter.server.repositories.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.criteriafilter.*;
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.scriptfilter.ScriptFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.scriptfilter.ScriptFilterRepository;
-import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.springframework.context.annotation.ComponentScan;
@@ -65,44 +61,12 @@ public class FilterService {
     private final FilterService self;
 
     public FilterService(final ScriptFilterRepository scriptFiltersRepository,
-                         final LineFilterRepository lineFilterRepository,
-                         final GeneratorFilterRepository generatorFilterRepository,
-                         final LoadFilterRepository loadFilterRepository,
-                         final ShuntCompensatorFilterRepository shuntCompensatorFilterRepository,
-                         final StaticVarCompensatorFilterRepository staticVarCompensatorFilterRepository,
-                         final BatteryFilterRepository batteryFilterRepository,
-                         final BusBarSectionFilterRepository busBarSectionFilterRepository,
-                         final DanglingLineFilterRepository danglingLineFilterRepository,
-                         final LccConverterStationFilterRepository lccConverterStationFilterRepository,
-                         final VscConverterStationFilterRepository vscConverterStationFilterRepository,
-                         final TwoWindingsTransformerFilterRepository twoWindingsTransformerFilterRepository,
-                         final ThreeWindingsTransformerFilterRepository threeWindingsTransformerFilterRepository,
-                         final HvdcLineFilterRepository hvdcLineFilterRepository,
-                         final VoltageLevelFilterRepository voltageLevelFilterRepository,
-                         final SubstationFilterRepository substationFilterRepository,
                          final IdentifierListFilterRepository identifierListFilterRepository,
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
                          NotificationService notificationService,
                          @Lazy FilterService self) {
-        filterRepositories.put(EquipmentType.LINE.name(), new LineFilterRepositoryProxy(lineFilterRepository));
-        filterRepositories.put(EquipmentType.GENERATOR.name(), new GeneratorFilterRepositoryProxy(generatorFilterRepository));
-        filterRepositories.put(EquipmentType.LOAD.name(), new LoadFilterRepositoryProxy(loadFilterRepository));
-        filterRepositories.put(EquipmentType.SHUNT_COMPENSATOR.name(), new ShuntCompensatorFilterRepositoryProxy(shuntCompensatorFilterRepository));
-        filterRepositories.put(EquipmentType.STATIC_VAR_COMPENSATOR.name(), new StaticVarCompensatorFilterRepositoryProxy(staticVarCompensatorFilterRepository));
-        filterRepositories.put(EquipmentType.BATTERY.name(), new BatteryFilterRepositoryProxy(batteryFilterRepository));
-        filterRepositories.put(EquipmentType.BUSBAR_SECTION.name(), new BusBarSectionFilterRepositoryProxy(busBarSectionFilterRepository));
-        filterRepositories.put(EquipmentType.DANGLING_LINE.name(), new DanglingLineFilterRepositoryProxy(danglingLineFilterRepository));
-        filterRepositories.put(EquipmentType.LCC_CONVERTER_STATION.name(), new LccConverterStationFilterRepositoryProxy(lccConverterStationFilterRepository));
-        filterRepositories.put(EquipmentType.VSC_CONVERTER_STATION.name(), new VscConverterStationFilterRepositoryProxy(vscConverterStationFilterRepository));
-        filterRepositories.put(EquipmentType.TWO_WINDINGS_TRANSFORMER.name(), new TwoWindingsTransformerFilterRepositoryProxy(twoWindingsTransformerFilterRepository));
-        filterRepositories.put(EquipmentType.THREE_WINDINGS_TRANSFORMER.name(), new ThreeWindingsTransformerFilterRepositoryProxy(threeWindingsTransformerFilterRepository));
-        filterRepositories.put(EquipmentType.HVDC_LINE.name(), new HvdcLineFilterRepositoryProxy(hvdcLineFilterRepository));
-        filterRepositories.put(EquipmentType.VOLTAGE_LEVEL.name(), new VoltageLevelFilterRepositoryProxy(voltageLevelFilterRepository));
-        filterRepositories.put(EquipmentType.SUBSTATION.name(), new SubstationFilterRepositoryProxy(substationFilterRepository));
-
         filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
-
         filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
         filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
@@ -199,10 +163,7 @@ public class FilterService {
 
     private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity,
             ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
-        if (!filter.getType().equals(FilterType.CRITERIA)) {
-            return filterRepositories.get(filter.getType().name());
-        }
-        return filterRepositories.get(((CriteriaFilter) filter).getEquipmentFilterForm().getEquipmentType().name());
+        return filterRepositories.get(filter.getType().name());
     }
 
     @Transactional
