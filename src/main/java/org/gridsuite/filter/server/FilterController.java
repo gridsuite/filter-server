@@ -139,7 +139,6 @@ public class FilterController {
     @Operation(summary = "delete the filters")
     @ApiResponse(responseCode = "200", description = "The filters have been deleted")
     public ResponseEntity<Void> deleteFilters(@RequestBody List<UUID> ids) {
-        Logger.getLogger("export").info(() -> "test");
         service.deleteFilters(ids);
         return ResponseEntity.ok().build();
     }
