@@ -151,55 +151,55 @@
         <dropForeignKeyConstraint baseTableName="lcc_converter_station_filter" constraintName="FKtpfisx7dcvoaho1kfk2c2ssif"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-54">
-        <dropForeignKeyConstraint baseTableName="hvdc_line_filter_entity_countries1" constraintName="hvdclinefilterentity_countries_fk1"/>
+        <dropForeignKeyConstraint baseTableName="hvdc_line_filter_entity_countries1" constraintName="hvdcLineFilterEntity_countries_fk1"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-55">
-        <dropForeignKeyConstraint baseTableName="hvdc_line_filter_entity_countries2" constraintName="hvdclinefilterentity_countries_fk2"/>
+        <dropForeignKeyConstraint baseTableName="hvdc_line_filter_entity_countries2" constraintName="hvdcLineFilterEntity_countries_fk2"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-56">
-        <dropForeignKeyConstraint baseTableName="line_filter_entity_countries1" constraintName="linefilterentity_countries_fk1"/>
+        <dropForeignKeyConstraint baseTableName="line_filter_entity_countries1" constraintName="lineFilterEntity_countries_fk1"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-57">
-        <dropForeignKeyConstraint baseTableName="line_filter_entity_countries2" constraintName="linefilterentity_countries_fk2"/>
+        <dropForeignKeyConstraint baseTableName="line_filter_entity_countries2" constraintName="lineFilterEntity_countries_fk2"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-58">
-        <dropForeignKeyConstraint baseTableName="line_filter" constraintName="line_numericfilterid_id_fk1"/>
+        <dropForeignKeyConstraint baseTableName="line_filter" constraintName="line_numericFilterId_id_fk1"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-59">
-        <dropForeignKeyConstraint baseTableName="line_filter" constraintName="line_numericfilterid_id_fk2"/>
+        <dropForeignKeyConstraint baseTableName="line_filter" constraintName="line_numericFilterId_id_fk2"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-60">
-        <dropForeignKeyConstraint baseTableName="hvdc_line_filter" constraintName="numericfilterid_id_fk"/>
+        <dropForeignKeyConstraint baseTableName="hvdc_line_filter" constraintName="numericFilterId_id_fk"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-61">
-        <dropForeignKeyConstraint baseTableName="substation_filter_entity_countries" constraintName="substationfilterentity_countries_fk"/>
+        <dropForeignKeyConstraint baseTableName="substation_filter_entity_countries" constraintName="substationFilterEntity_countries_fk"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-62">
-        <dropForeignKeyConstraint baseTableName="three_windings_transformer_filter_entity_countries" constraintName="threewindingstransformerfilterentity_countries_fk"/>
+        <dropForeignKeyConstraint baseTableName="three_windings_transformer_filter_entity_countries" constraintName="threeWindingsTransformerFilterEntity_countries_fk"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-63">
-        <dropForeignKeyConstraint baseTableName="three_windings_transformer_filter" constraintName="threewindingstransformer_numericfilterid_id_fk1"/>
+        <dropForeignKeyConstraint baseTableName="three_windings_transformer_filter" constraintName="threeWindingsTransformer_numericFilterId_id_fk1"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-64">
-        <dropForeignKeyConstraint baseTableName="three_windings_transformer_filter" constraintName="threewindingstransformer_numericfilterid_id_fk2"/>
+        <dropForeignKeyConstraint baseTableName="three_windings_transformer_filter" constraintName="threeWindingsTransformer_numericFilterId_id_fk2"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-65">
-        <dropForeignKeyConstraint baseTableName="three_windings_transformer_filter" constraintName="threewindingstransformer_numericfilterid_id_fk3"/>
+        <dropForeignKeyConstraint baseTableName="three_windings_transformer_filter" constraintName="threeWindingsTransformer_numericFilterId_id_fk3"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-66">
-        <dropForeignKeyConstraint baseTableName="two_windings_transformer_filter_entity_countries" constraintName="twowindingstransformerfilterentity_countries_fk"/>
+        <dropForeignKeyConstraint baseTableName="two_windings_transformer_filter_entity_countries" constraintName="twoWindingsTransformerFilterEntity_countries_fk"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-67">
-        <dropForeignKeyConstraint baseTableName="two_windings_transformer_filter" constraintName="twowindingstransformer_numericfilterid_id_fk1"/>
+        <dropForeignKeyConstraint baseTableName="two_windings_transformer_filter" constraintName="twoWindingsTransformer_numericFilterId_id_fk1"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-68">
-        <dropForeignKeyConstraint baseTableName="two_windings_transformer_filter" constraintName="twowindingstransformer_numericfilterid_id_fk2"/>
+        <dropForeignKeyConstraint baseTableName="two_windings_transformer_filter" constraintName="twoWindingsTransformer_numericFilterId_id_fk2"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-69">
-        <dropForeignKeyConstraint baseTableName="voltage_level_filter_entity_countries" constraintName="voltagelevelfilterentity_countries_fk"/>
+        <dropForeignKeyConstraint baseTableName="voltage_level_filter_entity_countries" constraintName="voltageLevelFilterEntity_countries_fk"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-70">
-        <dropForeignKeyConstraint baseTableName="voltage_level_filter" constraintName="voltagelevel_numericfilterid_id_fk"/>
+        <dropForeignKeyConstraint baseTableName="voltage_level_filter" constraintName="voltageLevel_numericFilterId_id_fk"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-71">
         <dropUniqueConstraint constraintName="uk_d1cf8ek5m0ldv6x9fu1s2g59t" tableName="free_properties_free_property_filter_entities"/>
