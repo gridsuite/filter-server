@@ -202,7 +202,7 @@
         <dropForeignKeyConstraint baseTableName="voltage_level_filter" constraintName="voltageLevel_numericFilterId_id_fk"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-71">
-        <dropUniqueConstraint constraintName="uk_d1cf8ek5m0ldv6x9fu1s2g59t" tableName="free_properties_free_property_filter_entities"/>
+        <dropUniqueConstraint constraintName="UK_d1cf8ek5m0ldv6x9fu1s2g59t" tableName="free_properties_free_property_filter_entities"/>
     </changeSet>
     <changeSet author="elcheikhbas (generated)" id="1733157385915-72">
         <dropTable tableName="battery_filter"/>
