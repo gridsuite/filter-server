@@ -42,7 +42,6 @@
     </developers>
 
     <properties>
-        <filter.version>1.3.0</filter.version>
         <gridsuite-dependencies.version>38.1.0-SNAPSHOT</gridsuite-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
         <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
@@ -87,12 +86,6 @@
         <dependencies>
 
             <!-- imports -->
-            <!-- FIXME: to be removed at next gridsuite-dependencies upgrade  -->
-            <dependency>
-                <groupId>org.gridsuite</groupId>
-                <artifactId>gridsuite-filter</artifactId>
-                <version>${filter.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.gridsuite</groupId>
                 <artifactId>gridsuite-dependencies</artifactId>
