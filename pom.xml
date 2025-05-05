@@ -19,7 +19,7 @@
 
     <groupId>org.gridsuite</groupId>
     <artifactId>gridsuite-filter-server</artifactId>
-    <version>2.16.0-SNAPSHOT</version>
+    <version>2.17.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
     <name>Filter server</name>
@@ -46,6 +46,8 @@
         <string-template.version>4.3.1</string-template.version>
         <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
         <sonar.coverage.exclusions>**/migrations/**/*</sonar.coverage.exclusions>
+        <sonar.organization>gridsuite</sonar.organization>
+        <sonar.projectKey>org.gridsuite:filter-server</sonar.projectKey>
     </properties>
 
     <build>
