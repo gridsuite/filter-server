@@ -24,8 +24,6 @@ import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierL
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.scriptfilter.ScriptFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.scriptfilter.ScriptFilterRepository;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.springframework.context.annotation.ComponentScan;
@@ -36,8 +34,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy.WRONG_FILTER_TYPE;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
@@ -57,12 +53,10 @@ public class FilterService {
 
     private final NotificationService notificationService;
 
-    public FilterService(final ScriptFilterRepository scriptFiltersRepository,
-                         final IdentifierListFilterRepository identifierListFilterRepository,
+    public FilterService(final IdentifierListFilterRepository identifierListFilterRepository,
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
                          NotificationService notificationService) {
-        filterRepositories.put(FilterType.SCRIPT.name(), new ScriptFilterRepositoryProxy(scriptFiltersRepository));
         filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
         filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
@@ -187,13 +181,9 @@ public class FilterService {
             if (getRepository(filterOpt.get()) == getRepository(newFilter)) { // filter type has not changed
                 modifiedOrCreatedFilter = getRepository(newFilter).modify(id, newFilter);
             } else { // filter type has changed
-                if (filterOpt.get().getType() == FilterType.SCRIPT || newFilter.getType() == FilterType.SCRIPT) {
-                    throw new PowsyblException(WRONG_FILTER_TYPE);
-                } else {
-                    getRepository(filterOpt.get()).deleteById(id);
-                    newFilter.setId(id);
-                    modifiedOrCreatedFilter = doCreateFilter(newFilter);
-                }
+                getRepository(filterOpt.get()).deleteById(id);
+                newFilter.setId(id);
+                modifiedOrCreatedFilter = doCreateFilter(newFilter);
             }
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
@@ -241,9 +231,6 @@ public class FilterService {
     }
 
     private List<IdentifiableAttributes> getIdentifiableAttributes(AbstractFilter filter, UUID networkUuid, String variantId, FilterLoader filterLoader) {
-        if (filter.getType() == FilterType.SCRIPT) {
-            throw new PowsyblException("Filter implementation not yet supported: " + filter.getClass().getSimpleName());
-        }
         Network network = getNetwork(networkUuid, variantId);
         return FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader);
     }
