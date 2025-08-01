@@ -42,8 +42,10 @@
     </developers>
 
     <properties>
-
         <gridsuite-dependencies.version>42.0.0</gridsuite-dependencies.version>
+        <!-- FIXME to remove at next upgrade of powsybl-ws-dependencies -->
+        <gridsuite-filter.version>1.7.0</gridsuite-filter.version>
+
         <string-template.version>4.3.1</string-template.version>
         <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
         <sonar.coverage.exclusions>**/migrations/**/*</sonar.coverage.exclusions>
@@ -105,8 +107,7 @@
         <dependency>
             <groupId>org.gridsuite</groupId>
             <artifactId>gridsuite-filter</artifactId>
-            <!-- To be removed alongside the next gridsuite-dependencies upgrade  -->
-            <version>1.5.0</version>
+            <version>${gridsuite-filter.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
