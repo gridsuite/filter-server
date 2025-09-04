@@ -203,4 +203,16 @@ public class FilterController {
         List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilter(filter, networkUuid, variantId);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
+
+    @GetMapping(value = "/filters/{filterUuid}/evaluate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Export matched elements to JSON format")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "The list of matched elements")
+    })
+    public ResponseEntity<List<IdentifiableAttributes>> evaluateFilter(@RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                       @RequestParam(value = "variantId", required = false) String variantId,
+                                                                       @PathVariable("filterUuid") UUID filterUuid) {
+        List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilter(filterUuid, networkUuid, variantId);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
+    }
 }

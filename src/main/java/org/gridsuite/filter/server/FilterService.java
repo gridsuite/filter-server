@@ -27,6 +27,7 @@ import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.Ide
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,15 +54,19 @@ public class FilterService {
 
     private final NotificationService notificationService;
 
+    private final FilterService self;
+
     public FilterService(final IdentifierListFilterRepository identifierListFilterRepository,
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
-                         NotificationService notificationService) {
+                         NotificationService notificationService,
+                         @Lazy FilterService filterService) {
         filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
         filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
         this.networkStoreService = networkStoreService;
         this.notificationService = notificationService;
+        this.self = filterService;
     }
 
     public List<IFilterAttributes> getFilters() {
@@ -240,6 +245,12 @@ public class FilterService {
         Objects.requireNonNull(filter);
         FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
         return getIdentifiableAttributes(filter, networkUuid, variantId, filterLoader);
+    }
+
+    @Transactional(readOnly = true)
+    public List<IdentifiableAttributes> evaluateFilter(UUID filterUuid, UUID networkUuid, String variantId) {
+        AbstractFilter abstractFilter = getFilterFromRepository(filterUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterUuid + NOT_FOUND));
+        return self.evaluateFilter(abstractFilter, networkUuid, variantId);
     }
 
     @Transactional(readOnly = true)

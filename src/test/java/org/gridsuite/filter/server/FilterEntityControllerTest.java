@@ -50,6 +50,7 @@ import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -384,6 +385,69 @@ public class FilterEntityControllerTest {
 
         insertFilter(filterId4, lineFilter2);
         checkExpertFilter(filterId4, lineFilter2);
+    }
+
+    @Test
+    public void testEvaluateFilter() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+        Date modificationDate = new Date();
+
+        // Create OR rules for generators
+        List<AbstractExpertRule> orRules = new ArrayList<>();
+        NumberExpertRule numRule1 = NumberExpertRule.builder().value(20.0)
+                .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.GREATER).build();
+        orRules.add(numRule1);
+        NumberExpertRule numRule2 = NumberExpertRule.builder().value(-9000.0)
+                .field(FieldType.MIN_P).operator(OperatorType.EQUALS).build(); // false
+        orRules.add(numRule2);
+        CombinatorExpertRule orCombination = CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(orRules).build();
+        // Create AND rules for generators
+        List<AbstractExpertRule> andRules = new ArrayList<>();
+        andRules.add(orCombination);
+        NumberExpertRule numRule3 = NumberExpertRule.builder().value(9999.99)
+                .field(FieldType.MAX_P).operator(OperatorType.GREATER_OR_EQUALS).build();
+        andRules.add(numRule3);
+        NumberExpertRule numRule4 = NumberExpertRule.builder().value(24.5)
+                .field(FieldType.TARGET_V).operator(OperatorType.EQUALS).build();
+        andRules.add(numRule4);
+        NumberExpertRule numRule5 = NumberExpertRule.builder().value(400.0)
+                .field(FieldType.TARGET_Q).operator(OperatorType.LOWER_OR_EQUALS).build();
+        andRules.add(numRule5);
+        NumberExpertRule numRule6 = NumberExpertRule.builder().value(500.0)
+                .field(FieldType.TARGET_P).operator(OperatorType.GREATER).build();
+        andRules.add(numRule6);
+        EnumExpertRule enumRule1 = EnumExpertRule.builder().value("OTHER")
+                .field(FieldType.ENERGY_SOURCE).operator(OperatorType.EQUALS).build();
+        andRules.add(enumRule1);
+        EnumExpertRule enumRule2 = EnumExpertRule.builder().value("ES")
+                .field(FieldType.COUNTRY).operator(OperatorType.NOT_EQUALS).build();
+        andRules.add(enumRule2);
+        StringExpertRule stringRule1 = StringExpertRule.builder().value("N")
+                .field(FieldType.ID).operator(OperatorType.ENDS_WITH).build();
+        andRules.add(stringRule1);
+        StringExpertRule stringRule2 = StringExpertRule.builder().value("E")
+                .field(FieldType.NAME).operator(OperatorType.CONTAINS).build();
+        andRules.add(stringRule2);
+        BooleanExpertRule booleanRule1 = BooleanExpertRule.builder().value(false)
+                .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.NOT_EQUALS).build();
+        andRules.add(booleanRule1);
+
+        CombinatorExpertRule andCombination = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.GENERATOR, andCombination);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        MvcResult mvcResult = mvc.perform(get(URL_TEMPLATE + "/{filterId}/evaluate", filterId).param("networkUuid", NETWORK_UUID.toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // check result when evaluating a filter on a network
+        String expectedResultJson = """
+                [{"id":"GEN","type":"GENERATOR","distributionKey":null}]""";
+
+        String resultJson = mvcResult.getResponse().getContentAsString();
+        assertEquals(expectedResultJson, resultJson);
     }
 
     private void checkFilterEquipments(List<FilterEquipments> filterEquipments1, List<FilterEquipments> filterEquipments2) {
