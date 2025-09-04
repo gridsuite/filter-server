@@ -34,5 +34,6 @@ public class IdentifierListFilterEntity extends AbstractFilterEntity {
     private EquipmentType equipmentType;
 
     @OneToMany(cascade = CascadeType.ALL)
+    @OrderColumn(name = "equipmentId_order")
     private List<IdentifierListFilterEquipmentEntity> filterEquipmentEntityList;
 }
