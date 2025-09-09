@@ -26,7 +26,7 @@ import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilter
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
-import org.gridsuite.filter.server.utils.FilterCycleDetector;
+import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
