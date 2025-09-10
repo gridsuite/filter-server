@@ -245,7 +245,7 @@ public class FilterService {
     @Transactional(readOnly = true)
     public List<IdentifiableAttributes> evaluateFilters(List<UUID> filters, UUID networkUuid) {
         Map<String, IdentifiableAttributes> result = new HashMap<>();
-        filters.forEach((UUID filterUuid)-> {
+        filters.forEach((UUID filterUuid) -> {
                 Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
                 if (optFilter.isEmpty()) {
                     return;
