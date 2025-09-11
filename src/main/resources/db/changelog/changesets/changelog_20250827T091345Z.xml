@@ -1,0 +1,19 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="braquartdav (generated)" id="1756286054988-1">
+        <addColumn tableName="identifier_list_filter_filter_equipment_entity_list">
+            <column name="equipment_id_order" type="integer"/>
+        </addColumn>
+        <!-- mandatory: init this new column with a default order -->
+        <sql dbms="postgresql">
+            WITH ordered_filters AS (
+                SELECT filter_equipment_entity_list_id, ROW_NUMBER() OVER (PARTITION BY identifier_list_filter_entity_id ORDER BY filter_equipment_entity_list_id) - 1 as id_order
+                FROM identifier_list_filter_filter_equipment_entity_list
+            )
+            UPDATE identifier_list_filter_filter_equipment_entity_list f
+            SET equipment_id_order = of.id_order
+            FROM ordered_filters of
+            WHERE f.filter_equipment_entity_list_id = of.filter_equipment_entity_list_id;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
