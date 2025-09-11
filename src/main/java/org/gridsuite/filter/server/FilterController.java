@@ -192,6 +192,17 @@ public class FilterController {
                 .body(ret);
     }
 
+    @GetMapping(value = "/filters/evaluate/identifiables", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Export matched identifiables elements to JSON format")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "The list of matched elements")
+    })
+    public ResponseEntity<List<IdentifiableAttributes>> evaluateFilters(@RequestParam("ids") List<UUID> ids,
+                                                                        @RequestParam(value = "networkUuid") UUID networkUuid) {
+        List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilters(ids, networkUuid);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
+    }
+
     @PostMapping(value = "/filters/evaluate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Export matched elements to JSON format")
     @ApiResponses(value = {

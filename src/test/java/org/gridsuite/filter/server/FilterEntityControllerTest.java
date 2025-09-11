@@ -422,6 +422,33 @@ public class FilterEntityControllerTest {
     }
 
     @Test
+    public void testEvaluateFilters() throws Exception {
+        UUID filterId = UUID.randomUUID();
+        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+            .values(new TreeSet<>(Set.of("FR"))).build();
+        rules.add(country1Filter);
+        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
+        insertFilter(filterId, lineFilter);
+
+        // Apply filter by calling endPoint
+        List<String> filterIds = List.of(filterId.toString());
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.addAll("ids", filterIds);
+        params.add("networkUuid", NETWORK_UUID.toString());
+        List<IdentifiableAttributes> result = objectMapper.readValue(mvc.perform(get(URL_TEMPLATE + "/evaluate/identifiables")
+                .params(params).contentType(APPLICATION_JSON)).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), new TypeReference<>() { });
+
+        List<IdentifiableAttributes> expected = new ArrayList<>();
+        expected.add(new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null));
+        expected.add(new IdentifiableAttributes("NHV1_NHV2_2", IdentifiableType.LINE, null));
+
+        assertTrue(expected.size() == result.size() && result.containsAll(expected) && expected.containsAll(result));
+    }
+
+    @Test
     public void testExportFilters() throws Exception {
         UUID filterId = UUID.randomUUID();
         UUID filterId2 = UUID.randomUUID();
