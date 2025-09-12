@@ -26,6 +26,7 @@ import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilter
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
+import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -178,11 +179,17 @@ public class FilterService {
         Optional<AbstractFilter> filterOpt = getFilterFromRepository(id);
         AbstractFilter modifiedOrCreatedFilter;
         if (filterOpt.isPresent()) {
+            newFilter.setId(id);
+
+            FilterLoader filterLoader = uuids -> uuids.stream()
+                .map(uuid -> uuid.equals(id) ? newFilter : getFilterFromRepository(uuid).orElse(null))
+                .toList();
+            FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
+
             if (getRepository(filterOpt.get()) == getRepository(newFilter)) { // filter type has not changed
                 modifiedOrCreatedFilter = getRepository(newFilter).modify(id, newFilter);
             } else { // filter type has changed
                 getRepository(filterOpt.get()).deleteById(id);
-                newFilter.setId(id);
                 modifiedOrCreatedFilter = doCreateFilter(newFilter);
             }
         } else {
