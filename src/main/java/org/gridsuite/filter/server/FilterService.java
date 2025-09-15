@@ -243,7 +243,7 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public List<IdentifiableAttributes> evaluateFilters(List<UUID> filters, UUID networkUuid) {
+    public List<IdentifiableAttributes> evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
         Map<String, IdentifiableAttributes> result = new HashMap<>();
         filters.forEach((UUID filterUuid) -> {
                 Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
@@ -253,7 +253,7 @@ public class FilterService {
                 AbstractFilter filter = optFilter.get();
                 Objects.requireNonNull(filter);
                 FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-                List<IdentifiableAttributes> temp = getIdentifiableAttributes(filter, networkUuid, null, filterLoader);
+                List<IdentifiableAttributes> temp = getIdentifiableAttributes(filter, networkUuid, variantId, filterLoader);
                 temp.forEach(element -> result.put(element.getId(), element));
             }
         );

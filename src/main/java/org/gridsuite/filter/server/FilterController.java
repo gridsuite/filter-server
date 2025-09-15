@@ -198,8 +198,9 @@ public class FilterController {
         @ApiResponse(responseCode = "200", description = "The list of matched elements")
     })
     public ResponseEntity<List<IdentifiableAttributes>> evaluateFilters(@RequestParam("ids") List<UUID> ids,
-                                                                        @RequestParam(value = "networkUuid") UUID networkUuid) {
-        List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilters(ids, networkUuid);
+                                                                        @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                        @RequestParam(value = "variantUuid", required = false) String variantUuid) {
+        List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilters(ids, networkUuid, variantUuid);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
 
