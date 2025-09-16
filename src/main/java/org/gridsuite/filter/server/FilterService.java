@@ -16,6 +16,7 @@ import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
@@ -250,21 +251,31 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public List<IdentifiableAttributes> evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
+    public FilteredIdentifiables evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
+        FilteredIdentifiables filteredIdentifiables = new FilteredIdentifiables();
         Map<String, IdentifiableAttributes> result = new HashMap<>();
+        Map<String, IdentifiableAttributes> notFound = new HashMap<>();
+        Network network = getNetwork(networkUuid, variantId);
         filters.forEach((UUID filterUuid) -> {
-                Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
-                if (optFilter.isEmpty()) {
-                    return;
-                }
-                AbstractFilter filter = optFilter.get();
-                Objects.requireNonNull(filter);
-                FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-                List<IdentifiableAttributes> temp = getIdentifiableAttributes(filter, networkUuid, variantId, filterLoader);
-                temp.forEach(element -> result.put(element.getId(), element));
+            Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
+            if (optFilter.isEmpty()) {
+                return;
+            }
+            AbstractFilter filter = optFilter.get();
+            Objects.requireNonNull(filter);
+            FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
+            FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
+
+            // unduplicate equipments and merge in common lists
+            if (filterIdentiables.getNotFoundIds() != null) {
+                filterIdentiables.getNotFoundIds().forEach(element -> notFound.put(element.getId(), element));
+            }
+            filterIdentiables.getEquipmentIds().forEach(element -> result.put(element.getId(), element));
             }
         );
-        return result.values().stream().toList();
+        filteredIdentifiables.setEquipmentIds(result.values().stream().toList());
+        filteredIdentifiables.setNotFoundIds(notFound.values().stream().toList());
+        return filteredIdentifiables;
     }
 
     @Transactional(readOnly = true)

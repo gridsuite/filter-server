@@ -25,6 +25,7 @@ import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.expertfilter.expertrule.*;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
@@ -437,15 +438,16 @@ public class FilterEntityControllerTest {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.addAll("ids", filterIds);
         params.add("networkUuid", NETWORK_UUID.toString());
-        List<IdentifiableAttributes> result = objectMapper.readValue(mvc.perform(get(URL_TEMPLATE + "/evaluate/identifiables")
+        FilteredIdentifiables result = objectMapper.readValue(mvc.perform(get(URL_TEMPLATE + "/evaluate/identifiables")
                 .params(params).contentType(APPLICATION_JSON)).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(), new TypeReference<>() { });
 
         List<IdentifiableAttributes> expected = new ArrayList<>();
         expected.add(new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null));
         expected.add(new IdentifiableAttributes("NHV1_NHV2_2", IdentifiableType.LINE, null));
-
-        assertTrue(expected.size() == result.size() && result.containsAll(expected) && expected.containsAll(result));
+        assertTrue(expected.size() == result.getEquipmentIds().size()
+            && result.getEquipmentIds().containsAll(expected)
+            && expected.containsAll(result.getEquipmentIds()));
     }
 
     @Test

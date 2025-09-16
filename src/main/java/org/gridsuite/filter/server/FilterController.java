@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.springframework.context.annotation.ComponentScan;
@@ -197,10 +198,10 @@ public class FilterController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "The list of matched elements")
     })
-    public ResponseEntity<List<IdentifiableAttributes>> evaluateFilters(@RequestParam("ids") List<UUID> ids,
-                                                                        @RequestParam(value = "networkUuid") UUID networkUuid,
-                                                                        @RequestParam(value = "variantUuid", required = false) String variantUuid) {
-        List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilters(ids, networkUuid, variantUuid);
+    public ResponseEntity<FilteredIdentifiables> evaluateFilters(@RequestParam("ids") List<UUID> ids,
+                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                 @RequestParam(value = "variantUuid", required = false) String variantUuid) {
+        FilteredIdentifiables identifiableAttributes = service.evaluateFilters(ids, networkUuid, variantUuid);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
 
