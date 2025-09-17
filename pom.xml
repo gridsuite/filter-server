@@ -105,6 +105,7 @@
         <dependency>
             <groupId>org.gridsuite</groupId>
             <artifactId>gridsuite-filter</artifactId>
+            <!-- TODO : remove version when lib is released -->
             <version>1.9.0-SNAPSHOT</version>
         </dependency>
         <dependency>
