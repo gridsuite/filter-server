@@ -253,8 +253,8 @@ public class FilterService {
     @Transactional(readOnly = true)
     public FilteredIdentifiables evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
         FilteredIdentifiables filteredIdentifiables = new FilteredIdentifiables();
-        Map<String, IdentifiableAttributes> result = new HashMap<>();
-        Map<String, IdentifiableAttributes> notFound = new HashMap<>();
+        Map<String, IdentifiableAttributes> result = new TreeMap<>();
+        Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
         filters.forEach((UUID filterUuid) -> {
             Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
