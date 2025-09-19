@@ -17,6 +17,7 @@ import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
+import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
@@ -25,6 +26,7 @@ import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierL
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
+import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
@@ -55,21 +57,35 @@ public class FilterService {
 
     private final NotificationService notificationService;
 
+    private final DirectoryService directoryService;
+
     public FilterService(final IdentifierListFilterRepository identifierListFilterRepository,
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
-                         NotificationService notificationService) {
+                         NotificationService notificationService,
+                         DirectoryService directoryService) {
         filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
         filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
         this.networkStoreService = networkStoreService;
         this.notificationService = notificationService;
+        this.directoryService = directoryService;
     }
 
     public List<IFilterAttributes> getFilters() {
         return filterRepositories.entrySet().stream()
                 .flatMap(entry -> entry.getValue().getFiltersAttributes())
                 .collect(Collectors.toList());
+    }
+
+    public List<FilterAttributes> getFiltersAttributes(List<UUID> filterUuids, String userId) {
+        List<FilterAttributes> filterAttributes = filterRepositories.entrySet().stream()
+            .flatMap(entry -> entry.getValue().getFiltersAttributes(filterUuids))
+            .toList();
+        // call directory server to add name information
+        Map<UUID, String> elementsName = directoryService.getElementsName(filterAttributes.stream().map(FilterAttributes::getId).toList(), userId);
+        filterAttributes.forEach(attribute -> attribute.setName(elementsName.get(attribute.getId())));
+        return filterAttributes;
     }
 
     @Transactional(readOnly = true)

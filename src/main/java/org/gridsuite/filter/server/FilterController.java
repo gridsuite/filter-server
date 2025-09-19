@@ -16,6 +16,7 @@ import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
@@ -51,6 +52,13 @@ public class FilterController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "All filters")})
     public ResponseEntity<List<IFilterAttributes>> getFilters() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
+    }
+
+    @GetMapping(value = "/filters/infos", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get filters infos")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "All filters")})
+    public ResponseEntity<List<FilterAttributes>> getFilters(@RequestParam List<UUID> filterUuids, @RequestHeader String userId) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFiltersAttributes(filterUuids, userId));
     }
 
     @GetMapping(value = "/filters/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
