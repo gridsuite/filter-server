@@ -268,7 +268,6 @@ public class FilterService {
 
     @Transactional(readOnly = true)
     public FilteredIdentifiables evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
-        FilteredIdentifiables filteredIdentifiables = new FilteredIdentifiables();
         Map<String, IdentifiableAttributes> result = new TreeMap<>();
         Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
@@ -283,15 +282,13 @@ public class FilterService {
             FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
 
             // unduplicate equipments and merge in common lists
-            if (filterIdentiables.getNotFoundIds() != null) {
-                filterIdentiables.getNotFoundIds().forEach(element -> notFound.put(element.getId(), element));
+            if (filterIdentiables.notFoundIds() != null) {
+                filterIdentiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
             }
-            filterIdentiables.getEquipmentIds().forEach(element -> result.put(element.getId(), element));
+            filterIdentiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
             }
         );
-        filteredIdentifiables.setEquipmentIds(result.values().stream().toList());
-        filteredIdentifiables.setNotFoundIds(notFound.values().stream().toList());
-        return filteredIdentifiables;
+        return new FilteredIdentifiables(result.values().stream().toList(), notFound.values().stream().toList());
     }
 
     @Transactional(readOnly = true)
