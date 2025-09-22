@@ -271,21 +271,25 @@ public class FilterService {
         Map<String, IdentifiableAttributes> result = new TreeMap<>();
         Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
-        filters.forEach((UUID filterUuid) -> {
-            Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
-            if (optFilter.isEmpty()) {
-                return;
-            }
-            AbstractFilter filter = optFilter.get();
-            Objects.requireNonNull(filter);
-            FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-            FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
 
-            // unduplicate equipments and merge in common lists
-            if (filterIdentiables.notFoundIds() != null) {
-                filterIdentiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
-            }
-            filterIdentiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+        filters.forEach((UUID filterUuid) -> {
+                Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
+                if (optFilter.isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterUuid);
+                }
+                AbstractFilter filter = optFilter.get();
+                Objects.requireNonNull(filter);
+                FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
+                FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
+
+                // unduplicate equipments and merge in common lists
+                if (filterIdentiables.notFoundIds() != null) {
+                    filterIdentiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
+                }
+
+                if (filterIdentiables.equipmentIds() != null) {
+                    filterIdentiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+                }
             }
         );
         return new FilteredIdentifiables(result.values().stream().toList(), notFound.values().stream().toList());
