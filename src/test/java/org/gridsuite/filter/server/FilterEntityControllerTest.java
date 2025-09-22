@@ -445,9 +445,9 @@ public class FilterEntityControllerTest {
         List<IdentifiableAttributes> expected = new ArrayList<>();
         expected.add(new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null));
         expected.add(new IdentifiableAttributes("NHV1_NHV2_2", IdentifiableType.LINE, null));
-        assertTrue(expected.size() == result.getEquipmentIds().size()
-            && result.getEquipmentIds().containsAll(expected)
-            && expected.containsAll(result.getEquipmentIds()));
+        assertTrue(expected.size() == result.equipmentIds().size()
+            && result.equipmentIds().containsAll(expected)
+            && expected.containsAll(result.equipmentIds()));
     }
 
     @Test
