@@ -81,10 +81,22 @@ public class FilterService {
     public List<FilterAttributes> getFiltersAttributes(List<UUID> filterUuids, String userId) {
         List<FilterAttributes> filterAttributes = filterRepositories.entrySet().stream()
             .flatMap(entry -> entry.getValue().getFiltersAttributes(filterUuids))
-            .toList();
+            .collect(Collectors.toList());
         // call directory server to add name information
         Map<UUID, String> elementsName = directoryService.getElementsName(filterAttributes.stream().map(FilterAttributes::getId).toList(), userId);
         filterAttributes.forEach(attribute -> attribute.setName(elementsName.get(attribute.getId())));
+
+
+        if (filterAttributes.size() != filterUuids.size()) {
+            List<UUID> foundUuids = filterAttributes.stream().map(FilterAttributes::getId).toList();
+            List<UUID> notFoundUuids = filterUuids.stream().filter(f -> !foundUuids.contains(f)).toList();
+            notFoundUuids.forEach(uuid ->
+            {
+                FilterAttributes filterAttr = new FilterAttributes();
+                filterAttr.setId(uuid);
+                filterAttributes.add(filterAttr);
+            });
+        }
         return filterAttributes;
     }
 
@@ -275,7 +287,7 @@ public class FilterService {
         filters.forEach((UUID filterUuid) -> {
                 Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
                 if (optFilter.isEmpty()) {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + filterUuid);
+                    return;
                 }
                 AbstractFilter filter = optFilter.get();
                 Objects.requireNonNull(filter);
