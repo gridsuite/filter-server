@@ -18,7 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.gridsuite.filter.utils.ElementAttributes;
+import org.gridsuite.filter.server.dto.ElementAttributes;
 
 import java.util.HashMap;
 import java.util.List;
