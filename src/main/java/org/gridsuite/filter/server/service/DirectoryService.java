@@ -58,7 +58,7 @@ public class DirectoryService {
                 HttpMethod.GET, entity, new ParameterizedTypeReference<List<ElementAttributes>>() { }).getBody();
         if (elementAttributes != null) {
             for (ElementAttributes elementAttribute : elementAttributes) {
-                result.put(elementAttribute.getElementUuid(), elementAttribute.getElementName());
+                result.put(elementAttribute.elementUuid(), elementAttribute.elementName());
             }
         }
 
