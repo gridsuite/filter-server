@@ -61,6 +61,7 @@ import org.springframework.util.MultiValueMap;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.*;
@@ -471,11 +472,28 @@ public class FilterEntityControllerTest {
         ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
         insertFilter(filterId, lineFilter);
 
-        MappingBuilder requestPatternBuilder = WireMock.get(WireMock.urlPathEqualTo("/v1/directories/elements"))
-            .withHeader(USER_ID_HEADER, WireMock.equalTo(USER_ID_HEADER))
-            .withQueryParam("ids", WireMock.equalTo(filterId.toString()));
+        FilterAttributes filterAttributes = new FilterAttributes();
+        filterAttributes.setId(filterId);
+        filterAttributes.setName("Filter1");
+        String excpectedJson = objectMapper.writeValueAsString(filterAttributes);
+
+        MappingBuilder requestPatternBuilder = WireMock.get(WireMock.urlPathMatching("/v1/elements"))
+            .withHeader(USER_ID_HEADER, equalTo(USER_ID_HEADER))
+            .withQueryParam("ids", equalTo(filterId.toString())).withRequestBody(equalTo(excpectedJson));
 
         wireMockServer.stubFor(requestPatternBuilder.willReturn(WireMock.ok()));
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("filterUuids", filterId.toString());
+        List<FilterAttributes> result = objectMapper.readValue(mvc.perform(get(URL_TEMPLATE + "/infos")
+                .header(USER_ID_HEADER, USER_ID_HEADER)
+                .params(params).contentType(APPLICATION_JSON)).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString(), new TypeReference<>() { });
+
+        assertEquals(1, result.size());
+        FilterAttributes filterAttribute = result.getFirst();
+        assertEquals(filterAttribute.getId(), filterId);
+        assertEquals("Filter1", filterAttribute.getName());
     }
 
     @Test
