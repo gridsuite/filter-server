@@ -86,7 +86,6 @@ public class FilterService {
         Map<UUID, String> elementsName = directoryService.getElementsName(filterAttributes.stream().map(FilterAttributes::getId).toList(), userId);
         filterAttributes.forEach(attribute -> attribute.setName(elementsName.get(attribute.getId())));
 
-
         if (filterAttributes.size() != filterUuids.size()) {
             List<UUID> foundUuids = filterAttributes.stream().map(FilterAttributes::getId).toList();
             List<UUID> notFoundUuids = filterUuids.stream().filter(filterUuid -> !foundUuids.contains(filterUuid)).toList();
