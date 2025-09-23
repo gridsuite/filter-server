@@ -9,6 +9,10 @@ package org.gridsuite.filter.server.dto;
 
 import java.util.UUID;
 
+/**
+ * @author Bassel El Cheikh <bassel.el-cheikh at rte-france.com>
+ */
+
 // partial class from ElementAttributes (Directory-server)
 public record ElementAttributes(UUID elementUuid, String elementName) {
 }

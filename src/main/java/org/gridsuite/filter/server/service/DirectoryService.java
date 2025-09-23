@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * @author Bassel El Cheikh <bassel.el-cheikh at rte-france.com>
+ */
+
 @Service
 public class DirectoryService {
     public static final String DELIMITER = "/";

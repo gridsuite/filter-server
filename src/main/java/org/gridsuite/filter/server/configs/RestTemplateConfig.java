@@ -11,6 +11,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * @author Bassel El Cheikh <bassel.el-cheikh at rte-france.com>
+ */
+
 @Configuration
 public class RestTemplateConfig {
 
