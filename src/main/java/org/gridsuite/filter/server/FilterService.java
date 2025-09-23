@@ -89,7 +89,7 @@ public class FilterService {
 
         if (filterAttributes.size() != filterUuids.size()) {
             List<UUID> foundUuids = filterAttributes.stream().map(FilterAttributes::getId).toList();
-            List<UUID> notFoundUuids = filterUuids.stream().filter(f -> !foundUuids.contains(f)).toList();
+            List<UUID> notFoundUuids = filterUuids.stream().filter(filterUuid -> !foundUuids.contains(filterUuid)).toList();
             notFoundUuids.forEach(uuid ->
             {
                 FilterAttributes filterAttr = new FilterAttributes();
