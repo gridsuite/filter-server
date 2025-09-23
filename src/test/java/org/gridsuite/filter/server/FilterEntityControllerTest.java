@@ -9,6 +9,9 @@ package org.gridsuite.filter.server;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -58,6 +61,7 @@ import org.springframework.util.MultiValueMap;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
@@ -113,6 +117,8 @@ public class FilterEntityControllerTest {
     private static final String USER_ID_HEADER = "userId";
 
     private String elementUpdateDestination = "element.update";
+
+    private WireMockServer wireMockServer;
 
     @Before
     public void setUp() {
@@ -171,6 +177,9 @@ public class FilterEntityControllerTest {
                 return EnumSet.noneOf(Option.class);
             }
         });
+
+        wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
+        wireMockServer.start();
     }
 
     @After
@@ -179,6 +188,7 @@ public class FilterEntityControllerTest {
 
         cleanDB();
         assertQueuesEmptyThenClear(destinations, output);
+        wireMockServer.stop();
     }
 
     private void cleanDB() {
@@ -448,6 +458,24 @@ public class FilterEntityControllerTest {
         assertTrue(expected.size() == result.equipmentIds().size()
             && result.equipmentIds().containsAll(expected)
             && expected.containsAll(result.equipmentIds()));
+    }
+
+    @Test
+    public void testFilterInfos() throws Exception {
+        UUID filterId = UUID.randomUUID();
+        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+            .values(new TreeSet<>(Set.of("FR"))).build();
+        rules.add(country1Filter);
+        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
+        insertFilter(filterId, lineFilter);
+
+        MappingBuilder requestPatternBuilder = WireMock.get(WireMock.urlPathEqualTo("/v1/directories/elements"))
+            .withHeader(USER_ID_HEADER, WireMock.equalTo(USER_ID_HEADER))
+            .withQueryParam("ids", WireMock.equalTo(filterId.toString()));
+
+        wireMockServer.stubFor(requestPatternBuilder.willReturn(WireMock.ok()));
     }
 
     @Test
