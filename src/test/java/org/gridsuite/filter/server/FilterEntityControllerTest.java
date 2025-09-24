@@ -504,7 +504,8 @@ public class FilterEntityControllerTest {
         String excpectedElementAttributesJson = objectMapper.writeValueAsString(elementAttributesList);
 
         stubForFilterInfos(filterId, excpectedElementAttributesJson);
-        List<String> filterIds = List.of(filterId.toString());
+        UUID notFoundFilterId = UUID.randomUUID();
+        List<String> filterIds = List.of(filterId.toString(), notFoundFilterId.toString());
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.addAll("filterUuids", filterIds);
@@ -515,13 +516,20 @@ public class FilterEntityControllerTest {
 
         List<FilterAttributes> result = objectMapper.readValue(res, new TypeReference<>() { });
 
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
         FilterAttributes filterAttribute = result.getFirst();
         assertEquals(filterId, filterAttribute.getId());
         assertEquals("Filter1", filterAttribute.getName());
         assertEquals(FilterType.EXPERT, filterAttribute.getType());
         assertEquals(EquipmentType.LINE, filterAttribute.getEquipmentType());
         assertEquals(filter.getModificationDate(), filterAttribute.getModificationDate());
+
+        FilterAttributes filterAttribute2 = result.getLast();
+        assertEquals(notFoundFilterId, filterAttribute2.getId());
+        assertNull(filterAttribute2.getName());
+        assertNull(filterAttribute2.getType());
+        assertNull(filterAttribute2.getEquipmentType());
+        assertNull(filterAttribute2.getModificationDate());
     }
 
     @Test
