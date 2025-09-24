@@ -30,6 +30,7 @@ public class FilterAttributes implements IFilterAttributes {
     Date modificationDate;
     FilterType type;
     EquipmentType equipmentType;
+    String name;
 
     public FilterAttributes(FilterMetadata filterMetadata, FilterType type, EquipmentType equipmentType) {
         id = filterMetadata.getId();

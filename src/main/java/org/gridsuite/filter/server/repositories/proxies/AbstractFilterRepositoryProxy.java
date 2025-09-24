@@ -72,6 +72,10 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return getRepository().getFiltersMetadata().stream().map(this::metadataToAttribute);
     }
 
+    public Stream<FilterAttributes> getFiltersAttributes(List<UUID> ids) {
+        return getRepository().findFiltersMetaDataById(ids).stream().map(this::metadataToAttribute);
+    }
+
     FilterAttributes metadataToAttribute(FilterMetadata f) {
         return new FilterAttributes(f, getFilterType(), getEquipmentType(f.getId()));
     }

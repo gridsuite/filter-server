@@ -9,6 +9,9 @@ package org.gridsuite.filter.server;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -25,10 +28,13 @@ import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.expertfilter.expertrule.*;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
+import org.gridsuite.filter.server.dto.ElementAttributes;
 import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.assertions.Assertions;
 import org.gridsuite.filter.utils.EquipmentType;
@@ -40,10 +46,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.messaging.Message;
@@ -57,6 +65,8 @@ import org.springframework.util.MultiValueMap;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
@@ -89,14 +99,17 @@ public class FilterEntityControllerTest {
     @Autowired
     private FilterService filterService;
 
-    @MockBean
-    private NetworkStoreService networkStoreService;
-
     @Autowired
     private OutputDestination output;
 
     @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
+
+    @MockBean
+    private NetworkStoreService networkStoreService;
+
+    @SpyBean
+    private DirectoryService directoryService;
 
     public static final SortedSet<String> COUNTRIES1 = new TreeSet<>(Collections.singleton("France"));
     public static final SortedSet<String> COUNTRIES2 = new TreeSet<>(Collections.singleton("Germany"));
@@ -112,6 +125,8 @@ public class FilterEntityControllerTest {
     private static final String USER_ID_HEADER = "userId";
 
     private String elementUpdateDestination = "element.update";
+
+    private WireMockServer wireMockServer;
 
     @Before
     public void setUp() {
@@ -170,6 +185,12 @@ public class FilterEntityControllerTest {
                 return EnumSet.noneOf(Option.class);
             }
         });
+
+        wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
+        wireMockServer.start();
+
+        // mock base url of filter server as one of wire mock server
+        Mockito.doAnswer(invocation -> wireMockServer.baseUrl()).when(directoryService).getBaseUri();
     }
 
     @After
@@ -178,6 +199,7 @@ public class FilterEntityControllerTest {
 
         cleanDB();
         assertQueuesEmptyThenClear(destinations, output);
+        wireMockServer.stop();
     }
 
     private void cleanDB() {
@@ -419,6 +441,95 @@ public class FilterEntityControllerTest {
             assertEquals(identifiableAttribute1.getType(), identifiableAttribute2.getType());
             assertEquals(identifiableAttribute1.getDistributionKey(), identifiableAttribute2.getDistributionKey());
         }
+    }
+
+    @Test
+    public void testEvaluateFilters() throws Exception {
+        UUID filterId = UUID.randomUUID();
+        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+            .values(new TreeSet<>(Set.of("FR"))).build();
+        rules.add(country1Filter);
+        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
+        insertFilter(filterId, lineFilter);
+
+        // Apply filter by calling endPoint
+        List<String> filterIds = List.of(filterId.toString());
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.addAll("ids", filterIds);
+        params.add("networkUuid", NETWORK_UUID.toString());
+        FilteredIdentifiables result = objectMapper.readValue(mvc.perform(get(URL_TEMPLATE + "/evaluate/identifiables")
+                .params(params).contentType(APPLICATION_JSON)).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), new TypeReference<>() { });
+
+        List<IdentifiableAttributes> expected = new ArrayList<>();
+        expected.add(new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null));
+        expected.add(new IdentifiableAttributes("NHV1_NHV2_2", IdentifiableType.LINE, null));
+        assertTrue(expected.size() == result.equipmentIds().size()
+            && result.equipmentIds().containsAll(expected)
+            && expected.containsAll(result.equipmentIds()));
+    }
+
+    private void stubForFilterInfos(UUID filterId, String excpectedJson) {
+        MappingBuilder requestPatternBuilder = WireMock.get(WireMock.urlPathMatching("/v1/elements"))
+            .withHeader(USER_ID_HEADER, equalTo(USER_ID_HEADER))
+            .withQueryParam("ids", equalTo(filterId.toString()))
+            .willReturn(WireMock.ok().withBody(excpectedJson).withHeader("Content-Type", "application/json; charset=utf-8"));
+
+        wireMockServer.stubFor(requestPatternBuilder);
+    }
+
+    @Test
+    public void testFilterInfos() throws Exception {
+        UUID filterId = UUID.randomUUID();
+        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+            .values(new TreeSet<>(Set.of("FR"))).build();
+        rules.add(country1Filter);
+        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
+        AbstractFilter filter = insertFilter(filterId, lineFilter);
+
+        FilterAttributes filterAttributes = new FilterAttributes();
+        filterAttributes.setId(filter.getId());
+        filterAttributes.setType(FilterType.EXPERT);
+        filterAttributes.setEquipmentType(EquipmentType.LINE);
+        filterAttributes.setModificationDate(filter.getModificationDate());
+        filterAttributes.setName("Filter1");
+
+        ElementAttributes elementAttributes = new ElementAttributes(filterId, "Filter1");
+        List<ElementAttributes> elementAttributesList = new ArrayList<>();
+        elementAttributesList.add(elementAttributes);
+        String excpectedElementAttributesJson = objectMapper.writeValueAsString(elementAttributesList);
+
+        stubForFilterInfos(filterId, excpectedElementAttributesJson);
+        UUID notFoundFilterId = UUID.randomUUID();
+        List<String> filterIds = List.of(filterId.toString(), notFoundFilterId.toString());
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.addAll("filterUuids", filterIds);
+        String res = mvc.perform(get(URL_TEMPLATE + "/infos")
+                .header(USER_ID_HEADER, USER_ID_HEADER)
+                .params(params).contentType(APPLICATION_JSON)).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        List<FilterAttributes> result = objectMapper.readValue(res, new TypeReference<>() { });
+
+        assertEquals(2, result.size());
+        FilterAttributes filterAttribute = result.getFirst();
+        assertEquals(filterId, filterAttribute.getId());
+        assertEquals("Filter1", filterAttribute.getName());
+        assertEquals(FilterType.EXPERT, filterAttribute.getType());
+        assertEquals(EquipmentType.LINE, filterAttribute.getEquipmentType());
+        assertEquals(filter.getModificationDate(), filterAttribute.getModificationDate());
+
+        FilterAttributes filterAttribute2 = result.getLast();
+        assertEquals(notFoundFilterId, filterAttribute2.getId());
+        assertNull(filterAttribute2.getName());
+        assertNull(filterAttribute2.getType());
+        assertNull(filterAttribute2.getEquipmentType());
+        assertNull(filterAttribute2.getModificationDate());
     }
 
     @Test

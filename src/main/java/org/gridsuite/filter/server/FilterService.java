@@ -16,6 +16,8 @@ import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
+import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
@@ -24,6 +26,7 @@ import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierL
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
+import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
@@ -54,21 +57,45 @@ public class FilterService {
 
     private final NotificationService notificationService;
 
+    private final DirectoryService directoryService;
+
     public FilterService(final IdentifierListFilterRepository identifierListFilterRepository,
                          final ExpertFilterRepository expertFilterRepository,
                          NetworkStoreService networkStoreService,
-                         NotificationService notificationService) {
+                         NotificationService notificationService,
+                         DirectoryService directoryService) {
         filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
 
         filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
         this.networkStoreService = networkStoreService;
         this.notificationService = notificationService;
+        this.directoryService = directoryService;
     }
 
     public List<IFilterAttributes> getFilters() {
         return filterRepositories.entrySet().stream()
                 .flatMap(entry -> entry.getValue().getFiltersAttributes())
                 .collect(Collectors.toList());
+    }
+
+    public List<FilterAttributes> getFiltersAttributes(List<UUID> filterUuids, String userId) {
+        List<FilterAttributes> filterAttributes = filterRepositories.entrySet().stream()
+            .flatMap(entry -> entry.getValue().getFiltersAttributes(filterUuids))
+            .collect(Collectors.toList());
+        // call directory server to add name information
+        Map<UUID, String> elementsName = directoryService.getElementsName(filterAttributes.stream().map(FilterAttributes::getId).toList(), userId);
+        filterAttributes.forEach(attribute -> attribute.setName(elementsName.get(attribute.getId())));
+
+        if (filterAttributes.size() != filterUuids.size()) {
+            List<UUID> foundUuids = filterAttributes.stream().map(FilterAttributes::getId).toList();
+            List<UUID> notFoundUuids = filterUuids.stream().filter(filterUuid -> !foundUuids.contains(filterUuid)).toList();
+            notFoundUuids.forEach(uuid -> {
+                FilterAttributes filterAttr = new FilterAttributes();
+                filterAttr.setId(uuid);
+                filterAttributes.add(filterAttr);
+            });
+        }
+        return filterAttributes;
     }
 
     @Transactional(readOnly = true)
@@ -247,6 +274,35 @@ public class FilterService {
         Objects.requireNonNull(filter);
         FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
         return getIdentifiableAttributes(filter, networkUuid, variantId, filterLoader);
+    }
+
+    @Transactional(readOnly = true)
+    public FilteredIdentifiables evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
+        Map<String, IdentifiableAttributes> result = new TreeMap<>();
+        Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
+        Network network = getNetwork(networkUuid, variantId);
+
+        filters.forEach((UUID filterUuid) -> {
+                Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
+                if (optFilter.isEmpty()) {
+                    return;
+                }
+                AbstractFilter filter = optFilter.get();
+                Objects.requireNonNull(filter);
+                FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
+                FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
+
+                // unduplicate equipments and merge in common lists
+                if (filterIdentiables.notFoundIds() != null) {
+                    filterIdentiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
+                }
+
+                if (filterIdentiables.equipmentIds() != null) {
+                    filterIdentiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+                }
+            }
+        );
+        return new FilteredIdentifiables(result.values().stream().toList(), notFound.values().stream().toList());
     }
 
     @Transactional(readOnly = true)

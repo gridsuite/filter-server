@@ -14,7 +14,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
@@ -50,6 +52,13 @@ public class FilterController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "All filters")})
     public ResponseEntity<List<IFilterAttributes>> getFilters() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
+    }
+
+    @GetMapping(value = "/filters/infos", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get filters infos")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Get filters infos of given ids")})
+    public ResponseEntity<List<FilterAttributes>> getFilters(@RequestParam List<UUID> filterUuids, @RequestHeader String userId) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFiltersAttributes(filterUuids, userId));
     }
 
     @GetMapping(value = "/filters/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -190,6 +199,18 @@ public class FilterController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ret);
+    }
+
+    @GetMapping(value = "/filters/evaluate/identifiables", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Export matched identifiables elements to JSON format")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "The list of matched elements")
+    })
+    public ResponseEntity<FilteredIdentifiables> evaluateFilters(@RequestParam("ids") List<UUID> ids,
+                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                 @RequestParam(value = "variantUuid", required = false) String variantUuid) {
+        FilteredIdentifiables identifiableAttributes = service.evaluateFilters(ids, networkUuid, variantUuid);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
 
     @PostMapping(value = "/filters/evaluate", produces = MediaType.APPLICATION_JSON_VALUE)
