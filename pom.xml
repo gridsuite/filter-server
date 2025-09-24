@@ -106,7 +106,6 @@
         <dependency>
             <groupId>org.gridsuite</groupId>
             <artifactId>gridsuite-filter</artifactId>
-            <!-- TODO : remove version when lib is released -->
             <version>${gridsuite-filter.version}</version>
         </dependency>
         <dependency>
