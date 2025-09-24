@@ -32,7 +32,9 @@ import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
+import org.gridsuite.filter.server.dto.ElementAttributes;
 import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.assertions.Assertions;
 import org.gridsuite.filter.utils.EquipmentType;
@@ -44,10 +46,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.messaging.Message;
@@ -95,14 +99,17 @@ public class FilterEntityControllerTest {
     @Autowired
     private FilterService filterService;
 
-    @MockBean
-    private NetworkStoreService networkStoreService;
-
     @Autowired
     private OutputDestination output;
 
     @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
+
+    @MockBean
+    private NetworkStoreService networkStoreService;
+
+    @SpyBean
+    private DirectoryService directoryService;
 
     public static final SortedSet<String> COUNTRIES1 = new TreeSet<>(Collections.singleton("France"));
     public static final SortedSet<String> COUNTRIES2 = new TreeSet<>(Collections.singleton("Germany"));
@@ -181,6 +188,9 @@ public class FilterEntityControllerTest {
 
         wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
         wireMockServer.start();
+
+        // mock base url of filter server as one of wire mock server
+        Mockito.doAnswer(invocation -> wireMockServer.baseUrl()).when(directoryService).getBaseUri();
     }
 
     @After
@@ -461,6 +471,15 @@ public class FilterEntityControllerTest {
             && expected.containsAll(result.equipmentIds()));
     }
 
+    private void stubForFilterInfos(UUID filterId, String excpectedJson) {
+        MappingBuilder requestPatternBuilder = WireMock.get(WireMock.urlPathMatching("/v1/elements"))
+            .withHeader(USER_ID_HEADER, equalTo(USER_ID_HEADER))
+            .withQueryParam("ids", equalTo(filterId.toString()))
+            .willReturn(WireMock.ok().withBody(excpectedJson).withHeader("Content-Type", "application/json; charset=utf-8"));
+
+        wireMockServer.stubFor(requestPatternBuilder);
+    }
+
     @Test
     public void testFilterInfos() throws Exception {
         UUID filterId = UUID.randomUUID();
@@ -470,30 +489,39 @@ public class FilterEntityControllerTest {
         rules.add(country1Filter);
         CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
         ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
-        insertFilter(filterId, lineFilter);
+        AbstractFilter filter = insertFilter(filterId, lineFilter);
 
         FilterAttributes filterAttributes = new FilterAttributes();
-        filterAttributes.setId(filterId);
+        filterAttributes.setId(filter.getId());
+        filterAttributes.setType(FilterType.EXPERT);
+        filterAttributes.setEquipmentType(EquipmentType.LINE);
+        filterAttributes.setModificationDate(filter.getModificationDate());
         filterAttributes.setName("Filter1");
-        String excpectedJson = objectMapper.writeValueAsString(filterAttributes);
 
-        MappingBuilder requestPatternBuilder = WireMock.get(WireMock.urlPathMatching("/v1/elements"))
-            .withHeader(USER_ID_HEADER, equalTo(USER_ID_HEADER))
-            .withQueryParam("ids", equalTo(filterId.toString())).withRequestBody(equalTo(excpectedJson));
+        ElementAttributes elementAttributes = new ElementAttributes(filterId, "Filter1");
+        List<ElementAttributes> elementAttributesList = new ArrayList<>();
+        elementAttributesList.add(elementAttributes);
+        String excpectedElementAttributesJson = objectMapper.writeValueAsString(elementAttributesList);
 
-        wireMockServer.stubFor(requestPatternBuilder.willReturn(WireMock.ok()));
+        stubForFilterInfos(filterId, excpectedElementAttributesJson);
+        List<String> filterIds = List.of(filterId.toString());
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("filterUuids", filterId.toString());
-        List<FilterAttributes> result = objectMapper.readValue(mvc.perform(get(URL_TEMPLATE + "/infos")
+        params.addAll("filterUuids", filterIds);
+        String res = mvc.perform(get(URL_TEMPLATE + "/infos")
                 .header(USER_ID_HEADER, USER_ID_HEADER)
                 .params(params).contentType(APPLICATION_JSON)).andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString(), new TypeReference<>() { });
+            .andReturn().getResponse().getContentAsString();
+
+        List<FilterAttributes> result = objectMapper.readValue(res, new TypeReference<>() { });
 
         assertEquals(1, result.size());
         FilterAttributes filterAttribute = result.getFirst();
-        assertEquals(filterAttribute.getId(), filterId);
+        assertEquals(filterId, filterAttribute.getId());
         assertEquals("Filter1", filterAttribute.getName());
+        assertEquals(FilterType.EXPERT, filterAttribute.getType());
+        assertEquals(EquipmentType.LINE, filterAttribute.getEquipmentType());
+        assertEquals(filter.getModificationDate(), filterAttribute.getModificationDate());
     }
 
     @Test
