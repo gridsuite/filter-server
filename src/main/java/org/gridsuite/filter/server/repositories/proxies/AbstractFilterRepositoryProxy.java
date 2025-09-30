@@ -47,11 +47,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     public abstract FilterType getFilterType();
 
-    public abstract EquipmentType getEquipmentType();
-
-    public EquipmentType getEquipmentType(UUID id) {
-        return getEquipmentType();
-    }
+    public abstract EquipmentType getEquipmentType(UUID id);
 
     public Optional<AbstractFilter> getFilter(UUID id) {
         Optional<F> element = getRepository().findById(id);
@@ -76,7 +72,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return getRepository().findFiltersMetaDataById(ids).stream().map(this::metadataToAttribute);
     }
 
-    FilterAttributes metadataToAttribute(FilterMetadata f) {
+    private FilterAttributes metadataToAttribute(final FilterMetadata f) {
         return new FilterAttributes(f, getFilterType(), getEquipmentType(f.getId()));
     }
 
@@ -94,8 +90,13 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return toDto(getRepository().save(fromDto(f)));
     }
 
+    /**
+     * Delete a filter by its id.
+     * @param id the filter id
+     * @return true if the filter has been deleted, false otherwise
+     */
     public boolean deleteById(UUID id) {
-        return getRepository().removeById(id) != 0;
+        return getRepository().removeById(id) > 0L;
     }
 
     public void deleteAllByIds(List<UUID> ids) {
@@ -106,7 +107,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         getRepository().deleteAll();
     }
 
-    public void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
+    public static void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.id(dto.getId());
     }
