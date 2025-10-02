@@ -76,11 +76,6 @@ public class IdentifierListFilterRepositoryProxy extends AbstractFilterRepositor
     }
 
     @Override
-    public EquipmentType getEquipmentType() {
-        throw new UnsupportedOperationException("A filter id must be provided to get equipment type !!");
-    }
-
-    @Override
     public EquipmentType getEquipmentType(UUID id) {
         return identifierListFilterRepository.findById(id)
             .map(IdentifierListFilterEntity::getEquipmentType)

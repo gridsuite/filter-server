@@ -11,6 +11,7 @@ import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -28,8 +29,14 @@ public interface FilterRepository<T extends AbstractFilterEntity> extends JpaRep
     @Query(value = "SELECT t.id as id, t.modificationDate as modificationDate from #{#entityName} as t WHERE t.id in (:ids)")
     List<FilterMetadata> findFiltersMetaDataById(List<UUID> ids);
 
+    /**
+     * Remove a filter by id.
+     * @param id the filter id
+     * @return the number of filter(s) removed ({@code 0} or {@code 1})
+     * @see #deleteById(Object) like deleteById(id) but with the indicator of either a filter has been removed or not
+     */
     @Transactional
-    Integer removeById(UUID id);
+    long removeById(@NonNull UUID id);
 
     @Transactional
     void deleteAllByIdIn(List<UUID> ids);
