@@ -27,7 +27,7 @@ import java.util.UUID;
 public class GlobalFilterController {
     private final GlobalFilterService service;
 
-    @PostMapping(value = "/")
+    @PostMapping(value = "")
     @Operation(summary = "Get network equipments IDs that match the filter(s)")
     @ApiResponse(responseCode = "200", description = "The filter")
     @ApiResponse(responseCode = "400", description = "Invalid parameters")
