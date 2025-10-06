@@ -17,6 +17,7 @@ import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
@@ -201,15 +202,15 @@ public class FilterController {
                 .body(ret);
     }
 
-    @GetMapping(value = "/filters/evaluate/identifiables", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/filters/evaluate/identifiables", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Export matched identifiables elements to JSON format")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "The list of matched elements")
     })
-    public ResponseEntity<FilteredIdentifiables> evaluateFilters(@RequestParam("ids") List<UUID> ids,
-                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
-                                                                 @RequestParam(value = "variantUuid", required = false) String variantUuid) {
-        FilteredIdentifiables identifiableAttributes = service.evaluateFilters(ids, networkUuid, variantUuid);
+    public ResponseEntity<FilteredIdentifiables> evaluateFilters(@RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                 @RequestParam(value = "variantUuid", required = false) String variantUuid,
+                                                                 @RequestBody FiltersWithEquipmentTypes filters) {
+        FilteredIdentifiables identifiableAttributes = service.evaluateFilters(filters, networkUuid, variantUuid);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
 

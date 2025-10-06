@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.IdentifiableType;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
@@ -17,7 +18,9 @@ import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
+import org.gridsuite.filter.server.dto.EquipmentTypesByElement;
 import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
@@ -277,20 +280,27 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public FilteredIdentifiables evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
+    public FilteredIdentifiables evaluateFilters(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
         Map<String, IdentifiableAttributes> result = new TreeMap<>();
         Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
 
-        filters.forEach((UUID filterUuid) -> {
+        filtersWithEquipmentTypes.filters().forEach((FilterAttributes filterAttributes) -> {
+                UUID filterUuid = filterAttributes.getId();
                 Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
                 if (optFilter.isEmpty()) {
                     return;
                 }
                 AbstractFilter filter = optFilter.get();
                 Objects.requireNonNull(filter);
+                Set<IdentifiableType> equipmentTypes = filtersWithEquipmentTypes.selectedEquipmentTypesByFilter()
+                    .stream()
+                    .filter(equipmentTypesByElement -> equipmentTypesByElement.id().equals(filterUuid))
+                    .findFirst()
+                    .map(EquipmentTypesByElement::equipmentTypes)
+                    .get();
                 FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-                FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
+                FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, equipmentTypes, network, filterLoader));
 
                 // unduplicate equipments and merge in common lists
                 if (filterIdentiables.notFoundIds() != null) {
