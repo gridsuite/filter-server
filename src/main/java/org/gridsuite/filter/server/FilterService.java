@@ -298,7 +298,7 @@ public class FilterService {
                     .filter(equipmentTypesByElement -> equipmentTypesByElement.id().equals(filterUuid))
                     .findFirst()
                     .map(EquipmentTypesByElement::equipmentTypes)
-                    .get();
+                    .orElse(null);
                 FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
                 FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, equipmentTypes, network, filterLoader));
 
