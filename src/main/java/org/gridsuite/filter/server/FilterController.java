@@ -210,7 +210,7 @@ public class FilterController {
     public ResponseEntity<FilteredIdentifiables> evaluateFilters(@RequestParam(value = "networkUuid") UUID networkUuid,
                                                                  @RequestParam(value = "variantUuid", required = false) String variantUuid,
                                                                  @RequestBody FiltersWithEquipmentTypes filters) {
-        FilteredIdentifiables identifiableAttributes = service.evaluateFilters(filters, networkUuid, variantUuid);
+        FilteredIdentifiables identifiableAttributes = service.evaluateFiltersForContingencyList(filters, networkUuid, variantUuid);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
 

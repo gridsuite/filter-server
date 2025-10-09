@@ -15,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
@@ -30,6 +31,8 @@ import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepository
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.server.service.DirectoryService;
+import org.gridsuite.filter.server.utils.FilterWithEquipmentTypesUtils;
+import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
@@ -280,7 +283,7 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public FilteredIdentifiables evaluateFilters(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
+    public FilteredIdentifiables evaluateFiltersForContingencyList(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
         Map<String, IdentifiableAttributes> result = new TreeMap<>();
         Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
@@ -293,22 +296,37 @@ public class FilterService {
                 }
                 AbstractFilter filter = optFilter.get();
                 Objects.requireNonNull(filter);
-                Set<IdentifiableType> equipmentTypes = filtersWithEquipmentTypes.selectedEquipmentTypesByFilter()
-                    .stream()
-                    .filter(equipmentTypesByElement -> equipmentTypesByElement.id().equals(filterUuid))
-                    .findFirst()
-                    .map(EquipmentTypesByElement::equipmentTypes)
-                    .orElse(null);
+                EquipmentType filterEquipmentType = filter.getEquipmentType();
                 FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-                FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, equipmentTypes, network, filterLoader));
+                FilteredIdentifiables filteredIdentifiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
 
                 // unduplicate equipments and merge in common lists
-                if (filterIdentiables.notFoundIds() != null) {
-                    filterIdentiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
+                if (filteredIdentifiables.notFoundIds() != null) {
+                    filteredIdentifiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
                 }
 
-                if (filterIdentiables.equipmentIds() != null) {
-                    filterIdentiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+                if (filteredIdentifiables.equipmentIds() != null) {
+                    if (filterEquipmentType != EquipmentType.SUBSTATION && filterEquipmentType != EquipmentType.VOLTAGE_LEVEL) {
+                        filteredIdentifiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+                    } else {
+                        Set<IdentifiableType> selectedEquipmentTypes = filtersWithEquipmentTypes.selectedEquipmentTypesByFilter()
+                            .stream()
+                            .filter(equipmentTypesByElement -> equipmentTypesByElement.id().equals(filterUuid))
+                            .findFirst()
+                            .map(EquipmentTypesByElement::equipmentTypes)
+                            .orElseThrow(
+                                () -> new IllegalStateException("No selected equipment types for filter " + filterUuid
+                                    + " : substation and voltage level filters should contain an equipment types list")
+                            );
+
+                        // This list is the result of the original filter and so necessarily contains a list of IDs of substations or voltage levels
+                        Set<String> filteredEquipmentIds = filteredIdentifiables.equipmentIds().stream().map(IdentifiableAttributes::getId).collect(Collectors.toSet());
+                        List<ExpertFilter> filters = FilterWithEquipmentTypesUtils.createFiltersForSubEquipments(filterEquipmentType,
+                            filteredEquipmentIds,
+                            selectedEquipmentTypes);
+                        filters.stream().flatMap(expertFilter -> evaluateFilter(expertFilter, networkUuid, variantId).stream())
+                            .forEach(element -> result.put(element.getId(), element));
+                    }
                 }
             }
         );
