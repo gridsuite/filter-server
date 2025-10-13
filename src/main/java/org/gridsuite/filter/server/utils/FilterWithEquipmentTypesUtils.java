@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021, RTE (http://www.rte-france.com)
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -63,8 +63,8 @@ public final class FilterWithEquipmentTypesUtils {
     public static AbstractExpertRule createSubstationRuleByEquipmentType(IdentifiableType equipmentType, Set<String> substationIds) {
         return switch (equipmentType) {
             case LOAD, GENERATOR, SHUNT_COMPENSATOR, STATIC_VAR_COMPENSATOR, BUSBAR_SECTION, BATTERY,
-                 DANGLING_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER -> createSubstationRule(substationIds, 1);
-            case LINE, HVDC_LINE -> createSubstationRule(substationIds, 2);
+                 DANGLING_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER -> createRuleWithOneField(substationIds, SUBSTATION_ID);
+            case LINE, HVDC_LINE -> createRuleWithTwoFields(substationIds, SUBSTATION_ID_1, SUBSTATION_ID_2);
             default -> throw new UnsupportedOperationException("Unsupported equipment type " + equipmentType);
         };
     }
@@ -72,30 +72,14 @@ public final class FilterWithEquipmentTypesUtils {
     public static AbstractExpertRule createVoltageLevelRuleByEquipmentType(IdentifiableType equipmentType, Set<String> voltageLevelIds) {
         return switch (equipmentType) {
             case LOAD, GENERATOR, SHUNT_COMPENSATOR, STATIC_VAR_COMPENSATOR, BUSBAR_SECTION, BATTERY,
-                 DANGLING_LINE -> createVoltageLevelRule(voltageLevelIds, 1);
-            case LINE, HVDC_LINE, TWO_WINDINGS_TRANSFORMER -> createVoltageLevelRule(voltageLevelIds, 2);
-            case THREE_WINDINGS_TRANSFORMER -> createVoltageLevelRule(voltageLevelIds, 3);
+                 DANGLING_LINE -> createRuleWithOneField(voltageLevelIds, VOLTAGE_LEVEL_ID);
+            case LINE, HVDC_LINE, TWO_WINDINGS_TRANSFORMER -> createRuleWithTwoFields(voltageLevelIds, VOLTAGE_LEVEL_ID_1, VOLTAGE_LEVEL_ID_2);
+            case THREE_WINDINGS_TRANSFORMER -> createRuleWithThreeFields(voltageLevelIds, VOLTAGE_LEVEL_ID_1, VOLTAGE_LEVEL_ID_2, VOLTAGE_LEVEL_ID_3);
             default -> throw new UnsupportedOperationException("Unsupported equipment type " + equipmentType);
         };
     }
 
-    public static AbstractExpertRule createSubstationRule(Set<String> substationIds, int fieldCount) {
-        return switch (fieldCount) {
-            case 1 -> createRuleWithOneField(substationIds, SUBSTATION_ID);
-            case 2 -> createRuleWithTwoFields(substationIds, SUBSTATION_ID_1, SUBSTATION_ID_2);
-            default -> throw new UnsupportedOperationException("Unsupported field count " + fieldCount);
-        };
-    }
 
-    public static AbstractExpertRule createVoltageLevelRule(Set<String> voltageLevelIds, int fieldCount) {
-        return switch (fieldCount) {
-            case 1 -> createRuleWithOneField(voltageLevelIds, VOLTAGE_LEVEL_ID);
-            case 2 -> createRuleWithTwoFields(voltageLevelIds, VOLTAGE_LEVEL_ID_1, VOLTAGE_LEVEL_ID_2);
-            case 3 ->
-                createRuleWithThreeFields(voltageLevelIds, VOLTAGE_LEVEL_ID_1, VOLTAGE_LEVEL_ID_2, VOLTAGE_LEVEL_ID_3);
-            default -> throw new UnsupportedOperationException("Unsupported field count " + fieldCount);
-        };
-    }
 
     public static AbstractExpertRule createRuleWithOneField(Set<String> equipmentIds, FieldType field) {
         return StringExpertRule.builder()
