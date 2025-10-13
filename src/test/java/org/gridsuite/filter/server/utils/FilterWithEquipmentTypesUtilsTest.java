@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for FilterWithEquipmentTypesUtils
+ * @author Florent MILLOT <florent.millot_externe at rte-france.com>
  */
 public class FilterWithEquipmentTypesUtilsTest {
 
