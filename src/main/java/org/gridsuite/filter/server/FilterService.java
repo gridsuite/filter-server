@@ -283,7 +283,7 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public FilteredIdentifiables evaluateFiltersForContingencyList(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
+    public FilteredIdentifiables evaluateFiltersWithEquipmentTypes(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
         Map<String, IdentifiableAttributes> result = new TreeMap<>();
         Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);

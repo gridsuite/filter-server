@@ -207,10 +207,10 @@ public class FilterController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "The list of matched elements")
     })
-    public ResponseEntity<FilteredIdentifiables> evaluateFilters(@RequestParam(value = "networkUuid") UUID networkUuid,
-                                                                 @RequestParam(value = "variantUuid", required = false) String variantUuid,
-                                                                 @RequestBody FiltersWithEquipmentTypes filters) {
-        FilteredIdentifiables identifiableAttributes = service.evaluateFiltersForContingencyList(filters, networkUuid, variantUuid);
+    public ResponseEntity<FilteredIdentifiables> evaluateFiltersWithEquipmentTypes(@RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                                   @RequestParam(value = "variantUuid", required = false) String variantUuid,
+                                                                                   @RequestBody FiltersWithEquipmentTypes filters) {
+        FilteredIdentifiables identifiableAttributes = service.evaluateFiltersWithEquipmentTypes(filters, networkUuid, variantUuid);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
     }
 

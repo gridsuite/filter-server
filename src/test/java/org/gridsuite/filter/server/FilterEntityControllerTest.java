@@ -34,6 +34,8 @@ import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.gridsuite.filter.server.dto.ElementAttributes;
 import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
+import org.gridsuite.filter.server.dto.EquipmentTypesByElement;
 import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.assertions.Assertions;
@@ -446,6 +448,8 @@ public class FilterEntityControllerTest {
     @Test
     public void testEvaluateFilters() throws Exception {
         UUID filterId = UUID.randomUUID();
+        FilterAttributes filterAttributes = new FilterAttributes();
+        filterAttributes.setId(filterId);
         ArrayList<AbstractExpertRule> rules = new ArrayList<>();
         EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
             .values(new TreeSet<>(Set.of("FR"))).build();
@@ -453,14 +457,16 @@ public class FilterEntityControllerTest {
         CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
         ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
         insertFilter(filterId, lineFilter);
+        FiltersWithEquipmentTypes filtersBody = new FiltersWithEquipmentTypes(List.of(filterAttributes), List.of());
 
         // Apply filter by calling endPoint
-        List<String> filterIds = List.of(filterId.toString());
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.addAll("ids", filterIds);
         params.add("networkUuid", NETWORK_UUID.toString());
-        FilteredIdentifiables result = objectMapper.readValue(mvc.perform(get(URL_TEMPLATE + "/evaluate/identifiables")
-                .params(params).contentType(APPLICATION_JSON)).andExpect(status().isOk())
+        FilteredIdentifiables result = objectMapper.readValue(mvc.perform(
+            post(URL_TEMPLATE + "/evaluate/identifiables")
+                .params(params).contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(filtersBody))
+            ).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(), new TypeReference<>() { });
 
         List<IdentifiableAttributes> expected = new ArrayList<>();
@@ -469,6 +475,51 @@ public class FilterEntityControllerTest {
         assertTrue(expected.size() == result.equipmentIds().size()
             && result.equipmentIds().containsAll(expected)
             && expected.containsAll(result.equipmentIds()));
+
+    }
+
+    @Test
+    public void testEvaluateFilters_SubstationWithEquipmentTypesLineAndGenerator() throws Exception {
+        // Create a SUBSTATION expert filter selecting substations NHV1 and NGEN
+        UUID filterId = UUID.randomUUID();
+        FilterAttributes filterAttributes = new FilterAttributes();
+        filterAttributes.setId(filterId);
+
+        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        EnumExpertRule countryFilter = EnumExpertRule.builder()
+            .field(FieldType.COUNTRY)
+            .operator(OperatorType.IN)
+            .values(new TreeSet<>(Set.of("FR")))
+            .build();
+        rules.add(countryFilter);
+        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+
+        ExpertFilter substationFilter = new ExpertFilter(filterId, new Date(), EquipmentType.SUBSTATION, parentRule);
+        insertFilter(filterId, substationFilter);
+
+        // Ask for sub-equipments: LINE and GENERATOR for this filter
+        EquipmentTypesByElement equipmentTypesByElement = new EquipmentTypesByElement(filterId, Set.of(IdentifiableType.LINE, IdentifiableType.GENERATOR));
+        FiltersWithEquipmentTypes filtersBody = new FiltersWithEquipmentTypes(List.of(filterAttributes), List.of(equipmentTypesByElement));
+
+        // Apply filter by calling endpoint
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("networkUuid", NETWORK_UUID.toString());
+        FilteredIdentifiables result = objectMapper.readValue(mvc.perform(
+                post(URL_TEMPLATE + "/evaluate/identifiables")
+                    .params(params).contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(filtersBody))
+            ).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), new TypeReference<>() { });
+
+        List<IdentifiableAttributes> expected = new ArrayList<>();
+        // Lines connected to NHV1 substation in the sample network
+        expected.add(new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null));
+        expected.add(new IdentifiableAttributes("NHV1_NHV2_2", IdentifiableType.LINE, null));
+        // Generators in substation NGEN (GEN and GEN2 exist on initial variant)
+        expected.add(new IdentifiableAttributes("GEN", IdentifiableType.GENERATOR, null));
+        expected.add(new IdentifiableAttributes("GEN2", IdentifiableType.GENERATOR, null));
+
+        assertTrue(result.equipmentIds().containsAll(expected));
     }
 
     private void stubForFilterInfos(UUID filterId, String excpectedJson) {
