@@ -80,8 +80,6 @@ public final class FilterWithEquipmentTypesUtils {
         };
     }
 
-
-
     public static AbstractExpertRule createRuleWithOneField(Set<String> equipmentIds, FieldType field) {
         return StringExpertRule.builder()
             .operator(OperatorType.IN).field(field)

@@ -479,7 +479,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testEvaluateFilters_SubstationWithEquipmentTypesLineAndGenerator() throws Exception {
+    public void testEvaluateFiltersWithEquipmentTypes() throws Exception {
         // Create a SUBSTATION expert filter selecting substations NHV1 and NGEN
         UUID filterId = UUID.randomUUID();
         FilterAttributes filterAttributes = new FilterAttributes();
