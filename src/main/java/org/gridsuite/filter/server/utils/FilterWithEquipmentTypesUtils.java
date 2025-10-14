@@ -27,6 +27,9 @@ import static org.gridsuite.filter.utils.expertfilter.FieldType.*;
  * we actually want the equipments related to these substations or voltage levels.
  * This class is used to build these special filters,
  * and we can specify which equipment types we are interested into.
+ * PS : We could have used a mix of expert filters with the operator IS_PART_OF
+ * but in this case we also need the notFoundIds of the original filter,
+ * which is not possible because it is different equipment types.
  * @author Florent MILLOT <florent.millot at rte-france.com>
  */
 public final class FilterWithEquipmentTypesUtils {
