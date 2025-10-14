@@ -15,5 +15,5 @@ import java.util.List;
  * @author Florent MILLOT <florent.millot@rte-france.com>
  */
 public record FiltersWithEquipmentTypes(List<FilterAttributes> filters,
-                                        List<EquipmentTypesByElement> selectedEquipmentTypesByFilter) {
+                                        List<EquipmentTypesByFilterId> selectedEquipmentTypesByFilter) {
 }

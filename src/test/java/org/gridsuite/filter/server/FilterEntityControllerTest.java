@@ -35,7 +35,7 @@ import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAt
 import org.gridsuite.filter.server.dto.ElementAttributes;
 import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
-import org.gridsuite.filter.server.dto.EquipmentTypesByElement;
+import org.gridsuite.filter.server.dto.EquipmentTypesByFilterId;
 import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.assertions.Assertions;
@@ -498,8 +498,8 @@ public class FilterEntityControllerTest {
         insertFilter(filterId, substationFilter);
 
         // Ask for sub-equipments: LINE and GENERATOR for this filter
-        EquipmentTypesByElement equipmentTypesByElement = new EquipmentTypesByElement(filterId, Set.of(IdentifiableType.LINE, IdentifiableType.GENERATOR));
-        FiltersWithEquipmentTypes filtersBody = new FiltersWithEquipmentTypes(List.of(filterAttributes), List.of(equipmentTypesByElement));
+        EquipmentTypesByFilterId equipmentTypesByFilterId = new EquipmentTypesByFilterId(filterId, Set.of(IdentifiableType.LINE, IdentifiableType.GENERATOR));
+        FiltersWithEquipmentTypes filtersBody = new FiltersWithEquipmentTypes(List.of(filterAttributes), List.of(equipmentTypesByFilterId));
 
         // Apply filter by calling endpoint
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();

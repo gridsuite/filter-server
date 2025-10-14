@@ -19,7 +19,7 @@ import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
-import org.gridsuite.filter.server.dto.EquipmentTypesByElement;
+import org.gridsuite.filter.server.dto.EquipmentTypesByFilterId;
 import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
@@ -311,9 +311,9 @@ public class FilterService {
                     } else {
                         Set<IdentifiableType> selectedEquipmentTypes = filtersWithEquipmentTypes.selectedEquipmentTypesByFilter()
                             .stream()
-                            .filter(equipmentTypesByElement -> equipmentTypesByElement.id().equals(filterUuid))
+                            .filter(equipmentTypesByFilterId -> equipmentTypesByFilterId.filterId().equals(filterUuid))
                             .findFirst()
-                            .map(EquipmentTypesByElement::equipmentTypes)
+                            .map(EquipmentTypesByFilterId::equipmentTypes)
                             .orElseThrow(
                                 () -> new IllegalStateException("No selected equipment types for filter " + filterUuid
                                     + " : substation and voltage level filters should contain an equipment types list")
