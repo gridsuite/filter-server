@@ -29,7 +29,7 @@ public class GlobalFilterController {
 
     @PostMapping(value = "")
     @Operation(summary = "Get network equipments IDs that match the filter(s)")
-    @ApiResponse(responseCode = "200", description = "The filter")
+    @ApiResponse(responseCode = "200", description = "The list of matching elements IDs")
     @ApiResponse(responseCode = "400", description = "Invalid parameters")
     @ApiResponse(responseCode = "404", description = "The filter does not exists")
     public ResponseEntity<List<String>> getResults(
