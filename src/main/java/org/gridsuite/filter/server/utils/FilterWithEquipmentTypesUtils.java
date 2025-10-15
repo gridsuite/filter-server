@@ -46,22 +46,21 @@ public final class FilterWithEquipmentTypesUtils {
      * @return the list of filters
      */
     public static List<ExpertFilter> createFiltersForSubEquipments(EquipmentType filterEquipmentType, Set<String> filteredEquipmentIDs, Set<IdentifiableType> subEquipmentTypes) {
-        if (filterEquipmentType == EquipmentType.SUBSTATION) {
-            return subEquipmentTypes.stream().map(identifiableType -> new ExpertFilter(
+        return switch (filterEquipmentType) {
+            case SUBSTATION -> subEquipmentTypes.stream().map(identifiableType -> new ExpertFilter(
                 null,
                 null,
                 EquipmentType.valueOf(identifiableType.name()),
                 createSubstationRuleByEquipmentType(identifiableType, filteredEquipmentIDs))).toList();
-        } else if (filterEquipmentType == EquipmentType.VOLTAGE_LEVEL) {
-            return subEquipmentTypes.stream().map(identifiableType -> new ExpertFilter(
+            case VOLTAGE_LEVEL -> subEquipmentTypes.stream().map(identifiableType -> new ExpertFilter(
                 null,
                 null,
                 EquipmentType.valueOf(identifiableType.name()),
                 createVoltageLevelRuleByEquipmentType(identifiableType, filteredEquipmentIDs))).toList();
-        } else {
-            throw new UnsupportedOperationException("Unsupported filter equipment type " + filterEquipmentType
-                + " : we can only filter sub equipments from substation and voltage level");
-        }
+            default ->
+                throw new UnsupportedOperationException("Unsupported filter equipment type " + filterEquipmentType
+                    + " : we can only filter sub equipments from substation and voltage level");
+        };
     }
 
     public static AbstractExpertRule createSubstationRuleByEquipmentType(IdentifiableType equipmentType, Set<String> substationIds) {
