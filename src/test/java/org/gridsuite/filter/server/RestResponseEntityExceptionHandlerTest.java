@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Mohamed Ben-rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
@@ -44,8 +45,7 @@ class RestResponseEntityExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getBusinessErrorCode())
-            .isEqualTo(new PowsyblWsProblemDetail.BusinessErrorCode("filter.filterCycleDetected"));
+        assertEquals("filter.filterCycleDetected", response.getBody().getBusinessErrorCode());
     }
 
     @Test
@@ -65,8 +65,7 @@ class RestResponseEntityExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getBusinessErrorCode())
-            .isEqualTo(new PowsyblWsProblemDetail.BusinessErrorCode("directory.remoteError"));
+        assertEquals("directory.remoteError", response.getBody().getBusinessErrorCode());
         assertThat(response.getBody().getChain()).hasSize(1);
     }
 
@@ -85,8 +84,7 @@ class RestResponseEntityExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getBusinessErrorCode())
-            .isEqualTo(new PowsyblWsProblemDetail.BusinessErrorCode("filter.remoteError"));
+        assertEquals("filter.remoteError", response.getBody().getBusinessErrorCode());
     }
 
     @Test
