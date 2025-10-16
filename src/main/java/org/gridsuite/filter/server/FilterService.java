@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -330,7 +331,9 @@ public class FilterService {
                 }
             }
         );
-        return new FilteredIdentifiables(result.values().stream().toList(), notFound.values().stream().toList());
+        return new FilteredIdentifiables(
+            result.values().stream().sorted(Comparator.comparing(e -> e.getType().ordinal())).toList(),
+            notFound.values().stream().sorted(Comparator.comparing(e -> e.getType().ordinal())).toList());
     }
 
     @Transactional(readOnly = true)
