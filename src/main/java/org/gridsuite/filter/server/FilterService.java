@@ -288,6 +288,7 @@ public class FilterService {
         Map<String, IdentifiableAttributes> result = new TreeMap<>();
         Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
+        FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
 
         filtersWithEquipmentTypes.filters().forEach((FilterAttributes filterAttributes) -> {
                 UUID filterUuid = filterAttributes.getId();
@@ -298,7 +299,6 @@ public class FilterService {
                 AbstractFilter filter = optFilter.get();
                 Objects.requireNonNull(filter);
                 EquipmentType filterEquipmentType = filter.getEquipmentType();
-                FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
                 FilteredIdentifiables filteredIdentifiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
 
                 // unduplicate equipments and merge in common lists
@@ -325,7 +325,7 @@ public class FilterService {
                         List<ExpertFilter> filters = FilterWithEquipmentTypesUtils.createFiltersForSubEquipments(filterEquipmentType,
                             filteredEquipmentIds,
                             selectedEquipmentTypes);
-                        filters.stream().flatMap(expertFilter -> evaluateFilter(expertFilter, networkUuid, variantId).stream())
+                        filters.stream().flatMap(expertFilter -> getIdentifiableAttributes(expertFilter, networkUuid, variantId, filterLoader).stream())
                             .forEach(element -> result.put(element.getId(), element));
                     }
                 }
