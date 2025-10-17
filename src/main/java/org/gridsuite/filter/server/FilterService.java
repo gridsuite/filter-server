@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.IdentifiableType;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
@@ -14,10 +15,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
+import org.gridsuite.filter.server.dto.EquipmentTypesByFilterId;
 import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
@@ -27,6 +31,8 @@ import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepository
 import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
 import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.server.service.DirectoryService;
+import org.gridsuite.filter.server.utils.FilterWithEquipmentTypesUtils;
+import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
@@ -37,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -277,32 +284,56 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public FilteredIdentifiables evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
+    public FilteredIdentifiables evaluateFiltersWithEquipmentTypes(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
         Map<String, IdentifiableAttributes> result = new TreeMap<>();
         Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
+        FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
 
-        filters.forEach((UUID filterUuid) -> {
+        filtersWithEquipmentTypes.filters().forEach((FilterAttributes filterAttributes) -> {
+                UUID filterUuid = filterAttributes.getId();
                 Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
                 if (optFilter.isEmpty()) {
                     return;
                 }
                 AbstractFilter filter = optFilter.get();
                 Objects.requireNonNull(filter);
-                FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-                FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
+                EquipmentType filterEquipmentType = filter.getEquipmentType();
+                FilteredIdentifiables filteredIdentifiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
 
                 // unduplicate equipments and merge in common lists
-                if (filterIdentiables.notFoundIds() != null) {
-                    filterIdentiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
+                if (filteredIdentifiables.notFoundIds() != null) {
+                    filteredIdentifiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
                 }
 
-                if (filterIdentiables.equipmentIds() != null) {
-                    filterIdentiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+                if (filteredIdentifiables.equipmentIds() != null) {
+                    if (filterEquipmentType != EquipmentType.SUBSTATION && filterEquipmentType != EquipmentType.VOLTAGE_LEVEL) {
+                        filteredIdentifiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+                    } else {
+                        Set<IdentifiableType> selectedEquipmentTypes = filtersWithEquipmentTypes.selectedEquipmentTypesByFilter()
+                            .stream()
+                            .filter(equipmentTypesByFilterId -> equipmentTypesByFilterId.filterId().equals(filterUuid))
+                            .findFirst()
+                            .map(EquipmentTypesByFilterId::equipmentTypes)
+                            .orElseThrow(
+                                () -> new IllegalStateException("No selected equipment types for filter " + filterUuid
+                                    + " : substation and voltage level filters should contain an equipment types list")
+                            );
+
+                        // This list is the result of the original filter and so necessarily contains a list of IDs of substations or voltage levels
+                        Set<String> filteredEquipmentIds = filteredIdentifiables.equipmentIds().stream().map(IdentifiableAttributes::getId).collect(Collectors.toSet());
+                        List<ExpertFilter> filters = FilterWithEquipmentTypesUtils.createFiltersForSubEquipments(filterEquipmentType,
+                            filteredEquipmentIds,
+                            selectedEquipmentTypes);
+                        filters.stream().flatMap(expertFilter -> getIdentifiableAttributes(expertFilter, networkUuid, variantId, filterLoader).stream())
+                            .forEach(element -> result.put(element.getId(), element));
+                    }
                 }
             }
         );
-        return new FilteredIdentifiables(result.values().stream().toList(), notFound.values().stream().toList());
+        return new FilteredIdentifiables(
+            result.values().stream().sorted(Comparator.comparing(e -> e.getType().ordinal())).toList(),
+            notFound.values().stream().sorted(Comparator.comparing(e -> e.getType().ordinal())).toList());
     }
 
     @Transactional(readOnly = true)
