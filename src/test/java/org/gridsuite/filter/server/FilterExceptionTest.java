@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Mohamed Ben-rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
@@ -31,8 +32,7 @@ class FilterExceptionTest {
         FilterException exception = new FilterException(FilterBusinessErrorCode.FILTER_REMOTE_ERROR,
             "Wrapped", remote);
 
-        assertThat(exception.getErrorCode()).contains(FilterBusinessErrorCode.FILTER_REMOTE_ERROR);
-        assertThat(exception.getBusinessErrorCode()).contains(FilterBusinessErrorCode.FILTER_REMOTE_ERROR);
+        assertEquals(FilterBusinessErrorCode.FILTER_REMOTE_ERROR, exception.getBusinessErrorCode());
         assertThat(exception.getRemoteError()).contains(remote);
     }
 

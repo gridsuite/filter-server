@@ -6,8 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
-import com.powsybl.ws.commons.error.AbstractPowsyblWsException;
-import com.powsybl.ws.commons.error.BusinessErrorCode;
+import com.powsybl.ws.commons.error.AbstractBusinessException;
 import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
 
 import java.util.Objects;
@@ -19,7 +18,7 @@ import java.util.Optional;
  *
  * Filter server specific runtime exception enriched with a business error code.
  */
-public class FilterException extends AbstractPowsyblWsException {
+public class FilterException extends AbstractBusinessException {
 
     private final FilterBusinessErrorCode errorCode;
     private final PowsyblWsProblemDetail remoteError;
@@ -34,13 +33,9 @@ public class FilterException extends AbstractPowsyblWsException {
         this.remoteError = remoteError;
     }
 
-    public Optional<FilterBusinessErrorCode> getErrorCode() {
-        return Optional.of(errorCode);
-    }
-
     @Override
-    public Optional<BusinessErrorCode> getBusinessErrorCode() {
-        return Optional.ofNullable(errorCode);
+    public FilterBusinessErrorCode getBusinessErrorCode() {
+        return errorCode;
     }
 
     public Optional<PowsyblWsProblemDetail> getRemoteError() {

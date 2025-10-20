@@ -31,8 +31,8 @@ public class RestResponseEntityExceptionHandler
     }
 
     @Override
-    protected Optional<FilterBusinessErrorCode> getBusinessCode(FilterException ex) {
-        return ex.getErrorCode();
+    protected FilterBusinessErrorCode getBusinessCode(FilterException ex) {
+        return ex.getBusinessErrorCode();
     }
 
     @Override
