@@ -6,21 +6,23 @@
  */
 package org.gridsuite.filter.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author Mohamed Ben-rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
@@ -49,19 +51,24 @@ class RestResponseEntityExceptionHandlerTest {
     }
 
     @Test
-    void propagatesRemoteErrorDetails() {
+    void propagatesRemoteErrorDetails() throws JsonProcessingException {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/filters/remote");
         PowsyblWsProblemDetail remote = PowsyblWsProblemDetail.builder(HttpStatus.INTERNAL_SERVER_ERROR)
             .server("directory")
             .businessErrorCode("directory.remoteError")
             .detail("Directory failure")
-            .timestamp(Instant.parse("2025-04-10T00:00:00Z"))
             .path("/directory")
             .build();
 
-        FilterException exception = new FilterException(FilterBusinessErrorCode.FILTER_REMOTE_ERROR, "wrap", remote);
+        HttpClientErrorException exception = HttpClientErrorException.create(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "coucou",
+            HttpHeaders.EMPTY,
+            OBJECT_MAPPER.writeValueAsBytes(remote),
+            null
+        );
 
-        ResponseEntity<PowsyblWsProblemDetail> response = handler.invokeHandleDomainException(exception, request);
+        ResponseEntity<PowsyblWsProblemDetail> response = handler.invokeHandleRemoteException(exception, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).isNotNull();
@@ -70,11 +77,11 @@ class RestResponseEntityExceptionHandlerTest {
     }
 
     @Test
-    void wrapsInvalidRemotePayloadWithDefaultCode() {
+    void wrapsInvalidRemotePayload() {
         MockHttpServletRequest request = new MockHttpServletRequest("DELETE", "/filters/remote");
         HttpClientErrorException exception = HttpClientErrorException.create(
             HttpStatus.BAD_GATEWAY,
-            "bad gateway",
+            "coucou",
             null,
             "oops".getBytes(StandardCharsets.UTF_8),
             StandardCharsets.UTF_8
@@ -84,7 +91,7 @@ class RestResponseEntityExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
         assertThat(response.getBody()).isNotNull();
-        assertEquals("filter.remoteError", response.getBody().getBusinessErrorCode());
+        assertNull(response.getBody().getBusinessErrorCode());
     }
 
     @Test
@@ -94,7 +101,6 @@ class RestResponseEntityExceptionHandlerTest {
             .server("directory")
             .businessErrorCode("directory.remoteError")
             .detail("bad gateway")
-            .timestamp(Instant.parse("2025-04-11T00:00:00Z"))
             .path("/directory")
             .build();
 

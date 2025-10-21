@@ -7,12 +7,10 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.ws.commons.error.AbstractBaseRestExceptionHandler;
-import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
 import com.powsybl.ws.commons.error.ServerNameProvider;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-
-import java.util.Optional;
 
 /**
  * @author Mohamed Ben-rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
@@ -25,11 +23,7 @@ public class RestResponseEntityExceptionHandler
         super(serverNameProvider);
     }
 
-    @Override
-    protected Optional<PowsyblWsProblemDetail> getRemoteError(FilterException ex) {
-        return ex.getRemoteError();
-    }
-
+    @NotNull
     @Override
     protected FilterBusinessErrorCode getBusinessCode(FilterException ex) {
         return ex.getBusinessErrorCode();
@@ -41,19 +35,5 @@ public class RestResponseEntityExceptionHandler
             case FILTER_CYCLE_DETECTED -> HttpStatus.BAD_REQUEST;
             case FILTER_REMOTE_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
-    }
-
-    @Override
-    protected FilterBusinessErrorCode defaultRemoteErrorCode() {
-        return FilterBusinessErrorCode.FILTER_REMOTE_ERROR;
-    }
-
-    @Override
-    protected FilterException wrapRemote(PowsyblWsProblemDetail remoteError) {
-        return new FilterException(
-            FilterBusinessErrorCode.FILTER_REMOTE_ERROR,
-            remoteError.getDetail(),
-            remoteError
-        );
     }
 }

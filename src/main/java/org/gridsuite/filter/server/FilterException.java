@@ -7,7 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.ws.commons.error.AbstractBusinessException;
-import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,24 +21,15 @@ import java.util.Optional;
 public class FilterException extends AbstractBusinessException {
 
     private final FilterBusinessErrorCode errorCode;
-    private final PowsyblWsProblemDetail remoteError;
 
     public FilterException(FilterBusinessErrorCode errorCode, String message) {
-        this(errorCode, message, null);
-    }
-
-    public FilterException(FilterBusinessErrorCode errorCode, String message, PowsyblWsProblemDetail remoteError) {
         super(Objects.requireNonNull(message, "message must not be null"));
         this.errorCode = Objects.requireNonNull(errorCode, "errorCode must not be null");
-        this.remoteError = remoteError;
     }
 
+    @NotNull
     @Override
     public FilterBusinessErrorCode getBusinessErrorCode() {
         return errorCode;
-    }
-
-    public Optional<PowsyblWsProblemDetail> getRemoteError() {
-        return Optional.ofNullable(remoteError);
     }
 }

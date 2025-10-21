@@ -6,14 +6,9 @@
  */
 package org.gridsuite.filter.server;
 
-import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-
-import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Mohamed Ben-rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
@@ -21,25 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class FilterExceptionTest {
 
     @Test
-    void exposesErrorCodeAndRemoteError() {
-        PowsyblWsProblemDetail remote = PowsyblWsProblemDetail.builder(HttpStatus.BAD_GATEWAY)
-            .server("downstream")
-            .detail("failure")
-            .timestamp(Instant.parse("2025-04-01T00:00:00Z"))
-            .path("/remote")
-            .build();
-
-        FilterException exception = new FilterException(FilterBusinessErrorCode.FILTER_REMOTE_ERROR,
-            "Wrapped", remote);
-
-        assertEquals(FilterBusinessErrorCode.FILTER_REMOTE_ERROR, exception.getBusinessErrorCode());
-        assertThat(exception.getRemoteError()).contains(remote);
-    }
-
-    @Test
     void defaultConstructorStoresMessage() {
         FilterException exception = new FilterException(FilterBusinessErrorCode.FILTER_CYCLE_DETECTED, "cycle");
         assertThat(exception.getMessage()).isEqualTo("cycle");
-        assertThat(exception.getRemoteError()).isEmpty();
     }
 }
