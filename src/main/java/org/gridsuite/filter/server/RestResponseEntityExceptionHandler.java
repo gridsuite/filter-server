@@ -33,7 +33,6 @@ public class RestResponseEntityExceptionHandler
     protected HttpStatus mapStatus(FilterBusinessErrorCode code) {
         return switch (code) {
             case FILTER_CYCLE_DETECTED -> HttpStatus.BAD_REQUEST;
-            case FILTER_REMOTE_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }
 }

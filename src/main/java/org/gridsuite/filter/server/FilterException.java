@@ -10,7 +10,6 @@ import com.powsybl.ws.commons.error.AbstractBusinessException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * /**
