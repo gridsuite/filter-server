@@ -245,11 +245,6 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
     }
 
     @Override
-    public EquipmentType getEquipmentType() {
-        throw new UnsupportedOperationException("A filter id must be provided to get equipment type !!");
-    }
-
-    @Override
     public EquipmentType getEquipmentType(UUID id) {
         return expertFilterRepository.findById(id)
                 .map(ExpertFilterEntity::getEquipmentType)
