@@ -21,6 +21,8 @@ import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
+import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
+import org.gridsuite.filter.server.error.FilterException;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;

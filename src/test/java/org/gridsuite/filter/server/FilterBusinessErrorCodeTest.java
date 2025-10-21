@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
+import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 

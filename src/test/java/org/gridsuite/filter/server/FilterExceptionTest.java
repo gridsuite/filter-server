@@ -6,6 +6,8 @@
  */
 package org.gridsuite.filter.server;
 
+import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
+import org.gridsuite.filter.server.error.FilterException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
