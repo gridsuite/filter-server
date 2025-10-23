@@ -18,7 +18,7 @@ public class PropertyServerNameProvider implements ServerNameProvider {
 
     private final String name;
 
-    public PropertyServerNameProvider(@Value("${server.name:filter-server}") String name) {
+    public PropertyServerNameProvider(@Value("${spring.application.name:filter-server}") String name) {
         this.name = name;
     }
 
