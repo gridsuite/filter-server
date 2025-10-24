@@ -17,6 +17,7 @@ import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.exceptions.FilterCycleException;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
@@ -24,6 +25,8 @@ import org.gridsuite.filter.server.dto.EquipmentTypesByFilterId;
 import org.gridsuite.filter.server.dto.FilterAttributes;
 import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
+import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
+import org.gridsuite.filter.server.error.FilterException;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.server.utils.FilterWithEquipmentTypesUtils;
@@ -61,7 +64,7 @@ public class FilterService {
 
     public List<IFilterAttributes> getFilters() {
         return this.repositoriesService.getFiltersAttributes()
-                .map(IFilterAttributes.class::cast) // cast because generics are invariants
+            .map(IFilterAttributes.class::cast) // cast because generics are invariants
                 .toList();
     }
 
@@ -109,7 +112,7 @@ public class FilterService {
         }
 
         Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filters.stream()
-                .collect(Collectors.groupingBy(this.repositoriesService::getRepositoryFromType));
+            .collect(Collectors.groupingBy(this.repositoriesService::getRepositoryFromType));
 
         List<AbstractFilter> createdFilters = new ArrayList<>();
         repositoryFiltersMap.forEach((repository, subFilters) -> createdFilters.addAll(repository.insertAll(subFilters)));
@@ -150,7 +153,7 @@ public class FilterService {
         });
 
         Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = sourceFilters.stream()
-                .collect(Collectors.groupingBy(this.repositoriesService::getRepositoryFromType));
+            .collect(Collectors.groupingBy(this.repositoriesService::getRepositoryFromType));
 
         repositoryFiltersMap.forEach(AbstractFilterRepositoryProxy::insertAll);
 
@@ -170,7 +173,11 @@ public class FilterService {
             FilterLoader filterLoader = uuids -> uuids.stream()
                 .map(uuid -> uuid.equals(id) ? newFilter : this.repositoriesService.getFilter(uuid).orElse(null))
                 .toList();
-            FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
+            try {
+                FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
+            } catch (FilterCycleException exception) {
+                throw new FilterException(FilterBusinessErrorCode.FILTER_CYCLE_DETECTED, exception.getMessage());
+            }
 
             AbstractFilter modifiedOrCreatedFilter;
             if (filterOpt.get().getType() == newFilter.getType()) { // filter type has not changed
@@ -301,13 +308,13 @@ public class FilterService {
         Objects.requireNonNull(idsByGroup);
         final FilterLoader filterLoader = this.repositoriesService.getFilterLoader();
         return idsByGroup.getIds().entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> this.repositoriesService.getFilters(entry.getValue()).stream()
-                                .mapToLong(f -> getIdentifiableAttributes(f, networkUuid, variantId, filterLoader).size())
-                                .sum()
-                        )
-                );
+            .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> this.repositoriesService.getFilters(entry.getValue()).stream()
+                        .mapToLong(f -> getIdentifiableAttributes(f, networkUuid, variantId, filterLoader).size())
+                        .sum()
+                )
+            );
     }
 
     @Transactional(readOnly = true)
