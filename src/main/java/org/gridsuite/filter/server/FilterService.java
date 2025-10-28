@@ -7,26 +7,30 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.IdentifiableType;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
+import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.exceptions.FilterCycleException;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
-import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
+import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.server.dto.EquipmentTypesByFilterId;
 import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
-import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.repositories.FilterRepository;
-import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
-import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
+import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
+import org.gridsuite.filter.server.error.FilterException;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.expertfiler.ExpertFilterRepositoryProxy;
-import org.gridsuite.filter.server.repositories.proxies.identifierlistfilter.IdentifierListFilterRepositoryProxy;
 import org.gridsuite.filter.server.service.DirectoryService;
+import org.gridsuite.filter.server.utils.FilterWithEquipmentTypesUtils;
+import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
 import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
@@ -37,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -45,43 +50,26 @@ import java.util.stream.Collectors;
  */
 @Service
 @ComponentScan(basePackageClasses = {NetworkStoreService.class})
+@AllArgsConstructor
 public class FilterService {
 
     private static final String FILTER_LIST = "Filter list ";
     private static final String NOT_FOUND = " not found";
     public static final String FILTER_UUIDS_NOT_FOUND = "Some filter uuids have not bean found";
 
-    private final Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories = new HashMap<>();
-
+    private final RepositoryService repositoriesService;
     private final NetworkStoreService networkStoreService;
-
     private final NotificationService notificationService;
-
     private final DirectoryService directoryService;
 
-    public FilterService(final IdentifierListFilterRepository identifierListFilterRepository,
-                         final ExpertFilterRepository expertFilterRepository,
-                         NetworkStoreService networkStoreService,
-                         NotificationService notificationService,
-                         DirectoryService directoryService) {
-        filterRepositories.put(FilterType.IDENTIFIER_LIST.name(), new IdentifierListFilterRepositoryProxy(identifierListFilterRepository));
-
-        filterRepositories.put(FilterType.EXPERT.name(), new ExpertFilterRepositoryProxy(expertFilterRepository));
-        this.networkStoreService = networkStoreService;
-        this.notificationService = notificationService;
-        this.directoryService = directoryService;
-    }
-
     public List<IFilterAttributes> getFilters() {
-        return filterRepositories.entrySet().stream()
-                .flatMap(entry -> entry.getValue().getFiltersAttributes())
-                .collect(Collectors.toList());
+        return this.repositoriesService.getFiltersAttributes()
+            .map(IFilterAttributes.class::cast) // cast because generics are invariants
+                .toList();
     }
 
     public List<FilterAttributes> getFiltersAttributes(List<UUID> filterUuids, String userId) {
-        List<FilterAttributes> filterAttributes = filterRepositories.entrySet().stream()
-            .flatMap(entry -> entry.getValue().getFiltersAttributes(filterUuids))
-            .collect(Collectors.toList());
+        List<FilterAttributes> filterAttributes = this.repositoriesService.getFiltersAttributes(filterUuids).collect(Collectors.toList());
         // call directory server to add name information
         Map<UUID, String> elementsName = directoryService.getElementsName(filterAttributes.stream().map(FilterAttributes::getId).toList(), userId);
         filterAttributes.forEach(attribute -> attribute.setName(elementsName.get(attribute.getId())));
@@ -100,41 +88,21 @@ public class FilterService {
 
     @Transactional(readOnly = true)
     public Optional<AbstractFilter> getFilter(UUID id) {
-        return getFilterFromRepository(id);
-    }
-
-    public Optional<AbstractFilter> getFilterFromRepository(UUID id) {
-        Objects.requireNonNull(id);
-        for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
-            Optional<AbstractFilter> res = repository.getFilter(id);
-            if (res.isPresent()) {
-                return res;
-            }
-        }
-        return Optional.empty();
+        return this.repositoriesService.getFilter(id);
     }
 
     @Transactional(readOnly = true)
     public List<AbstractFilter> getFilters(List<UUID> ids) {
-        return getFiltersFromRepositories(ids);
-    }
-
-    private List<AbstractFilter> getFiltersFromRepositories(List<UUID> ids) {
-        Objects.requireNonNull(ids);
-        return filterRepositories.values()
-                .stream()
-                .flatMap(repository -> repository.getFilters(ids)
-                        .stream())
-                .toList();
+        return this.repositoriesService.getFilters(ids);
     }
 
     @Transactional
-    public <F extends AbstractFilter> AbstractFilter createFilter(F filter) {
+    public AbstractFilter createFilter(AbstractFilter filter) {
         return doCreateFilter(filter);
     }
 
-    private <F extends AbstractFilter> AbstractFilter doCreateFilter(F filter) {
-        return getRepository(filter).insert(filter);
+    private AbstractFilter doCreateFilter(AbstractFilter filter) {
+        return this.repositoriesService.getRepositoryFromType(filter).insert(filter);
     }
 
     @Transactional
@@ -144,7 +112,7 @@ public class FilterService {
         }
 
         Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = filters.stream()
-                .collect(Collectors.groupingBy(this::getRepository));
+            .collect(Collectors.groupingBy(this.repositoriesService::getRepositoryFromType));
 
         List<AbstractFilter> createdFilters = new ArrayList<>();
         repositoryFiltersMap.forEach((repository, subFilters) -> createdFilters.addAll(repository.insertAll(subFilters)));
@@ -153,7 +121,7 @@ public class FilterService {
 
     @Transactional
     public Optional<UUID> duplicateFilter(UUID sourceFilterId) {
-        Optional<AbstractFilter> sourceFilterOptional = getFilterFromRepository(sourceFilterId);
+        Optional<AbstractFilter> sourceFilterOptional = this.repositoriesService.getFilter(sourceFilterId);
         if (sourceFilterOptional.isPresent()) {
             UUID newFilterId = UUID.randomUUID();
             AbstractFilter sourceFilter = sourceFilterOptional.get();
@@ -171,7 +139,7 @@ public class FilterService {
     public Map<UUID, UUID> duplicateFilters(List<UUID> filterUuids) {
         Map<UUID, UUID> uuidsMap = new HashMap<>();
 
-        List<AbstractFilter> sourceFilters = getFiltersFromRepositories(filterUuids);
+        List<AbstractFilter> sourceFilters = this.repositoriesService.getFilters(filterUuids);
 
         // check whether found all
         if (sourceFilters.isEmpty() || sourceFilters.size() != filterUuids.size()) {
@@ -185,49 +153,49 @@ public class FilterService {
         });
 
         Map<AbstractFilterRepositoryProxy<?, ?>, List<AbstractFilter>> repositoryFiltersMap = sourceFilters.stream()
-                .collect(Collectors.groupingBy(this::getRepository));
+            .collect(Collectors.groupingBy(this.repositoriesService::getRepositoryFromType));
 
         repositoryFiltersMap.forEach(AbstractFilterRepositoryProxy::insertAll);
 
         return uuidsMap;
     }
 
-    private AbstractFilterRepositoryProxy<? extends AbstractFilterEntity,
-            ? extends FilterRepository<? extends AbstractFilterEntity>> getRepository(AbstractFilter filter) {
-        return filterRepositories.get(filter.getType().name());
-    }
-
     @Transactional
-    public <F extends AbstractFilter> AbstractFilter updateFilter(UUID id, F newFilter, String userId) {
+    public AbstractFilter updateFilter(UUID id, AbstractFilter newFilter, String userId) {
         return doUpdateFilter(id, newFilter, userId);
     }
 
-    private <F extends AbstractFilter> AbstractFilter doUpdateFilter(UUID id, F newFilter, String userId) {
-        Optional<AbstractFilter> filterOpt = getFilterFromRepository(id);
-        AbstractFilter modifiedOrCreatedFilter;
+    private AbstractFilter doUpdateFilter(UUID id, AbstractFilter newFilter, String userId) {
+        Optional<AbstractFilter> filterOpt = this.repositoriesService.getFilter(id);
         if (filterOpt.isPresent()) {
             newFilter.setId(id);
 
             FilterLoader filterLoader = uuids -> uuids.stream()
-                .map(uuid -> uuid.equals(id) ? newFilter : getFilterFromRepository(uuid).orElse(null))
+                .map(uuid -> uuid.equals(id) ? newFilter : this.repositoriesService.getFilter(uuid).orElse(null))
                 .toList();
-            FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
+            try {
+                FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
+            } catch (FilterCycleException exception) {
+                throw new FilterException(FilterBusinessErrorCode.FILTER_CYCLE_DETECTED, exception.getMessage());
+            }
 
-            if (getRepository(filterOpt.get()) == getRepository(newFilter)) { // filter type has not changed
-                modifiedOrCreatedFilter = getRepository(newFilter).modify(id, newFilter);
+            AbstractFilter modifiedOrCreatedFilter;
+            if (filterOpt.get().getType() == newFilter.getType()) { // filter type has not changed
+                modifiedOrCreatedFilter = this.repositoriesService.getRepositoryFromType(newFilter).modify(id, newFilter);
             } else { // filter type has changed
-                getRepository(filterOpt.get()).deleteById(id);
+                this.repositoriesService.getRepositoryFromType(filterOpt.get()).deleteById(id);
+                newFilter.setId(id);
                 modifiedOrCreatedFilter = doCreateFilter(newFilter);
             }
+
+            if (userId != null) {
+                notificationService.emitElementUpdated(id, userId);
+            }
+
+            return modifiedOrCreatedFilter;
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
-
-        if (userId != null) {
-            notificationService.emitElementUpdated(id, userId);
-        }
-
-        return modifiedOrCreatedFilter;
     }
 
     @Transactional
@@ -239,18 +207,18 @@ public class FilterService {
 
     public void deleteFilter(UUID id) {
         Objects.requireNonNull(id);
-        if (filterRepositories.values().stream().noneMatch(repository -> repository.deleteById(id))) {
+        if (!this.repositoriesService.deleteFilter(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILTER_LIST + id + NOT_FOUND);
         }
     }
 
     public void deleteFilters(List<UUID> ids) {
         Objects.requireNonNull(ids);
-        filterRepositories.values().forEach(repository -> repository.deleteAllByIds(ids));
+        this.repositoriesService.deleteFilters(ids);
     }
 
     public void deleteAll() {
-        filterRepositories.values().forEach(AbstractFilterRepositoryProxy::deleteAll);
+        this.repositoriesService.deleteAll();
     }
 
     private Network getNetwork(UUID networkUuid, String variantId) {
@@ -272,71 +240,93 @@ public class FilterService {
     @Transactional(readOnly = true)
     public List<IdentifiableAttributes> evaluateFilter(AbstractFilter filter, UUID networkUuid, String variantId) {
         Objects.requireNonNull(filter);
-        FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-        return getIdentifiableAttributes(filter, networkUuid, variantId, filterLoader);
+        return getIdentifiableAttributes(filter, networkUuid, variantId, this.repositoriesService.getFilterLoader());
     }
 
     @Transactional(readOnly = true)
-    public FilteredIdentifiables evaluateFilters(List<UUID> filters, UUID networkUuid, String variantId) {
+    public FilteredIdentifiables evaluateFiltersWithEquipmentTypes(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
         Map<String, IdentifiableAttributes> result = new TreeMap<>();
         Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
+        FilterLoader filterLoader = this.repositoriesService.getFilterLoader();
 
-        filters.forEach((UUID filterUuid) -> {
-                Optional<AbstractFilter> optFilter = getFilterFromRepository(filterUuid);
+        filtersWithEquipmentTypes.filters().forEach((FilterAttributes filterAttributes) -> {
+                UUID filterUuid = filterAttributes.getId();
+                Optional<AbstractFilter> optFilter = this.repositoriesService.getFilter(filterUuid);
                 if (optFilter.isEmpty()) {
                     return;
                 }
                 AbstractFilter filter = optFilter.get();
                 Objects.requireNonNull(filter);
-                FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-                FilteredIdentifiables filterIdentiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
+                EquipmentType filterEquipmentType = filter.getEquipmentType();
+                FilteredIdentifiables filteredIdentifiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
 
                 // unduplicate equipments and merge in common lists
-                if (filterIdentiables.notFoundIds() != null) {
-                    filterIdentiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
+                if (filteredIdentifiables.notFoundIds() != null) {
+                    filteredIdentifiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
                 }
 
-                if (filterIdentiables.equipmentIds() != null) {
-                    filterIdentiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+                if (filteredIdentifiables.equipmentIds() != null) {
+                    if (filterEquipmentType != EquipmentType.SUBSTATION && filterEquipmentType != EquipmentType.VOLTAGE_LEVEL) {
+                        filteredIdentifiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
+                    } else {
+                        Set<IdentifiableType> selectedEquipmentTypes = filtersWithEquipmentTypes.selectedEquipmentTypesByFilter()
+                            .stream()
+                            .filter(equipmentTypesByFilterId -> equipmentTypesByFilterId.filterId().equals(filterUuid))
+                            .findFirst()
+                            .map(EquipmentTypesByFilterId::equipmentTypes)
+                            .orElseThrow(
+                                () -> new IllegalStateException("No selected equipment types for filter " + filterUuid
+                                    + " : substation and voltage level filters should contain an equipment types list")
+                            );
+
+                        // This list is the result of the original filter and so necessarily contains a list of IDs of substations or voltage levels
+                        Set<String> filteredEquipmentIds = filteredIdentifiables.equipmentIds().stream().map(IdentifiableAttributes::getId).collect(Collectors.toSet());
+                        List<ExpertFilter> filters = FilterWithEquipmentTypesUtils.createFiltersForSubEquipments(filterEquipmentType,
+                            filteredEquipmentIds,
+                            selectedEquipmentTypes);
+                        filters.stream().flatMap(expertFilter -> getIdentifiableAttributes(expertFilter, networkUuid, variantId, filterLoader).stream())
+                            .forEach(element -> result.put(element.getId(), element));
+                    }
                 }
             }
         );
-        return new FilteredIdentifiables(result.values().stream().toList(), notFound.values().stream().toList());
+        return new FilteredIdentifiables(
+            result.values().stream().sorted(Comparator.comparing(e -> e.getType().ordinal())).toList(),
+            notFound.values().stream().sorted(Comparator.comparing(e -> e.getType().ordinal())).toList());
     }
 
     @Transactional(readOnly = true)
     public Optional<List<IdentifiableAttributes>> exportFilter(UUID id, UUID networkUuid, String variantId) {
         Objects.requireNonNull(id);
-        FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-        return getFilterFromRepository(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId, filterLoader));
+        final FilterLoader filterLoader = this.repositoriesService.getFilterLoader();
+        return this.repositoriesService.getFilter(id).map(filter -> getIdentifiableAttributes(filter, networkUuid, variantId, filterLoader));
     }
 
     @Transactional(readOnly = true)
     public Map<String, Long> getIdentifiablesCountByGroup(IdsByGroup idsByGroup, UUID networkUuid, String variantId) {
         Objects.requireNonNull(idsByGroup);
-        FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
+        final FilterLoader filterLoader = this.repositoriesService.getFilterLoader();
         return idsByGroup.getIds().entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> getFiltersFromRepositories(entry.getValue()).stream()
-                                .mapToLong(f -> getIdentifiableAttributes(f, networkUuid, variantId, filterLoader).size())
-                                .sum()
-                        )
-                );
+            .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> this.repositoriesService.getFilters(entry.getValue()).stream()
+                        .mapToLong(f -> getIdentifiableAttributes(f, networkUuid, variantId, filterLoader).size())
+                        .sum()
+                )
+            );
     }
 
     @Transactional(readOnly = true)
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
         Network network = getNetwork(networkUuid, variantId);
-        FilterLoader filterLoader = new FilterLoaderImpl(filterRepositories);
-        return exportFilters(ids, network, Set.of(), filterLoader);
+        return exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, Network network, Set<FilterType> filterTypesToExclude, FilterLoader filterLoader) {
         // we stream on the ids so that we can keep the same order of ids sent
         return ids.stream()
-            .map(id -> getFilterFromRepository(id).orElse(null))
+            .map(id -> this.repositoriesService.getFilter(id).orElse(null))
             .filter(filter -> filter != null && !filterTypesToExclude.contains(filter.getType()))
             .map(filter -> filter.toFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
             .toList();
