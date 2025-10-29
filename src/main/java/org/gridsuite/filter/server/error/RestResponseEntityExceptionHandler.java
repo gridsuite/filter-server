@@ -8,7 +8,7 @@ package org.gridsuite.filter.server.error;
 
 import com.powsybl.ws.commons.error.AbstractBaseRestExceptionHandler;
 import com.powsybl.ws.commons.error.ServerNameProvider;
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
