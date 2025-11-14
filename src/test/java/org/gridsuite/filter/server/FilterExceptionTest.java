@@ -10,6 +10,8 @@ import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
 import org.gridsuite.filter.server.error.FilterException;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -21,5 +23,17 @@ class FilterExceptionTest {
     void defaultConstructorStoresMessage() {
         FilterException exception = new FilterException(FilterBusinessErrorCode.FILTER_CYCLE_DETECTED, "cycle");
         assertThat(exception.getMessage()).isEqualTo("cycle");
+        assertThat(exception.getBusinessErrorValues()).isEmpty();
+    }
+
+    @Test
+    void constructorWithPropertiesCopiesValues() {
+        FilterException exception = new FilterException(
+            FilterBusinessErrorCode.FILTER_CYCLE_DETECTED,
+            "cycle",
+            Map.of("filters", "A, B")
+        );
+
+        assertThat(exception.getBusinessErrorValues()).containsEntry("filters", "A, B");
     }
 }

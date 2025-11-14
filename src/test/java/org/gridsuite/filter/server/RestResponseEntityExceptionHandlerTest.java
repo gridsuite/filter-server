@@ -22,6 +22,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,13 +45,18 @@ class RestResponseEntityExceptionHandlerTest {
     @Test
     void mapsBusinessErrorToStatus() {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/filters");
-        FilterException exception = new FilterException(FilterBusinessErrorCode.FILTER_CYCLE_DETECTED, "cycle");
+        FilterException exception = new FilterException(
+            FilterBusinessErrorCode.FILTER_CYCLE_DETECTED,
+            "cycle",
+            Map.of("filters", "A, B")
+        );
 
         ResponseEntity<PowsyblWsProblemDetail> response = handler.invokeHandleDomainException(exception, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertEquals("filter.filterCycleDetected", response.getBody().getBusinessErrorCode());
+        assertThat(response.getBody().getBusinessErrorValues()).containsEntry("filters", "A, B");
     }
 
     @Test
