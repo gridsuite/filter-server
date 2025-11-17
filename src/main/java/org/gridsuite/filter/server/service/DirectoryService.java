@@ -18,7 +18,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.gridsuite.filter.server.dto.ElementAttributes;
 
@@ -45,7 +44,7 @@ public class DirectoryService {
     public DirectoryService(@Value("${gridsuite.services.directory-server.base-uri:http://directory-server/}") String baseUri,
                             RestTemplateBuilder restTemplateBuilder) {
         this.baseUri = baseUri;
-        this.restTemplate = restTemplateBuilder.uriTemplateHandler(new DefaultUriBuilderFactory(baseUri)).build();
+        this.restTemplate = restTemplateBuilder.build();
     }
 
     public Map<UUID, String> getElementsName(List<UUID> ids, String userId) {
