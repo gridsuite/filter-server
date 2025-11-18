@@ -340,7 +340,7 @@ public class FilterService {
 
     private Map<String, Object> getCyclicFilterNames(String userId, FilterCycleException exception) {
         try {
-            List<UUID> orderedCycle = new ArrayList<>(new LinkedHashSet<>(exception.getCycleFilterIds()));
+            List<UUID> orderedCycle = exception.getCycleFilterIds();
             Map<UUID, String> names;
             if (!orderedCycle.isEmpty()) {
                 names = directoryService.getElementsName(orderedCycle, userId);
@@ -349,7 +349,7 @@ public class FilterService {
             }
             String filters = orderedCycle.stream()
                 .map(id -> Optional.ofNullable(names.get(id)).filter(name -> !name.isBlank()).orElse(id.toString()))
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.joining(" -> "));
             return filters.isEmpty() ? Map.of() : Map.of("filters", filters);
         } catch (Exception any) {
             // fallback in case of exception while trying to get filter names implied in the cycle from directory-server
