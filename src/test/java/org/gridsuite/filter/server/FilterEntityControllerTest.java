@@ -870,7 +870,7 @@ public class FilterEntityControllerTest {
         mvc.perform(put(URL_TEMPLATE + "/batch")
                         .content(objectMapper.writeValueAsString(filtersToUpdateMap))
                         .contentType(APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     private void deleteFilter(UUID filterId) throws Exception {
