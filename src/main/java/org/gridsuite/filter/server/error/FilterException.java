@@ -9,6 +9,7 @@ package org.gridsuite.filter.server.error;
 import com.powsybl.ws.commons.error.AbstractBusinessException;
 import jakarta.validation.constraints.NotNull;
 
+import java.io.Serial;
 import java.util.Map;
 import java.util.Objects;
 
@@ -19,6 +20,8 @@ import java.util.Objects;
  * Filter server specific runtime exception enriched with a business error code.
  */
 public class FilterException extends AbstractBusinessException {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final FilterBusinessErrorCode errorCode;
     private final Map<String, Object> businessErrorValues;
