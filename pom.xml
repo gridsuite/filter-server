@@ -19,7 +19,7 @@
 
     <groupId>org.gridsuite</groupId>
     <artifactId>gridsuite-filter-server</artifactId>
-    <version>2.26.0-SNAPSHOT</version>
+    <version>2.27.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
     <name>Filter server</name>
@@ -88,13 +88,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- TODO remove when gridsuite-dependencies is released with this version -->
-            <dependency>
-                <groupId>com.powsybl</groupId>
-                <artifactId>powsybl-ws-commons</artifactId>
-                <version>1.33.0</version>
-            </dependency>
-
             <!-- imports -->
             <dependency>
                 <groupId>org.gridsuite</groupId>
