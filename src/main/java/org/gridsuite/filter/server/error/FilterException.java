@@ -9,6 +9,7 @@ package org.gridsuite.filter.server.error;
 import com.powsybl.ws.commons.error.AbstractBusinessException;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -20,15 +21,27 @@ import java.util.Objects;
 public class FilterException extends AbstractBusinessException {
 
     private final FilterBusinessErrorCode errorCode;
+    private final transient Map<String, Object> businessErrorValues;
 
     public FilterException(FilterBusinessErrorCode errorCode, String message) {
+        this(errorCode, message, Map.of());
+    }
+
+    public FilterException(FilterBusinessErrorCode errorCode, String message, Map<String, Object> businessErrorValues) {
         super(Objects.requireNonNull(message, "message must not be null"));
         this.errorCode = Objects.requireNonNull(errorCode, "errorCode must not be null");
+        this.businessErrorValues = businessErrorValues != null ? Map.copyOf(businessErrorValues) : Map.of();
     }
 
     @NotNull
     @Override
     public FilterBusinessErrorCode getBusinessErrorCode() {
         return errorCode;
+    }
+
+    @NotNull
+    @Override
+    public Map<String, Object> getBusinessErrorValues() {
+        return businessErrorValues;
     }
 }
