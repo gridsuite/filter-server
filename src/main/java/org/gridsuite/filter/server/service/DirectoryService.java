@@ -11,6 +11,7 @@ import lombok.Getter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,9 +42,9 @@ public class DirectoryService {
 
     @Autowired
     public DirectoryService(@Value("${gridsuite.services.directory-server.base-uri:http://directory-server/}") String baseUri,
-                            RestTemplate restTemplate) {
+                            RestTemplateBuilder restTemplateBuilder) {
         this.baseUri = baseUri;
-        this.restTemplate = restTemplate;
+        this.restTemplate = restTemplateBuilder.build();
     }
 
     public Map<UUID, String> getElementsName(List<UUID> ids, String userId) {
