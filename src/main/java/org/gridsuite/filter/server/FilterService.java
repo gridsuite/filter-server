@@ -16,8 +16,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.exception.FilterCycleException;
 import org.gridsuite.filter.expertfilter.ExpertFilter;
-import org.gridsuite.filter.exceptions.FilterCycleException;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
@@ -65,7 +65,7 @@ public class FilterService {
     public List<IFilterAttributes> getFilters() {
         return this.repositoriesService.getFiltersAttributes()
             .map(IFilterAttributes.class::cast) // cast because generics are invariants
-                .toList();
+            .toList();
     }
 
     public List<FilterAttributes> getFiltersAttributes(List<UUID> filterUuids, String userId) {
@@ -176,7 +176,13 @@ public class FilterService {
             try {
                 FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
             } catch (FilterCycleException exception) {
-                throw new FilterException(FilterBusinessErrorCode.FILTER_CYCLE_DETECTED, exception.getMessage());
+                Map<String, Object> cyclicFilterNames = getCyclicFilterNames(userId, exception);
+                throw new FilterException(
+                    FilterBusinessErrorCode.FILTER_CYCLE_DETECTED,
+                    exception.getMessage(),
+                    cyclicFilterNames
+                );
+
             }
 
             AbstractFilter modifiedOrCreatedFilter;
@@ -330,5 +336,24 @@ public class FilterService {
             .filter(filter -> filter != null && !filterTypesToExclude.contains(filter.getType()))
             .map(filter -> filter.toFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
             .toList();
+    }
+
+    private Map<String, Object> getCyclicFilterNames(String userId, FilterCycleException exception) {
+        try {
+            List<UUID> orderedCycle = exception.getCycleFilterIds();
+            Map<UUID, String> names;
+            if (!orderedCycle.isEmpty()) {
+                names = directoryService.getElementsName(orderedCycle, userId);
+            } else {
+                names = Collections.emptyMap();
+            }
+            String filters = orderedCycle.stream()
+                .map(id -> Optional.ofNullable(names.get(id)).filter(name -> !name.isBlank()).orElse(id.toString()))
+                .collect(Collectors.joining(" -> "));
+            return filters.isEmpty() ? Map.of() : Map.of("filters", filters);
+        } catch (Exception any) {
+            // fallback in case of exception while trying to get filter names implied in the cycle from directory-server
+            throw new FilterException(FilterBusinessErrorCode.FILTER_CYCLE_DETECTED, exception.getMessage());
+        }
     }
 }
