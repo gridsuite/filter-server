@@ -96,7 +96,8 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
      * @return true if the filter has been deleted, false otherwise
      */
     public boolean deleteById(UUID id) {
-        return getRepository().removeById(id) > 0L;
+        Long result = getRepository().removeById(id);
+        return result != null && result > 0L;
     }
 
     public void deleteAllByIds(List<UUID> ids) {
