@@ -6,20 +6,24 @@
  */
 package org.gridsuite.filter.server.error;
 
-import com.powsybl.ws.commons.error.AbstractBaseRestExceptionHandler;
+import com.powsybl.ws.commons.error.AbstractBusinessExceptionHandler;
+import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
 import com.powsybl.ws.commons.error.ServerNameProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
  * @author Mohamed Ben-rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
  */
 @ControllerAdvice
-public class RestResponseEntityExceptionHandler
-    extends AbstractBaseRestExceptionHandler<FilterException, FilterBusinessErrorCode> {
+public class FilterExceptionHandler
+    extends AbstractBusinessExceptionHandler<FilterException, FilterBusinessErrorCode> {
 
-    public RestResponseEntityExceptionHandler(ServerNameProvider serverNameProvider) {
+    public FilterExceptionHandler(ServerNameProvider serverNameProvider) {
         super(serverNameProvider);
     }
 
@@ -34,5 +38,11 @@ public class RestResponseEntityExceptionHandler
         return switch (code) {
             case FILTER_CYCLE_DETECTED -> HttpStatus.BAD_REQUEST;
         };
+    }
+
+    @ExceptionHandler(FilterException.class)
+    protected ResponseEntity<PowsyblWsProblemDetail> handleFilterException(
+        FilterException exception, HttpServletRequest request) {
+        return super.handleDomainException(exception, request);
     }
 }
