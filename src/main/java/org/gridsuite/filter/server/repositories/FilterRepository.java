@@ -36,7 +36,7 @@ public interface FilterRepository<T extends AbstractFilterEntity> extends JpaRep
      * @see #deleteById(Object) like deleteById(id) but with the indicator of either a filter has been removed or not
      */
     @Transactional
-    Long removeById(@NonNull UUID id);
+    long removeById(@NonNull UUID id);
 
     @Transactional
     void deleteAllByIdIn(List<UUID> ids);
