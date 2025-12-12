@@ -314,13 +314,14 @@ public class FilterService {
         Objects.requireNonNull(idsByGroup);
         final FilterLoader filterLoader = this.repositoriesService.getFilterLoader();
         return idsByGroup.getIds().entrySet().stream()
-            .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> this.repositoriesService.getFilters(entry.getValue()).stream()
-                        .mapToLong(f -> getIdentifiableAttributes(f, networkUuid, variantId, filterLoader).size())
-                        .sum()
-                )
-            );
+                .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> this.repositoriesService.getFilters(entry.getValue()).stream()
+                                        .flatMap(f -> getIdentifiableAttributes(f, networkUuid, variantId, filterLoader).stream())
+                                        .distinct()
+                                        .count()
+                        )
+                );
     }
 
     @Transactional(readOnly = true)
