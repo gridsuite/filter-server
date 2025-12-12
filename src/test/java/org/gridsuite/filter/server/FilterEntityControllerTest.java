@@ -32,10 +32,7 @@ import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
-import org.gridsuite.filter.server.dto.ElementAttributes;
-import org.gridsuite.filter.server.dto.FilterAttributes;
-import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
-import org.gridsuite.filter.server.dto.EquipmentTypesByFilterId;
+import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.assertions.Assertions;
@@ -758,15 +755,19 @@ public class FilterEntityControllerTest {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>(Map.of(
                 "networkUuid", List.of(NETWORK_UUID.toString()),
-                "variantId", List.of(VARIANT_ID_1),
-                "ids[g1]", List.of(filterId1.toString()),
-                "ids[g2]", List.of(filterId2.toString()),
-                "ids[g3]", List.of(filterId3.toString()),
-                "ids[g4]", List.of(UUID.randomUUID().toString())
-        ));
+                "variantId", List.of(VARIANT_ID_1)));
+
+        IdsByGroup content = IdsByGroup.builder().ids(Map.of(
+                "g1", List.of(filterId1),
+                "g2", List.of(filterId2),
+                "g3", List.of(filterId3),
+                "g4", List.of(UUID.randomUUID())
+        )).build();
+
         Map<String, Long> identifiablesCount = objectMapper.readValue(
-                mvc.perform(get(URL_TEMPLATE + "/identifiables-count")
+                mvc.perform(post(URL_TEMPLATE + "/identifiables-count")
                                 .params(params)
+                                .content(objectMapper.writeValueAsString(content))
                                 .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString(),
@@ -779,6 +780,44 @@ public class FilterEntityControllerTest {
         assertEquals(0, identifiablesCount.get("g4").longValue());
 
         assertEquals(4, identifiablesCount.size());
+    }
+
+    @Test
+    public void testGetIdentifiablesDuplicatedCount() throws Exception {
+        UUID filterId1 = UUID.randomUUID();
+        UUID filterId1Duplicated = UUID.randomUUID();
+
+        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        createExpertLineRules(rules, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of(360., 400.)),
+                new TreeSet<>(Set.of(356.25, 393.7)));
+        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilter expertFilter = new ExpertFilter(filterId1, new Date(), EquipmentType.LINE, parentRule);
+        ExpertFilter expertFilterDuplicated = new ExpertFilter(filterId1Duplicated, new Date(), EquipmentType.LINE, parentRule);
+
+        insertFilter(filterId1, expertFilter);
+        insertFilter(filterId1Duplicated, expertFilter);
+        checkExpertFilter(filterId1, expertFilter);
+        checkExpertFilter(filterId1Duplicated, expertFilterDuplicated);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>(Map.of(
+                "networkUuid", List.of(NETWORK_UUID.toString()),
+                "variantId", List.of(VARIANT_ID_1)));
+
+        IdsByGroup content = IdsByGroup.builder().ids(Map.of(
+                "g1", List.of(filterId1, filterId1Duplicated)
+        )).build();
+
+        Map<String, Long> identifiablesCount = objectMapper.readValue(
+                mvc.perform(post(URL_TEMPLATE + "/identifiables-count")
+                                .params(params)
+                                .content(objectMapper.writeValueAsString(content))
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertEquals(2, identifiablesCount.get("g1").longValue());
     }
 
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
