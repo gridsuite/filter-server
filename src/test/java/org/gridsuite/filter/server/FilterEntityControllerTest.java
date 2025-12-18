@@ -804,7 +804,8 @@ public class FilterEntityControllerTest {
                 "variantId", List.of(VARIANT_ID_1)));
 
         IdsByGroup content = IdsByGroup.builder().ids(Map.of(
-                "g1", List.of(filterId1, filterId1Duplicated)
+                "g1", List.of(filterId1, filterId1Duplicated),
+                "g2", List.of(filterId1)
         )).build();
 
         Map<String, Long> identifiablesCount = objectMapper.readValue(
@@ -817,7 +818,7 @@ public class FilterEntityControllerTest {
                 new TypeReference<>() {
                 });
 
-        assertEquals(2, identifiablesCount.get("g1").longValue());
+        assertEquals(identifiablesCount.get("g2").longValue(), identifiablesCount.get("g1").longValue());
     }
 
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
