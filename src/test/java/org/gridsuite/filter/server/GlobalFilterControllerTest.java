@@ -122,7 +122,7 @@ public class GlobalFilterControllerTest {
         params.add("networkUuid", NETWORK_UUID.toString());
         params.add("variantId", INITIAL_VARIANT_ID);
         params.addAll("equipmentTypes", List.of(EquipmentType.GENERATOR.name()));
-        GlobalFilter globalFilter = new GlobalFilter(List.of("24"), List.of(Country.FR, Country.BE), List.of(), Map.of());
+        GlobalFilter globalFilter = new GlobalFilter(List.of(List.of(0, 400)), List.of(Country.FR, Country.BE), List.of(), Map.of());
 
         String expectedJson = objectMapper.writeValueAsString(List.of("GEN", "GEN2"));
         mvc.perform(post(URL_TEMPLATE)
