@@ -176,12 +176,12 @@ public class FilterController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping(value = "/filters/identifiables-count", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/filters/identifiables-count", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Calculate the total of identifiables for a list of filters")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Identifiables count")})
     public ResponseEntity<Map<String, Long>> getIdentifiablesCountByGroup(@RequestParam(value = "networkUuid") UUID networkUuid,
                                                                           @RequestParam(value = "variantId", required = false) String variantId,
-                                                                          IdsByGroup idsByGroup) {
+                                                                          @RequestBody IdsByGroup idsByGroup) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.getIdentifiablesCountByGroup(idsByGroup, networkUuid, variantId));
