@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -41,6 +42,13 @@ public class GlobalFilterService extends AbstractGlobalFilterService {
     @Transactional(readOnly = true)
     public List<AbstractFilter> getFilters(@NonNull final List<UUID> filtersUuids) {
         return this.repositoriesService.getFilters(filtersUuids);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<AbstractFilter> getFilter(UUID uuid) {
+        return this.repositoriesService.getFilter(uuid);
     }
 
     /* Expose it publicly */

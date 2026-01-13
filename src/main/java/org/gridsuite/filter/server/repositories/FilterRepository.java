@@ -7,6 +7,7 @@
 
 package org.gridsuite.filter.server.repositories;
 
+import org.gridsuite.filter.identifierlistfilter.FilterMetadata;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
