@@ -48,6 +48,7 @@
         <sonar.coverage.exclusions>**/migrations/**/*</sonar.coverage.exclusions>
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:filter-server</sonar.projectKey>
+        <gridsuite-filter.version>1.20.0-SNAPSHOT</gridsuite-filter.version>
     </properties>
 
     <build>
@@ -93,6 +94,12 @@
                 <version>${gridsuite-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gridsuite</groupId>
+                <artifactId>gridsuite-filter</artifactId>
+                <version>${gridsuite-filter.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

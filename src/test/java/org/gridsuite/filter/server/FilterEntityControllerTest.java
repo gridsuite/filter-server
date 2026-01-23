@@ -23,14 +23,13 @@ import com.powsybl.iidm.network.test.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
-import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.IFilterAttributes;
-import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.AbstractFilterDto;
+import org.gridsuite.filter.expertfilter.ExpertFilterDto;
 import org.gridsuite.filter.expertfilter.expertrule.*;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
+import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterDto;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.gridsuite.filter.server.dto.*;
 import org.gridsuite.filter.server.service.DirectoryService;
@@ -228,7 +227,7 @@ public class FilterEntityControllerTest {
         // Create identifier list filter for generators
         IdentifierListFilterEquipmentAttributes gen1 = new IdentifierListFilterEquipmentAttributes("GEN", 7d);
         IdentifierListFilterEquipmentAttributes gen2 = new IdentifierListFilterEquipmentAttributes("GEN2", 9d);
-        IdentifierListFilter identifierListFilter = new IdentifierListFilter(filterId, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
+        IdentifierListFilterDto identifierListFilter = new IdentifierListFilterDto(filterId, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
         insertFilter(filterId, identifierListFilter);
         checkIdentifierListFilter(filterId, identifierListFilter);
         checkIdentifierListFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n", EquipmentType.GENERATOR);
@@ -237,7 +236,7 @@ public class FilterEntityControllerTest {
 
         IdentifierListFilterEquipmentAttributes line1 = new IdentifierListFilterEquipmentAttributes("NHV1_NHV2_1", null);
         IdentifierListFilterEquipmentAttributes line2 = new IdentifierListFilterEquipmentAttributes("NHV1_NHV2_2", null);
-        IdentifierListFilter lineIdentifierListFilter = new IdentifierListFilter(lineFilterId, modificationDate, EquipmentType.LINE, List.of(line1, line2));
+        IdentifierListFilterDto lineIdentifierListFilter = new IdentifierListFilterDto(lineFilterId, modificationDate, EquipmentType.LINE, List.of(line1, line2));
         insertFilter(lineFilterId, lineIdentifierListFilter);
         checkIdentifierListFilter(lineFilterId, lineIdentifierListFilter);
         checkIdentifierListFilterExportAndMetadata(lineFilterId, "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]", EquipmentType.LINE);
@@ -247,7 +246,7 @@ public class FilterEntityControllerTest {
         IdentifierListFilterEquipmentAttributes twoWT1 = new IdentifierListFilterEquipmentAttributes("NGEN_NHV1", null);
         IdentifierListFilterEquipmentAttributes twoWT2 = new IdentifierListFilterEquipmentAttributes("NHV2_NLOAD", null);
         IdentifierListFilterEquipmentAttributes twoWT3 = new IdentifierListFilterEquipmentAttributes("twoWT3", null);
-        IdentifierListFilter twoWinTransformerIdentifierListFilter = new IdentifierListFilter(twoWinTransformerIdentifierListFilterId, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
+        IdentifierListFilterDto twoWinTransformerIdentifierListFilter = new IdentifierListFilterDto(twoWinTransformerIdentifierListFilterId, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
         insertFilter(twoWinTransformerIdentifierListFilterId, twoWinTransformerIdentifierListFilter);
         checkIdentifierListFilter(twoWinTransformerIdentifierListFilterId, twoWinTransformerIdentifierListFilter);
         checkIdentifierListFilterExportAndMetadata(twoWinTransformerIdentifierListFilterId, "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]", EquipmentType.TWO_WINDINGS_TRANSFORMER);
@@ -256,14 +255,14 @@ public class FilterEntityControllerTest {
         UUID threeWTransformerIdentifierListFilterId = UUID.randomUUID();
         IdentifierListFilterEquipmentAttributes threeWT1 = new IdentifierListFilterEquipmentAttributes("threeWT1", null);
         IdentifierListFilterEquipmentAttributes threeWT2 = new IdentifierListFilterEquipmentAttributes("threeWT2", null);
-        IdentifierListFilter threeWinTransformerIdentifierListFilter = new IdentifierListFilter(threeWTransformerIdentifierListFilterId, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
+        IdentifierListFilterDto threeWinTransformerIdentifierListFilter = new IdentifierListFilterDto(threeWTransformerIdentifierListFilterId, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
         insertFilter(threeWTransformerIdentifierListFilterId, threeWinTransformerIdentifierListFilter);
         checkIdentifierListFilter(threeWTransformerIdentifierListFilterId, threeWinTransformerIdentifierListFilter);
         checkIdentifierListFilterExportAndMetadata(threeWTransformerIdentifierListFilterId, "[]", EquipmentType.THREE_WINDINGS_TRANSFORMER);
 
         // Create identifier list filter for hvdc
         UUID hvdcFilterId = UUID.randomUUID();
-        IdentifierListFilter hvdcIdentifierListFilter = new IdentifierListFilter(hvdcFilterId, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
+        IdentifierListFilterDto hvdcIdentifierListFilter = new IdentifierListFilterDto(hvdcFilterId, modificationDate, EquipmentType.HVDC_LINE, List.of(line1, line2));
         insertFilter(hvdcFilterId, hvdcIdentifierListFilter);
         checkIdentifierListFilter(hvdcFilterId, hvdcIdentifierListFilter);
         checkIdentifierListFilterExportAndMetadata(hvdcFilterId, "[]", EquipmentType.HVDC_LINE);
@@ -272,7 +271,7 @@ public class FilterEntityControllerTest {
         UUID voltageLevelFilterId = UUID.randomUUID();
         IdentifierListFilterEquipmentAttributes vl1 = new IdentifierListFilterEquipmentAttributes("VLHV1", null);
         IdentifierListFilterEquipmentAttributes vl2 = new IdentifierListFilterEquipmentAttributes("VLHV2", null);
-        IdentifierListFilter vlIdentifierListFilter = new IdentifierListFilter(voltageLevelFilterId, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
+        IdentifierListFilterDto vlIdentifierListFilter = new IdentifierListFilterDto(voltageLevelFilterId, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
         insertFilter(voltageLevelFilterId, vlIdentifierListFilter);
         checkIdentifierListFilter(voltageLevelFilterId, vlIdentifierListFilter);
         checkIdentifierListFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n", EquipmentType.VOLTAGE_LEVEL);
@@ -282,7 +281,7 @@ public class FilterEntityControllerTest {
         IdentifierListFilterEquipmentAttributes s1 = new IdentifierListFilterEquipmentAttributes("P1", null);
         IdentifierListFilterEquipmentAttributes s2 = new IdentifierListFilterEquipmentAttributes("P2", null);
         IdentifierListFilterEquipmentAttributes s3 = new IdentifierListFilterEquipmentAttributes("P3", null);
-        IdentifierListFilter sIdentifierListFilter = new IdentifierListFilter(substationFilterId, modificationDate, EquipmentType.SUBSTATION, List.of(s1, s2, s3));
+        IdentifierListFilterDto sIdentifierListFilter = new IdentifierListFilterDto(substationFilterId, modificationDate, EquipmentType.SUBSTATION, List.of(s1, s2, s3));
         insertFilter(substationFilterId, sIdentifierListFilter);
         checkIdentifierListFilter(substationFilterId, sIdentifierListFilter);
         checkIdentifierListFilterExportAndMetadata(substationFilterId, "[{\"id\":\"P1\",\"type\":\"SUBSTATION\"},{\"id\":\"P2\",\"type\":\"SUBSTATION\"}]\n", EquipmentType.SUBSTATION);
@@ -294,7 +293,7 @@ public class FilterEntityControllerTest {
         assertEquals(userId, message.getHeaders().get(NotificationService.HEADER_MODIFIED_BY));
     }
 
-    private void updateFilter(UUID filterId, AbstractFilter filter, String userId) throws Exception {
+    private void updateFilter(UUID filterId, AbstractFilterDto filter, String userId) throws Exception {
         mvc.perform(put(URL_TEMPLATE + "/" + filterId)
                         .content(objectMapper.writeValueAsString(filter))
                         .contentType(APPLICATION_JSON)
@@ -313,10 +312,10 @@ public class FilterEntityControllerTest {
     @Test
     public void testLineFilterCrud() throws Exception {
         UUID filterId1 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
-        List<AbstractExpertRule> rules = new ArrayList<>();
+        List<AbstractExpertRuleDto> rules = new ArrayList<>();
         createExpertLineRules(rules, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(5., 8.)), new TreeSet<>(Set.of(6.)));
-        CombinatorExpertRule combinator = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
-        ExpertFilter lineFilter = new ExpertFilter(null, new Date(), EquipmentType.LINE, combinator);
+        CombinatorExpertRuleDto combinator = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilterDto lineFilter = new ExpertFilterDto(null, new Date(), EquipmentType.LINE, combinator);
 
         // --- insert filter --- //
         insertFilter(filterId1, lineFilter);
@@ -333,10 +332,10 @@ public class FilterEntityControllerTest {
         checkExpertFilter(newFilterId1, lineFilter);
 
         // --- modify filter --- //
-        List<AbstractExpertRule> rules2 = new ArrayList<>();
+        List<AbstractExpertRuleDto> rules2 = new ArrayList<>();
         createExpertLineRules(rules2, COUNTRIES2, COUNTRIES1, new TreeSet<>(Set.of(4., 9.)), new TreeSet<>(Set.of(5.)));
-        CombinatorExpertRule combinator2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
-        ExpertFilter lineFilter2 = new ExpertFilter(null, new Date(), EquipmentType.LINE, combinator2);
+        CombinatorExpertRuleDto combinator2 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules2).build();
+        ExpertFilterDto lineFilter2 = new ExpertFilterDto(null, new Date(), EquipmentType.LINE, combinator2);
         updateFilter(filterId1, lineFilter2, "userId");
 
         // check the modified filter
@@ -346,8 +345,8 @@ public class FilterEntityControllerTest {
         // --- modify filter with equipment type changed --- //
         List rules3 = new ArrayList<>();
         createExpertRules(rules3, new TreeSet<>(Set.of("FR", "BE")), new TreeSet<>(Set.of(50.)));
-        CombinatorExpertRule combinator3 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules3).build();
-        ExpertFilter generatorFilter = new ExpertFilter(null, new Date(), EquipmentType.GENERATOR, combinator3);
+        CombinatorExpertRuleDto combinator3 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules3).build();
+        ExpertFilterDto generatorFilter = new ExpertFilterDto(null, new Date(), EquipmentType.GENERATOR, combinator3);
         updateFilter(filterId1, generatorFilter, "userId");
 
         // check the modified filter
@@ -359,7 +358,7 @@ public class FilterEntityControllerTest {
         deleteFilter(newFilterId1);
 
         // check empty after delete all
-        List<IFilterAttributes> allFilters = getAllFilters();
+        List<FilterMetadataDto> allFilters = getAllFilters();
         Assertions.assertThat(allFilters).isEmpty();
     }
 
@@ -368,40 +367,40 @@ public class FilterEntityControllerTest {
         UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
         UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
 
-        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
-        EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+        ArrayList<AbstractExpertRuleDto> rules = new ArrayList<>();
+        EnumExpertRuleDto country1Filter = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR"))).build();
         rules.add(country1Filter);
-        EnumExpertRule country2Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
+        EnumExpertRuleDto country2Filter = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR"))).build();
         rules.add(country2Filter);
-        NumberExpertRule nominalVoltage1Filter = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
+        NumberExpertRuleDto nominalVoltage1Filter = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_1)
                 .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(360., 400.))).build();
         rules.add(nominalVoltage1Filter);
-        NumberExpertRule nominalVoltage2Filter = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2)
+        NumberExpertRuleDto nominalVoltage2Filter = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_2)
                 .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(356.25, 393.75))).build();
         rules.add(nominalVoltage2Filter);
-        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
-        ExpertFilter lineFilter = new ExpertFilter(filterId3, new Date(), EquipmentType.LINE, parentRule);
+        CombinatorExpertRuleDto parentRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilterDto lineFilter = new ExpertFilterDto(filterId3, new Date(), EquipmentType.LINE, parentRule);
 
         insertFilter(filterId3, lineFilter);
         checkExpertFilter(filterId3, lineFilter);
 
-        ArrayList<AbstractExpertRule> rules2 = new ArrayList<>();
-        EnumExpertRule country1Filter2 = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+        ArrayList<AbstractExpertRuleDto> rules2 = new ArrayList<>();
+        EnumExpertRuleDto country1Filter2 = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR"))).build();
         rules2.add(country1Filter2);
-        EnumExpertRule country2Filter2 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
+        EnumExpertRuleDto country2Filter2 = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR"))).build();
         rules2.add(country2Filter2);
-        NumberExpertRule nominalVoltage1Filter2 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
+        NumberExpertRuleDto nominalVoltage1Filter2 = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_1)
                 .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(360., 400.))).build();
         rules2.add(nominalVoltage1Filter2);
-        NumberExpertRule nominalVoltage2Filter2 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2)
+        NumberExpertRuleDto nominalVoltage2Filter2 = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_2)
                 .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(356.25, 393.75))).build();
         rules2.add(nominalVoltage2Filter2);
-        CombinatorExpertRule parentRule2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
-        ExpertFilter lineFilter2 = new ExpertFilter(filterId4, new Date(), EquipmentType.LINE, parentRule2);
+        CombinatorExpertRuleDto parentRule2 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules2).build();
+        ExpertFilterDto lineFilter2 = new ExpertFilterDto(filterId4, new Date(), EquipmentType.LINE, parentRule2);
 
         insertFilter(filterId4, lineFilter2);
         checkExpertFilter(filterId4, lineFilter2);
@@ -445,16 +444,16 @@ public class FilterEntityControllerTest {
     @Test
     public void testEvaluateFilters() throws Exception {
         UUID filterId = UUID.randomUUID();
-        FilterAttributes filterAttributes = new FilterAttributes();
-        filterAttributes.setId(filterId);
-        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
-        EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+        FilterMetadataDto filterMetadataDto = new FilterMetadataDto();
+        filterMetadataDto.setId(filterId);
+        ArrayList<AbstractExpertRuleDto> rules = new ArrayList<>();
+        EnumExpertRuleDto country1Filter = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
             .values(new TreeSet<>(Set.of("FR"))).build();
         rules.add(country1Filter);
-        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
-        ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
+        CombinatorExpertRuleDto parentRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilterDto lineFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.LINE, parentRule);
         insertFilter(filterId, lineFilter);
-        FiltersWithEquipmentTypes filtersBody = new FiltersWithEquipmentTypes(List.of(filterAttributes), List.of());
+        FiltersWithEquipmentTypes filtersBody = new FiltersWithEquipmentTypes(List.of(filterMetadataDto), List.of());
 
         // Apply filter by calling endPoint
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -479,24 +478,24 @@ public class FilterEntityControllerTest {
     public void testEvaluateFiltersWithEquipmentTypes() throws Exception {
         // Create a SUBSTATION expert filter selecting substations NHV1 and NGEN
         UUID filterId = UUID.randomUUID();
-        FilterAttributes filterAttributes = new FilterAttributes();
-        filterAttributes.setId(filterId);
+        FilterMetadataDto filterMetadataDto = new FilterMetadataDto();
+        filterMetadataDto.setId(filterId);
 
-        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
-        EnumExpertRule countryFilter = EnumExpertRule.builder()
+        ArrayList<AbstractExpertRuleDto> rules = new ArrayList<>();
+        EnumExpertRuleDto countryFilter = EnumExpertRuleDto.builder()
             .field(FieldType.COUNTRY)
             .operator(OperatorType.IN)
             .values(new TreeSet<>(Set.of("FR")))
             .build();
         rules.add(countryFilter);
-        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        CombinatorExpertRuleDto parentRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
 
-        ExpertFilter substationFilter = new ExpertFilter(filterId, new Date(), EquipmentType.SUBSTATION, parentRule);
+        ExpertFilterDto substationFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.SUBSTATION, parentRule);
         insertFilter(filterId, substationFilter);
 
         // Ask for sub-equipments: LINE and GENERATOR for this filter
         EquipmentTypesByFilterId equipmentTypesByFilterId = new EquipmentTypesByFilterId(filterId, Set.of(IdentifiableType.LINE, IdentifiableType.GENERATOR));
-        FiltersWithEquipmentTypes filtersBody = new FiltersWithEquipmentTypes(List.of(filterAttributes), List.of(equipmentTypesByFilterId));
+        FiltersWithEquipmentTypes filtersBody = new FiltersWithEquipmentTypes(List.of(filterMetadataDto), List.of(equipmentTypesByFilterId));
 
         // Apply filter by calling endpoint
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -531,20 +530,20 @@ public class FilterEntityControllerTest {
     @Test
     public void testFilterInfos() throws Exception {
         UUID filterId = UUID.randomUUID();
-        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
-        EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+        ArrayList<AbstractExpertRuleDto> rules = new ArrayList<>();
+        EnumExpertRuleDto country1Filter = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
             .values(new TreeSet<>(Set.of("FR"))).build();
         rules.add(country1Filter);
-        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
-        ExpertFilter lineFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LINE, parentRule);
-        AbstractFilter filter = insertFilter(filterId, lineFilter);
+        CombinatorExpertRuleDto parentRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilterDto lineFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.LINE, parentRule);
+        AbstractFilterDto filter = insertFilter(filterId, lineFilter);
 
-        FilterAttributes filterAttributes = new FilterAttributes();
-        filterAttributes.setId(filter.getId());
-        filterAttributes.setType(FilterType.EXPERT);
-        filterAttributes.setEquipmentType(EquipmentType.LINE);
-        filterAttributes.setModificationDate(filter.getModificationDate());
-        filterAttributes.setName("Filter1");
+        FilterMetadataDto filterMetadataDto = new FilterMetadataDto();
+        filterMetadataDto.setId(filter.getId());
+        filterMetadataDto.setType(FilterType.EXPERT);
+        filterMetadataDto.setEquipmentType(EquipmentType.LINE);
+        filterMetadataDto.setModificationDate(filter.getModificationDate());
+        filterMetadataDto.setName("Filter1");
 
         ElementAttributes elementAttributes = new ElementAttributes(filterId, "Filter1");
         List<ElementAttributes> elementAttributesList = new ArrayList<>();
@@ -562,17 +561,17 @@ public class FilterEntityControllerTest {
                 .params(params).contentType(APPLICATION_JSON)).andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 
-        List<FilterAttributes> result = objectMapper.readValue(res, new TypeReference<>() { });
+        List<FilterMetadataDto> result = objectMapper.readValue(res, new TypeReference<>() { });
 
         assertEquals(2, result.size());
-        FilterAttributes filterAttribute = result.getFirst();
+        FilterMetadataDto filterAttribute = result.getFirst();
         assertEquals(filterId, filterAttribute.getId());
         assertEquals("Filter1", filterAttribute.getName());
         assertEquals(FilterType.EXPERT, filterAttribute.getType());
         assertEquals(EquipmentType.LINE, filterAttribute.getEquipmentType());
         assertEquals(filter.getModificationDate(), filterAttribute.getModificationDate());
 
-        FilterAttributes filterAttribute2 = result.getLast();
+        FilterMetadataDto filterAttribute2 = result.getLast();
         assertEquals(notFoundFilterId, filterAttribute2.getId());
         assertNull(filterAttribute2.getName());
         assertNull(filterAttribute2.getType());
@@ -586,40 +585,40 @@ public class FilterEntityControllerTest {
         UUID filterId2 = UUID.randomUUID();
         UUID filterId3 = UUID.randomUUID();
 
-        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
-        EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+        ArrayList<AbstractExpertRuleDto> rules = new ArrayList<>();
+        EnumExpertRuleDto country1Filter = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR"))).build();
         rules.add(country1Filter);
-        EnumExpertRule country2Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
+        EnumExpertRuleDto country2Filter = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR"))).build();
         rules.add(country2Filter);
-        NumberExpertRule nominalVoltage1Filter = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
+        NumberExpertRuleDto nominalVoltage1Filter = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_1)
                 .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(360., 400.))).build();
         rules.add(nominalVoltage1Filter);
-        NumberExpertRule nominalVoltage2Filter = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2)
+        NumberExpertRuleDto nominalVoltage2Filter = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_2)
                 .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(356.25, 393.75))).build();
         rules.add(nominalVoltage2Filter);
-        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
-        ExpertFilter lineFilter = new ExpertFilter(filterId2, new Date(), EquipmentType.LINE, parentRule);
+        CombinatorExpertRuleDto parentRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilterDto lineFilter = new ExpertFilterDto(filterId2, new Date(), EquipmentType.LINE, parentRule);
 
         insertFilter(filterId2, lineFilter);
         checkExpertFilter(filterId2, lineFilter);
 
-        ArrayList<AbstractExpertRule> rules2 = new ArrayList<>();
-        EnumExpertRule country1Filter2 = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+        ArrayList<AbstractExpertRuleDto> rules2 = new ArrayList<>();
+        EnumExpertRuleDto country1Filter2 = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR"))).build();
         rules2.add(country1Filter2);
-        EnumExpertRule country2Filter2 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
+        EnumExpertRuleDto country2Filter2 = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR"))).build();
         rules2.add(country2Filter2);
-        NumberExpertRule nominalVoltage1Filter2 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
+        NumberExpertRuleDto nominalVoltage1Filter2 = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_1)
                 .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(360., 400.))).build();
         rules2.add(nominalVoltage1Filter2);
-        NumberExpertRule nominalVoltage2Filter2 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2)
+        NumberExpertRuleDto nominalVoltage2Filter2 = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_2)
                 .operator(OperatorType.BETWEEN).values(new TreeSet<>(Set.of(356.25, 393.75))).build();
         rules2.add(nominalVoltage2Filter2);
-        CombinatorExpertRule parentRule2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
-        ExpertFilter lineFilter2 = new ExpertFilter(filterId3, new Date(), EquipmentType.LINE, parentRule2);
+        CombinatorExpertRuleDto parentRule2 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules2).build();
+        ExpertFilterDto lineFilter2 = new ExpertFilterDto(filterId3, new Date(), EquipmentType.LINE, parentRule2);
 
         insertFilter(filterId3, lineFilter2);
         checkExpertFilter(filterId3, lineFilter2);
@@ -629,7 +628,7 @@ public class FilterEntityControllerTest {
         IdentifierListFilterEquipmentAttributes attribute3 = new IdentifierListFilterEquipmentAttributes("wrongId2", 3.0);
 
         Date date = new Date();
-        IdentifierListFilter identifierListFilter = new IdentifierListFilter(filterId,
+        IdentifierListFilterDto identifierListFilter = new IdentifierListFilterDto(filterId,
                 date,
                 EquipmentType.GENERATOR,
                 List.of(attribute1, attribute2, attribute3));
@@ -674,43 +673,43 @@ public class FilterEntityControllerTest {
         checkFilterEquipments(expected, filterEquipments);
     }
 
-    private void createExpertRules(List<AbstractExpertRule> rules, Set<String> countries, Set<Double> nominalVoltages) {
-        EnumExpertRule country1Rule = EnumExpertRule.builder().field(FieldType.COUNTRY).operator(OperatorType.IN)
+    private void createExpertRules(List<AbstractExpertRuleDto> rules, Set<String> countries, Set<Double> nominalVoltages) {
+        EnumExpertRuleDto country1Rule = EnumExpertRuleDto.builder().field(FieldType.COUNTRY).operator(OperatorType.IN)
                 .values(countries).build();
         rules.add(country1Rule);
 
-        NumberExpertRule nominalVoltage2Rule;
+        NumberExpertRuleDto nominalVoltage2Rule;
         if (nominalVoltages.size() == 1) {
-            nominalVoltage2Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.EQUALS)
+            nominalVoltage2Rule = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.EQUALS)
                     .value(nominalVoltages.stream().findFirst().isPresent() ? nominalVoltages.stream().findFirst().get() : null)
                     .build();
         } else {
-            nominalVoltage2Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.BETWEEN)
+            nominalVoltage2Rule = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.BETWEEN)
                     .values(nominalVoltages).build();
         }
         rules.add(nominalVoltage2Rule);
     }
 
-    private void createExpertLineRules(List<AbstractExpertRule> rules, Set<String> countries1, Set<String> countries2,
+    private void createExpertLineRules(List<AbstractExpertRuleDto> rules, Set<String> countries1, Set<String> countries2,
                                        Set<Double> nominalVoltage1, Set<Double> nominalVoltage2) {
 
-        EnumExpertRule country1Rule = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+        EnumExpertRuleDto country1Rule = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
                 .values(countries1).build();
         rules.add(country1Rule);
-        EnumExpertRule country2Rule = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
+        EnumExpertRuleDto country2Rule = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
                 .values(countries2).build();
         rules.add(country2Rule);
-        NumberExpertRule nominalVoltage1Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_1)
+        NumberExpertRuleDto nominalVoltage1Rule = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_1)
                 .operator(OperatorType.BETWEEN).values(nominalVoltage1).build();
         rules.add(nominalVoltage1Rule);
 
-        NumberExpertRule nominalVoltage2Rule;
+        NumberExpertRuleDto nominalVoltage2Rule;
         if (nominalVoltage2.size() == 1) {
-            nominalVoltage2Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.EQUALS)
+            nominalVoltage2Rule = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.EQUALS)
                     .value(nominalVoltage2.stream().findFirst().isPresent() ? nominalVoltage2.stream().findFirst().get() : null)
                     .build();
         } else {
-            nominalVoltage2Rule = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.BETWEEN)
+            nominalVoltage2Rule = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE_2).operator(OperatorType.BETWEEN)
                     .values(nominalVoltage2).build();
         }
         rules.add(nominalVoltage2Rule);
@@ -722,33 +721,33 @@ public class FilterEntityControllerTest {
         UUID filterId2 = UUID.randomUUID();
         UUID filterId3 = UUID.randomUUID();
 
-        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        ArrayList<AbstractExpertRuleDto> rules = new ArrayList<>();
         createExpertLineRules(rules, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of(360., 400.)),
                 new TreeSet<>(Set.of(356.25, 393.7)));
-        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
-        ExpertFilter expertFilter = new ExpertFilter(filterId1, new Date(), EquipmentType.LINE, parentRule);
+        CombinatorExpertRuleDto parentRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId1, new Date(), EquipmentType.LINE, parentRule);
 
         insertFilter(filterId1, expertFilter);
         checkExpertFilter(filterId1, expertFilter);
 
-        ArrayList<AbstractExpertRule> rules2 = new ArrayList<>();
+        ArrayList<AbstractExpertRuleDto> rules2 = new ArrayList<>();
         createExpertLineRules(rules2, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of(360., 400.)),
                 new TreeSet<>(Set.of(356.25, 393.7)));
-        CombinatorExpertRule parentRule2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
-        ExpertFilter expertFilter2 = new ExpertFilter(filterId2, new Date(), EquipmentType.LINE, parentRule2);
+        CombinatorExpertRuleDto parentRule2 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules2).build();
+        ExpertFilterDto expertFilter2 = new ExpertFilterDto(filterId2, new Date(), EquipmentType.LINE, parentRule2);
 
         insertFilter(filterId2, expertFilter2);
         checkExpertFilter(filterId2, expertFilter2);
 
-        ArrayList<AbstractExpertRule> rules3 = new ArrayList<>();
-        EnumExpertRule country1Rule3 = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
+        ArrayList<AbstractExpertRuleDto> rules3 = new ArrayList<>();
+        EnumExpertRuleDto country1Rule3 = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR", "BE"))).build();
         rules3.add(country1Rule3);
-        EnumExpertRule country2Rule3 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
+        EnumExpertRuleDto country2Rule3 = EnumExpertRuleDto.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR", "IT"))).build();
         rules3.add(country2Rule3);
-        CombinatorExpertRule parentRule3 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules3).build();
-        ExpertFilter expertFilter3 = new ExpertFilter(filterId3, new Date(), EquipmentType.HVDC_LINE, parentRule3);
+        CombinatorExpertRuleDto parentRule3 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules3).build();
+        ExpertFilterDto expertFilter3 = new ExpertFilterDto(filterId3, new Date(), EquipmentType.HVDC_LINE, parentRule3);
 
         insertFilter(filterId3, expertFilter3);
         checkExpertFilter(filterId3, expertFilter3);
@@ -787,12 +786,12 @@ public class FilterEntityControllerTest {
         UUID filterId1 = UUID.randomUUID();
         UUID filterId1Duplicated = UUID.randomUUID();
 
-        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        ArrayList<AbstractExpertRuleDto> rules = new ArrayList<>();
         createExpertLineRules(rules, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of(360., 400.)),
                 new TreeSet<>(Set.of(356.25, 393.7)));
-        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
-        ExpertFilter expertFilter = new ExpertFilter(filterId1, new Date(), EquipmentType.LINE, parentRule);
-        ExpertFilter expertFilterDuplicated = new ExpertFilter(filterId1Duplicated, new Date(), EquipmentType.LINE, parentRule);
+        CombinatorExpertRuleDto parentRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId1, new Date(), EquipmentType.LINE, parentRule);
+        ExpertFilterDto expertFilterDuplicated = new ExpertFilterDto(filterId1Duplicated, new Date(), EquipmentType.LINE, parentRule);
 
         insertFilter(filterId1, expertFilter);
         insertFilter(filterId1Duplicated, expertFilter);
@@ -828,7 +827,7 @@ public class FilterEntityControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(content().json(expectedJson));
 
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+        List<FilterMetadataDto> filterAttributes = objectMapper.readValue(
             mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", filterId.toString())
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -849,7 +848,7 @@ public class FilterEntityControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(content().json(expectedJson));
 
-        List<FilterAttributes> filterAttributes = objectMapper.readValue(
+        List<FilterMetadataDto> filterAttributes = objectMapper.readValue(
                 mvc.perform(get(URL_TEMPLATE + "/metadata").param("ids", filterId.toString())
                                 .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
@@ -865,7 +864,7 @@ public class FilterEntityControllerTest {
         deleteFilter(filterId);
     }
 
-    private void checkFilterEvaluating(AbstractFilter filter, String expectedJson) throws Exception {
+    private void checkFilterEvaluating(AbstractFilterDto filter, String expectedJson) throws Exception {
         mvc.perform(post(URL_TEMPLATE + "/evaluate").param("networkUuid", NETWORK_UUID.toString())
                         .content(objectMapper.writeValueAsString(filter))
                         .contentType(APPLICATION_JSON))
@@ -874,15 +873,15 @@ public class FilterEntityControllerTest {
                 .andExpect(content().json(expectedJson));
     }
 
-    private AbstractFilter insertFilter(UUID filterId, AbstractFilter filter) throws Exception {
+    private AbstractFilterDto insertFilter(UUID filterId, AbstractFilterDto filter) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE).param("id", filterId.toString())
                         .content(objectMapper.writeValueAsString(filter))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        return objectMapper.readValue(response, AbstractFilter.class);
+        return objectMapper.readValue(response, AbstractFilterDto.class);
     }
 
-    private List<AbstractFilter> insertFilters(Map<UUID, AbstractFilter> filtersToCreateMap) throws Exception {
+    private List<AbstractFilterDto> insertFilters(Map<UUID, AbstractFilterDto> filtersToCreateMap) throws Exception {
         String response = mvc.perform(post(URL_TEMPLATE + "/batch")
                         .content(objectMapper.writeValueAsString(filtersToCreateMap))
                         .contentType(APPLICATION_JSON))
@@ -898,7 +897,7 @@ public class FilterEntityControllerTest {
         return objectMapper.readValue(response, new TypeReference<>() { });
     }
 
-    private List<AbstractFilter> updateFilters(Map<UUID, AbstractFilter> filtersToUpdateMap) throws Exception {
+    private List<AbstractFilterDto> updateFilters(Map<UUID, AbstractFilterDto> filtersToUpdateMap) throws Exception {
         String response = mvc.perform(put(URL_TEMPLATE + "/batch")
                         .content(objectMapper.writeValueAsString(filtersToUpdateMap))
                         .contentType(APPLICATION_JSON))
@@ -906,7 +905,7 @@ public class FilterEntityControllerTest {
         return objectMapper.readValue(response, new TypeReference<>() { });
     }
 
-    private void updateFiltersWithNoneExistingId(Map<UUID, AbstractFilter> filtersToUpdateMap) throws Exception {
+    private void updateFiltersWithNoneExistingId(Map<UUID, AbstractFilterDto> filtersToUpdateMap) throws Exception {
         mvc.perform(put(URL_TEMPLATE + "/batch")
                         .content(objectMapper.writeValueAsString(filtersToUpdateMap))
                         .contentType(APPLICATION_JSON))
@@ -924,38 +923,38 @@ public class FilterEntityControllerTest {
                 .andExpect(status().isOk());
     }
 
-    private List<IFilterAttributes> getAllFilters() throws Exception {
+    private List<FilterMetadataDto> getAllFilters() throws Exception {
         String response = mvc.perform(get(URL_TEMPLATE)
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, new TypeReference<>() { });
     }
 
-    private void checkIdentifierListFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
+    private void checkIdentifierListFilter(UUID filterId, IdentifierListFilterDto identifierListFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        IdentifierListFilter foundFilter = objectMapper.readValue(foundFilterAsString, IdentifierListFilter.class);
+        IdentifierListFilterDto foundFilter = objectMapper.readValue(foundFilterAsString, IdentifierListFilterDto.class);
         matchIdentifierListFilterInfos(foundFilter, identifierListFilter);
     }
 
-    private void checkExpertFilter(UUID filterId, ExpertFilter expertFilter) throws Exception {
+    private void checkExpertFilter(UUID filterId, ExpertFilterDto expertFilter) throws Exception {
         String foundFilterAsString = mvc.perform(get(URL_TEMPLATE + "/" + filterId)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        ExpertFilter foundFilter = objectMapper.readValue(foundFilterAsString, ExpertFilter.class);
+        ExpertFilterDto foundFilter = objectMapper.readValue(foundFilterAsString, ExpertFilterDto.class);
         matchExpertFilterInfos(foundFilter, expertFilter);
     }
 
-    private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
+    private void matchFilterInfos(FilterMetadataDto filter1, FilterMetadataDto filter2) {
         assertEquals(filter1.getId(), filter2.getId());
         assertEquals(filter1.getType(), filter2.getType());
         assertTrue((filter2.getModificationDate().getTime() - filter1.getModificationDate().getTime()) < 2000);
         assertEquals(filter1.getEquipmentType(), filter2.getEquipmentType());
     }
 
-    private void matchIdentifierListFilterInfos(IdentifierListFilter identifierListFilter1, IdentifierListFilter identifierListFilter2) {
+    private void matchIdentifierListFilterInfos(IdentifierListFilterDto identifierListFilter1, IdentifierListFilterDto identifierListFilter2) {
         matchFilterInfos(identifierListFilter1, identifierListFilter2);
         assertTrue(new MatcherJson<>(objectMapper, identifierListFilter2.getFilterEquipmentsAttributes()).matchesSafely(identifierListFilter1.getFilterEquipmentsAttributes()));
     }
 
-    private void matchExpertFilterInfos(ExpertFilter expertFilter1, ExpertFilter expertFilter2) {
+    private void matchExpertFilterInfos(ExpertFilterDto expertFilter1, ExpertFilterDto expertFilter2) {
         matchFilterInfos(expertFilter1, expertFilter2);
         Assertions.assertThat(expertFilter1).recursivelyEquals(expertFilter2, "topologyKind" /* not persisted field */);
     }
@@ -966,48 +965,48 @@ public class FilterEntityControllerTest {
         Date modificationDate = new Date();
 
         // Create OR rules for generators
-        List<AbstractExpertRule> orRules = new ArrayList<>();
-        NumberExpertRule numRule1 = NumberExpertRule.builder().value(20.0)
+        List<AbstractExpertRuleDto> orRules = new ArrayList<>();
+        NumberExpertRuleDto numRule1 = NumberExpertRuleDto.builder().value(20.0)
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.GREATER).build();
         orRules.add(numRule1);
-        NumberExpertRule numRule2 = NumberExpertRule.builder().value(-9000.0)
+        NumberExpertRuleDto numRule2 = NumberExpertRuleDto.builder().value(-9000.0)
                 .field(FieldType.MIN_P).operator(OperatorType.EQUALS).build(); // false
         orRules.add(numRule2);
-        CombinatorExpertRule orCombination = CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(orRules).build();
+        CombinatorExpertRuleDto orCombination = CombinatorExpertRuleDto.builder().combinator(CombinatorType.OR).rules(orRules).build();
         // Create AND rules for generators
-        List<AbstractExpertRule> andRules = new ArrayList<>();
+        List<AbstractExpertRuleDto> andRules = new ArrayList<>();
         andRules.add(orCombination);
-        NumberExpertRule numRule3 = NumberExpertRule.builder().value(9999.99)
+        NumberExpertRuleDto numRule3 = NumberExpertRuleDto.builder().value(9999.99)
                 .field(FieldType.MAX_P).operator(OperatorType.GREATER_OR_EQUALS).build();
         andRules.add(numRule3);
-        NumberExpertRule numRule4 = NumberExpertRule.builder().value(24.5)
+        NumberExpertRuleDto numRule4 = NumberExpertRuleDto.builder().value(24.5)
                 .field(FieldType.TARGET_V).operator(OperatorType.EQUALS).build();
         andRules.add(numRule4);
-        NumberExpertRule numRule5 = NumberExpertRule.builder().value(400.0)
+        NumberExpertRuleDto numRule5 = NumberExpertRuleDto.builder().value(400.0)
                 .field(FieldType.TARGET_Q).operator(OperatorType.LOWER_OR_EQUALS).build();
         andRules.add(numRule5);
-        NumberExpertRule numRule6 = NumberExpertRule.builder().value(500.0)
+        NumberExpertRuleDto numRule6 = NumberExpertRuleDto.builder().value(500.0)
                 .field(FieldType.TARGET_P).operator(OperatorType.GREATER).build();
         andRules.add(numRule6);
-        EnumExpertRule enumRule1 = EnumExpertRule.builder().value("OTHER")
+        EnumExpertRuleDto enumRule1 = EnumExpertRuleDto.builder().value("OTHER")
                 .field(FieldType.ENERGY_SOURCE).operator(OperatorType.EQUALS).build();
         andRules.add(enumRule1);
-        EnumExpertRule enumRule2 = EnumExpertRule.builder().value("ES")
+        EnumExpertRuleDto enumRule2 = EnumExpertRuleDto.builder().value("ES")
                 .field(FieldType.COUNTRY).operator(OperatorType.NOT_EQUALS).build();
         andRules.add(enumRule2);
-        StringExpertRule stringRule1 = StringExpertRule.builder().value("N")
+        StringExpertRuleDto stringRule1 = StringExpertRuleDto.builder().value("N")
                 .field(FieldType.ID).operator(OperatorType.ENDS_WITH).build();
         andRules.add(stringRule1);
-        StringExpertRule stringRule2 = StringExpertRule.builder().value("E")
+        StringExpertRuleDto stringRule2 = StringExpertRuleDto.builder().value("E")
                 .field(FieldType.NAME).operator(OperatorType.CONTAINS).build();
         andRules.add(stringRule2);
-        BooleanExpertRule booleanRule1 = BooleanExpertRule.builder().value(false)
+        BooleanExpertRuleDto booleanRule1 = BooleanExpertRuleDto.builder().value(false)
                 .field(FieldType.VOLTAGE_REGULATOR_ON).operator(OperatorType.NOT_EQUALS).build();
         andRules.add(booleanRule1);
 
-        CombinatorExpertRule andCombination = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(andRules).build();
+        CombinatorExpertRuleDto andCombination = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(andRules).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.GENERATOR, andCombination);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, modificationDate, EquipmentType.GENERATOR, andCombination);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1025,14 +1024,14 @@ public class FilterEntityControllerTest {
         Date modificationDate = new Date();
 
         // Create rules for loads
-        List<AbstractExpertRule> rules = new ArrayList<>();
-        StringExpertRule stringRule1 = StringExpertRule.builder().value("LOAD")
+        List<AbstractExpertRuleDto> rules = new ArrayList<>();
+        StringExpertRuleDto stringRule1 = StringExpertRuleDto.builder().value("LOAD")
                 .field(FieldType.ID).operator(OperatorType.IS).build();
         rules.add(stringRule1);
 
-        CombinatorExpertRule gen1 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        CombinatorExpertRuleDto gen1 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.LOAD, gen1);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, modificationDate, EquipmentType.LOAD, gen1);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1049,14 +1048,14 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
-        List<AbstractExpertRule> rules = new ArrayList<>();
-        StringExpertRule stringRule = StringExpertRule.builder().value("VLLOAD")
+        List<AbstractExpertRuleDto> rules = new ArrayList<>();
+        StringExpertRuleDto stringRule = StringExpertRuleDto.builder().value("VLLOAD")
             .field(FieldType.ID).operator(OperatorType.IS).build();
         rules.add(stringRule);
 
-        CombinatorExpertRule vlRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        CombinatorExpertRuleDto vlRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.VOLTAGE_LEVEL, vlRule);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, modificationDate, EquipmentType.VOLTAGE_LEVEL, vlRule);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1073,14 +1072,14 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
-        List<AbstractExpertRule> rules = new ArrayList<>();
-        StringExpertRule stringRule = StringExpertRule.builder().value("P1")
+        List<AbstractExpertRuleDto> rules = new ArrayList<>();
+        StringExpertRuleDto stringRule = StringExpertRuleDto.builder().value("P1")
             .field(FieldType.ID).operator(OperatorType.IS).build();
         rules.add(stringRule);
 
-        CombinatorExpertRule subRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        CombinatorExpertRuleDto subRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.SUBSTATION, subRule);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, modificationDate, EquipmentType.SUBSTATION, subRule);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1097,17 +1096,17 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
-        List<AbstractExpertRule> rules = new ArrayList<>();
-        StringExpertRule stringRule = StringExpertRule.builder().value("P1")
+        List<AbstractExpertRuleDto> rules = new ArrayList<>();
+        StringExpertRuleDto stringRule = StringExpertRuleDto.builder().value("P1")
             .field(FieldType.ID).operator(OperatorType.IS).build();
         rules.add(stringRule);
-        PropertiesExpertRule propertiesExpertRule = PropertiesExpertRule.builder().propertyName("region").propertyValues(List.of("north"))
+        PropertiesExpertRuleDto propertiesExpertRule = PropertiesExpertRuleDto.builder().propertyName("region").propertyValues(List.of("north"))
                 .field(FieldType.FREE_PROPERTIES).operator(OperatorType.IN).build();
         rules.add(propertiesExpertRule);
 
-        CombinatorExpertRule subRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        CombinatorExpertRuleDto subRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, modificationDate, EquipmentType.SUBSTATION, subRule);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, modificationDate, EquipmentType.SUBSTATION, subRule);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1124,11 +1123,11 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
-        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLGEN2")))
+        StringExpertRuleDto stringInRule = StringExpertRuleDto.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLGEN2")))
                 .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
-        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+        CombinatorExpertRuleDto inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1142,11 +1141,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
 
         // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
-        stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN2")))
+        stringInRule = StringExpertRuleDto.builder().values(new HashSet<>(Arrays.asList("VLGEN2")))
                 .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1154,11 +1153,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
 
         // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
-        NumberExpertRule numberInRule = NumberExpertRule.builder().values(Set.of(24.0))
+        NumberExpertRuleDto numberInRule = NumberExpertRuleDto.builder().values(Set.of(24.0))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1166,11 +1165,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
 
         // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
-        numberInRule = NumberExpertRule.builder().values(Set.of(12.0))
+        numberInRule = NumberExpertRuleDto.builder().values(Set.of(12.0))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1178,11 +1177,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
 
         // Build a filter AND with only an IN operator for COUNTRY
-        EnumExpertRule enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
+        EnumExpertRuleDto enumInRule = EnumExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
                 .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1190,11 +1189,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.GENERATOR);
 
         // Build a filter AND with only a NOT_IN operator for COUNTRY
-        enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
+        enumInRule = EnumExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
                 .field(FieldType.COUNTRY).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1207,11 +1206,11 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
-        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLLOAD", "VLLOAD2")))
+        StringExpertRuleDto stringInRule = StringExpertRuleDto.builder().values(new HashSet<>(Arrays.asList("VLLOAD", "VLLOAD2")))
                 .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
-        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+        CombinatorExpertRuleDto inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.LOAD, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1224,11 +1223,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
 
         // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
-        stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLLOAD2")))
+        stringInRule = StringExpertRuleDto.builder().values(new HashSet<>(Arrays.asList("VLLOAD2")))
                 .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.LOAD, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1236,11 +1235,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
 
         // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
-        NumberExpertRule numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(150.0)))
+        NumberExpertRuleDto numberInRule = NumberExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(150.0)))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.LOAD, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1248,11 +1247,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
 
         // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
-        numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(12.0)))
+        numberInRule = NumberExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(12.0)))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.LOAD, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1260,11 +1259,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
 
         // Build a filter AND with only an IN operator for COUNTRY
-        EnumExpertRule enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
+        EnumExpertRuleDto enumInRule = EnumExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
                 .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.LOAD, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1272,11 +1271,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.LOAD);
 
         // Build a filter AND with only a NOT_IN operator for COUNTRY
-        enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
+        enumInRule = EnumExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
                 .field(FieldType.COUNTRY).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.LOAD, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.LOAD, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1289,11 +1288,11 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
-        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLGEN2", "VLLOAD", "VLLOAD2")))
+        StringExpertRuleDto stringInRule = StringExpertRuleDto.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLGEN2", "VLLOAD", "VLLOAD2")))
                 .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
-        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+        CombinatorExpertRuleDto inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.BUS, inFilter);
         expertFilter.setTopologyKind(TopologyKind.BUS_BREAKER); // set optional info
 
         insertFilter(filterId, expertFilter);
@@ -1309,11 +1308,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
 
         // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
-        stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLHV1", "VLHV2")))
+        stringInRule = StringExpertRuleDto.builder().values(new HashSet<>(Arrays.asList("VLHV1", "VLHV2")))
                 .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.BUS, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1321,11 +1320,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
 
         // Build a filter AND with only an IN operator for NOMINAL_VOLTAGE
-        NumberExpertRule numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(24.0, 150.0)))
+        NumberExpertRuleDto numberInRule = NumberExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(24.0, 150.0)))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.BUS, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1333,11 +1332,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
 
         // Build a filter AND with only a NOT_IN operator for NOMINAL_VOLTAGE
-        numberInRule = NumberExpertRule.builder().values(new HashSet<>(Arrays.asList(380.0)))
+        numberInRule = NumberExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(380.0)))
                 .field(FieldType.NOMINAL_VOLTAGE).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(numberInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.BUS, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1345,11 +1344,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
 
         // Build a filter AND with only an IN operator for COUNTRY
-        EnumExpertRule enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
+        EnumExpertRuleDto enumInRule = EnumExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(Country.FR.name(), Country.GB.name())))
                 .field(FieldType.COUNTRY).operator(OperatorType.IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.BUS, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1365,11 +1364,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.BUS);
 
         // Build a filter AND with only a NOT_IN operator for COUNTRY
-        enumInRule = EnumExpertRule.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
+        enumInRule = EnumExpertRuleDto.builder().values(new HashSet<>(Arrays.asList(Country.GB.name())))
                 .field(FieldType.COUNTRY).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(enumInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.BUS, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.BUS, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1382,11 +1381,11 @@ public class FilterEntityControllerTest {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
-        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLHV2")))
+        StringExpertRuleDto stringInRule = StringExpertRuleDto.builder().values(new HashSet<>(Arrays.asList("VLHV2")))
                 .field(FieldType.VOLTAGE_LEVEL_ID_1).operator(OperatorType.IN).build();
-        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+        CombinatorExpertRuleDto inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.TWO_WINDINGS_TRANSFORMER, inFilter);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.TWO_WINDINGS_TRANSFORMER, inFilter);
         expertFilter.setTopologyKind(TopologyKind.NODE_BREAKER); // set optional info
 
         insertFilter(filterId, expertFilter);
@@ -1401,11 +1400,11 @@ public class FilterEntityControllerTest {
         checkExpertFilterExportAndMetadata(filterId, expectedResultJson, EquipmentType.TWO_WINDINGS_TRANSFORMER);
 
         // Build a filter AND with only a NOT_IN operator for VOLTAGE_LEVEL_ID
-        stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLHV2")))
+        stringInRule = StringExpertRuleDto.builder().values(new HashSet<>(Arrays.asList("VLHV2")))
                 .field(FieldType.VOLTAGE_LEVEL_ID_1).operator(OperatorType.NOT_IN).build();
-        inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
+        inFilter = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(Arrays.asList(stringInRule)).build();
 
-        expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.TWO_WINDINGS_TRANSFORMER, inFilter);
+        expertFilter = new ExpertFilterDto(filterId, new Date(), EquipmentType.TWO_WINDINGS_TRANSFORMER, inFilter);
         insertFilter(filterId, expertFilter);
         checkExpertFilter(filterId, expertFilter);
 
@@ -1427,19 +1426,19 @@ public class FilterEntityControllerTest {
         Date modificationDate = new Date();
 
         IdentifierListFilterEquipmentAttributes load = new IdentifierListFilterEquipmentAttributes("LOAD", 7d);
-        IdentifierListFilter identifierListFilter = new IdentifierListFilter(identifierListFilterId, modificationDate, EquipmentType.LOAD, List.of(load));
+        IdentifierListFilterDto identifierListFilter = new IdentifierListFilterDto(identifierListFilterId, modificationDate, EquipmentType.LOAD, List.of(load));
         insertFilter(identifierListFilterId, identifierListFilter);
 
         // create expert filter linked to the identifier list filter
         UUID expertFilterId = UUID.fromString("87614d91-c168-4f89-8fb9-77a23729e88e");
-        List<AbstractExpertRule> rules = new ArrayList<>();
-        FilterUuidExpertRule filterUuidExpertRule = FilterUuidExpertRule.builder().values(Set.of(identifierListFilterId.toString()))
+        List<AbstractExpertRuleDto> rules = new ArrayList<>();
+        FilterUuidExpertRuleDto filterUuidExpertRule = FilterUuidExpertRuleDto.builder().values(Set.of(identifierListFilterId.toString()))
             .field(FieldType.ID).operator(OperatorType.IS_PART_OF).build();
         rules.add(filterUuidExpertRule);
 
-        CombinatorExpertRule combinatorRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
+        CombinatorExpertRuleDto combinatorRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
 
-        ExpertFilter expertFilter = new ExpertFilter(expertFilterId, modificationDate, EquipmentType.LOAD, combinatorRule);
+        ExpertFilterDto expertFilter = new ExpertFilterDto(expertFilterId, modificationDate, EquipmentType.LOAD, combinatorRule);
         insertFilter(expertFilterId, expertFilter);
         checkExpertFilter(expertFilterId, expertFilter);
 
@@ -1455,20 +1454,20 @@ public class FilterEntityControllerTest {
     public void testLineFiltersCrudInBatch() throws Exception {
         UUID filterId1 = UUID.randomUUID();
         Date date = new Date();
-        ArrayList<AbstractExpertRule> rules = new ArrayList<>();
+        ArrayList<AbstractExpertRuleDto> rules = new ArrayList<>();
         createExpertLineRules(rules, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(5., 8.)), new TreeSet<>(Set.of(6.)));
 
-        CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
-        ExpertFilter expertFilter1 = new ExpertFilter(filterId1, date, EquipmentType.LINE, parentRule);
+        CombinatorExpertRuleDto parentRule = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules).build();
+        ExpertFilterDto expertFilter1 = new ExpertFilterDto(filterId1, date, EquipmentType.LINE, parentRule);
 
         UUID filterId2 = UUID.randomUUID();
-        ArrayList<AbstractExpertRule> rules2 = new ArrayList<>();
+        ArrayList<AbstractExpertRuleDto> rules2 = new ArrayList<>();
         createExpertLineRules(rules2, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(4., 9.)), new TreeSet<>(Set.of(5.)));
 
-        CombinatorExpertRule parentRule2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
-        ExpertFilter expertFilter2 = new ExpertFilter(filterId2, date, EquipmentType.LINE, parentRule2);
+        CombinatorExpertRuleDto parentRule2 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules2).build();
+        ExpertFilterDto expertFilter2 = new ExpertFilterDto(filterId2, date, EquipmentType.LINE, parentRule2);
 
-        Map<UUID, AbstractFilter> filtersToCreateMap = Map.of(
+        Map<UUID, AbstractFilterDto> filtersToCreateMap = Map.of(
                 filterId1, expertFilter1,
                 filterId2, expertFilter2
         );
@@ -1490,26 +1489,26 @@ public class FilterEntityControllerTest {
         for (Map.Entry<UUID, UUID> entry : sourceAndNewUuidMap.entrySet()) {
             UUID sourceUuid = entry.getKey();
             UUID newUuid = entry.getValue();
-            checkExpertFilter(newUuid, (ExpertFilter) filtersToCreateMap.get(sourceUuid));
+            checkExpertFilter(newUuid, (ExpertFilterDto) filtersToCreateMap.get(sourceUuid));
         }
 
         // --- modify filters in batch --- //
-        ArrayList<AbstractExpertRule> rules3 = new ArrayList<>();
+        ArrayList<AbstractExpertRuleDto> rules3 = new ArrayList<>();
         createExpertLineRules(rules3, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(3., 10.)), new TreeSet<>(Set.of(4.)));
-        CombinatorExpertRule parentRule3 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules3).build();
-        ExpertFilter lineExpertFilter = new ExpertFilter(null, date, EquipmentType.LINE, parentRule3);
+        CombinatorExpertRuleDto parentRule3 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules3).build();
+        ExpertFilterDto lineExpertFilter = new ExpertFilterDto(null, date, EquipmentType.LINE, parentRule3);
 
-        ArrayList<AbstractExpertRule> rules4 = new ArrayList<>();
-        EnumExpertRule countryFilter4 = EnumExpertRule.builder().field(FieldType.COUNTRY).operator(OperatorType.IN)
+        ArrayList<AbstractExpertRuleDto> rules4 = new ArrayList<>();
+        EnumExpertRuleDto countryFilter4 = EnumExpertRuleDto.builder().field(FieldType.COUNTRY).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR", "BE"))).build();
         rules4.add(countryFilter4);
-        NumberExpertRule nominalVoltageFilter4 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE)
+        NumberExpertRuleDto nominalVoltageFilter4 = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE)
                 .operator(OperatorType.EQUALS).value(50.).build();
         rules4.add(nominalVoltageFilter4);
-        CombinatorExpertRule parentRule4 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules4).build();
-        ExpertFilter generatorExpertFilter = new ExpertFilter(null, date, EquipmentType.GENERATOR, parentRule4);
+        CombinatorExpertRuleDto parentRule4 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules4).build();
+        ExpertFilterDto generatorExpertFilter = new ExpertFilterDto(null, date, EquipmentType.GENERATOR, parentRule4);
 
-        Map<UUID, AbstractFilter> filtersToUpdateMap = Map.of(
+        Map<UUID, AbstractFilterDto> filtersToUpdateMap = Map.of(
                 filterId1, lineExpertFilter,
                 filterId2, generatorExpertFilter
         );
@@ -1522,18 +1521,18 @@ public class FilterEntityControllerTest {
         checkExpertFilter(filterId2, generatorExpertFilter);
 
         // --- modify filters in batch with a none existing id --- //
-        ArrayList<AbstractExpertRule> rules5 = new ArrayList<>();
-        EnumExpertRule countryFilter5 = EnumExpertRule.builder().field(FieldType.COUNTRY).operator(OperatorType.IN)
+        ArrayList<AbstractExpertRuleDto> rules5 = new ArrayList<>();
+        EnumExpertRuleDto countryFilter5 = EnumExpertRuleDto.builder().field(FieldType.COUNTRY).operator(OperatorType.IN)
                 .values(new TreeSet<>(Set.of("FR", "BE"))).build();
         rules5.add(countryFilter5);
 
-        NumberExpertRule nominalVoltageFilter5 = NumberExpertRule.builder().field(FieldType.NOMINAL_VOLTAGE)
+        NumberExpertRuleDto nominalVoltageFilter5 = NumberExpertRuleDto.builder().field(FieldType.NOMINAL_VOLTAGE)
                 .operator(OperatorType.EQUALS).value(60.).build();
         rules5.add(nominalVoltageFilter5);
-        CombinatorExpertRule parentRule5 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules5).build();
-        ExpertFilter generatorExpertFilter2 = new ExpertFilter(null, new Date(), EquipmentType.GENERATOR, parentRule5);
+        CombinatorExpertRuleDto parentRule5 = CombinatorExpertRuleDto.builder().combinator(CombinatorType.AND).rules(rules5).build();
+        ExpertFilterDto generatorExpertFilter2 = new ExpertFilterDto(null, new Date(), EquipmentType.GENERATOR, parentRule5);
 
-        Map<UUID, AbstractFilter> filtersToUpdateMap2 = Map.of(
+        Map<UUID, AbstractFilterDto> filtersToUpdateMap2 = Map.of(
                 UUID.randomUUID(), lineExpertFilter,
                 filterId2, generatorExpertFilter2
         );
@@ -1545,7 +1544,7 @@ public class FilterEntityControllerTest {
         deleteFilters(Stream.concat(sourceAndNewUuidMap.keySet().stream(), sourceAndNewUuidMap.values().stream()).toList());
 
         // check empty after delete all
-        List<IFilterAttributes> allFilters = getAllFilters();
+        List<FilterMetadataDto> allFilters = getAllFilters();
         Assertions.assertThat(allFilters).isEmpty();
     }
 

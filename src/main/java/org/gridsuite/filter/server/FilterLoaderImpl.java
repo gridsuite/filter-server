@@ -6,7 +6,7 @@
  */
 package org.gridsuite.filter.server;
 
-import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.AbstractFilterDto;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 
@@ -26,10 +26,10 @@ public class FilterLoaderImpl implements FilterLoader {
         this.filterRepositories = filterRepositories;
     }
 
-    private Optional<AbstractFilter> getFilter(UUID id) {
+    private Optional<AbstractFilterDto> getFilter(UUID id) {
         Objects.requireNonNull(id);
         for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
-            Optional<AbstractFilter> res = repository.getFilter(id);
+            Optional<AbstractFilterDto> res = repository.getFilter(id);
             if (res.isPresent()) {
                 return res;
             }
@@ -38,7 +38,7 @@ public class FilterLoaderImpl implements FilterLoader {
     }
 
     @Override
-    public List<AbstractFilter> getFilters(List<UUID> uuids) {
+    public List<AbstractFilterDto> getFilters(List<UUID> uuids) {
         return uuids.stream()
             .map(id -> getFilter(id).orElse(null)).toList();
     }

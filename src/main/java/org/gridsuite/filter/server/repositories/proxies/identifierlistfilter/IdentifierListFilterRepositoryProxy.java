@@ -8,9 +8,11 @@
 package org.gridsuite.filter.server.repositories.proxies.identifierlistfilter;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.AbstractFilterDto;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
-import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
+import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterDto;
+import org.gridsuite.filter.model.Filter;
+import org.gridsuite.filter.model.IdentifierListFilter;
 import org.gridsuite.filter.server.entities.identifierlistfilter.IdentifierListFilterEntity;
 import org.gridsuite.filter.server.entities.identifierlistfilter.IdentifierListFilterEquipmentEntity;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
@@ -38,8 +40,8 @@ public class IdentifierListFilterRepositoryProxy extends AbstractFilterRepositor
     }
 
     @Override
-    public AbstractFilter toDto(IdentifierListFilterEntity filterEntity) {
-        return new IdentifierListFilter(filterEntity.getId(),
+    public AbstractFilterDto toDto(IdentifierListFilterEntity filterEntity) {
+        return new IdentifierListFilterDto(filterEntity.getId(),
                 filterEntity.getModificationDate(),
                 filterEntity.getEquipmentType(),
                 filterEntity.getFilterEquipmentEntityList()
@@ -50,9 +52,17 @@ public class IdentifierListFilterRepositoryProxy extends AbstractFilterRepositor
     }
 
     @Override
-    public IdentifierListFilterEntity fromDto(AbstractFilter dto) {
-        if (dto instanceof IdentifierListFilter) {
-            var filter = (IdentifierListFilter) dto;
+    public Filter toModel(IdentifierListFilterEntity filterEntity) {
+        return IdentifierListFilter.builder()
+            .equipmentIds(filterEntity.getFilterEquipmentEntityList().stream().map(IdentifierListFilterEquipmentEntity::getEquipmentId).toList())
+            .equipmentType(filterEntity.getEquipmentType())
+            .build();
+    }
+
+    @Override
+    public IdentifierListFilterEntity fromDto(AbstractFilterDto dto) {
+        if (dto instanceof IdentifierListFilterDto) {
+            var filter = (IdentifierListFilterDto) dto;
             var identifierListFilterEntityBuilder = IdentifierListFilterEntity.builder()
                     .equipmentType(filter.getEquipmentType())
                     .filterEquipmentEntityList(filter.getFilterEquipmentsAttributes()

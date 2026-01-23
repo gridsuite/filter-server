@@ -7,7 +7,7 @@
 package org.gridsuite.filter.server.utils.assertions;
 
 import org.assertj.core.util.CheckReturnValue;
-import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.expertfilter.ExpertFilterDto;
 
 /**
  *  @author Thang PHAM <quyet-thang.pham at rte-france.com>
@@ -15,7 +15,7 @@ import org.gridsuite.filter.expertfilter.ExpertFilter;
  */
 public class Assertions extends org.assertj.core.api.Assertions {
     @CheckReturnValue
-    public static <T extends ExpertFilter> DTOAssert<ExpertFilter> assertThat(T actual) {
+    public static <T extends ExpertFilterDto> DTOAssert<ExpertFilterDto> assertThat(T actual) {
         return new DTOAssert<>(actual);
     }
 }

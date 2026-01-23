@@ -10,7 +10,6 @@ package org.gridsuite.filter.server.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterType;
@@ -25,14 +24,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class FilterAttributes implements IFilterAttributes {
+public class FilterMetadataDto {
     UUID id;
     Date modificationDate;
     FilterType type;
     EquipmentType equipmentType;
     String name;
 
-    public FilterAttributes(FilterMetadata filterMetadata, FilterType type, EquipmentType equipmentType) {
+    public FilterMetadataDto(FilterMetadata filterMetadata, FilterType type, EquipmentType equipmentType) {
         id = filterMetadata.getId();
         modificationDate = filterMetadata.getModificationDate();
         this.type = type;

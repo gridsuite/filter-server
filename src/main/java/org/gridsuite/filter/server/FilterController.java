@@ -11,12 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
-import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.AbstractFilterDto;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.model.Filter;
+import org.gridsuite.filter.server.dto.FilterMetadataDto;
 import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.springframework.context.annotation.ComponentScan;
@@ -51,14 +51,14 @@ public class FilterController {
     @GetMapping(value = "/filters", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all filters")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "All filters")})
-    public ResponseEntity<List<IFilterAttributes>> getFilters() {
+    public ResponseEntity<List<FilterMetadataDto>> getFilters() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
     }
 
     @GetMapping(value = "/filters/infos", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get filters infos")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Get filters infos of given ids")})
-    public ResponseEntity<List<FilterAttributes>> getFilters(@RequestParam List<UUID> filterUuids, @RequestHeader String userId) {
+    public ResponseEntity<List<FilterMetadataDto>> getFilters(@RequestParam List<UUID> filterUuids, @RequestHeader String userId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFiltersAttributes(filterUuids, userId));
     }
 
@@ -66,7 +66,7 @@ public class FilterController {
     @Operation(summary = "Get filter by id")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter"),
         @ApiResponse(responseCode = "404", description = "The filter does not exists")})
-    public ResponseEntity<AbstractFilter> getFilter(@PathVariable("id") UUID id) {
+    public ResponseEntity<AbstractFilterDto> getFilter(@PathVariable("id") UUID id) {
         return service.getFilter(id).map(filter -> ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
             .body(filter))
@@ -76,8 +76,8 @@ public class FilterController {
     @PostMapping(value = "/filters", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create a filter")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully created")})
-    public ResponseEntity<AbstractFilter> createFilter(@RequestParam("id") UUID filterId,
-                                                       @RequestBody AbstractFilter filter) {
+    public ResponseEntity<AbstractFilterDto> createFilter(@RequestParam("id") UUID filterId,
+                                                          @RequestBody AbstractFilterDto filter) {
         filter.setId(filterId);
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +87,7 @@ public class FilterController {
     @PostMapping(value = "/filters/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create filters from given ids")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters have been successfully created")})
-    public ResponseEntity<List<AbstractFilter>> createFilters(@RequestBody Map<UUID, AbstractFilter> filtersToCreateMap) {
+    public ResponseEntity<List<AbstractFilterDto>> createFilters(@RequestBody Map<UUID, AbstractFilterDto> filtersToCreateMap) {
         filtersToCreateMap.forEach((uuid, expertFilter) -> expertFilter.setId(uuid));
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
@@ -119,9 +119,9 @@ public class FilterController {
     @PutMapping(value = "/filters/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update a filter from a given id and the whole new filter object")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filter has been successfully updated")})
-    public ResponseEntity<AbstractFilter> updateFilter(@PathVariable UUID id, @RequestBody AbstractFilter filter, @RequestHeader("userId") String userId) {
+    public ResponseEntity<AbstractFilterDto> updateFilter(@PathVariable UUID id, @RequestBody AbstractFilterDto filter, @RequestHeader("userId") String userId) {
         try {
-            AbstractFilter updatedFilter = service.updateFilter(id, filter, userId);
+            AbstractFilterDto updatedFilter = service.updateFilter(id, filter, userId);
             return ResponseEntity.ok().body(updatedFilter);
         } catch (EntityNotFoundException ignored) {
             return ResponseEntity.notFound().build();
@@ -131,7 +131,7 @@ public class FilterController {
     @PutMapping(value = "/filters/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update filters in batch from a given map of each filter id and the corresponding whole new filter object")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Filters have been successfully updated")})
-    public ResponseEntity<List<AbstractFilter>> updateFilters(@RequestBody Map<UUID, AbstractFilter> filtersToUpdateMap) {
+    public ResponseEntity<List<AbstractFilterDto>> updateFilters(@RequestBody Map<UUID, AbstractFilterDto> filtersToUpdateMap) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.updateFilters(filtersToUpdateMap));
@@ -157,7 +157,7 @@ public class FilterController {
     @Operation(summary = "get filters metadata")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "filters metadata"),
         @ApiResponse(responseCode = "404", description = "The filters don't exist")})
-    public ResponseEntity<List<AbstractFilter>> getFiltersMetadata(@RequestParam("ids") List<UUID> ids) {
+    public ResponseEntity<List<AbstractFilterDto>> getFiltersMetadata(@RequestParam("ids") List<UUID> ids) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters(ids));
     }
 
@@ -191,10 +191,10 @@ public class FilterController {
     @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Export list of filters to JSON format")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filters on JSON format")})
-    public ResponseEntity<List<FilterEquipments>> exportFilters(@RequestParam("ids") List<UUID> ids,
+    public ResponseEntity<List<org.gridsuite.filter.model.FilterEquipments>> exportFilters(@RequestParam("ids") List<UUID> ids,
                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                 @RequestParam(value = "variantId", required = false) String variantId) {
-        List<FilterEquipments> ret = service.exportFilters(ids, networkUuid, variantId);
+        List<org.gridsuite.filter.model.FilterEquipments> ret = service.exportFilters(ids, networkUuid, variantId);
         Logger.getLogger("export").info(() -> String.format("multiple net:%s, variant:%s, ids:%s,%ngot:%d",
             networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), ret.size()).replaceAll("[$\r]", "_"));
         return ResponseEntity.ok()
@@ -219,10 +219,10 @@ public class FilterController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "The list of matched elements")
     })
-    public ResponseEntity<List<IdentifiableAttributes>> evaluateFilter(@RequestParam(value = "networkUuid") UUID networkUuid,
-                                                                       @RequestParam(value = "variantId", required = false) String variantId,
-                                                                       @RequestBody AbstractFilter filter) {
-        List<IdentifiableAttributes> identifiableAttributes = service.evaluateFilter(filter, networkUuid, variantId);
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(identifiableAttributes);
+    public ResponseEntity<org.gridsuite.filter.model.FilterEquipments> evaluateFilter(@RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                                      @RequestParam(value = "variantId", required = false) String variantId,
+                                                                                      @RequestBody Filter filter) {
+        org.gridsuite.filter.model.FilterEquipments filterEquipments = service.evaluateFilter(filter, networkUuid, variantId);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(filterEquipments);
     }
 }

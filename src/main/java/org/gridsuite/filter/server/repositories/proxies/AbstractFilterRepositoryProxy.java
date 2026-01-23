@@ -7,8 +7,9 @@
 
 package org.gridsuite.filter.server.repositories.proxies;
 
-import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.AbstractFilterDto;
+import org.gridsuite.filter.model.Filter;
+import org.gridsuite.filter.server.dto.FilterMetadataDto;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
@@ -41,15 +42,17 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
 
     public abstract R getRepository();
 
-    public abstract AbstractFilter toDto(F filterEntity);
+    public abstract AbstractFilterDto toDto(F filterEntity);
 
-    public abstract F fromDto(AbstractFilter dto);
+    public abstract Filter toModel(F filterEntity);
+
+    public abstract F fromDto(AbstractFilterDto dto);
 
     public abstract FilterType getFilterType();
 
     public abstract EquipmentType getEquipmentType(UUID id);
 
-    public Optional<AbstractFilter> getFilter(UUID id) {
+    public Optional<AbstractFilterDto> getFilter(UUID id) {
         Optional<F> element = getRepository().findById(id);
         if (element.isPresent()) {
             return element.map(this::toDto);
@@ -57,35 +60,50 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         return Optional.empty();
     }
 
-    public List<AbstractFilter> getFilters(List<UUID> ids) {
+    public Optional<Filter> getFilterModel(UUID id) {
+        Optional<F> element = getRepository().findById(id);
+        if (element.isPresent()) {
+            return element.map(this::toModel);
+        }
+        return Optional.empty();
+    }
+
+    public List<AbstractFilterDto> getFilters(List<UUID> ids) {
         return getRepository().findAllById(ids)
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
-    public Stream<FilterAttributes> getFiltersAttributes() {
+    public List<Filter> getFiltersModels(List<UUID> ids) {
+        return getRepository().findAllById(ids)
+            .stream()
+            .map(this::toModel)
+            .collect(Collectors.toList());
+    }
+
+    public Stream<FilterMetadataDto> getFiltersAttributes() {
         return getRepository().getFiltersMetadata().stream().map(this::metadataToAttribute);
     }
 
-    public Stream<FilterAttributes> getFiltersAttributes(List<UUID> ids) {
+    public Stream<FilterMetadataDto> getFiltersAttributes(List<UUID> ids) {
         return getRepository().findFiltersMetaDataById(ids).stream().map(this::metadataToAttribute);
     }
 
-    private FilterAttributes metadataToAttribute(final FilterMetadata f) {
-        return new FilterAttributes(f, getFilterType(), getEquipmentType(f.getId()));
+    private FilterMetadataDto metadataToAttribute(final FilterMetadata f) {
+        return new FilterMetadataDto(f, getFilterType(), getEquipmentType(f.getId()));
     }
 
-    public AbstractFilter insert(AbstractFilter f) {
+    public AbstractFilterDto insert(AbstractFilterDto f) {
         return toDto(getRepository().save(fromDto(f)));
     }
 
-    public List<AbstractFilter> insertAll(List<AbstractFilter> filters) {
+    public List<AbstractFilterDto> insertAll(List<AbstractFilterDto> filters) {
         List<F> savedFilterEntities = getRepository().saveAll(filters.stream().map(this::fromDto).toList());
         return savedFilterEntities.stream().map(this::toDto).toList();
     }
 
-    public AbstractFilter modify(UUID id, AbstractFilter f) {
+    public AbstractFilterDto modify(UUID id, AbstractFilterDto f) {
         f.setId(id);
         return toDto(getRepository().save(fromDto(f)));
     }
@@ -107,7 +125,7 @@ public abstract class AbstractFilterRepositoryProxy<F extends AbstractFilterEnti
         getRepository().deleteAll();
     }
 
-    public static void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilter dto) {
+    public static void buildAbstractFilter(AbstractFilterEntity.AbstractFilterEntityBuilder<?, ?> builder, AbstractFilterDto dto) {
         /* modification date is managed by jpa, so we don't process it */
         builder.id(dto.getId());
     }

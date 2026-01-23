@@ -3,9 +3,10 @@ package org.gridsuite.filter.server;
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.collections4.ListUtils;
-import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.AbstractFilterDto;
 import org.gridsuite.filter.FilterLoader;
-import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.model.Filter;
+import org.gridsuite.filter.server.dto.FilterMetadataDto;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
@@ -48,7 +49,7 @@ public class RepositoryService {
         };
     }
 
-    public AbstractFilterRepositoryProxy<?, ?> getRepositoryFromType(@NonNull final AbstractFilter filter) {
+    public AbstractFilterRepositoryProxy<?, ?> getRepositoryFromType(@NonNull final AbstractFilterDto filter) {
         return this.getRepositoryFromType(filter.getType());
     }
 
@@ -71,19 +72,19 @@ public class RepositoryService {
 
     /** @see AbstractFilterRepositoryProxy#getFiltersAttributes() */
     @Transactional(readOnly = true)
-    public Stream<FilterAttributes> getFiltersAttributes() {
+    public Stream<FilterMetadataDto> getFiltersAttributes() {
         return Stream.concat(this.identifierListFilterProxy.getFiltersAttributes(), this.expertFilterProxy.getFiltersAttributes());
     }
 
     /** @see AbstractFilterRepositoryProxy#getFiltersAttributes(List) */
     @Transactional(readOnly = true)
-    public Stream<FilterAttributes> getFiltersAttributes(@NonNull final List<UUID> ids) {
+    public Stream<FilterMetadataDto> getFiltersAttributes(@NonNull final List<UUID> ids) {
         return Stream.concat(this.identifierListFilterProxy.getFiltersAttributes(ids), this.expertFilterProxy.getFiltersAttributes(ids));
     }
 
     /** @see AbstractFilterRepositoryProxy#getFilters(List) */
     @Transactional(readOnly = true)
-    public List<AbstractFilter> getFilters(@NonNull final List<UUID> ids) {
+    public List<AbstractFilterDto> getFilters(@NonNull final List<UUID> ids) {
         return ListUtils.union(
             this.identifierListFilterProxy.getFilters(ids),
             this.expertFilterProxy.getFilters(ids)
@@ -92,7 +93,22 @@ public class RepositoryService {
 
     /** @see AbstractFilterRepositoryProxy#getFilter(UUID) */
     @Transactional(readOnly = true)
-    public Optional<AbstractFilter> getFilter(@NonNull final UUID id) {
+    public Optional<AbstractFilterDto> getFilter(@NonNull final UUID id) {
         return this.identifierListFilterProxy.getFilter(id).or(() -> this.expertFilterProxy.getFilter(id));
+    }
+
+    /** @see AbstractFilterRepositoryProxy#getFilter(UUID) */
+    @Transactional(readOnly = true)
+    public Optional<Filter> getFilterModel(@NonNull final UUID id) {
+        return this.identifierListFilterProxy.getFilterModel(id).or(() -> this.expertFilterProxy.getFilterModel(id));
+    }
+
+    /** @see AbstractFilterRepositoryProxy#getFilters(List) */
+    @Transactional(readOnly = true)
+    public List<Filter> getFiltersModels(@NonNull final List<UUID> ids) {
+        return ListUtils.union(
+            this.identifierListFilterProxy.getFiltersModels(ids),
+            this.expertFilterProxy.getFiltersModels(ids)
+        );
     }
 }
