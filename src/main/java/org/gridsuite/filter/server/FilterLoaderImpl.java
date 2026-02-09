@@ -26,8 +26,7 @@ public class FilterLoaderImpl implements FilterLoader {
         this.filterRepositories = filterRepositories;
     }
 
-    @Override
-    public Optional<AbstractFilter> getFilter(UUID id) {
+    private Optional<AbstractFilter> getFilter(UUID id) {
         Objects.requireNonNull(id);
         for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
             Optional<AbstractFilter> res = repository.getFilter(id);

@@ -172,12 +172,6 @@ public class FilterService {
                         .toList();
                 }
 
-                @Override
-                public Optional<AbstractFilter> getFilter(UUID uuid) {
-                    return uuid.equals(id)
-                        ? Optional.of(newFilter)
-                        : repositoriesService.getFilter(uuid);
-                }
             };
 
             try {

@@ -44,13 +44,6 @@ public class GlobalFilterService extends AbstractGlobalFilterService {
         return this.repositoriesService.getFilters(filtersUuids);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<AbstractFilter> getFilter(UUID uuid) {
-        return this.repositoriesService.getFilter(uuid);
-    }
-
     /* Expose it publicly */
     /** {@inheritDoc} */
     @Override
