@@ -15,11 +15,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.api.FilterEvaluator;
+import org.gridsuite.filter.api.dto.FilterAttributes;
+import org.gridsuite.filter.api.dto.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.exception.FilterCycleException;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
 import org.gridsuite.filter.server.error.FilterException;
@@ -27,7 +29,6 @@ import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepository
 import org.gridsuite.filter.server.service.DirectoryService;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
-import org.gridsuite.filter.utils.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
@@ -55,6 +56,7 @@ public class FilterService {
     private final NetworkStoreService networkStoreService;
     private final NotificationService notificationService;
     private final DirectoryService directoryService;
+    private final FilterEvaluator filterEvaluator;
 
     public List<IFilterAttributes> getFilters() {
         return this.repositoriesService.getFiltersAttributes()
@@ -164,22 +166,9 @@ public class FilterService {
         if (filterOpt.isPresent()) {
             newFilter.setId(id);
 
-            FilterLoader filterLoader = new FilterLoader() {
-                @Override
-                public List<AbstractFilter> getFilters(List<UUID> uuids) {
-                    return uuids.stream()
-                        .map(uuid -> uuid.equals(id) ? newFilter : repositoriesService.getFilter(uuid).orElse(null))
-                        .toList();
-                }
-
-                @Override
-                public Optional<AbstractFilter> getFilter(UUID uuid) {
-                    return uuid.equals(id)
-                        ? Optional.of(newFilter)
-                        : repositoriesService.getFilter(uuid);
-                }
-            };
-
+            FilterLoader filterLoader = uuids -> uuids.stream()
+                .map(uuid -> uuid.equals(id) ? newFilter : this.repositoriesService.getFilter(uuid).orElse(null))
+                .toList();
             try {
                 FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
             } catch (FilterCycleException exception) {
@@ -259,9 +248,7 @@ public class FilterService {
     @Transactional(readOnly = true)
     public FilteredIdentifiables evaluateFiltersWithEquipmentTypes(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
         Network network = getNetwork(networkUuid, variantId);
-        FilterLoader filterLoader = this.repositoriesService.getFilterLoader();
-
-        return FilterServiceUtils.evaluateFiltersWithEquipmentTypes(filtersWithEquipmentTypes, network, filterLoader);
+        return filterEvaluator.evaluateFilters(filtersWithEquipmentTypes, network);
     }
 
     @Transactional(readOnly = true)

@@ -5,7 +5,7 @@ import lombok.NonNull;
 import org.apache.commons.collections4.ListUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
-import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
+import org.gridsuite.filter.api.dto.FilterAttributes;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
@@ -35,7 +35,7 @@ public class RepositoryService {
                              final ExpertFilterRepository expertFilterRepository) {
         this.identifierListFilterProxy = new IdentifierListFilterRepositoryProxy(identifierListFilterRepository);
         this.expertFilterProxy = new ExpertFilterRepositoryProxy(expertFilterRepository);
-        this.filterLoader = new FilterLoaderImpl(Map.of(
+        this.filterLoader = new DefaultFilterLoader(Map.of(
             FilterType.IDENTIFIER_LIST.name(), this.identifierListFilterProxy,
             FilterType.EXPERT.name(), this.expertFilterProxy
         ));
