@@ -164,15 +164,9 @@ public class FilterService {
         if (filterOpt.isPresent()) {
             newFilter.setId(id);
 
-            FilterLoader filterLoader = new FilterLoader() {
-                @Override
-                public List<AbstractFilter> getFilters(List<UUID> uuids) {
-                    return uuids.stream()
-                        .map(uuid -> uuid.equals(id) ? newFilter : repositoriesService.getFilter(uuid).orElse(null))
-                        .toList();
-                }
-
-            };
+            FilterLoader filterLoader = uuids -> uuids.stream()
+                .map(uuid -> uuid.equals(id) ? newFilter : repositoriesService.getFilter(uuid).orElse(null))
+                .toList();
 
             try {
                 FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
