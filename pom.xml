@@ -42,9 +42,7 @@
     </developers>
 
     <properties>
-        <gridsuite-dependencies.version>47.0.0</gridsuite-dependencies.version>
-        <!-- TODO filter.version remove when included in gridsuite-dependencies -->
-        <filter.version>1.20.0</filter.version>
+        <gridsuite-dependencies.version>48.0.0</gridsuite-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
         <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
         <sonar.coverage.exclusions>**/migrations/**/*</sonar.coverage.exclusions>
@@ -89,12 +87,6 @@
     <dependencyManagement>
         <dependencies>
             <!-- imports -->
-            <!-- FIXME: to be removed at next gridsuite-dependencies upgrade  -->
-            <dependency>
-                <groupId>org.gridsuite</groupId>
-                <artifactId>gridsuite-filter</artifactId>
-                <version>${filter.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.gridsuite</groupId>
                 <artifactId>gridsuite-dependencies</artifactId>
