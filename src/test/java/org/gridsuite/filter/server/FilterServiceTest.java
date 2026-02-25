@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.network.store.client.NetworkStoreService;
+import org.gridsuite.filter.api.FilterEvaluator;
 import org.gridsuite.filter.exception.FilterCycleException;
 import org.gridsuite.filter.server.error.FilterException;
 import org.gridsuite.filter.server.service.DirectoryService;
@@ -26,9 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Mohamed Ben-rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
@@ -44,13 +43,15 @@ class FilterServiceTest {
     private NotificationService notificationService;
     @Mock
     private DirectoryService directoryService;
+    @Mock
+    private FilterEvaluator filterEvaluator;
 
     @Autowired
     private FilterService filterService;
 
     @BeforeEach
     void setUp() {
-        filterService = new FilterService(repositoryService, networkStoreService, notificationService, directoryService);
+        filterService = new FilterService(repositoryService, networkStoreService, notificationService, directoryService, filterEvaluator);
     }
 
     @Test

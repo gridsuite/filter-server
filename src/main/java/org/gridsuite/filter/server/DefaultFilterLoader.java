@@ -10,36 +10,37 @@ import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
-public class FilterLoaderImpl implements FilterLoader {
+public class DefaultFilterLoader implements FilterLoader {
     private final Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories;
 
-    public FilterLoaderImpl(Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories) {
+    public DefaultFilterLoader(Map<String, AbstractFilterRepositoryProxy<?, ?>> filterRepositories) {
         this.filterRepositories = filterRepositories;
-    }
-
-    private Optional<AbstractFilter> getFilter(UUID id) {
-        Objects.requireNonNull(id);
-        for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
-            Optional<AbstractFilter> res = repository.getFilter(id);
-            if (res.isPresent()) {
-                return res;
-            }
-        }
-        return Optional.empty();
     }
 
     @Override
     public List<AbstractFilter> getFilters(List<UUID> uuids) {
-        return uuids.stream()
-            .map(id -> getFilter(id).orElse(null)).toList();
+        List<UUID> uuidsLoading = new ArrayList<>(uuids);
+        List<AbstractFilter> result = new ArrayList<>();
+        for (AbstractFilterRepositoryProxy<?, ?> repository : filterRepositories.values()) {
+            List<AbstractFilter> partialResult = repository.getFilters(uuidsLoading);
+            result.addAll(partialResult);
+
+            // prepare next iteration
+            List<UUID> foundUuids = partialResult.stream().map(AbstractFilter::getId).toList();
+            uuidsLoading.removeAll(foundUuids);
+            if (uuidsLoading.isEmpty()) {
+                break;
+            }
+        }
+
+        return result;
     }
 }

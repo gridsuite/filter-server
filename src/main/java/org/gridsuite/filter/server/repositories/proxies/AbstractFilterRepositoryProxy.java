@@ -8,9 +8,9 @@
 package org.gridsuite.filter.server.repositories.proxies;
 
 import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.api.dto.FilterAttributes;
 import org.gridsuite.filter.server.entities.AbstractFilterEntity;
-import org.gridsuite.filter.server.repositories.FilterMetadata;
+import org.gridsuite.filter.api.dto.FilterMetadata;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterType;
