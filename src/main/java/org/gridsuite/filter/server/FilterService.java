@@ -9,6 +9,7 @@ package org.gridsuite.filter.server;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.IdentifiableType;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import lombok.AllArgsConstructor;
@@ -282,18 +283,29 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> exportBusFromVoltageLevelFilters(List<UUID> ids, UUID networkUuid, String variantId) {
-        List<String> busIds = new ArrayList<>();
+    public List<FilterEquipments> exportBusFromVoltageLevelFilters(List<UUID> ids, UUID networkUuid, String variantId) {
         Network network = getNetwork(networkUuid, variantId);
         List<FilterEquipments> filterEquipments = exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
-        filterEquipments.forEach(filterEquipment ->
-                filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
-                    if (identifiableAttribute.getType() != IdentifiableType.VOLTAGE_LEVEL) {
-                        throw new IllegalStateException("Exporting bus from voltage level filters is only allowed for voltage level filters");
-                    }
-                    network.getVoltageLevel(identifiableAttribute.getId()).getBusView().getBusStream().forEach(bus -> busIds.add(bus.getId()));
-                }));
-        return busIds;
+        List<FilterEquipments> filterBuses = new ArrayList<>();
+        filterEquipments.forEach(filterEquipment -> {
+            List<IdentifiableAttributes> busIds = new ArrayList<>();
+            List<String> notFoundVoltageLevels = new ArrayList<>();
+
+            filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
+                if (identifiableAttribute.getType() != IdentifiableType.VOLTAGE_LEVEL) {
+                    throw new IllegalStateException("Exporting bus from voltage level filters is only allowed for voltage level filters");
+                }
+                VoltageLevel voltageLevel = network.getVoltageLevel(identifiableAttribute.getId());
+                if (voltageLevel == null) {
+                    notFoundVoltageLevels.add(identifiableAttribute.getId());
+                } else {
+                    voltageLevel.getBusView().getBusStream().forEach(bus ->
+                            busIds.add(new IdentifiableAttributes(bus.getId(), IdentifiableType.BUS, null)));
+                }
+            });
+            filterBuses.add(new FilterEquipments(filterEquipment.getFilterId(), busIds, notFoundVoltageLevels));
+        });
+        return filterBuses;
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, Network network, Set<FilterType> filterTypesToExclude, FilterLoader filterLoader) {

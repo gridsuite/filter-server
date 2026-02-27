@@ -205,10 +205,10 @@ public class FilterController {
     @GetMapping(value = "/filters/export/busIds", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Export list of filters to JSON format")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filters on JSON format")})
-    public ResponseEntity<List<String>> exportFiltersBus(@RequestParam("ids") List<UUID> ids,
+    public ResponseEntity<List<FilterEquipments>> exportFiltersBus(@RequestParam("ids") List<UUID> ids,
                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,
                                                                 @RequestParam(value = "variantId", required = false) String variantId) {
-        List<String> ret = service.exportBusFromVoltageLevelFilters(ids, networkUuid, variantId);
+        List<FilterEquipments> ret = service.exportBusFromVoltageLevelFilters(ids, networkUuid, variantId);
         Logger.getLogger("export").info(() -> String.format("multiple net:%s, variant:%s, ids:%s,%ngot:%d",
                 networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), ret.size()).replaceAll("[$\r]", "_"));
         return ResponseEntity.ok()

@@ -1561,7 +1561,7 @@ public class FilterEntityControllerTest {
         checkExpertFilter(filterId, expertFilter);
 
         String expectedResultJson = """
-                ["VLGEN_0","VLLOAD_0"]
+                [{"filterId":"77614d91-c168-4f89-8fb9-77a23729e88e","identifiableAttributes":[{"id":"VLGEN_0","type":"BUS","distributionKey":null},{"id":"VLLOAD_0","type":"BUS","distributionKey":null}],"notFoundEquipments":[]}]
             """;
         mvc.perform(get(URL_TEMPLATE + "/export/busIds")
                         .param("networkUuid", NETWORK_UUID.toString())
