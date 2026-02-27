@@ -292,7 +292,7 @@ public class FilterService {
                         throw new IllegalStateException("Exporting bus from voltage level filters is only allowed for voltage level filters");
                     }
                     network.getVoltageLevel(identifiableAttribute.getId()).getBusView().getBusStream().forEach(bus -> busIds.add(bus.getId()));
-        }));
+                }));
         return busIds;
     }
 
