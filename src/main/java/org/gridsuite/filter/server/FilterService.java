@@ -7,6 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.IdentifiableType;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
@@ -278,6 +279,22 @@ public class FilterService {
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
         Network network = getNetwork(networkUuid, variantId);
         return exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> exportBusFromVoltageLevelFilters(List<UUID> ids, UUID networkUuid, String variantId) {
+        List<String> busIds = new ArrayList<>();
+        Network network = getNetwork(networkUuid, variantId);
+        List<FilterEquipments> filterEquipments = exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
+        filterEquipments.forEach(filterEquipment -> {
+            filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
+                if (identifiableAttribute.getType() != IdentifiableType.VOLTAGE_LEVEL) {
+                    throw new IllegalStateException("Exporting bus from voltage level filters is only allowed for voltage level filters");
+                }
+                network.getVoltageLevel(identifiableAttribute.getId()).getBusView().getBusStream().forEach(bus -> busIds.add(bus.getId()));
+            });
+        });
+        return busIds;
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, Network network, Set<FilterType> filterTypesToExclude, FilterLoader filterLoader) {

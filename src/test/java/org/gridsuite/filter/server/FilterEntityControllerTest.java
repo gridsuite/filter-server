@@ -1547,4 +1547,31 @@ public class FilterEntityControllerTest {
         Assertions.assertThat(allFilters).isEmpty();
     }
 
+    @Test
+    public void testExportBusId() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLLOAD")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Collections.singletonList(stringInRule)).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.VOLTAGE_LEVEL, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        String expectedResultJson = """
+                ["VLGEN_0","VLLOAD_0"]
+            """;
+        mvc.perform(get(URL_TEMPLATE + "/export/busIds")
+                        .param("networkUuid", NETWORK_UUID.toString())
+                        .param("ids", filterId.toString())
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(content().json(expectedResultJson));
+
+        deleteFilter(filterId);
+    }
+
 }
