@@ -286,14 +286,13 @@ public class FilterService {
         List<String> busIds = new ArrayList<>();
         Network network = getNetwork(networkUuid, variantId);
         List<FilterEquipments> filterEquipments = exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
-        filterEquipments.forEach(filterEquipment -> {
-            filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
-                if (identifiableAttribute.getType() != IdentifiableType.VOLTAGE_LEVEL) {
-                    throw new IllegalStateException("Exporting bus from voltage level filters is only allowed for voltage level filters");
-                }
-                network.getVoltageLevel(identifiableAttribute.getId()).getBusView().getBusStream().forEach(bus -> busIds.add(bus.getId()));
-            });
-        });
+        filterEquipments.forEach(filterEquipment ->
+                filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
+                    if (identifiableAttribute.getType() != IdentifiableType.VOLTAGE_LEVEL) {
+                        throw new IllegalStateException("Exporting bus from voltage level filters is only allowed for voltage level filters");
+                    }
+                    network.getVoltageLevel(identifiableAttribute.getId()).getBusView().getBusStream().forEach(bus -> busIds.add(bus.getId()));
+        }));
         return busIds;
     }
 
