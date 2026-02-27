@@ -5,7 +5,7 @@ import lombok.NonNull;
 import org.apache.commons.collections4.ListUtils;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
-import org.gridsuite.filter.server.dto.FilterAttributes;
+import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;

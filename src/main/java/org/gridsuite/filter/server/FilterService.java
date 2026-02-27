@@ -7,7 +7,6 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import com.powsybl.iidm.network.IdentifiableType;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
@@ -17,22 +16,18 @@ import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.exception.FilterCycleException;
-import org.gridsuite.filter.expertfilter.ExpertFilter;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.server.dto.EquipmentTypesByFilterId;
-import org.gridsuite.filter.server.dto.FilterAttributes;
-import org.gridsuite.filter.server.dto.FiltersWithEquipmentTypes;
+import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
 import org.gridsuite.filter.server.error.FilterException;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 import org.gridsuite.filter.server.service.DirectoryService;
-import org.gridsuite.filter.server.utils.FilterWithEquipmentTypesUtils;
-import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterServiceUtils;
 import org.gridsuite.filter.utils.FilterType;
+import org.gridsuite.filter.utils.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.utils.expertfilter.FilterCycleDetector;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
@@ -41,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -171,8 +165,9 @@ public class FilterService {
             newFilter.setId(id);
 
             FilterLoader filterLoader = uuids -> uuids.stream()
-                .map(uuid -> uuid.equals(id) ? newFilter : this.repositoriesService.getFilter(uuid).orElse(null))
+                .map(uuid -> uuid.equals(id) ? newFilter : repositoriesService.getFilter(uuid).orElse(null))
                 .toList();
+
             try {
                 FilterCycleDetector.checkNoCycle(newFilter, filterLoader);
             } catch (FilterCycleException exception) {
@@ -251,55 +246,10 @@ public class FilterService {
 
     @Transactional(readOnly = true)
     public FilteredIdentifiables evaluateFiltersWithEquipmentTypes(FiltersWithEquipmentTypes filtersWithEquipmentTypes, UUID networkUuid, String variantId) {
-        Map<String, IdentifiableAttributes> result = new TreeMap<>();
-        Map<String, IdentifiableAttributes> notFound = new TreeMap<>();
         Network network = getNetwork(networkUuid, variantId);
         FilterLoader filterLoader = this.repositoriesService.getFilterLoader();
 
-        filtersWithEquipmentTypes.filters().forEach((FilterAttributes filterAttributes) -> {
-                UUID filterUuid = filterAttributes.getId();
-                Optional<AbstractFilter> optFilter = this.repositoriesService.getFilter(filterUuid);
-                if (optFilter.isEmpty()) {
-                    return;
-                }
-                AbstractFilter filter = optFilter.get();
-                Objects.requireNonNull(filter);
-                EquipmentType filterEquipmentType = filter.getEquipmentType();
-                FilteredIdentifiables filteredIdentifiables = filter.toFilteredIdentifiables(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader));
-
-                // unduplicate equipments and merge in common lists
-                if (filteredIdentifiables.notFoundIds() != null) {
-                    filteredIdentifiables.notFoundIds().forEach(element -> notFound.put(element.getId(), element));
-                }
-
-                if (filteredIdentifiables.equipmentIds() != null) {
-                    if (filterEquipmentType != EquipmentType.SUBSTATION && filterEquipmentType != EquipmentType.VOLTAGE_LEVEL) {
-                        filteredIdentifiables.equipmentIds().forEach(element -> result.put(element.getId(), element));
-                    } else {
-                        Set<IdentifiableType> selectedEquipmentTypes = filtersWithEquipmentTypes.selectedEquipmentTypesByFilter()
-                            .stream()
-                            .filter(equipmentTypesByFilterId -> equipmentTypesByFilterId.filterId().equals(filterUuid))
-                            .findFirst()
-                            .map(EquipmentTypesByFilterId::equipmentTypes)
-                            .orElseThrow(
-                                () -> new IllegalStateException("No selected equipment types for filter " + filterUuid
-                                    + " : substation and voltage level filters should contain an equipment types list")
-                            );
-
-                        // This list is the result of the original filter and so necessarily contains a list of IDs of substations or voltage levels
-                        Set<String> filteredEquipmentIds = filteredIdentifiables.equipmentIds().stream().map(IdentifiableAttributes::getId).collect(Collectors.toSet());
-                        List<ExpertFilter> filters = FilterWithEquipmentTypesUtils.createFiltersForSubEquipments(filterEquipmentType,
-                            filteredEquipmentIds,
-                            selectedEquipmentTypes);
-                        filters.stream().flatMap(expertFilter -> getIdentifiableAttributes(expertFilter, networkUuid, variantId, filterLoader).stream())
-                            .forEach(element -> result.put(element.getId(), element));
-                    }
-                }
-            }
-        );
-        return new FilteredIdentifiables(
-            result.values().stream().sorted(Comparator.comparing(e -> e.getType().ordinal())).toList(),
-            notFound.values().stream().sorted(Comparator.comparing(e -> e.getType().ordinal())).toList());
+        return FilterServiceUtils.evaluateFiltersWithEquipmentTypes(filtersWithEquipmentTypes, network, filterLoader);
     }
 
     @Transactional(readOnly = true)
