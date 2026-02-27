@@ -65,12 +65,12 @@ import java.util.stream.Stream;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.apache.commons.lang3.StringUtils.join;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
@@ -1570,6 +1570,30 @@ public class FilterEntityControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(content().json(expectedResultJson));
+
+        deleteFilter(filterId);
+    }
+
+    @Test
+    public void testWrongExportBusId() throws Exception {
+        UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
+
+        // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
+        StringExpertRule stringInRule = StringExpertRule.builder().values(new HashSet<>(Arrays.asList("VLGEN", "VLLOAD")))
+                .field(FieldType.VOLTAGE_LEVEL_ID).operator(OperatorType.IN).build();
+        CombinatorExpertRule inFilter = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(Collections.singletonList(stringInRule)).build();
+
+        ExpertFilter expertFilter = new ExpertFilter(filterId, new Date(), EquipmentType.GENERATOR, inFilter);
+        insertFilter(filterId, expertFilter);
+        checkExpertFilter(filterId, expertFilter);
+
+        mvc.perform(get(URL_TEMPLATE + "/export/busIds")
+                        .param("networkUuid", NETWORK_UUID.toString())
+                        .param("ids", filterId.toString())
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.detail")
+                        .value(containsString("Exporting bus from voltage level filters is only allowed for voltage level filters")));
 
         deleteFilter(filterId);
     }
