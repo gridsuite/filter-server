@@ -286,14 +286,12 @@ public class FilterService {
     public List<FilterEquipments> exportBusFromVoltageLevelFilters(List<UUID> ids, UUID networkUuid, String variantId) {
         Network network = getNetwork(networkUuid, variantId);
         List<FilterEquipments> filterEquipments = exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
-        List<FilterEquipments> filterBuses = new ArrayList<>();
-        filterEquipments.forEach(filterEquipment -> {
+        return filterEquipments.stream().map(filterEquipment -> {
             List<IdentifiableAttributes> busIds = new ArrayList<>();
             List<String> notFoundVoltageLevels = new ArrayList<>();
-
             filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
                 if (identifiableAttribute.getType() != IdentifiableType.VOLTAGE_LEVEL) {
-                    throw new IllegalStateException("Exporting bus from voltage level filters is only allowed for voltage level filters");
+                    throw new IllegalStateException("Cannot export bus ids for non-voltage level filters");
                 }
                 VoltageLevel voltageLevel = network.getVoltageLevel(identifiableAttribute.getId());
                 if (voltageLevel == null) {
@@ -303,9 +301,8 @@ public class FilterService {
                             busIds.add(new IdentifiableAttributes(bus.getId(), IdentifiableType.BUS, null)));
                 }
             });
-            filterBuses.add(new FilterEquipments(filterEquipment.getFilterId(), busIds, notFoundVoltageLevels));
-        });
-        return filterBuses;
+            return new FilterEquipments(filterEquipment.getFilterId(), busIds, notFoundVoltageLevels);
+        }).toList();
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, Network network, Set<FilterType> filterTypesToExclude, FilterLoader filterLoader) {

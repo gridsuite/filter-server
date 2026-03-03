@@ -203,7 +203,7 @@ public class FilterController {
     }
 
     @GetMapping(value = "/filters/export/busIds", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Export list of filters to JSON format")
+    @Operation(summary = "Export a list of voltage level filters to bus ids in a JSON format")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filters on JSON format")})
     public ResponseEntity<List<FilterEquipments>> exportFiltersBus(@RequestParam("ids") List<UUID> ids,
                                                                 @RequestParam(value = "networkUuid") UUID networkUuid,

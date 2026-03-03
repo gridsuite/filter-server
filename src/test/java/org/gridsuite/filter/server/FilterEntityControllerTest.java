@@ -1593,7 +1593,7 @@ public class FilterEntityControllerTest {
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.detail")
-                        .value(containsString("Exporting bus from voltage level filters is only allowed for voltage level filters")));
+                        .value(containsString("Cannot export bus ids for non-voltage level filters")));
 
         deleteFilter(filterId);
     }
