@@ -289,6 +289,9 @@ public class FilterService {
         return filterEquipments.stream().map(filterEquipment -> {
             List<IdentifiableAttributes> busIds = new ArrayList<>();
             List<String> notFoundVoltageLevels = new ArrayList<>();
+            if (filterEquipment.getNotFoundEquipments() != null) {
+                notFoundVoltageLevels.addAll(filterEquipment.getNotFoundEquipments());
+            }
             filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
                 if (identifiableAttribute.getType() != IdentifiableType.VOLTAGE_LEVEL) {
                     throw new IllegalStateException("Cannot export bus ids for non-voltage level filters");
