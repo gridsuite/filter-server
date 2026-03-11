@@ -7,7 +7,9 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
+import com.powsybl.iidm.network.IdentifiableType;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import lombok.AllArgsConstructor;
@@ -278,6 +280,32 @@ public class FilterService {
     public List<FilterEquipments> exportFilters(List<UUID> ids, UUID networkUuid, String variantId) {
         Network network = getNetwork(networkUuid, variantId);
         return exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
+    }
+
+    @Transactional(readOnly = true)
+    public List<FilterEquipments> exportBusFromVoltageLevelFilters(List<UUID> ids, UUID networkUuid, String variantId) {
+        Network network = getNetwork(networkUuid, variantId);
+        List<FilterEquipments> filterEquipments = exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
+        return filterEquipments.stream().map(filterEquipment -> {
+            List<IdentifiableAttributes> busIds = new ArrayList<>();
+            List<String> notFoundVoltageLevels = new ArrayList<>();
+            if (filterEquipment.getNotFoundEquipments() != null) {
+                notFoundVoltageLevels.addAll(filterEquipment.getNotFoundEquipments());
+            }
+            filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
+                if (identifiableAttribute.getType() != IdentifiableType.VOLTAGE_LEVEL) {
+                    throw new IllegalStateException("Cannot export bus ids for non-voltage level filters");
+                }
+                VoltageLevel voltageLevel = network.getVoltageLevel(identifiableAttribute.getId());
+                if (voltageLevel == null) {
+                    notFoundVoltageLevels.add(identifiableAttribute.getId());
+                } else {
+                    voltageLevel.getBusView().getBusStream().forEach(bus ->
+                            busIds.add(new IdentifiableAttributes(bus.getId(), IdentifiableType.BUS, null)));
+                }
+            });
+            return new FilterEquipments(filterEquipment.getFilterId(), busIds, notFoundVoltageLevels);
+        }).toList();
     }
 
     public List<FilterEquipments> exportFilters(List<UUID> ids, Network network, Set<FilterType> filterTypesToExclude, FilterLoader filterLoader) {
