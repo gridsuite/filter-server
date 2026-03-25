@@ -66,7 +66,7 @@ public final class FilterWithEquipmentTypesUtils {
     public static AbstractExpertRule createSubstationRuleByEquipmentType(IdentifiableType equipmentType, Set<String> substationIds) {
         return switch (equipmentType) {
             case LOAD, GENERATOR, SHUNT_COMPENSATOR, STATIC_VAR_COMPENSATOR, BUSBAR_SECTION, BATTERY,
-                 DANGLING_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER -> createRuleWithOneField(substationIds, SUBSTATION_ID);
+                 BOUNDARY_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER -> createRuleWithOneField(substationIds, SUBSTATION_ID);
             case LINE, HVDC_LINE -> createRuleWithTwoFields(substationIds, SUBSTATION_ID_1, SUBSTATION_ID_2);
             default -> throw new UnsupportedOperationException("Unsupported equipment type " + equipmentType);
         };
@@ -75,7 +75,7 @@ public final class FilterWithEquipmentTypesUtils {
     public static AbstractExpertRule createVoltageLevelRuleByEquipmentType(IdentifiableType equipmentType, Set<String> voltageLevelIds) {
         return switch (equipmentType) {
             case LOAD, GENERATOR, SHUNT_COMPENSATOR, STATIC_VAR_COMPENSATOR, BUSBAR_SECTION, BATTERY,
-                 DANGLING_LINE -> createRuleWithOneField(voltageLevelIds, VOLTAGE_LEVEL_ID);
+                 BOUNDARY_LINE -> createRuleWithOneField(voltageLevelIds, VOLTAGE_LEVEL_ID);
             case LINE, HVDC_LINE, TWO_WINDINGS_TRANSFORMER -> createRuleWithTwoFields(voltageLevelIds, VOLTAGE_LEVEL_ID_1, VOLTAGE_LEVEL_ID_2);
             case THREE_WINDINGS_TRANSFORMER -> createRuleWithThreeFields(voltageLevelIds, VOLTAGE_LEVEL_ID_1, VOLTAGE_LEVEL_ID_2, VOLTAGE_LEVEL_ID_3);
             default -> throw new UnsupportedOperationException("Unsupported equipment type " + equipmentType);
