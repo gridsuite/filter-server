@@ -58,8 +58,8 @@ public class FilterController {
     @GetMapping(value = "/filters/infos", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get filters infos")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Get filters infos of given ids")})
-    public ResponseEntity<List<FilterAttributes>> getFilters(@RequestParam List<UUID> filterUuids, @RequestHeader String userId) {
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFiltersAttributes(filterUuids, userId));
+    public ResponseEntity<List<FilterAttributes>> getFilters(@RequestParam List<UUID> filterUuids) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFiltersAttributes(filterUuids));
     }
 
     @GetMapping(value = "/filters/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

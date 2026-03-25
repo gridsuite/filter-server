@@ -8,8 +8,6 @@ package org.gridsuite.filter.server;
 
 import com.powsybl.network.store.client.NetworkStoreService;
 import org.gridsuite.filter.exception.FilterCycleException;
-import org.gridsuite.filter.server.error.FilterException;
-import org.gridsuite.filter.server.service.DirectoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -23,12 +21,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Mohamed Ben-rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
@@ -42,60 +34,41 @@ class FilterServiceTest {
     private NetworkStoreService networkStoreService;
     @Mock
     private NotificationService notificationService;
-    @Mock
-    private DirectoryService directoryService;
 
     @Autowired
     private FilterService filterService;
 
     @BeforeEach
     void setUp() {
-        filterService = new FilterService(repositoryService, networkStoreService, notificationService, directoryService);
+        filterService = new FilterService(repositoryService, networkStoreService, notificationService);
     }
 
     @Test
-    void getCyclicFilterNamesUsesResolvedNamesAndIds() throws Exception {
+    void getCyclicFilterNamesUsesResolvedIdsAndIds() throws Exception {
         UUID first = UUID.randomUUID();
         UUID second = UUID.randomUUID();
         UUID third = UUID.randomUUID();
         List<UUID> cycle = List.of(first, second, third);
-        when(directoryService.getElementsName(cycle, "user-id")).thenReturn(Map.of(
-            first, "A",
-            second, "B",
-            third, "A"
-        ));
 
-        Map<String, Object> properties = invokeGetCyclicFilterNames(cycle);
+        Map<String, Object> properties = invokeGetCyclicFilterIds(cycle);
 
         assertThat(properties)
-            .containsEntry("filters", "A -> B -> A");
+            .containsEntry("filters", first + " -> " + second + " -> " + third);
     }
 
     @Test
-    void getCyclicFilterNamesReturnsEmptyMapWhenCycleMissing() throws Exception {
-        Map<String, Object> properties = invokeGetCyclicFilterNames(List.of());
+    void getCyclicFilterIdsReturnsEmptyMapWhenCycleMissing() throws Exception {
+        Map<String, Object> properties = invokeGetCyclicFilterIds(List.of());
 
         assertThat(properties).isEmpty();
-        verify(directoryService, never()).getElementsName(anyList(), anyString());
     }
 
-    @Test
-    void getCyclicFilterNamesFallsBackWhenDirectoryLookupFails() {
-        UUID first = UUID.randomUUID();
-        List<UUID> cycle = List.of(first);
-        when(directoryService.getElementsName(cycle, "user-id")).thenThrow(new IllegalStateException("exp"));
-
-        assertThatThrownBy(() -> invokeGetCyclicFilterNames(cycle))
-            .isInstanceOf(FilterException.class)
-            .hasMessage("cycle");
-    }
-
-    private Map<String, Object> invokeGetCyclicFilterNames(List<UUID> cycle) throws Exception {
+    private Map<String, Object> invokeGetCyclicFilterIds(List<UUID> cycle) throws Exception {
         FilterCycleException exception = new FilterCycleException("cycle", cycle);
-        Method helper = FilterService.class.getDeclaredMethod("getCyclicFilterNames", String.class, FilterCycleException.class);
+        Method helper = FilterService.class.getDeclaredMethod("getCyclicFilterIds", FilterCycleException.class);
         helper.setAccessible(true);
         try {
-            return (Map<String, Object>) helper.invoke(filterService, "user-id", exception);
+            return (Map<String, Object>) helper.invoke(filterService, exception);
         } catch (InvocationTargetException targetException) {
             Throwable cause = targetException.getCause();
             throw (Exception) cause;
