@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -12,11 +12,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.server.dto.CountWithMissingUuids;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.utils.FiltersWithEquipmentTypes;
@@ -47,13 +46,6 @@ public class FilterController {
 
     public FilterController(FilterService service) {
         this.service = service;
-    }
-
-    @GetMapping(value = "/filters", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all filters")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "All filters")})
-    public ResponseEntity<List<IFilterAttributes>> getFilters() {
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
     }
 
     @GetMapping(value = "/filters/infos", produces = MediaType.APPLICATION_JSON_VALUE)

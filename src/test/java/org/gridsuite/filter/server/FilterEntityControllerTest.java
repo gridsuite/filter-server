@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -84,6 +84,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class FilterEntityControllerTest {
 
     public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters";
+    public static final String SUPERVISION_URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/supervision/filters";
     private static final long TIMEOUT = 1000;
 
     @Autowired
@@ -939,7 +940,7 @@ public class FilterEntityControllerTest {
     }
 
     private List<IFilterAttributes> getAllFilters() throws Exception {
-        String response = mvc.perform(get(URL_TEMPLATE)
+        String response = mvc.perform(get(SUPERVISION_URL_TEMPLATE)
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, new TypeReference<>() { });
