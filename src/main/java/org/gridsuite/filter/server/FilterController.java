@@ -17,6 +17,7 @@ import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
+import org.gridsuite.filter.server.dto.CountWithMissingUuids;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.utils.FiltersWithEquipmentTypes;
 import org.springframework.context.annotation.ComponentScan;
@@ -177,15 +178,14 @@ public class FilterController {
     }
 
     @PostMapping(value = "/filters/identifiables-count", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Calculate the total of identifiables for a list of filters")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Identifiables count")})
-    public ResponseEntity<Map<String, Long>> getIdentifiablesCountByGroup(@RequestParam(value = "networkUuid") UUID networkUuid,
-                                                                          @RequestParam(value = "variantId", required = false) String variantId,
-                                                                          @RequestBody IdsByGroup idsByGroup) {
+    @Operation(summary = "Calculate the total of identifiables for a list of filters with information about missing filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Identifiables count and list of missing filters UUIDs")})
+    public ResponseEntity<Map<String, CountWithMissingUuids>> getIdentifiablesCountByGroup(@RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                                           @RequestParam(value = "variantId", required = false) String variantId,
+                                                                                           @RequestBody IdsByGroup idsByGroup) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.getIdentifiablesCountByGroup(idsByGroup, networkUuid, variantId));
-
     }
 
     @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)

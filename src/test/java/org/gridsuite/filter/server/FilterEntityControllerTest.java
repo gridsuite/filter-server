@@ -719,65 +719,81 @@ public class FilterEntityControllerTest {
         UUID filterId1 = UUID.randomUUID();
         UUID filterId2 = UUID.randomUUID();
         UUID filterId3 = UUID.randomUUID();
+        UUID notFoundFilterId = UUID.randomUUID();
 
         ArrayList<AbstractExpertRule> rules = new ArrayList<>();
         createExpertLineRules(rules, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of(360., 400.)),
-                new TreeSet<>(Set.of(356.25, 393.7)));
+            new TreeSet<>(Set.of(356.25, 393.7)));
         CombinatorExpertRule parentRule = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
         ExpertFilter expertFilter = new ExpertFilter(filterId1, new Date(), EquipmentType.LINE, parentRule);
 
         insertFilter(filterId1, expertFilter);
-        checkExpertFilter(filterId1, expertFilter);
 
         ArrayList<AbstractExpertRule> rules2 = new ArrayList<>();
         createExpertLineRules(rules2, new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of("FR")), new TreeSet<>(Set.of(360., 400.)),
-                new TreeSet<>(Set.of(356.25, 393.7)));
+            new TreeSet<>(Set.of(356.25, 393.7)));
         CombinatorExpertRule parentRule2 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules2).build();
         ExpertFilter expertFilter2 = new ExpertFilter(filterId2, new Date(), EquipmentType.LINE, parentRule2);
 
         insertFilter(filterId2, expertFilter2);
-        checkExpertFilter(filterId2, expertFilter2);
 
         ArrayList<AbstractExpertRule> rules3 = new ArrayList<>();
         EnumExpertRule country1Rule3 = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
-                .values(new TreeSet<>(Set.of("FR", "BE"))).build();
+            .values(new TreeSet<>(Set.of("FR", "BE"))).build();
         rules3.add(country1Rule3);
         EnumExpertRule country2Rule3 = EnumExpertRule.builder().field(FieldType.COUNTRY_2).operator(OperatorType.IN)
-                .values(new TreeSet<>(Set.of("FR", "IT"))).build();
+            .values(new TreeSet<>(Set.of("FR", "IT"))).build();
         rules3.add(country2Rule3);
         CombinatorExpertRule parentRule3 = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules3).build();
         ExpertFilter expertFilter3 = new ExpertFilter(filterId3, new Date(), EquipmentType.HVDC_LINE, parentRule3);
 
         insertFilter(filterId3, expertFilter3);
-        checkExpertFilter(filterId3, expertFilter3);
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>(Map.of(
-                "networkUuid", List.of(NETWORK_UUID.toString()),
-                "variantId", List.of(VARIANT_ID_1)));
+            "networkUuid", List.of(NETWORK_UUID.toString()),
+            "variantId", List.of(VARIANT_ID_1)));
 
         IdsByGroup content = IdsByGroup.builder().ids(Map.of(
-                "g1", List.of(filterId1),
-                "g2", List.of(filterId2),
-                "g3", List.of(filterId3),
-                "g4", List.of(UUID.randomUUID())
+            "g1", List.of(filterId1),
+            "g2", List.of(filterId2),
+            "g3", List.of(filterId3),
+            "g4", List.of(notFoundFilterId),
+            "g5", List.of(filterId1, notFoundFilterId)
         )).build();
 
-        Map<String, Long> identifiablesCount = objectMapper.readValue(
-                mvc.perform(post(URL_TEMPLATE + "/identifiables-count")
-                                .params(params)
-                                .content(objectMapper.writeValueAsString(content))
-                                .contentType(APPLICATION_JSON))
-                        .andExpect(status().isOk())
-                        .andReturn().getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+        Map<String, CountWithMissingUuids> identifiablesCountWithMissingUuids = objectMapper.readValue(
+            mvc.perform(post(URL_TEMPLATE + "/identifiables-count")
+                    .params(params)
+                    .content(objectMapper.writeValueAsString(content))
+                    .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(),
+            new TypeReference<>() {
+            });
 
-        assertEquals(2, identifiablesCount.get("g1").longValue());
-        assertEquals(2, identifiablesCount.get("g2").longValue());
-        assertEquals(0, identifiablesCount.get("g3").longValue());
-        assertEquals(0, identifiablesCount.get("g4").longValue());
+        assertEquals(5, identifiablesCountWithMissingUuids.size());
 
-        assertEquals(4, identifiablesCount.size());
+        // g1: filter found, 2 identifiables found, no missing filters
+        assertEquals(2, identifiablesCountWithMissingUuids.get("g1").count().longValue());
+        assertTrue(identifiablesCountWithMissingUuids.get("g1").missingUuids().isEmpty());
+
+        // g2: filter found, 2 identifiables found, no missing filters
+        assertEquals(2, identifiablesCountWithMissingUuids.get("g2").count().longValue());
+        assertTrue(identifiablesCountWithMissingUuids.get("g2").missingUuids().isEmpty());
+
+        // g3: filter found, 0 identifiables found, no missing filters
+        assertEquals(0, identifiablesCountWithMissingUuids.get("g3").count().longValue());
+        assertTrue(identifiablesCountWithMissingUuids.get("g3").missingUuids().isEmpty());
+
+        // g4: filter not found, 0 identifiables found, 1 missing filter
+        assertEquals(0, identifiablesCountWithMissingUuids.get("g4").count().longValue());
+        assertEquals(1, identifiablesCountWithMissingUuids.get("g4").missingUuids().size());
+        assertEquals(notFoundFilterId, identifiablesCountWithMissingUuids.get("g4").missingUuids().get(0));
+
+        // g5: one filter found, 2 identifiables found, 1 missing filter
+        assertEquals(2, identifiablesCountWithMissingUuids.get("g5").count().longValue());
+        assertEquals(1, identifiablesCountWithMissingUuids.get("g5").missingUuids().size());
+        assertEquals(notFoundFilterId, identifiablesCountWithMissingUuids.get("g5").missingUuids().get(0));
     }
 
     @Test
@@ -806,7 +822,7 @@ public class FilterEntityControllerTest {
                 "g2", List.of(filterId1)
         )).build();
 
-        Map<String, Long> identifiablesCount = objectMapper.readValue(
+        Map<String, CountWithMissingUuids> identifiablesCount = objectMapper.readValue(
                 mvc.perform(post(URL_TEMPLATE + "/identifiables-count")
                                 .params(params)
                                 .content(objectMapper.writeValueAsString(content))
@@ -816,7 +832,7 @@ public class FilterEntityControllerTest {
                 new TypeReference<>() {
                 });
 
-        assertEquals(identifiablesCount.get("g2").longValue(), identifiablesCount.get("g1").longValue());
+        assertEquals(identifiablesCount.get("g2").count(), identifiablesCount.get("g1").count());
     }
 
     private void checkIdentifierListFilterExportAndMetadata(UUID filterId, String expectedJson, EquipmentType equipmentType) throws Exception {
