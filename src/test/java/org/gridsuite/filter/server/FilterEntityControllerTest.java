@@ -84,7 +84,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class FilterEntityControllerTest {
 
     public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters";
-    public static final String SUPERVISION_URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/supervision/filters";
     private static final long TIMEOUT = 1000;
 
     @Autowired
@@ -939,11 +938,8 @@ public class FilterEntityControllerTest {
                 .andExpect(status().isOk());
     }
 
-    private List<IFilterAttributes> getAllFilters() throws Exception {
-        String response = mvc.perform(get(SUPERVISION_URL_TEMPLATE)
-                        .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        return objectMapper.readValue(response, new TypeReference<>() { });
+    private List<IFilterAttributes> getAllFilters() {
+        return filterService.getFilters();
     }
 
     private void checkIdentifierListFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
