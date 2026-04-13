@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -938,11 +938,8 @@ public class FilterEntityControllerTest {
                 .andExpect(status().isOk());
     }
 
-    private List<IFilterAttributes> getAllFilters() throws Exception {
-        String response = mvc.perform(get(URL_TEMPLATE)
-                        .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        return objectMapper.readValue(response, new TypeReference<>() { });
+    private List<IFilterAttributes> getAllFilters() {
+        return filterService.getFilters();
     }
 
     private void checkIdentifierListFilter(UUID filterId, IdentifierListFilter identifierListFilter) throws Exception {
