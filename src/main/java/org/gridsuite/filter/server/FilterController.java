@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -12,11 +12,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
-import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
+import org.gridsuite.filter.server.dto.CountWithMissingUuids;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.utils.FiltersWithEquipmentTypes;
 import org.springframework.context.annotation.ComponentScan;
@@ -46,13 +46,6 @@ public class FilterController {
 
     public FilterController(FilterService service) {
         this.service = service;
-    }
-
-    @GetMapping(value = "/filters", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all filters")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "All filters")})
-    public ResponseEntity<List<IFilterAttributes>> getFilters() {
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getFilters());
     }
 
     @GetMapping(value = "/filters/infos", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -177,15 +170,14 @@ public class FilterController {
     }
 
     @PostMapping(value = "/filters/identifiables-count", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Calculate the total of identifiables for a list of filters")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Identifiables count")})
-    public ResponseEntity<Map<String, Long>> getIdentifiablesCountByGroup(@RequestParam(value = "networkUuid") UUID networkUuid,
-                                                                          @RequestParam(value = "variantId", required = false) String variantId,
-                                                                          @RequestBody IdsByGroup idsByGroup) {
+    @Operation(summary = "Calculate the total of identifiables for a list of filters with information about missing filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Identifiables count and list of missing filters UUIDs")})
+    public ResponseEntity<Map<String, CountWithMissingUuids>> getIdentifiablesCountByGroup(@RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                                           @RequestParam(value = "variantId", required = false) String variantId,
+                                                                                           @RequestBody IdsByGroup idsByGroup) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.getIdentifiablesCountByGroup(idsByGroup, networkUuid, variantId));
-
     }
 
     @GetMapping(value = "/filters/export", produces = MediaType.APPLICATION_JSON_VALUE)

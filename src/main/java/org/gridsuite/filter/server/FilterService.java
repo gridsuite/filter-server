@@ -22,6 +22,7 @@ import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
 import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
+import org.gridsuite.filter.server.dto.CountWithMissingUuids;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
 import org.gridsuite.filter.server.error.FilterException;
@@ -257,18 +258,26 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Long> getIdentifiablesCountByGroup(IdsByGroup idsByGroup, UUID networkUuid, String variantId) {
+    public Map<String, CountWithMissingUuids> getIdentifiablesCountByGroup(IdsByGroup idsByGroup, UUID networkUuid, String variantId) {
         Objects.requireNonNull(idsByGroup);
         final FilterLoader filterLoader = this.repositoriesService.getFilterLoader();
         return idsByGroup.getIds().entrySet().stream()
-                .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                entry -> this.repositoriesService.getFilters(entry.getValue()).stream()
-                                        .flatMap(f -> getIdentifiableAttributes(f, networkUuid, variantId, filterLoader).stream())
-                                        .distinct()
-                                        .count()
-                        )
-                );
+            .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> {
+                        List<UUID> requestedFilterIds = entry.getValue();
+                        List<AbstractFilter> foundFilters = this.repositoriesService.getFilters(requestedFilterIds);
+
+                        List<UUID> foundFilterIds = foundFilters.stream().map(AbstractFilter::getId).toList();
+                        List<UUID> missingFilterIds = requestedFilterIds.stream().filter(uuid -> !foundFilterIds.contains(uuid)).toList();
+
+                        Long count = foundFilters.stream()
+                            .flatMap(filter -> getIdentifiableAttributes(filter, networkUuid, variantId, filterLoader).stream())
+                            .distinct()
+                            .count();
+
+                    return new CountWithMissingUuids(count, missingFilterIds);
+                }));
     }
 
     @Transactional(readOnly = true)
