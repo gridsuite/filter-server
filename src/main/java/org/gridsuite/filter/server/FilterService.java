@@ -7,9 +7,7 @@
 package org.gridsuite.filter.server;
 
 import com.powsybl.commons.PowsyblException;
-import com.powsybl.iidm.network.IdentifiableType;
-import com.powsybl.iidm.network.Network;
-import com.powsybl.iidm.network.VoltageLevel;
+import com.powsybl.iidm.network.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import lombok.AllArgsConstructor;
@@ -314,6 +312,36 @@ public class FilterService {
                 }
             });
             return new FilterEquipments(filterEquipment.getFilterId(), busIds, notFoundVoltageLevels);
+        }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FilterEquipments> exportVscConverterStationsFromHvdcFilters(List<UUID> ids, UUID networkUuid, String variantId) {
+        Network network = getNetwork(networkUuid, variantId);
+        List<FilterEquipments> filterEquipments = exportFilters(ids, network, Set.of(), this.repositoriesService.getFilterLoader());
+        return filterEquipments.stream().map(filterEquipment -> {
+            List<IdentifiableAttributes> vscConverterStationIds = new ArrayList<>();
+            List<String> notFoundHvdc = new ArrayList<>();
+            if (filterEquipment.getNotFoundEquipments() != null) {
+                notFoundHvdc.addAll(filterEquipment.getNotFoundEquipments());
+            }
+            filterEquipment.getIdentifiableAttributes().forEach(identifiableAttribute -> {
+                if (identifiableAttribute.getType() != IdentifiableType.HVDC_LINE) {
+                    throw new IllegalStateException("Cannot export vsc converter station ids for non-hvdc level filters");
+                }
+                HvdcLine hvdcLine = network.getHvdcLine(identifiableAttribute.getId());
+                if (hvdcLine == null) {
+                    notFoundHvdc.add(identifiableAttribute.getId());
+                } else {
+                    if (hvdcLine.getConverterStation1().getHvdcType() == HvdcConverterStation.HvdcType.VSC) {
+                        vscConverterStationIds.add(new IdentifiableAttributes(hvdcLine.getConverterStation1().getId(), IdentifiableType.HVDC_CONVERTER_STATION, null));
+                    }
+                    if (hvdcLine.getConverterStation2().getHvdcType() == HvdcConverterStation.HvdcType.VSC) {
+                        vscConverterStationIds.add(new IdentifiableAttributes(hvdcLine.getConverterStation2().getId(), IdentifiableType.HVDC_CONVERTER_STATION, null));
+                    }
+                }
+            });
+            return new FilterEquipments(filterEquipment.getFilterId(), vscConverterStationIds, notFoundHvdc);
         }).toList();
     }
 
