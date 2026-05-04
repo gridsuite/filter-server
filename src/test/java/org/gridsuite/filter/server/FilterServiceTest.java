@@ -44,7 +44,7 @@ class FilterServiceTest {
     }
 
     @Test
-    void getCyclicFilterIdsUsesResolvedIds() throws Exception {
+    void getCyclicFilterIds() throws Exception {
         UUID first = UUID.randomUUID();
         UUID second = UUID.randomUUID();
         UUID third = UUID.randomUUID();
