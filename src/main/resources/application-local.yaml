@@ -14,7 +14,3 @@ powsybl:
     network-store-server:
       base-uri: http://localhost:8080
 
-gridsuite:
-  services:
-    directory-server:
-      base-uri: http://localhost:5026
