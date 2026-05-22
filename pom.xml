@@ -92,7 +92,7 @@
             <!-- FIXME : remove when gridsuite-dependencies contains gridsuite-filter with last version -->
             <dependency>
                 <groupId>org.gridsuite</groupId>
-                <artifactId>gridsuite-filtergridsuite-filter</artifactId>
+                <artifactId>gridsuite-filter</artifactId>
                 <version>${filter.version}</version>
             </dependency>
             <dependency>
