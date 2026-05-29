@@ -184,6 +184,7 @@ public class FilterEntityControllerTest {
 
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void assertQueuesEmptyThenClear(List<String> destinations, OutputDestination output) {
         try {
             destinations.forEach(destination -> assertNull("Should not be any messages in queue " + destination + " : ", output.receive(TIMEOUT, destination)));
@@ -209,7 +210,8 @@ public class FilterEntityControllerTest {
         IdentifierListFilter identifierListFilter = new IdentifierListFilter(filterId, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
         insertFilter(filterId, identifierListFilter);
         checkIdentifierListFilter(filterId, identifierListFilter);
-        checkIdentifierListFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n", EquipmentType.GENERATOR);
+        checkIdentifierListFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n",
+                EquipmentType.GENERATOR);
         // Create identifier list filter for lines
         UUID lineFilterId = UUID.randomUUID();
 
@@ -218,23 +220,28 @@ public class FilterEntityControllerTest {
         IdentifierListFilter lineIdentifierListFilter = new IdentifierListFilter(lineFilterId, modificationDate, EquipmentType.LINE, List.of(line1, line2));
         insertFilter(lineFilterId, lineIdentifierListFilter);
         checkIdentifierListFilter(lineFilterId, lineIdentifierListFilter);
-        checkIdentifierListFilterExportAndMetadata(lineFilterId, "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]", EquipmentType.LINE);
+        checkIdentifierListFilterExportAndMetadata(lineFilterId,
+                "[{\"id\":\"NHV1_NHV2_1\",\"type\":\"LINE\",\"distributionKey\":null},{\"id\":\"NHV1_NHV2_2\",\"type\":\"LINE\",\"distributionKey\":null}]", EquipmentType.LINE);
 
         // Create identifier list filter for Two Windings Transformer
         UUID twoWinTransformerIdentifierListFilterId = UUID.randomUUID();
         IdentifierListFilterEquipmentAttributes twoWT1 = new IdentifierListFilterEquipmentAttributes("NGEN_NHV1", null);
         IdentifierListFilterEquipmentAttributes twoWT2 = new IdentifierListFilterEquipmentAttributes("NHV2_NLOAD", null);
         IdentifierListFilterEquipmentAttributes twoWT3 = new IdentifierListFilterEquipmentAttributes("twoWT3", null);
-        IdentifierListFilter twoWinTransformerIdentifierListFilter = new IdentifierListFilter(twoWinTransformerIdentifierListFilterId, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(twoWT1, twoWT2, twoWT3));
+        IdentifierListFilter twoWinTransformerIdentifierListFilter = new IdentifierListFilter(twoWinTransformerIdentifierListFilterId, modificationDate, EquipmentType.TWO_WINDINGS_TRANSFORMER,
+                List.of(twoWT1, twoWT2, twoWT3));
         insertFilter(twoWinTransformerIdentifierListFilterId, twoWinTransformerIdentifierListFilter);
         checkIdentifierListFilter(twoWinTransformerIdentifierListFilterId, twoWinTransformerIdentifierListFilter);
-        checkIdentifierListFilterExportAndMetadata(twoWinTransformerIdentifierListFilterId, "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]", EquipmentType.TWO_WINDINGS_TRANSFORMER);
+        checkIdentifierListFilterExportAndMetadata(twoWinTransformerIdentifierListFilterId,
+                "[{\"id\":\"NGEN_NHV1\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null},{\"id\":\"NHV2_NLOAD\",\"type\":\"TWO_WINDINGS_TRANSFORMER\",\"distributionKey\":null}]",
+                        EquipmentType.TWO_WINDINGS_TRANSFORMER);
 
         // Create identifier list filter for Three Windings Transformer
         UUID threeWTransformerIdentifierListFilterId = UUID.randomUUID();
         IdentifierListFilterEquipmentAttributes threeWT1 = new IdentifierListFilterEquipmentAttributes("threeWT1", null);
         IdentifierListFilterEquipmentAttributes threeWT2 = new IdentifierListFilterEquipmentAttributes("threeWT2", null);
-        IdentifierListFilter threeWinTransformerIdentifierListFilter = new IdentifierListFilter(threeWTransformerIdentifierListFilterId, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER, List.of(threeWT1, threeWT2));
+        IdentifierListFilter threeWinTransformerIdentifierListFilter = new IdentifierListFilter(threeWTransformerIdentifierListFilterId, modificationDate, EquipmentType.THREE_WINDINGS_TRANSFORMER,
+                List.of(threeWT1, threeWT2));
         insertFilter(threeWTransformerIdentifierListFilterId, threeWinTransformerIdentifierListFilter);
         checkIdentifierListFilter(threeWTransformerIdentifierListFilterId, threeWinTransformerIdentifierListFilter);
         checkIdentifierListFilterExportAndMetadata(threeWTransformerIdentifierListFilterId, "[]", EquipmentType.THREE_WINDINGS_TRANSFORMER);
@@ -253,7 +260,8 @@ public class FilterEntityControllerTest {
         IdentifierListFilter vlIdentifierListFilter = new IdentifierListFilter(voltageLevelFilterId, modificationDate, EquipmentType.VOLTAGE_LEVEL, List.of(vl1, vl2));
         insertFilter(voltageLevelFilterId, vlIdentifierListFilter);
         checkIdentifierListFilter(voltageLevelFilterId, vlIdentifierListFilter);
-        checkIdentifierListFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n", EquipmentType.VOLTAGE_LEVEL);
+        checkIdentifierListFilterExportAndMetadata(voltageLevelFilterId, "[{\"id\":\"VLHV1\",\"type\":\"VOLTAGE_LEVEL\"},{\"id\":\"VLHV2\",\"type\":\"VOLTAGE_LEVEL\"}]\n",
+                EquipmentType.VOLTAGE_LEVEL);
 
         // Create identifier list filter for substations
         UUID substationFilterId = UUID.randomUUID();
