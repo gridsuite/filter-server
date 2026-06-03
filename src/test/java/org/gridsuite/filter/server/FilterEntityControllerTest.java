@@ -184,12 +184,9 @@ public class FilterEntityControllerTest {
 
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private void assertQueuesEmptyThenClear(List<String> destinations, OutputDestination output) {
         try {
             destinations.forEach(destination -> assertNull("Should not be any messages in queue " + destination + " : ", output.receive(TIMEOUT, destination)));
-        } catch (NullPointerException e) {
-            // Ignoring
         } finally {
             output.clear(); // purge in order to not fail the other tests
         }
