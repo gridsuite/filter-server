@@ -10,7 +10,6 @@ import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.springframework.stereotype.Repository;
 
-
 /**
  * @author Antoine Bouhours <antoine.bouhours at rte-france.com>
  */

@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server.entities;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,11 +14,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import jakarta.persistence.*;
 import java.util.Date;
 import java.util.UUID;
-
 import static jakarta.persistence.TemporalType.TIMESTAMP;
 
 /**

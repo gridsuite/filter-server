@@ -1,12 +1,5 @@
 package org.gridsuite.filter.server.migrations;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
@@ -19,6 +12,11 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class MigrateEquipmentFiltersToExpertFilters implements CustomSqlChange {
     private static final String EXPERT_RULE_TABLE = "expert_rule";

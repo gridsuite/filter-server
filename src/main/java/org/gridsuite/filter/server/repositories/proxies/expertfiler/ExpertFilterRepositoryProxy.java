@@ -145,7 +145,8 @@ public class ExpertFilterRepositoryProxy extends AbstractFilterRepositoryProxy<E
                         .build();
             }
             default ->
-                    throw new PowsyblException("Unknown rule data type: " + expertRuleEntity.getDataType() + ", supported data types are: " + Arrays.stream(DataType.values()).map(Enum::name).collect(Collectors.joining(", ")));
+                    throw new PowsyblException("Unknown rule data type: " + expertRuleEntity.getDataType() + ", supported data types are: "
+                            + Arrays.stream(DataType.values()).map(Enum::name).collect(Collectors.joining(", ")));
         }
     }
 
