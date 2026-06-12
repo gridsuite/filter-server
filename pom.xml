@@ -49,7 +49,7 @@
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:filter-server</sonar.projectKey>
         <!-- FIXME : remove when gridsuite-dependencies contains gridsuite-filter with last version -->
-        <filter.version>1.23.0</filter.version>
+        <filter.version>1.24.0</filter.version>
     </properties>
 
     <build>
