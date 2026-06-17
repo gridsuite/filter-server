@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server.wip;
 
+import com.google.common.annotations.Beta;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping(value = "/" + FilterApi.API_VERSION + "/standalone-filters")
 @Tag(name = "Standalone filter server")
+@Beta
 public class StandaloneFilterController {
 
     private final StandaloneFilterService service;

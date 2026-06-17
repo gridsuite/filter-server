@@ -6,6 +6,7 @@
  */
 package org.gridsuite.filter.server.wip;
 
+import com.google.common.annotations.Beta;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRulePropertiesEntity;
@@ -35,6 +36,7 @@ import static org.gridsuite.filter.utils.expertfilter.OperatorType.isMultipleCri
  * @author Mohamed Ben Rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
  */
 @Service
+@Beta
 public class StandaloneFilterService {
 
     private final IdentifierListFilterRepository identifierListFilterRepository;
