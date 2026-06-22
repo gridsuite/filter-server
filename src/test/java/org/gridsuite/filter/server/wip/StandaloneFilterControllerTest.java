@@ -6,8 +6,8 @@
  */
 package org.gridsuite.filter.server.wip;
 
+import com.powsybl.ws.commons.error.ServerNameProvider;
 import org.gridsuite.filter.server.FilterApi;
-import org.gridsuite.filter.server.FilterApplication;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.wip.ExpertFilter;
@@ -16,10 +16,7 @@ import org.gridsuite.filter.wip.IdentifierListFilter;
 import org.gridsuite.filter.wip.rule.CombinatorExpertRule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -38,9 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Mohamed Ben Rejeb {@literal <mohamed.ben-rejeb at rte-france.com>}
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@ContextConfiguration(classes = {FilterApplication.class, TestChannelBinderConfiguration.class})
+@WebMvcTest(StandaloneFilterController.class)
 class StandaloneFilterControllerTest {
 
     static final String URL = "/" + FilterApi.API_VERSION + "/standalone-filters";
@@ -50,6 +45,11 @@ class StandaloneFilterControllerTest {
 
     @MockitoBean
     private StandaloneFilterService standaloneFilterService;
+
+    // Required because @WebMvcTest loads the @ControllerAdvice (FilterExceptionHandler),
+    // whose ServerNameProvider collaborator is not a web-layer bean.
+    @MockitoBean
+    private ServerNameProvider serverNameProvider;
 
     @Test
     void getFilterWhenIdentifierListFilterExistsReturnsOk() throws Exception {
