@@ -202,7 +202,8 @@ class StandaloneFilterServiceTest {
                 .map(eqId -> IdentifierListFilterEquipmentEntity.builder().id(UUID.randomUUID()).equipmentId(eqId).build())
                 .map(IdentifierListFilterEquipmentEntity.class::cast)
                 .toList();
-        return IdentifierListFilterEntity.builder().id(id).equipmentType(type).filterEquipmentEntityList(equipment).build();
+        return IdentifierListFilterEntity.builder().id(id).equipmentType(type).filterEquipmentEntityList(equipment)
+                .build();
     }
 
     private ExpertFilterEntity expertFilterEntity(UUID id, EquipmentType type, ExpertRuleEntity root) {
@@ -212,11 +213,13 @@ class StandaloneFilterServiceTest {
     private ExpertRuleEntity combinator(ExpertRuleEntity... children) {
         return ExpertRuleEntity.builder()
                 .id(UUID.randomUUID()).dataType(DataType.COMBINATOR).combinator(CombinatorType.AND)
-                .rules(List.of(children)).build();
+                .rules(List.of(children))
+                .build();
     }
 
     private ExpertRuleValueEntity numberValue(FieldType field, OperatorType op, String value) {
-        return ExpertRuleValueEntity.builder().id(UUID.randomUUID()).dataType(DataType.NUMBER).field(field).operator(op).value(value).build();
+        return ExpertRuleValueEntity.builder().id(UUID.randomUUID()).dataType(DataType.NUMBER).field(field).operator(op).value(value)
+                .build();
     }
 
     private ExpertRuleValueEntity stringValue() {
@@ -224,18 +227,23 @@ class StandaloneFilterServiceTest {
     }
 
     private ExpertRuleValueEntity booleanValue() {
-        return ExpertRuleValueEntity.builder().id(UUID.randomUUID()).dataType(DataType.BOOLEAN).field(FieldType.CONNECTED_1).operator(OperatorType.EQUALS).value("true").build();
+        return ExpertRuleValueEntity.builder().id(UUID.randomUUID()).dataType(DataType.BOOLEAN).field(FieldType.CONNECTED_1).operator(OperatorType.EQUALS).value("true")
+                .build();
     }
 
     private ExpertRuleValueEntity enumValue() {
-        return ExpertRuleValueEntity.builder().id(UUID.randomUUID()).dataType(DataType.ENUM).field(FieldType.COUNTRY_1).operator(OperatorType.IN).value("BE,FR").build();
+        return ExpertRuleValueEntity.builder().id(UUID.randomUUID()).dataType(DataType.ENUM).field(FieldType.COUNTRY_1).operator(OperatorType.IN).value("BE,FR")
+                .build();
     }
 
     private ExpertRulePropertiesEntity propertiesValue(List<String> propertyValues) {
-        return ExpertRulePropertiesEntity.builder().id(UUID.randomUUID()).dataType(DataType.PROPERTIES).field(FieldType.FREE_PROPERTIES).operator(OperatorType.IN).propertyName("region").propertyValues(propertyValues).build();
+        return ExpertRulePropertiesEntity.builder().id(UUID.randomUUID()).dataType(DataType.PROPERTIES).field(FieldType.FREE_PROPERTIES).operator(OperatorType.IN).propertyName("region")
+                .propertyValues(propertyValues)
+                .build();
     }
 
     private ExpertRuleValueEntity filterUuidValue(String value) {
-        return ExpertRuleValueEntity.builder().id(UUID.randomUUID()).dataType(DataType.FILTER_UUID).field(FieldType.ID).operator(OperatorType.IS_PART_OF).value(value).build();
+        return ExpertRuleValueEntity.builder().id(UUID.randomUUID()).dataType(DataType.FILTER_UUID).field(FieldType.ID).operator(OperatorType.IS_PART_OF).value(value)
+                .build();
     }
 }

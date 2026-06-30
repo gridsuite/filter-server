@@ -9,13 +9,12 @@ package org.gridsuite.filter.server.repositories.proxies;
 
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
-import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.identifierlistfilter.FilterMetadata;
+import org.gridsuite.filter.server.entities.AbstractFilterEntity;
 import org.gridsuite.filter.server.repositories.FilterRepository;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.FilterType;
 import org.springframework.util.CollectionUtils;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
