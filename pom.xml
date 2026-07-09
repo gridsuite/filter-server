@@ -42,14 +42,12 @@
     </developers>
 
     <properties>
-        <gridsuite-dependencies.version>50.1.0</gridsuite-dependencies.version>
+        <gridsuite-dependencies.version>50.2.0-SNAPSHOT</gridsuite-dependencies.version>
         <string-template.version>4.3.1</string-template.version>
         <liquibase-hibernate-package>org.gridsuite.filter.server</liquibase-hibernate-package>
         <sonar.coverage.exclusions>**/migrations/**/*</sonar.coverage.exclusions>
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:filter-server</sonar.projectKey>
-        <!-- FIXME : remove when gridsuite-dependencies contains gridsuite-filter with last version -->
-        <filter.version>1.25.0</filter.version>
     </properties>
 
     <build>
@@ -89,12 +87,6 @@
     <dependencyManagement>
         <dependencies>
             <!-- imports -->
-            <!-- FIXME : remove when gridsuite-dependencies contains gridsuite-filter with last version -->
-            <dependency>
-                <groupId>org.gridsuite</groupId>
-                <artifactId>gridsuite-filter</artifactId>
-                <version>${filter.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.gridsuite</groupId>
                 <artifactId>gridsuite-dependencies</artifactId>
