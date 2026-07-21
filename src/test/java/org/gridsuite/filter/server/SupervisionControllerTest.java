@@ -19,21 +19,19 @@ import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
 import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.gridsuite.filter.utils.EquipmentType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,11 +39,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Radouane KHOUADRI {@literal <redouane.khouadri_externe at rte-france.com>}
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {FilterApplication.class, TestChannelBinderConfiguration.class})
-public class SupervisionControllerTest {
+class SupervisionControllerTest {
 
     public static final String SUPERVISION_URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/supervision/filters";
 
@@ -58,8 +55,8 @@ public class SupervisionControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Configuration.defaultConfiguration();
         final ObjectMapper mapper = new ObjectMapper();
         mapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
@@ -88,13 +85,13 @@ public class SupervisionControllerTest {
         });
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         filterService.deleteAll();
     }
 
     @Test
-    public void testFiltersList() throws Exception {
+    void testFiltersList() throws Exception {
         int count = getAllFilters().size();
         assertEquals(0, count);
 
