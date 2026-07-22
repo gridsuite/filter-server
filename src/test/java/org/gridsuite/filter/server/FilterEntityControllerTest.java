@@ -284,7 +284,7 @@ class FilterEntityControllerTest {
     }
 
     private UUID duplicateFilter(UUID filterId) throws Exception {
-        String response = mvc.perform(post(URL_TEMPLATE).param("duplicateFrom", filterId.toString()))
+        String response = mvc.perform(post(URL_TEMPLATE + "/" + filterId + "/duplicate"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, UUID.class);
