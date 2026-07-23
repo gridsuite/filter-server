@@ -22,17 +22,14 @@ import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import org.gridsuite.filter.globalfilter.GlobalFilter;
 import org.gridsuite.filter.utils.EquipmentType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -53,11 +50,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {FilterApplication.class, TestChannelBinderConfiguration.class})
-public class GlobalFilterControllerTest {
+class GlobalFilterControllerTest {
     public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/global-filter";
 
     @Autowired
@@ -71,8 +67,8 @@ public class GlobalFilterControllerTest {
 
     private static final UUID NETWORK_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Configuration.defaultConfiguration();
         final ObjectMapper mapper = new ObjectMapper();
         mapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
@@ -112,12 +108,8 @@ public class GlobalFilterControllerTest {
         });
     }
 
-    @After
-    public void tearDown() {
-    }
-
     @Test
-    public void testEvaluateGlobalFilter() throws Exception {
+    void testEvaluateGlobalFilter() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("networkUuid", NETWORK_UUID.toString());
         params.add("variantId", INITIAL_VARIANT_ID);

@@ -35,10 +35,9 @@ import org.gridsuite.filter.utils.FiltersWithEquipmentTypes;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.utils.expertfilter.FieldType;
 import org.gridsuite.filter.utils.expertfilter.OperatorType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,7 +46,6 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -58,7 +56,7 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -69,11 +67,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {FilterApplication.class, TestChannelBinderConfiguration.class})
-public class FilterEntityControllerTest {
+class FilterEntityControllerTest {
 
     public static final String URL_TEMPLATE = "/" + FilterApi.API_VERSION + "/filters";
     private static final long TIMEOUT = 1000;
@@ -112,8 +109,8 @@ public class FilterEntityControllerTest {
 
     private String elementUpdateDestination = "element.update";
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Configuration.defaultConfiguration();
         final ObjectMapper mapper = new ObjectMapper();
         mapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
@@ -171,8 +168,8 @@ public class FilterEntityControllerTest {
         });
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         List<String> destinations = List.of(elementUpdateDestination);
 
         cleanDB();
@@ -186,18 +183,18 @@ public class FilterEntityControllerTest {
 
     private void assertQueuesEmptyThenClear(List<String> destinations, OutputDestination output) {
         try {
-            destinations.forEach(destination -> assertNull("Should not be any messages in queue " + destination + " : ", output.receive(TIMEOUT, destination)));
+            destinations.forEach(destination -> assertNull(output.receive(TIMEOUT, destination), "Should not be any messages in queue " + destination + " : "));
         } finally {
             output.clear(); // purge in order to not fail the other tests
         }
     }
 
-    public String joinWithComma(Object... array) {
+    String joinWithComma(Object... array) {
         return join(array, ",");
     }
 
     @Test
-    public void testIdentifierListFilter() throws Exception {
+    void testIdentifierListFilter() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
@@ -287,14 +284,14 @@ public class FilterEntityControllerTest {
     }
 
     private UUID duplicateFilter(UUID filterId) throws Exception {
-        String response = mvc.perform(post(URL_TEMPLATE).param("duplicateFrom", filterId.toString()))
+        String response = mvc.perform(post(URL_TEMPLATE + "/" + filterId + "/duplicate"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, UUID.class);
     }
 
     @Test
-    public void testLineFilterCrud() throws Exception {
+    void testLineFilterCrud() throws Exception {
         UUID filterId1 = UUID.fromString("99999999-e0c4-413a-8e3e-78e9027d300f");
         List<AbstractExpertRule> rules = new ArrayList<>();
         createExpertLineRules(rules, COUNTRIES1, COUNTRIES2, new TreeSet<>(Set.of(5., 8.)), new TreeSet<>(Set.of(6.)));
@@ -347,7 +344,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testGetFiltersByIds() throws Exception {
+    void testGetFiltersByIds() throws Exception {
         UUID filterId3 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300c");
         UUID filterId4 = UUID.fromString("42b70a4d-e0c4-413a-8e3e-78e9027d300d");
 
@@ -426,7 +423,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testEvaluateFilters() throws Exception {
+    void testEvaluateFilters() throws Exception {
         UUID filterId = UUID.randomUUID();
         FilterAttributes filterAttributes = new FilterAttributes();
         filterAttributes.setId(filterId);
@@ -459,7 +456,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testEvaluateFiltersWithEquipmentTypes() throws Exception {
+    void testEvaluateFiltersWithEquipmentTypes() throws Exception {
         // Create a SUBSTATION expert filter selecting substations NHV1 and NGEN
         UUID filterId = UUID.randomUUID();
         FilterAttributes filterAttributes = new FilterAttributes();
@@ -503,7 +500,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testFilterInfos() throws Exception {
+    void testFilterInfos() throws Exception {
         UUID filterId = UUID.randomUUID();
         ArrayList<AbstractExpertRule> rules = new ArrayList<>();
         EnumExpertRule country1Filter = EnumExpertRule.builder().field(FieldType.COUNTRY_1).operator(OperatorType.IN)
@@ -546,7 +543,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExportFilters() throws Exception {
+    void testExportFilters() throws Exception {
         UUID filterId = UUID.randomUUID();
         UUID filterId2 = UUID.randomUUID();
         UUID filterId3 = UUID.randomUUID();
@@ -682,7 +679,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testGetIdentifiablesCount() throws Exception {
+    void testGetIdentifiablesCount() throws Exception {
         UUID filterId1 = UUID.randomUUID();
         UUID filterId2 = UUID.randomUUID();
         UUID filterId3 = UUID.randomUUID();
@@ -764,7 +761,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testGetIdentifiablesDuplicatedCount() throws Exception {
+    void testGetIdentifiablesDuplicatedCount() throws Exception {
         UUID filterId1 = UUID.randomUUID();
         UUID filterId1Duplicated = UUID.randomUUID();
 
@@ -939,7 +936,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterGenerator() throws Exception {
+    void testExpertFilterGenerator() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
@@ -998,7 +995,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterLoad() throws Exception {
+    void testExpertFilterLoad() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
@@ -1023,7 +1020,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterVoltageLevel() throws Exception {
+    void testExpertFilterVoltageLevel() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
@@ -1047,7 +1044,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterSubstation() throws Exception {
+    void testExpertFilterSubstation() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
@@ -1071,7 +1068,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterSubstationWithProperties() throws Exception {
+    void testExpertFilterSubstationWithProperties() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
 
@@ -1098,7 +1095,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterGeneratorWithInAndNotInOperator() throws Exception {
+    void testExpertFilterGeneratorWithInAndNotInOperator() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
@@ -1181,7 +1178,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterLoadWithInAndNotInOperator() throws Exception {
+    void testExpertFilterLoadWithInAndNotInOperator() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
@@ -1263,7 +1260,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterBusWithInAndNotInOperator() throws Exception {
+    void testExpertFilterBusWithInAndNotInOperator() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
@@ -1356,7 +1353,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterTwoWindingsTransformerWithInAndNotInOperator() throws Exception {
+    void testExpertFilterTwoWindingsTransformerWithInAndNotInOperator() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
@@ -1399,7 +1396,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExpertFilterLoadLinkToOtherFilterWithIsPartOfOperator() throws Exception {
+    void testExpertFilterLoadLinkToOtherFilterWithIsPartOfOperator() throws Exception {
         // Create identifier list filter for loads
         UUID identifierListFilterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
         Date modificationDate = new Date();
@@ -1430,7 +1427,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testLineFiltersCrudInBatch() throws Exception {
+    void testLineFiltersCrudInBatch() throws Exception {
         UUID filterId1 = UUID.randomUUID();
         Date date = new Date();
         ArrayList<AbstractExpertRule> rules = new ArrayList<>();
@@ -1528,7 +1525,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testExportBusId() throws Exception {
+    void testExportBusId() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
@@ -1555,7 +1552,7 @@ public class FilterEntityControllerTest {
     }
 
     @Test
-    public void testWrongExportBusId() throws Exception {
+    void testWrongExportBusId() throws Exception {
         UUID filterId = UUID.fromString("77614d91-c168-4f89-8fb9-77a23729e88e");
 
         // Build a filter AND with only an IN operator for VOLTAGE_LEVEL_ID
