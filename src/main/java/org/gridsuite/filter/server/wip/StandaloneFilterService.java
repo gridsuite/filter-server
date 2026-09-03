@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -57,12 +59,19 @@ public class StandaloneFilterService {
         return expertFilterRepository.findById(id).map(this::toWipFilter);
     }
 
+    /**
+     * Loads the filters matching the given identifiers.
+     * Identifiers with no matching filter are omitted from the result.
+     *
+     * @param ids the identifiers of the filters to load
+     * @return the filters found, indexed by their identifier
+     */
     @Transactional(readOnly = true)
-    public List<Filter> getFilters(List<UUID> ids) {
-        List<Filter> result = new ArrayList<>();
-        identifierListFilterRepository.findAllById(ids).forEach(e -> result.add(toWipFilter(e)));
-        expertFilterRepository.findAllById(ids).forEach(e -> result.add(toWipFilter(e)));
-        return result;
+    public Map<UUID, Filter> getFilters(List<UUID> ids) {
+        Map<UUID, Filter> filtersById = new LinkedHashMap<>();
+        identifierListFilterRepository.findAllById(ids).forEach(entity -> filtersById.put(entity.getId(), toWipFilter(entity)));
+        expertFilterRepository.findAllById(ids).forEach(entity -> filtersById.put(entity.getId(), toWipFilter(entity)));
+        return filtersById;
     }
 
     private Filter toWipFilter(IdentifierListFilterEntity entity) {
