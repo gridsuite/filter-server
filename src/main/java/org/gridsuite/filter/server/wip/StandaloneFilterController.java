@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -48,11 +49,11 @@ public class StandaloneFilterController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get multiple filters by ids")
+    @Operation(summary = "Get multiple filters by ids, indexed by id")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "The filters")
+        @ApiResponse(responseCode = "200", description = "The filters found, indexed by their id; ids with no matching filter are omitted")
     })
-    public ResponseEntity<List<Filter>> getFilters(@RequestParam List<UUID> ids) {
+    public ResponseEntity<Map<UUID, Filter>> getFilters(@RequestParam List<UUID> ids) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.getFilters(ids));

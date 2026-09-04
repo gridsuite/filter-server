@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -105,7 +106,7 @@ class StandaloneFilterServiceTest {
     }
 
     @Test
-    void getFiltersWhenMixedTypeIdsReturnsBothFilterTypes() {
+    void getFiltersWhenMixedTypeIdsReturnsBothFilterTypesIndexedById() {
         // Arrange
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
@@ -116,14 +117,31 @@ class StandaloneFilterServiceTest {
                         combinator(numberValue(FieldType.NOMINAL_VOLTAGE, OperatorType.GREATER, "100.0")))));
 
         // Act
-        List<Filter> filters = service.getFilters(List.of(id1, id2));
+        Map<UUID, Filter> filters = service.getFilters(List.of(id1, id2));
 
         // Assert
         assertThat(filters).hasSize(2)
-                .anySatisfy(f -> assertThat(f).isInstanceOf(IdentifierListFilter.class))
-                .anySatisfy(f -> assertThat(f).isInstanceOf(ExpertFilter.class));
+                .hasEntrySatisfying(id1, filter -> assertThat(filter).isInstanceOf(IdentifierListFilter.class))
+                .hasEntrySatisfying(id2, filter -> assertThat(filter).isInstanceOf(ExpertFilter.class));
         verify(identifierListFilterRepository).findAllById(List.of(id1, id2));
         verify(expertFilterRepository).findAllById(List.of(id1, id2));
+    }
+
+    @Test
+    void getFiltersWhenSomeIdsDoNotExistOmitsThemFromTheResult() {
+        // Arrange
+        UUID existingId = UUID.randomUUID();
+        UUID deletedId = UUID.randomUUID();
+        List<UUID> requestedIds = List.of(existingId, deletedId);
+        when(identifierListFilterRepository.findAllById(requestedIds))
+                .thenReturn(List.of(identifierListFilterEntity(existingId, EquipmentType.LOAD, "LOAD1")));
+        when(expertFilterRepository.findAllById(requestedIds)).thenReturn(List.of());
+
+        // Act
+        Map<UUID, Filter> filters = service.getFilters(requestedIds);
+
+        // Assert : a deleted filter is simply absent
+        assertThat(filters).containsOnlyKeys(existingId).doesNotContainValue(null);
     }
 
     // --- entity→domain mapping ---

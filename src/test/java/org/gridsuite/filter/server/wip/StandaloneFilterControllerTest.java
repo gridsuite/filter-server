@@ -20,7 +20,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -99,15 +101,14 @@ class StandaloneFilterControllerTest {
     }
 
     @Test
-    void getFiltersWhenFiltersExistReturnsOkWithAllFilters() throws Exception {
+    void getFiltersWhenFiltersExistReturnsOkWithFiltersIndexedById() throws Exception {
         // Arrange
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
-        List<Filter> filters = List.of(
-                IdentifierListFilter.builder().equipmentType(EquipmentType.LINE).equipmentIds(Set.of("L1")).build(),
-                ExpertFilter.builder().equipmentType(EquipmentType.GENERATOR)
-                        .rule(CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of()).build()).build()
-        );
+        Map<UUID, Filter> filters = new LinkedHashMap<>();
+        filters.put(id1, IdentifierListFilter.builder().equipmentType(EquipmentType.LINE).equipmentIds(Set.of("L1")).build());
+        filters.put(id2, ExpertFilter.builder().equipmentType(EquipmentType.GENERATOR)
+                .rule(CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of()).build()).build());
         when(standaloneFilterService.getFilters(List.of(id1, id2))).thenReturn(filters);
 
         // Act & Assert
@@ -116,16 +117,41 @@ class StandaloneFilterControllerTest {
                         .param("ids", id2.toString())
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$['" + id1 + "'].filterType").value("IDENTIFIER_LIST"))
+                .andExpect(jsonPath("$['" + id1 + "'].equipmentType").value("LINE"))
+                .andExpect(jsonPath("$['" + id2 + "'].filterType").value("EXPERT"))
+                .andExpect(jsonPath("$['" + id2 + "'].equipmentType").value("GENERATOR"));
 
         verify(standaloneFilterService).getFilters(List.of(id1, id2));
     }
 
     @Test
-    void getFiltersWhenNoFiltersFoundReturnsOkWithEmptyList() throws Exception {
+    void getFiltersWhenSomeIdsDoNotExistOmitsThemFromTheBody() throws Exception {
+        // Arrange
+        UUID existingId = UUID.randomUUID();
+        UUID deletedId = UUID.randomUUID();
+        when(standaloneFilterService.getFilters(List.of(existingId, deletedId))).thenReturn(Map.of(existingId,
+                IdentifierListFilter.builder().equipmentType(EquipmentType.LOAD).equipmentIds(Set.of("LOAD1")).build()));
+
+        // Act & Assert
+        mockMvc.perform(get(URL)
+                        .param("ids", existingId.toString())
+                        .param("ids", deletedId.toString())
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$['" + existingId + "']").exists())
+                .andExpect(jsonPath("$['" + deletedId + "']").doesNotExist());
+
+        verify(standaloneFilterService).getFilters(List.of(existingId, deletedId));
+    }
+
+    @Test
+    void getFiltersWhenNoFiltersFoundReturnsOkWithEmptyMap() throws Exception {
         // Arrange
         UUID id = UUID.randomUUID();
-        when(standaloneFilterService.getFilters(List.of(id))).thenReturn(List.of());
+        when(standaloneFilterService.getFilters(List.of(id))).thenReturn(Map.of());
 
         // Act & Assert
         mockMvc.perform(get(URL)
