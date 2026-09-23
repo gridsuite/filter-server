@@ -52,6 +52,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.join;
@@ -1424,6 +1425,42 @@ class FilterEntityControllerTest {
             """;
         checkExpertFilterExportAndMetadata(expertFilterId, expectedResultJson, EquipmentType.LOAD);
         checkFilterEvaluating(expertFilter, expectedResultJson);
+    }
+
+    @Test
+    void testGetReferencedFilterUuids() throws Exception {
+        Date modificationDate = new Date();
+        UUID identifierListFilterId = UUID.randomUUID();
+        insertFilter(identifierListFilterId, new IdentifierListFilter(identifierListFilterId, modificationDate, EquipmentType.LOAD,
+            List.of(new IdentifierListFilterEquipmentAttributes("LOAD", 7d))));
+        // expertFilter2 -> identifierListFilter, expertFilter1 -> expertFilter2 and a deleted filter
+        UUID expertFilterId2 = UUID.randomUUID();
+        insertFilter(expertFilterId2, new ExpertFilter(expertFilterId2, modificationDate, EquipmentType.LOAD, isPartOfRule(identifierListFilterId)));
+        UUID expertFilterId1 = UUID.randomUUID();
+        UUID deletedFilterId = UUID.randomUUID();
+        insertFilter(expertFilterId1, new ExpertFilter(expertFilterId1, modificationDate, EquipmentType.LOAD, isPartOfRule(expertFilterId2, deletedFilterId)));
+
+        assertEquals(Set.of(expertFilterId2, deletedFilterId, identifierListFilterId), getReferencedFilterUuids(expertFilterId1));
+        // requested filters are not returned even if they are referenced
+        assertEquals(Set.of(expertFilterId2, deletedFilterId), getReferencedFilterUuids(expertFilterId1, identifierListFilterId));
+        assertEquals(Set.of(), getReferencedFilterUuids(identifierListFilterId, UUID.randomUUID()));
+    }
+
+    private static CombinatorExpertRule isPartOfRule(UUID... filterUuids) {
+        FilterUuidExpertRule filterUuidExpertRule = FilterUuidExpertRule.builder()
+            .values(Arrays.stream(filterUuids).map(UUID::toString).collect(Collectors.toSet()))
+            .field(FieldType.ID).operator(OperatorType.IS_PART_OF).build();
+        return CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(List.of(filterUuidExpertRule)).build();
+    }
+
+    private Set<UUID> getReferencedFilterUuids(UUID... filterUuids) throws Exception {
+        String response = mvc.perform(get(URL_TEMPLATE + "/referenced-filter-uuids")
+                .queryParam("ids", Arrays.stream(filterUuids).map(UUID::toString).toArray(String[]::new)))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        List<UUID> referencedFilterUuids = objectMapper.readValue(response, new TypeReference<>() { });
+        assertEquals(new HashSet<>(referencedFilterUuids).size(), referencedFilterUuids.size());
+        return new HashSet<>(referencedFilterUuids);
     }
 
     @Test

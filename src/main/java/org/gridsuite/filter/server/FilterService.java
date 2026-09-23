@@ -18,6 +18,10 @@ import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.exception.FilterCycleException;
+import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.expertfilter.expertrule.AbstractExpertRule;
+import org.gridsuite.filter.expertfilter.expertrule.CombinatorExpertRule;
+import org.gridsuite.filter.expertfilter.expertrule.FilterUuidExpertRule;
 import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
@@ -85,6 +89,38 @@ public class FilterService {
     @Transactional(readOnly = true)
     public List<AbstractFilter> getFilters(List<UUID> ids) {
         return this.repositoriesService.getFilters(ids);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UUID> getReferencedFilterUuids(List<UUID> filterUuids) {
+        Set<UUID> alreadySeenFilterUuids = new HashSet<>(filterUuids);
+        List<UUID> allReferencedFilterUuids = new ArrayList<>();
+        List<UUID> currentLevelFilterUuids = filterUuids;
+        while (!currentLevelFilterUuids.isEmpty()) {
+            List<UUID> nextLevelFilterUuids = new ArrayList<>();
+            for (AbstractFilter currentFilter : this.repositoriesService.getFilters(currentLevelFilterUuids)) {
+                if (currentFilter instanceof ExpertFilter expertFilter) {
+                    for (UUID referencedFilterUuid : extractReferencedFilterUuids(expertFilter.getRules())) {
+                        if (alreadySeenFilterUuids.add(referencedFilterUuid)) {
+                            nextLevelFilterUuids.add(referencedFilterUuid);
+                        }
+                    }
+                }
+            }
+            allReferencedFilterUuids.addAll(nextLevelFilterUuids);
+            currentLevelFilterUuids = nextLevelFilterUuids;
+        }
+        return allReferencedFilterUuids;
+    }
+
+    private static List<UUID> extractReferencedFilterUuids(AbstractExpertRule rule) {
+        List<UUID> referencedFilterUuids = new ArrayList<>();
+        if (rule instanceof CombinatorExpertRule combinatorRule && combinatorRule.getRules() != null) {
+            combinatorRule.getRules().forEach(childRule -> referencedFilterUuids.addAll(extractReferencedFilterUuids(childRule)));
+        } else if (rule instanceof FilterUuidExpertRule filterUuidRule && filterUuidRule.getValues() != null) {
+            filterUuidRule.getValues().forEach(filterUuidAsString -> referencedFilterUuids.add(UUID.fromString(filterUuidAsString)));
+        }
+        return referencedFilterUuids;
     }
 
     @Transactional
