@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
@@ -93,29 +92,35 @@ public class FilterService {
     }
 
     @Transactional(readOnly = true)
-    public List<UUID> getReferencedFilterUuids(List<UUID> ids) {
-        Set<UUID> visitedUuids = new HashSet<>(ids);
-        List<UUID> referencedUuids = new ArrayList<>();
-        List<UUID> uuidsToVisit = ids;
-        while (!uuidsToVisit.isEmpty()) {
-            uuidsToVisit = this.repositoriesService.getFilters(uuidsToVisit).stream()
-                .filter(ExpertFilter.class::isInstance)
-                .flatMap(filter -> getReferencedFilterUuids(((ExpertFilter) filter).getRules()))
-                .filter(visitedUuids::add)
-                .toList();
-            referencedUuids.addAll(uuidsToVisit);
+    public List<UUID> getReferencedFilterUuids(List<UUID> filterUuids) {
+        Set<UUID> alreadySeenFilterUuids = new HashSet<>(filterUuids);
+        List<UUID> allReferencedFilterUuids = new ArrayList<>();
+        List<UUID> currentLevelFilterUuids = filterUuids;
+        while (!currentLevelFilterUuids.isEmpty()) {
+            List<UUID> nextLevelFilterUuids = new ArrayList<>();
+            for (AbstractFilter currentFilter : this.repositoriesService.getFilters(currentLevelFilterUuids)) {
+                if (currentFilter instanceof ExpertFilter expertFilter) {
+                    for (UUID referencedFilterUuid : extractReferencedFilterUuids(expertFilter.getRules())) {
+                        if (alreadySeenFilterUuids.add(referencedFilterUuid)) {
+                            nextLevelFilterUuids.add(referencedFilterUuid);
+                        }
+                    }
+                }
+            }
+            allReferencedFilterUuids.addAll(nextLevelFilterUuids);
+            currentLevelFilterUuids = nextLevelFilterUuids;
         }
-        return referencedUuids;
+        return allReferencedFilterUuids;
     }
 
-    private static Stream<UUID> getReferencedFilterUuids(AbstractExpertRule rule) {
-        return switch (rule) {
-            case CombinatorExpertRule combinatorRule -> Optional.ofNullable(combinatorRule.getRules()).orElse(List.of()).stream()
-                .flatMap(FilterService::getReferencedFilterUuids);
-            case FilterUuidExpertRule filterUuidRule -> Optional.ofNullable(filterUuidRule.getValues()).orElse(Set.of()).stream()
-                .map(UUID::fromString);
-            case null, default -> Stream.empty();
-        };
+    private static List<UUID> extractReferencedFilterUuids(AbstractExpertRule rule) {
+        List<UUID> referencedFilterUuids = new ArrayList<>();
+        if (rule instanceof CombinatorExpertRule combinatorRule && combinatorRule.getRules() != null) {
+            combinatorRule.getRules().forEach(childRule -> referencedFilterUuids.addAll(extractReferencedFilterUuids(childRule)));
+        } else if (rule instanceof FilterUuidExpertRule filterUuidRule && filterUuidRule.getValues() != null) {
+            filterUuidRule.getValues().forEach(filterUuidAsString -> referencedFilterUuids.add(UUID.fromString(filterUuidAsString)));
+        }
+        return referencedFilterUuids;
     }
 
     @Transactional
