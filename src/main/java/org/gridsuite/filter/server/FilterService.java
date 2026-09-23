@@ -18,6 +18,10 @@ import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.exception.FilterCycleException;
+import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.expertfilter.expertrule.AbstractExpertRule;
+import org.gridsuite.filter.expertfilter.expertrule.CombinatorExpertRule;
+import org.gridsuite.filter.expertfilter.expertrule.FilterUuidExpertRule;
 import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
@@ -38,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Jacques Borsenberger <jacques.borsenberger at rte-france.com>
@@ -85,6 +90,32 @@ public class FilterService {
     @Transactional(readOnly = true)
     public List<AbstractFilter> getFilters(List<UUID> ids) {
         return this.repositoriesService.getFilters(ids);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UUID> getReferencedFilterUuids(List<UUID> ids) {
+        Set<UUID> visitedUuids = new HashSet<>(ids);
+        List<UUID> referencedUuids = new ArrayList<>();
+        List<UUID> uuidsToVisit = ids;
+        while (!uuidsToVisit.isEmpty()) {
+            uuidsToVisit = this.repositoriesService.getFilters(uuidsToVisit).stream()
+                .filter(ExpertFilter.class::isInstance)
+                .flatMap(filter -> getReferencedFilterUuids(((ExpertFilter) filter).getRules()))
+                .filter(visitedUuids::add)
+                .toList();
+            referencedUuids.addAll(uuidsToVisit);
+        }
+        return referencedUuids;
+    }
+
+    private static Stream<UUID> getReferencedFilterUuids(AbstractExpertRule rule) {
+        return switch (rule) {
+            case CombinatorExpertRule combinatorRule -> Optional.ofNullable(combinatorRule.getRules()).orElse(List.of()).stream()
+                .flatMap(FilterService::getReferencedFilterUuids);
+            case FilterUuidExpertRule filterUuidRule -> Optional.ofNullable(filterUuidRule.getValues()).orElse(Set.of()).stream()
+                .map(UUID::fromString);
+            case null, default -> Stream.empty();
+        };
     }
 
     @Transactional

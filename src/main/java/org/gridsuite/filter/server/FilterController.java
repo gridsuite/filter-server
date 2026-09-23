@@ -146,6 +146,13 @@ public class FilterController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping(value = "/filters/referenced-filter-uuids", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get filter uuids referenced, directly or transitively, by the given filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The referenced filter uuids")})
+    public ResponseEntity<List<UUID>> getReferencedFilterUuids(@RequestParam("ids") List<UUID> ids) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getReferencedFilterUuids(ids));
+    }
+
     @GetMapping(value = "/filters/metadata")
     @Operation(summary = "get filters metadata")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "filters metadata"),
