@@ -24,10 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -192,6 +189,23 @@ public class FilterController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ret);
+    }
+
+    @GetMapping(value = "/filters/export/onlyIds", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Export list of filters to list of equipments ids found")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filters on JSON format")})
+    public ResponseEntity<Set<String>> exportFiltersToEquipmentsIds(@RequestParam("ids") List<UUID> ids,
+                                                                @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                @RequestParam(value = "variantId", required = false) String variantId) {
+        List<FilterEquipments> filterEquipments = service.exportFilters(ids, networkUuid, variantId);
+        Set<String> equipmentsIds = filterEquipments.stream()
+                .flatMap(filterEquipments1 -> filterEquipments1.getIdentifiableAttributes().stream().map(IdentifiableAttributes::getId))
+                .collect(Collectors.toSet());
+        Logger.getLogger("export").info(() -> String.format("multiple net:%s, variant:%s, ids:%s,%ngot:%d",
+                networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), equipmentsIds.size()).replaceAll("[$\r]", "_"));
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(equipmentsIds);
     }
 
     @GetMapping(value = "/filters/export/busIds", produces = MediaType.APPLICATION_JSON_VALUE)
