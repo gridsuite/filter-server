@@ -634,6 +634,16 @@ class FilterEntityControllerTest {
         assertEquals(3, filterEquipments.size());
         List<FilterEquipments> expected = new ArrayList<>(List.of(filterEquipment1, filterEquipment2, filterEquipment3));
         checkFilterEquipments(expected, filterEquipments);
+
+        List<String> equipmentsIds = objectMapper.readValue(
+                mvc.perform(get(URL_TEMPLATE + "/export/onlyIds").params(params)
+                                .contentType(APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        assertEquals(3, equipmentsIds.size());
+        assertTrue(equipmentsIds.containsAll(List.of("GEN", "NHV1_NHV2_2", "NHV1_NHV2_1")));
     }
 
     private void createExpertRules(List<AbstractExpertRule> rules, Set<String> countries, Set<Double> nominalVoltages) {
