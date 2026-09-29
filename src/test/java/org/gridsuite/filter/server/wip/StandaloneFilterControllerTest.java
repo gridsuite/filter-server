@@ -8,6 +8,7 @@ package org.gridsuite.filter.server.wip;
 
 import com.powsybl.ws.commons.error.ServerNameProvider;
 import org.gridsuite.filter.server.FilterApi;
+import org.gridsuite.filter.server.wip.dto.FilterWithDistributionKeys;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.wip.ExpertFilter;
@@ -27,6 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -41,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class StandaloneFilterControllerTest {
 
     static final String URL = "/" + FilterApi.API_VERSION + "/standalone-filters";
+    static final String WITH_DISTRIBUTION_KEYS = "/with-distribution-keys";
 
     @Autowired
     private MockMvc mockMvc;
@@ -161,5 +165,115 @@ class StandaloneFilterControllerTest {
                 .andExpect(jsonPath("$.length()").value(0));
 
         verify(standaloneFilterService).getFilters(List.of(id));
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenIdentifierListFilterExistsReturnsFilterAndItsDistributionKeys() throws Exception {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        when(standaloneFilterService.getFiltersWithDistributionKeys(List.of(id))).thenReturn(Map.of(id,
+                FilterWithDistributionKeys.builder()
+                        .filter(IdentifierListFilter.builder()
+                                .equipmentType(EquipmentType.LINE)
+                                .equipmentIds(Set.of("L1", "L2"))
+                                .build())
+                        .distributionKeys(new LinkedHashMap<>(Map.of("L1", 0.3, "L2", 0.7)))
+                        .build()));
+
+        // Act & Assert
+        mockMvc.perform(get(URL + WITH_DISTRIBUTION_KEYS)
+                        .param("ids", id.toString())
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$['" + id + "'].filter.filterType").value("IDENTIFIER_LIST"))
+                .andExpect(jsonPath("$['" + id + "'].filter.equipmentType").value("LINE"))
+                .andExpect(jsonPath("$['" + id + "'].distributionKeys['L1']").value(0.3))
+                .andExpect(jsonPath("$['" + id + "'].distributionKeys['L2']").value(0.7));
+
+        verify(standaloneFilterService).getFiltersWithDistributionKeys(List.of(id));
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenExpertFilterExistsReturnsEmptyDistributionKeys() throws Exception {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        when(standaloneFilterService.getFiltersWithDistributionKeys(List.of(id))).thenReturn(Map.of(id,
+                FilterWithDistributionKeys.builder()
+                        .filter(ExpertFilter.builder()
+                                .equipmentType(EquipmentType.GENERATOR)
+                                .rule(CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(List.of()).build())
+                                .build())
+                        .distributionKeys(Map.of())
+                        .build()));
+
+        // Act & Assert
+        mockMvc.perform(get(URL + WITH_DISTRIBUTION_KEYS)
+                        .param("ids", id.toString())
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$['" + id + "'].filter.filterType").value("EXPERT"))
+                .andExpect(jsonPath("$['" + id + "'].filter.equipmentType").value("GENERATOR"))
+                .andExpect(jsonPath("$['" + id + "'].distributionKeys").isEmpty());
+
+        verify(standaloneFilterService).getFiltersWithDistributionKeys(List.of(id));
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenSomeIdsDoNotExistOmitsThemFromTheBody() throws Exception {
+        // Arrange
+        UUID existingId = UUID.randomUUID();
+        UUID deletedId = UUID.randomUUID();
+        when(standaloneFilterService.getFiltersWithDistributionKeys(List.of(existingId, deletedId))).thenReturn(Map.of(existingId,
+                FilterWithDistributionKeys.builder()
+                        .filter(IdentifierListFilter.builder()
+                                .equipmentType(EquipmentType.LOAD)
+                                .equipmentIds(Set.of("LOAD1"))
+                                .build())
+                        .distributionKeys(Map.of("LOAD1", 1.0))
+                        .build()));
+
+        // Act & Assert
+        mockMvc.perform(get(URL + WITH_DISTRIBUTION_KEYS)
+                        .param("ids", existingId.toString())
+                        .param("ids", deletedId.toString())
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$['" + existingId + "'].distributionKeys['LOAD1']").value(1.0))
+                .andExpect(jsonPath("$['" + deletedId + "']").doesNotExist());
+
+        verify(standaloneFilterService).getFiltersWithDistributionKeys(List.of(existingId, deletedId));
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenNoFiltersFoundReturnsOkWithEmptyMap() throws Exception {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        when(standaloneFilterService.getFiltersWithDistributionKeys(List.of(id))).thenReturn(Map.of());
+
+        // Act & Assert
+        mockMvc.perform(get(URL + WITH_DISTRIBUTION_KEYS)
+                        .param("ids", id.toString())
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        verify(standaloneFilterService).getFiltersWithDistributionKeys(List.of(id));
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenIdsParamMissingReturns400() throws Exception {
+        mockMvc.perform(get(URL + WITH_DISTRIBUTION_KEYS).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(standaloneFilterService, never()).getFiltersWithDistributionKeys(any());
+    }
+
+    @Test
+    void getFilterWhenIdIsNotAUuidReturns400() throws Exception {
+        mockMvc.perform(get(URL + "/not-a-uuid").contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(standaloneFilterService, never()).getFilter(any());
     }
 }
