@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.gridsuite.filter.server.FilterApi;
+import org.gridsuite.filter.server.wip.dto.FilterWithDistributionKeys;
 import org.gridsuite.filter.wip.Filter;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -57,5 +58,17 @@ public class StandaloneFilterController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.getFilters(ids));
+    }
+
+    @GetMapping(value = "/with-distribution-keys", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get multiple filters by ids, along with their distribution keys, indexed by id",
+            description = "Only identifier list filters have distribution keys, expert filters are returned with an empty one. Ids with no matching filter are omitted.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "The filters found, indexed by their id, each with its distribution keys indexed by equipment id")
+    })
+    public ResponseEntity<Map<UUID, FilterWithDistributionKeys>> getFiltersWithDistributionKeys(@RequestParam List<UUID> ids) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(service.getFiltersWithDistributionKeys(ids));
     }
 }
