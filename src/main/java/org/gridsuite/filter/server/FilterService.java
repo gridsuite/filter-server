@@ -93,34 +93,33 @@ public class FilterService {
 
     @Transactional(readOnly = true)
     public List<UUID> getReferencedFilterUuids(List<UUID> filterUuids) {
-        Set<UUID> alreadySeenFilterUuids = new HashSet<>(filterUuids);
-        List<UUID> allReferencedFilterUuids = new ArrayList<>();
-        List<UUID> currentLevelFilterUuids = filterUuids;
-        while (!currentLevelFilterUuids.isEmpty()) {
-            List<UUID> nextLevelFilterUuids = new ArrayList<>();
-            for (AbstractFilter currentFilter : this.repositoriesService.getFilters(currentLevelFilterUuids)) {
-                if (currentFilter instanceof ExpertFilter expertFilter) {
-                    for (UUID referencedFilterUuid : extractReferencedFilterUuids(expertFilter.getRules())) {
-                        if (alreadySeenFilterUuids.add(referencedFilterUuid)) {
-                            nextLevelFilterUuids.add(referencedFilterUuid);
-                        }
-                    }
+        Set<UUID> allFilterUuids = new LinkedHashSet<>(filterUuids);
+        List<UUID> filterUuidsToInspect = filterUuids;
+        while (!filterUuidsToInspect.isEmpty()) {
+            Set<UUID> newReferencedFilterUuids = new LinkedHashSet<>();
+            for (AbstractFilter filter : this.repositoriesService.getFilters(filterUuidsToInspect)) {
+                if (filter instanceof ExpertFilter expertFilter) {
+                    collectReferencedFilterUuids(expertFilter.getRules(), newReferencedFilterUuids);
                 }
             }
-            allReferencedFilterUuids.addAll(nextLevelFilterUuids);
-            currentLevelFilterUuids = nextLevelFilterUuids;
+            newReferencedFilterUuids.removeAll(allFilterUuids);
+            allFilterUuids.addAll(newReferencedFilterUuids);
+            filterUuidsToInspect = new ArrayList<>(newReferencedFilterUuids);
         }
-        return allReferencedFilterUuids;
+        filterUuids.forEach(allFilterUuids::remove);
+        return new ArrayList<>(allFilterUuids);
     }
 
-    private static List<UUID> extractReferencedFilterUuids(AbstractExpertRule rule) {
-        List<UUID> referencedFilterUuids = new ArrayList<>();
+    private static void collectReferencedFilterUuids(AbstractExpertRule rule, Set<UUID> result) {
         if (rule instanceof CombinatorExpertRule combinatorRule && combinatorRule.getRules() != null) {
-            combinatorRule.getRules().forEach(childRule -> referencedFilterUuids.addAll(extractReferencedFilterUuids(childRule)));
+            for (AbstractExpertRule childRule : combinatorRule.getRules()) {
+                collectReferencedFilterUuids(childRule, result);
+            }
         } else if (rule instanceof FilterUuidExpertRule filterUuidRule && filterUuidRule.getValues() != null) {
-            filterUuidRule.getValues().forEach(filterUuidAsString -> referencedFilterUuids.add(UUID.fromString(filterUuidAsString)));
+            for (String filterUuid : filterUuidRule.getValues()) {
+                result.add(UUID.fromString(filterUuid));
+            }
         }
-        return referencedFilterUuids;
     }
 
     @Transactional
