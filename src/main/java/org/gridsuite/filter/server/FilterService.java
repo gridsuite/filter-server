@@ -102,9 +102,7 @@ public class FilterService {
                     collectReferencedFilterUuids(expertFilter.getRules(), newReferencedFilterUuids);
                 }
             }
-            newReferencedFilterUuids.removeAll(allFilterUuids);
-            allFilterUuids.addAll(newReferencedFilterUuids);
-            filterUuidsToInspect = new ArrayList<>(newReferencedFilterUuids);
+            filterUuidsToInspect = newReferencedFilterUuids.stream().filter(allFilterUuids::add).toList();
         }
         filterUuids.forEach(allFilterUuids::remove);
         return new ArrayList<>(allFilterUuids);
