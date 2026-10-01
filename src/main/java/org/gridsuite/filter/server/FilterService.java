@@ -93,29 +93,31 @@ public class FilterService {
 
     @Transactional(readOnly = true)
     public List<UUID> getReferencedFilterUuids(List<UUID> filterUuids) {
-        Set<UUID> allFilterUuids = new LinkedHashSet<>(filterUuids);
-        List<UUID> filterUuidsToInspect = filterUuids;
-        while (!filterUuidsToInspect.isEmpty()) {
-            Set<UUID> newReferencedFilterUuids = new LinkedHashSet<>();
-            for (AbstractFilter filter : this.repositoriesService.getFilters(filterUuidsToInspect)) {
-                if (filter instanceof ExpertFilter expertFilter) {
-                    collectReferencedFilterUuids(expertFilter.getRules(), newReferencedFilterUuids);
-                }
-            }
-            filterUuidsToInspect = newReferencedFilterUuids.stream().filter(allFilterUuids::add).toList();
+        Set<UUID> inputFilterUuids = new LinkedHashSet<>(filterUuids);
+        Set<UUID> allFilterUuids = new LinkedHashSet<>();
+        for (UUID filterUuid : inputFilterUuids) {
+            getFilter(filterUuid, inputFilterUuids, allFilterUuids);
         }
-        filterUuids.forEach(allFilterUuids::remove);
-        return new ArrayList<>(allFilterUuids);
+        return allFilterUuids.stream().toList();
     }
 
-    private static void collectReferencedFilterUuids(AbstractExpertRule rule, Set<UUID> result) {
+    private void getFilter(UUID filterUuid, Set<UUID> inputFilterUuids, Set<UUID> allFilterUuids) {
+        if (this.repositoriesService.getFilter(filterUuid).orElse(null) instanceof ExpertFilter expertFilter) {
+            getExpertRule(expertFilter.getRules(), inputFilterUuids, allFilterUuids);
+        }
+    }
+
+    private void getExpertRule(AbstractExpertRule rule, Set<UUID> inputFilterUuids, Set<UUID> allFilterUuids) {
         if (rule instanceof CombinatorExpertRule combinatorRule && combinatorRule.getRules() != null) {
             for (AbstractExpertRule childRule : combinatorRule.getRules()) {
-                collectReferencedFilterUuids(childRule, result);
+                getExpertRule(childRule, inputFilterUuids, allFilterUuids);
             }
         } else if (rule instanceof FilterUuidExpertRule filterUuidRule && filterUuidRule.getValues() != null) {
             for (String filterUuid : filterUuidRule.getValues()) {
-                result.add(UUID.fromString(filterUuid));
+                UUID referencedFilterUuid = UUID.fromString(filterUuid);
+                if (!inputFilterUuids.contains(referencedFilterUuid) && allFilterUuids.add(referencedFilterUuid)) {
+                    getFilter(referencedFilterUuid, inputFilterUuids, allFilterUuids);
+                }
             }
         }
     }
