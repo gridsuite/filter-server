@@ -18,6 +18,10 @@ import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
 import org.gridsuite.filter.IFilterAttributes;
 import org.gridsuite.filter.exception.FilterCycleException;
+import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.expertfilter.expertrule.AbstractExpertRule;
+import org.gridsuite.filter.expertfilter.expertrule.CombinatorExpertRule;
+import org.gridsuite.filter.expertfilter.expertrule.FilterUuidExpertRule;
 import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
 import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
 import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
@@ -85,6 +89,37 @@ public class FilterService {
     @Transactional(readOnly = true)
     public List<AbstractFilter> getFilters(List<UUID> ids) {
         return this.repositoriesService.getFilters(ids);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UUID> getReferencedFilterUuids(List<UUID> filterUuids) {
+        Set<UUID> inputFilterUuids = new LinkedHashSet<>(filterUuids);
+        Set<UUID> allFilterUuids = new LinkedHashSet<>();
+        for (UUID filterUuid : inputFilterUuids) {
+            getFilter(filterUuid, inputFilterUuids, allFilterUuids);
+        }
+        return allFilterUuids.stream().toList();
+    }
+
+    private void getFilter(UUID filterUuid, Set<UUID> inputFilterUuids, Set<UUID> allFilterUuids) {
+        if (this.repositoriesService.getFilter(filterUuid).orElse(null) instanceof ExpertFilter expertFilter) {
+            getExpertRule(expertFilter.getRules(), inputFilterUuids, allFilterUuids);
+        }
+    }
+
+    private void getExpertRule(AbstractExpertRule rule, Set<UUID> inputFilterUuids, Set<UUID> allFilterUuids) {
+        if (rule instanceof CombinatorExpertRule combinatorRule && combinatorRule.getRules() != null) {
+            for (AbstractExpertRule childRule : combinatorRule.getRules()) {
+                getExpertRule(childRule, inputFilterUuids, allFilterUuids);
+            }
+        } else if (rule instanceof FilterUuidExpertRule filterUuidRule && filterUuidRule.getValues() != null) {
+            for (String filterUuid : filterUuidRule.getValues()) {
+                UUID referencedFilterUuid = UUID.fromString(filterUuid);
+                if (!inputFilterUuids.contains(referencedFilterUuid) && allFilterUuids.add(referencedFilterUuid)) {
+                    getFilter(referencedFilterUuid, inputFilterUuids, allFilterUuids);
+                }
+            }
+        }
     }
 
     @Transactional
