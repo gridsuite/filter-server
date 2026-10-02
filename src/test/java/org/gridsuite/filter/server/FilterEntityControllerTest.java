@@ -636,7 +636,7 @@ class FilterEntityControllerTest {
         checkFilterEquipments(expected, filterEquipments);
 
         List<String> equipmentsIds = objectMapper.readValue(
-                mvc.perform(get(URL_TEMPLATE + "/export/onlyIds").params(params)
+                mvc.perform(get(URL_TEMPLATE + "/evaluate/onlyIds").params(params)
                                 .contentType(APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString(),

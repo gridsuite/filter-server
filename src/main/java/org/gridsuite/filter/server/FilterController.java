@@ -191,18 +191,16 @@ public class FilterController {
                 .body(ret);
     }
 
-    @GetMapping(value = "/filters/export/onlyIds", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Export list of filters to list of equipments ids found")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The filters on JSON format")})
-    public ResponseEntity<Set<String>> exportFiltersToEquipmentsIds(@RequestParam("ids") List<UUID> ids,
-                                                                @RequestParam(value = "networkUuid") UUID networkUuid,
-                                                                @RequestParam(value = "variantId", required = false) String variantId) {
+    @GetMapping(value = "/filters/evaluate/onlyIds", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Evaluate matched elements uuids from filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Uuids of the matching equipments")})
+    public ResponseEntity<Set<String>> evaluateFiltersToEquipmentsIds(@RequestParam("ids") List<UUID> ids,
+                                                                      @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                      @RequestParam(value = "variantId", required = false) String variantId) {
         List<FilterEquipments> filterEquipments = service.exportFilters(ids, networkUuid, variantId);
         Set<String> equipmentsIds = filterEquipments.stream()
                 .flatMap(filterEquipments1 -> filterEquipments1.getIdentifiableAttributes().stream().map(IdentifiableAttributes::getId))
                 .collect(Collectors.toSet());
-        Logger.getLogger("export").info(() -> String.format("multiple net:%s, variant:%s, ids:%s,%ngot:%d",
-                networkUuid, variantId, ids.stream().map(UUID::toString).collect(Collectors.joining()), equipmentsIds.size()).replaceAll("[$\r]", "_"));
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(equipmentsIds);
