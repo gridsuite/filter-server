@@ -24,10 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -199,6 +196,21 @@ public class FilterController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ret);
+    }
+
+    @GetMapping(value = "/filters/evaluate/onlyIds", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Evaluate matched elements uuids from filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Uuids of the matching equipments")})
+    public ResponseEntity<Set<String>> evaluateFiltersToEquipmentsIds(@RequestParam("ids") List<UUID> ids,
+                                                                      @RequestParam(value = "networkUuid") UUID networkUuid,
+                                                                      @RequestParam(value = "variantId", required = false) String variantId) {
+        List<FilterEquipments> filterEquipments = service.exportFilters(ids, networkUuid, variantId);
+        Set<String> equipmentsIds = filterEquipments.stream()
+                .flatMap(filterEquipments1 -> filterEquipments1.getIdentifiableAttributes().stream().map(IdentifiableAttributes::getId))
+                .collect(Collectors.toSet());
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(equipmentsIds);
     }
 
     @GetMapping(value = "/filters/export/busIds", produces = MediaType.APPLICATION_JSON_VALUE)
