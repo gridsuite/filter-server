@@ -14,6 +14,7 @@ import org.gridsuite.filter.server.entities.identifierlistfilter.IdentifierListF
 import org.gridsuite.filter.server.entities.identifierlistfilter.IdentifierListFilterEquipmentEntity;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
+import org.gridsuite.filter.server.wip.dto.FilterWithDistributionKeys;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.utils.expertfilter.DataType;
@@ -144,6 +145,125 @@ class StandaloneFilterServiceTest {
         assertThat(filters).containsOnlyKeys(existingId).doesNotContainValue(null);
     }
 
+    // --- getFiltersWithDistributionKeys ---
+
+    @Test
+    void getFiltersWithDistributionKeysForIdentifierListFilterReturnsFilterAndItsDistributionKeys() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        List<UUID> requestedIds = List.of(id);
+        when(identifierListFilterRepository.findAllById(requestedIds))
+                .thenReturn(List.of(identifierListFilterEntityWithDistributionKeys(id, EquipmentType.LINE,
+                        Map.of("L1", 0.3, "L2", 0.7))));
+        when(expertFilterRepository.findAllById(requestedIds)).thenReturn(List.of());
+
+        // Act
+        Map<UUID, FilterWithDistributionKeys> filters = service.getFiltersWithDistributionKeys(requestedIds);
+
+        // Assert
+        assertThat(filters).containsOnlyKeys(id);
+        FilterWithDistributionKeys entry = filters.get(id);
+        assertThat(entry.getFilter()).isInstanceOf(IdentifierListFilter.class);
+        assertThat(((IdentifierListFilter) entry.getFilter()).getEquipmentIds()).containsExactlyInAnyOrder("L1", "L2");
+        assertThat(entry.getDistributionKeys()).containsExactlyInAnyOrderEntriesOf(Map.of("L1", 0.3, "L2", 0.7));
+        verify(identifierListFilterRepository).findAllById(requestedIds);
+        verify(expertFilterRepository).findAllById(requestedIds);
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysForExpertFilterReturnsEmptyDistributionKeys() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        List<UUID> requestedIds = List.of(id);
+        when(identifierListFilterRepository.findAllById(requestedIds)).thenReturn(List.of());
+        when(expertFilterRepository.findAllById(requestedIds))
+                .thenReturn(List.of(expertFilterEntity(id, EquipmentType.GENERATOR,
+                        combinator(numberValue(FieldType.NOMINAL_VOLTAGE, OperatorType.GREATER, "100.0")))));
+
+        // Act
+        Map<UUID, FilterWithDistributionKeys> filters = service.getFiltersWithDistributionKeys(requestedIds);
+
+        // Assert : expert filters carry no distribution keys
+        assertThat(filters).containsOnlyKeys(id);
+        FilterWithDistributionKeys entry = filters.get(id);
+        assertThat(entry.getFilter()).isInstanceOf(ExpertFilter.class);
+        assertThat(entry.getDistributionKeys()).isEmpty();
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenMixedTypeIdsReturnsBothTypesIndexedById() {
+        // Arrange
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        List<UUID> requestedIds = List.of(id1, id2);
+        when(identifierListFilterRepository.findAllById(requestedIds))
+                .thenReturn(List.of(identifierListFilterEntityWithDistributionKeys(id1, EquipmentType.LINE, Map.of("L1", 1.0))));
+        when(expertFilterRepository.findAllById(requestedIds))
+                .thenReturn(List.of(expertFilterEntity(id2, EquipmentType.GENERATOR,
+                        combinator(numberValue(FieldType.NOMINAL_VOLTAGE, OperatorType.GREATER, "100.0")))));
+
+        // Act
+        Map<UUID, FilterWithDistributionKeys> filters = service.getFiltersWithDistributionKeys(requestedIds);
+
+        // Assert
+        assertThat(filters).hasSize(2);
+        assertThat(filters.get(id1).getFilter()).isInstanceOf(IdentifierListFilter.class);
+        assertThat(filters.get(id1).getDistributionKeys()).containsExactlyEntriesOf(Map.of("L1", 1.0));
+        assertThat(filters.get(id2).getFilter()).isInstanceOf(ExpertFilter.class);
+        assertThat(filters.get(id2).getDistributionKeys()).isEmpty();
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenSomeIdsDoNotExistOmitsThemFromTheResult() {
+        // Arrange
+        UUID existingId = UUID.randomUUID();
+        UUID deletedId = UUID.randomUUID();
+        List<UUID> requestedIds = List.of(existingId, deletedId);
+        when(identifierListFilterRepository.findAllById(requestedIds))
+                .thenReturn(List.of(identifierListFilterEntityWithDistributionKeys(existingId, EquipmentType.LOAD, Map.of("LOAD1", 0.5))));
+        when(expertFilterRepository.findAllById(requestedIds)).thenReturn(List.of());
+
+        // Act
+        Map<UUID, FilterWithDistributionKeys> filters = service.getFiltersWithDistributionKeys(requestedIds);
+
+        // Assert
+        assertThat(filters).containsOnlyKeys(existingId).doesNotContainValue(null);
+        assertThat(filters.get(existingId).getDistributionKeys()).containsExactlyEntriesOf(Map.of("LOAD1", 0.5));
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenNoFilterFoundReturnsEmptyMap() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        List<UUID> requestedIds = List.of(id);
+        when(identifierListFilterRepository.findAllById(requestedIds)).thenReturn(List.of());
+        when(expertFilterRepository.findAllById(requestedIds)).thenReturn(List.of());
+
+        // Act & Assert
+        assertThat(service.getFiltersWithDistributionKeys(requestedIds)).isEmpty();
+    }
+
+    @Test
+    void getFiltersWithDistributionKeysWhenSameEquipmentIdOccursTwiceKeepsTheLastDistributionKey() {
+        // Arrange : distribution keys are not unique yet, so a duplicated equipment id is collapsed, last one winning
+        UUID id = UUID.randomUUID();
+        List<UUID> requestedIds = List.of(id);
+        IdentifierListFilterEntity entity = IdentifierListFilterEntity.builder().id(id).equipmentType(EquipmentType.LINE)
+                .filterEquipmentEntityList(List.of(
+                        IdentifierListFilterEquipmentEntity.builder().id(UUID.randomUUID()).equipmentId("L1").distributionKey(0.2).build(),
+                        IdentifierListFilterEquipmentEntity.builder().id(UUID.randomUUID()).equipmentId("L1").distributionKey(0.8).build()))
+                .build();
+        when(identifierListFilterRepository.findAllById(requestedIds)).thenReturn(List.of(entity));
+        when(expertFilterRepository.findAllById(requestedIds)).thenReturn(List.of());
+
+        // Act
+        Map<UUID, FilterWithDistributionKeys> filters = service.getFiltersWithDistributionKeys(requestedIds);
+
+        // Assert
+        assertThat(filters.get(id).getDistributionKeys()).containsExactlyEntriesOf(Map.of("L1", 0.8));
+        assertThat(((IdentifierListFilter) filters.get(id).getFilter()).getEquipmentIds()).containsExactly("L1");
+    }
+
     // --- entity→domain mapping ---
 
     @Test
@@ -218,6 +338,19 @@ class StandaloneFilterServiceTest {
     private IdentifierListFilterEntity identifierListFilterEntity(UUID id, EquipmentType type, String... equipmentIds) {
         List<IdentifierListFilterEquipmentEntity> equipment = Arrays.stream(equipmentIds)
                 .map(eqId -> IdentifierListFilterEquipmentEntity.builder().id(UUID.randomUUID()).equipmentId(eqId).build())
+                .map(IdentifierListFilterEquipmentEntity.class::cast)
+                .toList();
+        return IdentifierListFilterEntity.builder().id(id).equipmentType(type).filterEquipmentEntityList(equipment)
+                .build();
+    }
+
+    private IdentifierListFilterEntity identifierListFilterEntityWithDistributionKeys(UUID id, EquipmentType type, Map<String, Double> distributionKeysByEquipmentId) {
+        List<IdentifierListFilterEquipmentEntity> equipment = distributionKeysByEquipmentId.entrySet().stream()
+                .map(entry -> IdentifierListFilterEquipmentEntity.builder()
+                        .id(UUID.randomUUID())
+                        .equipmentId(entry.getKey())
+                        .distributionKey(entry.getValue())
+                        .build())
                 .map(IdentifierListFilterEquipmentEntity.class::cast)
                 .toList();
         return IdentifierListFilterEntity.builder().id(id).equipmentType(type).filterEquipmentEntityList(equipment)
