@@ -267,7 +267,7 @@ public class FilterService {
 
     private List<IdentifiableAttributes> getIdentifiableAttributes(AbstractFilter filter, UUID networkUuid, String variantId, FilterLoader filterLoader) {
         Network network = getNetwork(networkUuid, variantId);
-        return FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader);
+        return filter.toFilter(filterLoader).evaluate(network).stream().map(FilterServiceUtils::map).toList();
     }
 
     @Transactional(readOnly = true)
@@ -351,7 +351,7 @@ public class FilterService {
         return ids.stream()
             .map(id -> this.repositoriesService.getFilter(id).orElse(null))
             .filter(filter -> filter != null && !filterTypesToExclude.contains(filter.getType()))
-            .map(filter -> filter.toFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
+            .map(filter -> filter.toFilterEquipments(filter.toFilter(filterLoader).evaluate(network)))
             .toList();
     }
 
