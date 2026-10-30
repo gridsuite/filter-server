@@ -54,6 +54,9 @@
         <sonar.coverage.exclusions>**/migrations/**/*</sonar.coverage.exclusions>
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:filter-server</sonar.projectKey>
+
+        <!-- FIXME remove this on next gridsuite-dependencies release -->
+        <gridsuite-filter.version>1.33.0-SNAPSHOT</gridsuite-filter.version>
     </properties>
 
     <build>
@@ -92,6 +95,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- overrides of imports -->
+            <dependency>
+                <groupId>org.gridsuite</groupId>
+                <artifactId>gridsuite-filter</artifactId>
+                <version>${gridsuite-filter.version}</version>
+            </dependency>
             <!-- imports -->
             <dependency>
                 <groupId>org.gridsuite</groupId>
@@ -183,6 +192,10 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-single-line-diagram-core</artifactId>
         </dependency>
 
         <!-- Test dependencies -->
