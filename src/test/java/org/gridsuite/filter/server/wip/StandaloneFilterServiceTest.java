@@ -75,6 +75,21 @@ class StandaloneFilterServiceTest {
     }
 
     @Test
+    void getFilterWhenIdentifierListFilterKeepsEquipmentIdsInPersistedOrder() {
+        // Arrange : neither alphabetical nor hash-friendly order, to detect any reordering
+        UUID id = UUID.randomUUID();
+        String[] persistedOrder = {"GEN_Z", "GEN_A", "GEN_M", "GEN_B", "GEN_Y", "GEN_C", "GEN_X", "GEN_D"};
+        when(identifierListFilterRepository.findById(id))
+                .thenReturn(Optional.of(identifierListFilterEntity(id, EquipmentType.GENERATOR, persistedOrder)));
+
+        // Act
+        IdentifierListFilter filter = (IdentifierListFilter) service.getFilter(id).orElseThrow();
+
+        // Assert
+        assertThat(filter.getEquipmentIds()).containsExactly(persistedOrder);
+    }
+
+    @Test
     void getFilterWhenNotInIdentifierListRepositoryFallsBackToExpertFilter() {
         // Arrange
         UUID id = UUID.randomUUID();
