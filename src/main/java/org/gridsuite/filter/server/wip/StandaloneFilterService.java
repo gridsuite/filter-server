@@ -106,7 +106,7 @@ public class StandaloneFilterService {
     private Filter toWipFilter(IdentifierListFilterEntity entity) {
         Set<String> equipmentIds = entity.getFilterEquipmentEntityList().stream()
                 .map(IdentifierListFilterEquipmentEntity::getEquipmentId)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         return IdentifierListFilter.builder()
                 .equipmentType(entity.getEquipmentType())
                 .equipmentIds(equipmentIds)
