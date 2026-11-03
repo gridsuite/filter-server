@@ -109,6 +109,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- FIXME to remove when gridsuite dependencies uses updated version -->
+            <dependency>
+                <groupId>org.gridsuite</groupId>
+                <artifactId>gridsuite-filter</artifactId>
+                <version>${filter.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
