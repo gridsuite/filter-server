@@ -54,9 +54,8 @@
         <sonar.coverage.exclusions>**/migrations/**/*</sonar.coverage.exclusions>
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:filter-server</sonar.projectKey>
-
-        <!-- FIXME remove this on next gridsuite-dependencies release -->
-        <gridsuite-filter.version>1.34.0</gridsuite-filter.version>
+        <!-- FIXME to remove when gridsuite dependencies uses updated version -->
+        <filter.version>1.34.0</filter.version>
     </properties>
 
     <build>
