@@ -8,9 +8,9 @@
 package org.gridsuite.filter.server.repositories.proxies.expertfiler;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.expertfilter.ExpertFilter;
-import org.gridsuite.filter.expertfilter.expertrule.*;
+import org.gridsuite.filter.dto.AbstractFilter;
+import org.gridsuite.filter.dto.expertfilter.ExpertFilter;
+import org.gridsuite.filter.dto.expertfilter.expertrule.*;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRulePropertiesEntity;
