@@ -7,31 +7,24 @@
 package org.gridsuite.filter.server.wip;
 
 import com.powsybl.ws.commons.error.ServerNameProvider;
+import org.gridsuite.filter.ExpertFilter;
+import org.gridsuite.filter.Filter;
+import org.gridsuite.filter.IdentifierListFilter;
+import org.gridsuite.filter.rule.CombinatorExpertRule;
 import org.gridsuite.filter.server.FilterApi;
 import org.gridsuite.filter.server.wip.dto.FilterWithDistributionKeys;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
-import org.gridsuite.filter.wip.ExpertFilter;
-import org.gridsuite.filter.wip.Filter;
-import org.gridsuite.filter.wip.IdentifierListFilter;
-import org.gridsuite.filter.wip.rule.CombinatorExpertRule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
