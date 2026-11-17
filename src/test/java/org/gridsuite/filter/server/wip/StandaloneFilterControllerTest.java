@@ -7,14 +7,14 @@
 package org.gridsuite.filter.server.wip;
 
 import com.powsybl.ws.commons.error.ServerNameProvider;
+import org.gridsuite.filter.ExpertFilter;
+import org.gridsuite.filter.Filter;
+import org.gridsuite.filter.IdentifierListFilter;
+import org.gridsuite.filter.rule.CombinatorExpertRule;
 import org.gridsuite.filter.server.FilterApi;
 import org.gridsuite.filter.server.wip.dto.FilterWithDistributionKeys;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
-import org.gridsuite.filter.wip.ExpertFilter;
-import org.gridsuite.filter.wip.Filter;
-import org.gridsuite.filter.wip.IdentifierListFilter;
-import org.gridsuite.filter.wip.rule.CombinatorExpertRule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

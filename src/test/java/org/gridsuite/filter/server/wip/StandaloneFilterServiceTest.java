@@ -6,6 +6,10 @@
  */
 package org.gridsuite.filter.server.wip;
 
+import org.gridsuite.filter.ExpertFilter;
+import org.gridsuite.filter.Filter;
+import org.gridsuite.filter.IdentifierListFilter;
+import org.gridsuite.filter.rule.*;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRulePropertiesEntity;
@@ -20,10 +24,6 @@ import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.utils.expertfilter.DataType;
 import org.gridsuite.filter.utils.expertfilter.FieldType;
 import org.gridsuite.filter.utils.expertfilter.OperatorType;
-import org.gridsuite.filter.wip.ExpertFilter;
-import org.gridsuite.filter.wip.Filter;
-import org.gridsuite.filter.wip.IdentifierListFilter;
-import org.gridsuite.filter.wip.rule.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

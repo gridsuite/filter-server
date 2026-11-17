@@ -10,7 +10,7 @@ package org.gridsuite.filter.server.wip.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.gridsuite.filter.wip.Filter;
+import org.gridsuite.filter.Filter;
 
 import java.util.Map;
 
