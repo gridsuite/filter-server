@@ -111,4 +111,3 @@ public final class FilterWithEquipmentTypesUtils {
         return CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(List.of(rule1, rule2, rule3)).build();
     }
 }
-
