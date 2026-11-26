@@ -20,12 +20,13 @@ import com.powsybl.iidm.network.test.*;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
-import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.IFilterAttributes;
-import org.gridsuite.filter.expertfilter.ExpertFilter;
-import org.gridsuite.filter.expertfilter.expertrule.*;
-import org.gridsuite.filter.identifierlistfilter.*;
-import org.gridsuite.filter.server.dto.*;
+import org.gridsuite.filter.dto.AbstractFilter;
+import org.gridsuite.filter.dto.IFilterAttributes;
+import org.gridsuite.filter.dto.expertfilter.ExpertFilter;
+import org.gridsuite.filter.dto.expertfilter.expertrule.*;
+import org.gridsuite.filter.dto.identifierlistfilter.*;
+import org.gridsuite.filter.server.dto.CountWithMissingUuids;
+import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.utils.MatcherJson;
 import org.gridsuite.filter.server.utils.assertions.Assertions;
 import org.gridsuite.filter.utils.EquipmentType;
@@ -200,12 +201,12 @@ class FilterEntityControllerTest {
         Date modificationDate = new Date();
 
         // Create identifier list filter for generators
-        IdentifierListFilterEquipmentAttributes gen1 = new IdentifierListFilterEquipmentAttributes("GEN", 7d);
-        IdentifierListFilterEquipmentAttributes gen2 = new IdentifierListFilterEquipmentAttributes("GEN2", 9d);
+        IdentifierListFilterEquipmentAttributes gen1 = new IdentifierListFilterEquipmentAttributes("GEN", null);
+        IdentifierListFilterEquipmentAttributes gen2 = new IdentifierListFilterEquipmentAttributes("GEN2", null);
         IdentifierListFilter identifierListFilter = new IdentifierListFilter(filterId, modificationDate, EquipmentType.GENERATOR, List.of(gen1, gen2));
         insertFilter(filterId, identifierListFilter);
         checkIdentifierListFilter(filterId, identifierListFilter);
-        checkIdentifierListFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":7.0},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":9.0}]\n",
+        checkIdentifierListFilterExportAndMetadata(filterId, "[{\"id\":\"GEN\",\"type\":\"GENERATOR\",\"distributionKey\":null},{\"id\":\"GEN2\",\"type\":\"GENERATOR\",\"distributionKey\":null}]\n",
                 EquipmentType.GENERATOR);
         // Create identifier list filter for lines
         UUID lineFilterId = UUID.randomUUID();
@@ -613,7 +614,7 @@ class FilterEntityControllerTest {
             new TypeReference<>() {
             });
 
-        IdentifiableAttributes identifiableAttributes = new IdentifiableAttributes("GEN", IdentifiableType.GENERATOR, 1.0);
+        IdentifiableAttributes identifiableAttributes = new IdentifiableAttributes("GEN", IdentifiableType.GENERATOR, null);
         IdentifiableAttributes identifiableAttributes4 = new IdentifiableAttributes("NHV1_NHV2_1", IdentifiableType.LINE, null);
 
         FilterEquipments filterEquipment1 = FilterEquipments.builder()
@@ -929,7 +930,7 @@ class FilterEntityControllerTest {
         matchExpertFilterInfos(foundFilter, expertFilter);
     }
 
-    private void matchFilterInfos(IFilterAttributes filter1, IFilterAttributes filter2) {
+    private void matchFilterInfos(AbstractFilter filter1, AbstractFilter filter2) {
         assertEquals(filter1.getId(), filter2.getId());
         assertEquals(filter1.getType(), filter2.getType());
         assertTrue((filter2.getModificationDate().getTime() - filter1.getModificationDate().getTime()) < 2000);

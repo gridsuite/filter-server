@@ -6,6 +6,10 @@
  */
 package org.gridsuite.filter.server.wip;
 
+import org.gridsuite.filter.ExpertFilter;
+import org.gridsuite.filter.Filter;
+import org.gridsuite.filter.IdentifierListFilter;
+import org.gridsuite.filter.rule.*;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRulePropertiesEntity;
@@ -20,21 +24,13 @@ import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.utils.expertfilter.DataType;
 import org.gridsuite.filter.utils.expertfilter.FieldType;
 import org.gridsuite.filter.utils.expertfilter.OperatorType;
-import org.gridsuite.filter.wip.ExpertFilter;
-import org.gridsuite.filter.wip.Filter;
-import org.gridsuite.filter.wip.IdentifierListFilter;
-import org.gridsuite.filter.wip.rule.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -72,6 +68,21 @@ class StandaloneFilterServiceTest {
         assertThat(filter.getEquipmentType()).isEqualTo(EquipmentType.GENERATOR);
         assertThat(((IdentifierListFilter) filter).getEquipmentIds()).containsExactlyInAnyOrder("GEN1", "GEN2");
         verify(identifierListFilterRepository).findById(id);
+    }
+
+    @Test
+    void getFilterWhenIdentifierListFilterKeepsEquipmentIdsInPersistedOrder() {
+        // Arrange : neither alphabetical nor hash-friendly order, to detect any reordering
+        UUID id = UUID.randomUUID();
+        String[] persistedOrder = {"GEN_Z", "GEN_A", "GEN_M", "GEN_B", "GEN_Y", "GEN_C", "GEN_X", "GEN_D"};
+        when(identifierListFilterRepository.findById(id))
+                .thenReturn(Optional.of(identifierListFilterEntity(id, EquipmentType.GENERATOR, persistedOrder)));
+
+        // Act
+        IdentifierListFilter filter = (IdentifierListFilter) service.getFilter(id).orElseThrow();
+
+        // Assert
+        assertThat(filter.getEquipmentIds()).containsExactly(persistedOrder);
     }
 
     @Test

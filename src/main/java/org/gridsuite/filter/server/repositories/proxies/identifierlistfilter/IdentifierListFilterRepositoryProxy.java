@@ -8,9 +8,9 @@
 package org.gridsuite.filter.server.repositories.proxies.identifierlistfilter;
 
 import com.powsybl.commons.PowsyblException;
-import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
-import org.gridsuite.filter.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
+import org.gridsuite.filter.dto.AbstractFilter;
+import org.gridsuite.filter.dto.identifierlistfilter.IdentifierListFilter;
+import org.gridsuite.filter.dto.identifierlistfilter.IdentifierListFilterEquipmentAttributes;
 import org.gridsuite.filter.server.entities.identifierlistfilter.IdentifierListFilterEntity;
 import org.gridsuite.filter.server.entities.identifierlistfilter.IdentifierListFilterEquipmentEntity;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;

@@ -14,18 +14,18 @@ import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
-import org.gridsuite.filter.IFilterAttributes;
+import org.gridsuite.filter.dto.AbstractFilter;
+import org.gridsuite.filter.dto.IFilterAttributes;
+import org.gridsuite.filter.dto.expertfilter.ExpertFilter;
+import org.gridsuite.filter.dto.expertfilter.expertrule.AbstractExpertRule;
+import org.gridsuite.filter.dto.expertfilter.expertrule.CombinatorExpertRule;
+import org.gridsuite.filter.dto.expertfilter.expertrule.FilterUuidExpertRule;
+import org.gridsuite.filter.dto.identifierlistfilter.FilterAttributes;
+import org.gridsuite.filter.dto.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.dto.identifierlistfilter.FilteredIdentifiables;
+import org.gridsuite.filter.dto.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.exception.FilterCycleException;
-import org.gridsuite.filter.expertfilter.ExpertFilter;
-import org.gridsuite.filter.expertfilter.expertrule.AbstractExpertRule;
-import org.gridsuite.filter.expertfilter.expertrule.CombinatorExpertRule;
-import org.gridsuite.filter.expertfilter.expertrule.FilterUuidExpertRule;
-import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
-import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
-import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
-import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.CountWithMissingUuids;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.server.error.FilterBusinessErrorCode;
@@ -40,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -267,7 +268,7 @@ public class FilterService {
 
     private List<IdentifiableAttributes> getIdentifiableAttributes(AbstractFilter filter, UUID networkUuid, String variantId, FilterLoader filterLoader) {
         Network network = getNetwork(networkUuid, variantId);
-        return FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader);
+        return filter.toFilter(filterLoader).evaluate(network).stream().map(FilterServiceUtils::map).toList();
     }
 
     @Transactional(readOnly = true)
@@ -351,7 +352,7 @@ public class FilterService {
         return ids.stream()
             .map(id -> this.repositoriesService.getFilter(id).orElse(null))
             .filter(filter -> filter != null && !filterTypesToExclude.contains(filter.getType()))
-            .map(filter -> filter.toFilterEquipments(FilterServiceUtils.getIdentifiableAttributes(filter, network, filterLoader)))
+            .map(filter -> filter.toFilterEquipments(filter.toFilter(filterLoader).evaluate(network)))
             .toList();
     }
 
