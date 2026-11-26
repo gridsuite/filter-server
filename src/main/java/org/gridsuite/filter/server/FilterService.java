@@ -223,7 +223,7 @@ public class FilterService {
         Network network;
         try {
             network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
-        } catch (PowsyblException powsyblException) {
+        } catch (PowsyblException _) {
             throw new FilterException(
                 FilterBusinessErrorCode.MISSING_NETWORK,
                 "Network with UUID " + networkUuid + " is not found",
