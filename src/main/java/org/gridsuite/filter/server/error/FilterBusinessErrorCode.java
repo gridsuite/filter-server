@@ -14,7 +14,8 @@ import com.powsybl.ws.commons.error.BusinessErrorCode;
  * Business error codes emitted by the filter service.
  */
 public enum FilterBusinessErrorCode implements BusinessErrorCode {
-    FILTER_CYCLE_DETECTED("filter.filterCycleDetected");
+    FILTER_CYCLE_DETECTED("filter.filterCycleDetected"),
+    MISSING_NETWORK("filter.missingNetwork");
     private final String code;
 
     FilterBusinessErrorCode(String code) {
