@@ -36,7 +36,7 @@ public class FilterExceptionHandler
     @Override
     protected HttpStatus mapStatus(FilterBusinessErrorCode code) {
         return switch (code) {
-            case FILTER_CYCLE_DETECTED -> HttpStatus.BAD_REQUEST;
+            case FILTER_CYCLE_DETECTED, MISSING_NETWORK -> HttpStatus.BAD_REQUEST;
         };
     }
 

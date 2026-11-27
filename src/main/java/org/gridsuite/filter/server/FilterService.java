@@ -256,9 +256,15 @@ public class FilterService {
     }
 
     private Network getNetwork(UUID networkUuid, String variantId) {
-        Network network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
-        if (network == null) {
-            throw new PowsyblException("Network '" + networkUuid + "' not found");
+        Network network;
+        try {
+            network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
+        } catch (PowsyblException _) {
+            throw new FilterException(
+                FilterBusinessErrorCode.MISSING_NETWORK,
+                "Network with UUID " + networkUuid + " is not found",
+                Map.of("networkUuid", networkUuid.toString())
+            );
         }
         if (variantId != null) {
             network.getVariantManager().setWorkingVariant(variantId);
