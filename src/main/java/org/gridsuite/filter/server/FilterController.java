@@ -11,11 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
-import org.gridsuite.filter.AbstractFilter;
-import org.gridsuite.filter.identifierlistfilter.FilterAttributes;
-import org.gridsuite.filter.identifierlistfilter.FilterEquipments;
-import org.gridsuite.filter.identifierlistfilter.FilteredIdentifiables;
-import org.gridsuite.filter.identifierlistfilter.IdentifiableAttributes;
+import org.gridsuite.filter.dto.AbstractFilter;
+import org.gridsuite.filter.dto.identifierlistfilter.FilterAttributes;
+import org.gridsuite.filter.dto.identifierlistfilter.FilterEquipments;
+import org.gridsuite.filter.dto.identifierlistfilter.FilteredIdentifiables;
+import org.gridsuite.filter.dto.identifierlistfilter.IdentifiableAttributes;
 import org.gridsuite.filter.server.dto.CountWithMissingUuids;
 import org.gridsuite.filter.server.dto.IdsByGroup;
 import org.gridsuite.filter.utils.FiltersWithEquipmentTypes;
@@ -141,6 +141,13 @@ public class FilterController {
     public ResponseEntity<Void> deleteFilters(@RequestBody List<UUID> ids) {
         service.deleteFilters(ids);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/filters/referenced-filter-uuids", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get filter uuids referenced, directly or transitively, by the given filters")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The referenced filter uuids")})
+    public ResponseEntity<List<UUID>> getReferencedFilterUuids(@RequestParam("ids") List<UUID> ids) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(service.getReferencedFilterUuids(ids));
     }
 
     @GetMapping(value = "/filters/metadata")

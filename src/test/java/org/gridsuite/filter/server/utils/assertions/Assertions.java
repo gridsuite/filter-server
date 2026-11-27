@@ -7,7 +7,7 @@
 package org.gridsuite.filter.server.utils.assertions;
 
 import org.assertj.core.util.CheckReturnValue;
-import org.gridsuite.filter.expertfilter.ExpertFilter;
+import org.gridsuite.filter.dto.expertfilter.ExpertFilter;
 
 /**
  *  @author Thang PHAM <quyet-thang.pham at rte-france.com>

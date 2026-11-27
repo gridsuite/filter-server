@@ -8,10 +8,10 @@
 package org.gridsuite.filter.server.utils;
 
 import com.powsybl.iidm.network.IdentifiableType;
-import org.gridsuite.filter.expertfilter.ExpertFilter;
-import org.gridsuite.filter.expertfilter.expertrule.AbstractExpertRule;
-import org.gridsuite.filter.expertfilter.expertrule.CombinatorExpertRule;
-import org.gridsuite.filter.expertfilter.expertrule.StringExpertRule;
+import org.gridsuite.filter.dto.expertfilter.ExpertFilter;
+import org.gridsuite.filter.dto.expertfilter.expertrule.AbstractExpertRule;
+import org.gridsuite.filter.dto.expertfilter.expertrule.CombinatorExpertRule;
+import org.gridsuite.filter.dto.expertfilter.expertrule.StringExpertRule;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.gridsuite.filter.utils.expertfilter.CombinatorType;
 import org.gridsuite.filter.utils.expertfilter.FieldType;
@@ -111,4 +111,3 @@ public final class FilterWithEquipmentTypesUtils {
         return CombinatorExpertRule.builder().combinator(CombinatorType.OR).rules(List.of(rule1, rule2, rule3)).build();
     }
 }
-

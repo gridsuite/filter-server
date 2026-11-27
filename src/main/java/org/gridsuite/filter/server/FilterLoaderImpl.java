@@ -6,15 +6,11 @@
  */
 package org.gridsuite.filter.server;
 
-import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.FilterLoader;
+import org.gridsuite.filter.dto.AbstractFilter;
 import org.gridsuite.filter.server.repositories.proxies.AbstractFilterRepositoryProxy;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>

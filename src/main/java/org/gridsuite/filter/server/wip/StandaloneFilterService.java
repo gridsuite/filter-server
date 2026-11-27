@@ -7,6 +7,10 @@
 package org.gridsuite.filter.server.wip;
 
 import com.google.common.annotations.Beta;
+import org.gridsuite.filter.ExpertFilter;
+import org.gridsuite.filter.Filter;
+import org.gridsuite.filter.IdentifierListFilter;
+import org.gridsuite.filter.rule.*;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertFilterEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRuleEntity;
 import org.gridsuite.filter.server.entities.expertfilter.ExpertRulePropertiesEntity;
@@ -15,20 +19,11 @@ import org.gridsuite.filter.server.entities.identifierlistfilter.IdentifierListF
 import org.gridsuite.filter.server.entities.identifierlistfilter.IdentifierListFilterEquipmentEntity;
 import org.gridsuite.filter.server.repositories.expertfilter.ExpertFilterRepository;
 import org.gridsuite.filter.server.repositories.identifierlistfilter.IdentifierListFilterRepository;
-import org.gridsuite.filter.wip.ExpertFilter;
-import org.gridsuite.filter.wip.Filter;
-import org.gridsuite.filter.wip.IdentifierListFilter;
-import org.gridsuite.filter.wip.rule.*;
+import org.gridsuite.filter.server.wip.dto.FilterWithDistributionKeys;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,10 +69,44 @@ public class StandaloneFilterService {
         return filtersById;
     }
 
+    //TODO WHAT TO DO WHEN FILTER NOT FOUND ? THEY ARE SILENTLY DROPPED AND MAY CAUSE A PROBLEM - TICKET GRD-5559
+    /**
+     * Loads the filters matching the given identifiers, together with the distribution keys recorded for their equipments.
+     * Identifiers with no matching filter are omitted from the result.
+     *
+     * @param ids the identifiers of the filters to load
+     * @return the filters found, indexed by their identifier
+     */
+    @Transactional(readOnly = true)
+    public Map<UUID, FilterWithDistributionKeys> getFiltersWithDistributionKeys(List<UUID> ids) {
+        Map<UUID, FilterWithDistributionKeys> filtersWithDistributionKeysById = new LinkedHashMap<>();
+        identifierListFilterRepository.findAllById(ids).forEach(entity -> filtersWithDistributionKeysById.put(entity.getId(), toFilterWithDistributionKeys(entity)));
+        expertFilterRepository.findAllById(ids).forEach(entity -> filtersWithDistributionKeysById.put(entity.getId(), toFilterWithDistributionKeys(entity)));
+        return filtersWithDistributionKeysById;
+    }
+
+    private FilterWithDistributionKeys toFilterWithDistributionKeys(IdentifierListFilterEntity entity) {
+        Map<String, Double> distributionKeys = new LinkedHashMap<>();
+        // TODO UPDATE WHEN DISTRIBUTION KEYS ARE FINALLY UNIQUE (TODAY ONE FILTER CAN HAVE THE SAME EQUIPMENT ID MULTIPLE TIMES)
+        entity.getFilterEquipmentEntityList().forEach(equipmentEntity -> distributionKeys.put(equipmentEntity.getEquipmentId(), equipmentEntity.getDistributionKey()));
+
+        return FilterWithDistributionKeys.builder()
+                .filter(toWipFilter(entity))
+                .distributionKeys(distributionKeys)
+                .build();
+    }
+
+    private FilterWithDistributionKeys toFilterWithDistributionKeys(ExpertFilterEntity entity) {
+        return FilterWithDistributionKeys.builder()
+                .filter(toWipFilter(entity))
+                .distributionKeys(Collections.emptyMap()) // Expert filters do not have distribution keys
+                .build();
+    }
+
     private Filter toWipFilter(IdentifierListFilterEntity entity) {
         Set<String> equipmentIds = entity.getFilterEquipmentEntityList().stream()
                 .map(IdentifierListFilterEquipmentEntity::getEquipmentId)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         return IdentifierListFilter.builder()
                 .equipmentType(entity.getEquipmentType())
                 .equipmentIds(equipmentIds)
